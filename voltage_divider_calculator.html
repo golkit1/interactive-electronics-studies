@@ -40,12 +40,19 @@ h1{font-size:22px;font-weight:500;margin-bottom:4px}
 .left-col{display:flex;flex-direction:column;gap:16px}
 
 /* big formula */
-.big-formula{background:var(--bg2);border-radius:var(--r);padding:20px 24px;display:flex;align-items:center;justify-content:center}
-.bf-inner{display:flex;align-items:center;gap:14px;direction:ltr}
-.bf-lhs{font-size:26px;font-weight:500;color:var(--blue);white-space:nowrap}
-.bf-frac{display:flex;flex-direction:column;align-items:center;gap:2px}
-.bf-num{font-size:18px;border-bottom:2.5px solid var(--text);padding:3px 10px;white-space:nowrap}
-.bf-den{font-size:18px;padding:3px 10px;white-space:nowrap}
+.big-formula{background:var(--bg3);border:0.5px solid var(--bd);border-radius:var(--r);padding:24px 20px;display:flex;align-items:center;justify-content:center}
+.bf-inner{display:flex;align-items:center;gap:12px;direction:ltr;flex-wrap:wrap;justify-content:center}
+.bf-lhs{font-size:44px;font-weight:700;color:var(--text);white-space:nowrap;line-height:1}
+.bf-lhs sub{font-size:0.45em;font-weight:700;vertical-align:sub}
+.bf-eq{font-size:36px;font-weight:400;color:var(--text)}
+.bf-vin{font-size:44px;font-weight:700;color:var(--text);white-space:nowrap;line-height:1}
+.bf-vin sub{font-size:0.45em;font-weight:700;vertical-align:sub}
+.bf-times{font-size:32px;font-weight:400;color:var(--text2)}
+.bf-frac{display:flex;flex-direction:column;align-items:center;gap:0}
+.bf-num{font-size:24px;font-weight:700;border-bottom:3px solid var(--text);padding:4px 14px;white-space:nowrap;line-height:1.2}
+.bf-num sub{font-size:0.5em;vertical-align:sub}
+.bf-den{font-size:22px;font-weight:700;padding:4px 14px;white-space:nowrap;line-height:1.2}
+.bf-den sub{font-size:0.5em;vertical-align:sub}
 
 /* variable list */
 .var-list{list-style:none;padding:0 16px;display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--text2)}
@@ -106,18 +113,21 @@ select.cf-unit{border:0.5px solid var(--bd2);border-radius:var(--rs);padding:6px
     <!-- Big formula -->
     <div class="big-formula">
       <div class="bf-inner">
-        <span class="bf-lhs">V<sub>out</sub> =</span>
+        <span class="bf-lhs">V<sub>out</sub></span>
+        <span class="bf-eq">=</span>
+        <span class="bf-vin">V<sub>in</sub></span>
+        <span class="bf-times">×</span>
         <div class="bf-frac">
-          <span class="bf-num">V<sub>s</sub> &times; R<sub>2</sub></span>
-          <span class="bf-den">R<sub>1</sub> + R<sub>2</sub></span>
+          <span class="bf-num">R<sub>2</sub></span>
+          <span class="bf-den">(R<sub>1</sub> + R<sub>2</sub>)</span>
         </div>
       </div>
     </div>
 
     <!-- Variable descriptions -->
     <ul class="var-list">
-      <li><strong>V<sub>s</sub></strong> — מתח אספקה</li>
-      <li><strong>R<sub>1</sub></strong> — נגד עליון (בין Vs ל-V_out)</li>
+      <li><strong>V<sub>in</sub></strong> — מתח אספקה</li>
+      <li><strong>R<sub>1</sub></strong> — נגד עליון (בין Vin ל-V_out)</li>
       <li><strong>R<sub>2</sub></strong> — נגד תחתון (בין V_out ל-GND)</li>
       <li><strong>V<sub>out</sub></strong> — מתח יציאה = מתח על R2</li>
     </ul>
@@ -139,8 +149,8 @@ select.cf-unit{border:0.5px solid var(--bd2);border-radius:var(--rs);padding:6px
         <!-- + − labels -->
         <text x="91" y="101" font-size="14" font-weight="500" fill="var(--text)" text-anchor="start">+</text>
         <text x="91" y="118" font-size="14" font-weight="500" fill="var(--text)" text-anchor="start">−</text>
-        <!-- Vs label -->
-        <text x="38" y="107" font-size="11" fill="var(--text2)" text-anchor="end">Vs</text>
+        <!-- Vin label -->
+        <text x="38" y="107" font-size="11" fill="var(--text2)" text-anchor="end">Vin</text>
         <text id="d-vs" x="38" y="120" font-size="10" font-weight="500" fill="var(--text)" text-anchor="end">5V</text>
         <!-- Left wire bottom -->
         <line x1="65" y1="112" x2="65" y2="210" stroke="var(--bd2)" stroke-width="2"/>
@@ -186,10 +196,10 @@ select.cf-unit{border:0.5px solid var(--bd2);border-radius:var(--rs);padding:6px
 
     <div class="cf-rows">
 
-      <!-- Vs -->
+      <!-- Vin -->
       <div class="cf-row" id="row-vs" onclick="setSolve('vs')">
         <div class="cf-radio" id="rd-vs"></div>
-        <span class="cf-name">V<sub>s</sub></span>
+        <span class="cf-name">V<sub>in</sub></span>
         <input class="cf-input" id="i-vs" type="number" value="5" step="any" min="0" oninput="autoCalc()" onclick="event.stopPropagation()">
         <span class="cf-unit-lbl">V</span>
       </div>
@@ -325,12 +335,12 @@ function autoCalc() {
       document.getElementById('i-vs').value = +result.toFixed(8);
     } else if (solving === 'r1') {
       if (Vout === 0) throw 'V_out = 0 → R1 = ∞';
-      if (Vs - Vout < 0) throw 'V_out > Vs';
+      if (Vs - Vout < 0) throw 'V_out > Vin';
       result = R2 * (Vs - Vout) / Vout;
       setR('r1', result);
     } else if (solving === 'r2') {
-      if (Vs - Vout === 0) throw 'Vs = V_out → R2 = ∞';
-      if (Vs - Vout < 0) throw 'V_out > Vs';
+      if (Vs - Vout === 0) throw 'Vin = V_out → R2 = ∞';
+      if (Vs - Vout < 0) throw 'V_out > Vin';
       result = R1 * Vout / (Vs - Vout);
       setR('r2', result);
     }
