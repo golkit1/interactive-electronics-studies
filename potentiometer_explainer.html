@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>פוטנציומטר כמחלק מתח</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f4ef;--bg2:#eceae3;--bg3:#ffffff;
+  --text:#2c2c2a;--text2:#5f5e5a;
+  --bd:rgba(0,0,0,0.12);--bd2:rgba(0,0,0,0.30);
+  --blue:#185FA5;--blue-bg:#e6f1fb;--blue-txt:#185FA5;
+  --red:#E24B4A;--red-txt:#a32d2d;
+  --amber:#BA7517;--amber-bg:#faeeda;--amber-txt:#854F0B;
+  --green:#3B6D11;--green-bg:#eaf3de;--green-txt:#3B6D11;
+  --r:10px;--rs:6px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1e1e1c;--bg2:#2a2a27;--bg3:#252523;
+  --text:#e8e6de;--text2:#9c9a92;
+  --bd:rgba(255,255,255,0.10);--bd2:rgba(255,255,255,0.28);
+  --blue-bg:#042c53;--blue-txt:#85b7eb;
+  --amber-bg:#412402;--amber-txt:#fac775;
+  --green-bg:#173404;--green-txt:#97c459;
+}}
+body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;min-height:100vh}
+.page{max-width:900px;margin:0 auto;padding:24px 16px 60px}
+h1{font-size:21px;font-weight:500;margin-bottom:3px}
+.sub{font-size:12px;color:var(--text2);margin-bottom:20px}
+
+/* Vin slider */
+.vin-bar{background:var(--bg2);border-radius:var(--r);padding:11px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.vin-bar label{font-size:13px;color:var(--text2);min-width:80px}
+.vin-bar input[type=range]{flex:1;accent-color:var(--blue);cursor:pointer}
+.vin-bar .vinval{font-size:16px;font-weight:500;min-width:52px;direction:ltr;text-align:right;color:var(--blue-txt)}
+
+/* main grid */
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;align-items:start}
+@media(max-width:620px){.mgrid{grid-template-columns:1fr}}
+
+.panel{background:var(--bg3);border:0.5px solid var(--bd);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;align-items:center}
+.ptitle{font-weight:500;font-size:13px;color:var(--text2);margin-bottom:10px;align-self:flex-start}
+
+/* pot SVG */
+#pot-svg{cursor:grab;user-select:none;touch-action:none;display:block;width:100%;max-width:260px}
+#pot-svg:active{cursor:grabbing}
+.pos-display{font-size:28px;font-weight:500;margin-top:8px;direction:ltr;color:var(--text)}
+.pos-label{font-size:12px;color:var(--text2);margin-top:1px}
+
+/* circuit panel */
+.circ-svg{width:100%;max-width:260px}
+
+/* Vout big display */
+.vout-bar{background:var(--bg3);border:1.5px solid var(--blue);border-radius:var(--r);padding:16px 24px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-around;flex-wrap:wrap;gap:12px;direction:ltr}
+.vout-item{text-align:center}
+.vout-lbl{font-size:11px;color:var(--text2);margin-bottom:2px}
+.vout-val{font-size:32px;font-weight:500}
+.vout-val.vin-color{color:var(--blue-txt)}
+.vout-val.vout-color{color:var(--red)}
+.vout-divider{width:1px;height:48px;background:var(--bd2);opacity:0.4}
+
+/* strip visualization */
+.strip-panel{background:var(--bg3);border:0.5px solid var(--bd);border-radius:var(--r);padding:16px 20px;margin-bottom:16px}
+.strip-title{font-weight:500;font-size:13px;color:var(--text2);margin-bottom:12px}
+.strip-wrap{direction:ltr;padding:0 8px}
+.strip-labels-top{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:4px;direction:ltr}
+.strip-bar{position:relative;height:28px;border-radius:6px;overflow:visible;margin-bottom:4px}
+.strip-rtop{position:absolute;right:0;top:0;height:100%;border-radius:0 6px 6px 0;transition:width .1s}
+.strip-rbot{position:absolute;left:0;top:0;height:100%;border-radius:6px 0 0 6px;transition:width .1s}
+.strip-wiper{position:absolute;top:-6px;bottom:-6px;width:3px;background:var(--text);border-radius:2px;transform:translateX(-50%);transition:left .1s}
+.strip-wiper::before{content:'▼';position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:12px;color:var(--text)}
+.strip-labels-bot{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-top:8px}
+.strip-val-top{font-size:12px;font-weight:500;color:var(--amber-txt);text-align:center;margin-top:4px}
+
+/* explain */
+.exp-btn{background:none;border:none;color:var(--text2);font-size:12px;cursor:pointer;padding:4px 0;font-family:inherit}
+.exp-box{margin-top:8px;display:none;background:var(--bg2);border-radius:var(--rs);padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.7}
+.exp-box strong{color:var(--text);display:block;margin-bottom:2px;font-size:13px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>פוטנציומטר כמחלק מתח</h1>
+<p class="sub">גרור את הידית לשינוי מיקום הוייפר — הפוטנציומטר מחלק את מתח הכניסה לפי מיקום</p>
+
+<!-- Vin slider -->
+<div class="vin-bar">
+  <label>V<sub>in</sub> — מתח כניסה</label>
+  <input type="range" id="vin" min="1" max="12" step="0.1" value="5" oninput="upd()">
+  <span class="vinval" id="vin-lbl">5.0 V</span>
+</div>
+
+<!-- Schematic symbol (full width) -->
+<div class="panel" style="margin-bottom:16px;align-items:stretch">
+  <div class="ptitle">סמל סכמטי — פוטנציומטר</div>
+  <svg viewBox="0 0 400 182" style="width:100%;max-width:460px;display:block;margin:0 auto">
+    <defs>
+      <marker id="arw-pot" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="5" markerHeight="5" orient="auto">
+        <path d="M0 0L8 4L0 8Z" fill="var(--text)"/>
+      </marker>
+    </defs>
+
+    <!-- Pot body rectangle (clean, outline only — schematic style) -->
+    <rect x="80" y="60" width="240" height="36" rx="2" fill="none" stroke="var(--text)" stroke-width="2.2"/>
+
+    <!-- Terminal 1 wire — left end of track -->
+    <line x1="80" y1="78" x2="22" y2="78" stroke="var(--text)" stroke-width="2"/>
+    <circle cx="18" cy="78" r="4.5" fill="var(--blue-txt)"/>
+    <text x="18" y="96" text-anchor="middle" font-size="10" fill="var(--blue-txt)" font-weight="500">① V_in</text>
+
+    <!-- Terminal 3 wire — right end of track -->
+    <line x1="320" y1="78" x2="378" y2="78" stroke="var(--text)" stroke-width="2"/>
+    <circle cx="382" cy="78" r="4.5" fill="var(--green-txt)"/>
+    <text x="382" y="96" text-anchor="middle" font-size="10" fill="var(--green-txt)" font-weight="500">③ GND</text>
+
+    <!-- Wiper: diagonal arrow touching the bottom edge of the rectangle -->
+    <line x1="148" y1="128" x2="174" y2="97" stroke="var(--text)" stroke-width="2" marker-end="url(#arw-pot)"/>
+
+    <!-- Junction dot where arrow meets terminal-2 wire -->
+    <circle cx="148" cy="128" r="3" fill="var(--text)"/>
+
+    <!-- Terminal 2 wire — straight down from junction -->
+    <line x1="148" y1="128" x2="148" y2="158" stroke="var(--text)" stroke-width="2"/>
+    <circle cx="148" cy="162" r="4.5" fill="var(--red)"/>
+    <text x="148" y="176" text-anchor="middle" font-size="10" fill="var(--red)" font-weight="500">② V_out (וייפר)</text>
+  </svg>
+</div>
+
+<!-- Main grid: pot + circuit -->
+<div class="mgrid">
+
+  <!-- Rotary pot -->
+  <div class="panel">
+    <div class="ptitle">פוטנציומטר</div>
+    <svg id="pot-svg" viewBox="0 0 260 260">
+      <!-- Track arc (full range, 270°) -->
+      <path id="track-arc" d="" fill="none" stroke-width="14" stroke-linecap="round"/>
+      <!-- Progress arc (0 to wiper) -->
+      <path id="prog-arc" d="" fill="none" stroke-width="14" stroke-linecap="round"/>
+      <!-- Knob body -->
+      <circle cx="130" cy="130" r="62" fill="var(--bg2)" stroke="var(--bd2)" stroke-width="2"/>
+      <!-- Wiper line -->
+      <line id="wiper-line" x1="130" y1="130" x2="130" y2="70" stroke="var(--text)" stroke-width="3" stroke-linecap="round"/>
+      <!-- Wiper dot -->
+      <circle id="wiper-dot" cx="130" cy="70" r="6" fill="var(--red)"/>
+      <!-- Terminal dots -->
+      <circle id="term-cw"  r="7" fill="var(--blue-bg)" stroke="var(--blue)" stroke-width="1.5"/>
+      <circle id="term-ccw" r="7" fill="var(--green-bg)" stroke="var(--green)" stroke-width="1.5"/>
+      <!-- Terminal labels -->
+      <text id="lbl-cw"  font-size="11" font-weight="500" fill="var(--blue-txt)" text-anchor="middle">V+</text>
+      <text id="lbl-ccw" font-size="11" font-weight="500" fill="var(--green-txt)" text-anchor="middle">GND</text>
+      <text font-size="11" fill="var(--red)" font-weight="500" text-anchor="middle" id="lbl-wiper">V_out</text>
+      <!-- Knob inner circle -->
+      <circle cx="130" cy="130" r="54" fill="var(--bg3)" stroke="var(--bd)" stroke-width="0.5"/>
+      <!-- Position readout in knob -->
+      <text id="knob-pct" x="130" y="126" text-anchor="middle" font-size="20" font-weight="500" fill="var(--text)">50%</text>
+      <text x="130" y="143" text-anchor="middle" font-size="10" fill="var(--text2)">מיקום וייפר</text>
+    </svg>
+    <div style="margin-top:10px;width:100%;max-width:260px;display:flex;align-items:center;gap:8px">
+      <span style="font-size:11px;color:var(--green-txt);white-space:nowrap">GND 0%</span>
+      <input type="range" id="pos-slider" min="0" max="100" step="1" value="50"
+             style="flex:1;accent-color:var(--red);cursor:pointer" oninput="onSlider()">
+      <span style="font-size:11px;color:var(--blue-txt);white-space:nowrap">100% V+</span>
+    </div>
+  </div>
+
+  <!-- Circuit diagram -->
+  <div class="panel">
+    <div class="ptitle">מעגל שקול</div>
+    <svg class="circ-svg" viewBox="0 0 270 280">
+      <defs>
+        <marker id="ar2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+
+      <!-- Vin source -->
+      <text x="28" y="20" text-anchor="middle" font-size="12" font-weight="500" fill="var(--blue-txt)">V<tspan font-size="9" dy="3">in</tspan></text>
+      <line x1="28" y1="24" x2="28" y2="44" stroke="var(--bd2)" stroke-width="1.8"/>
+      <line x1="14" y1="44" x2="42" y2="44" stroke="var(--bd2)" stroke-width="2.5"/>
+      <line x1="18" y1="56" x2="38" y2="56" stroke="var(--bd2)" stroke-width="1.5"/>
+      <line x1="28" y1="56" x2="28" y2="70" stroke="var(--bd2)" stroke-width="1.8"/>
+
+      <!-- Top wire -->
+      <line x1="28" y1="24" x2="100" y2="24" stroke="var(--blue-txt)" stroke-width="1.8"/>
+
+      <!-- Top horizontal wire to R_top -->
+      <line x1="100" y1="24" x2="100" y2="50" stroke="var(--bd2)" stroke-width="1.8"/>
+
+      <!-- R_top box -->
+      <rect x="76" y="50" width="48" height="54" rx="4" fill="var(--amber-bg)" stroke="var(--amber)" stroke-width="1.5"/>
+      <text x="100" y="72" text-anchor="middle" font-size="11" fill="var(--amber-txt)">R_top</text>
+      <text id="rtop-val" x="100" y="88" text-anchor="middle" font-size="10" font-weight="500" fill="var(--amber-txt)">5.0 kΩ</text>
+
+      <!-- Junction dot -->
+      <line x1="100" y1="104" x2="100" y2="124" stroke="var(--bd2)" stroke-width="1.8"/>
+      <circle cx="100" cy="124" r="5" fill="var(--red)"/>
+
+      <!-- V_out wire right -->
+      <line x1="100" y1="124" x2="208" y2="124" stroke="var(--red)" stroke-width="1.8" marker-end="url(#ar2)"/>
+      <text x="214" y="120" text-anchor="start" font-size="10" fill="var(--red)">V_out</text>
+      <text id="vout-circ" x="214" y="135" text-anchor="start" font-size="12" font-weight="500" fill="var(--red)">2.50 V</text>
+
+      <!-- R_bot box -->
+      <rect x="76" y="124" width="48" height="54" rx="4" fill="var(--green-bg)" stroke="var(--green)" stroke-width="1.5"/>
+      <text x="100" y="146" text-anchor="middle" font-size="11" fill="var(--green-txt)">R_bot</text>
+      <text id="rbot-val" x="100" y="162" text-anchor="middle" font-size="10" font-weight="500" fill="var(--green-txt)">5.0 kΩ</text>
+
+      <!-- Wire to GND -->
+      <line x1="100" y1="178" x2="100" y2="210" stroke="var(--bd2)" stroke-width="1.8"/>
+
+      <!-- Bottom wire back to source -->
+      <line x1="28" y1="210" x2="100" y2="210" stroke="var(--bd2)" stroke-width="1.8"/>
+      <line x1="28" y1="70" x2="28" y2="210" stroke="var(--bd2)" stroke-width="1.8"/>
+
+      <!-- GND symbol -->
+      <line x1="84" y1="210" x2="116" y2="210" stroke="var(--bd2)" stroke-width="1.8"/>
+      <line x1="89" y1="217" x2="111" y2="217" stroke="var(--bd2)" stroke-width="1.2"/>
+      <line x1="94" y1="224" x2="106" y2="224" stroke="var(--bd2)" stroke-width="0.8"/>
+
+      <!-- Formula -->
+      <rect x="4" y="238" width="260" height="36" rx="5" fill="var(--blue-bg)" stroke="var(--blue)" stroke-width="0.8"/>
+      <text x="134" y="253" text-anchor="middle" font-size="10" fill="var(--blue-txt)">V_out = V_in × R_bot / (R_top + R_bot)</text>
+      <text id="formula-nums" x="134" y="268" text-anchor="middle" font-size="10" font-weight="500" fill="var(--blue-txt)">= 5.0 × 5.0 / 10.0 = 2.50 V</text>
+    </svg>
+  </div>
+</div>
+
+<!-- Big V_out display -->
+<div class="vout-bar">
+  <div class="vout-item">
+    <div class="vout-lbl">V_in</div>
+    <div class="vout-val vin-color" id="big-vin">5.0 V</div>
+  </div>
+  <div class="vout-divider"></div>
+  <div class="vout-item">
+    <div class="vout-lbl">מיקום וייפר</div>
+    <div class="vout-val" style="color:var(--text)" id="big-pos">50%</div>
+  </div>
+  <div class="vout-divider"></div>
+  <div class="vout-item">
+    <div class="vout-lbl">V_out</div>
+    <div class="vout-val vout-color" id="big-vout">2.50 V</div>
+  </div>
+</div>
+
+<!-- Strip visualization -->
+<div class="strip-panel">
+  <div class="strip-title">פס ההתנגדות הפנימי</div>
+  <div class="strip-wrap">
+    <div class="strip-labels-top">
+      <span style="color:var(--green-txt)">GND</span>
+      <span id="strip-mid-lbl" style="color:var(--text2)">וייפר (50%)</span>
+      <span style="color:var(--blue-txt)">V_in</span>
+    </div>
+    <div class="strip-bar" id="strip-bar">
+      <div class="strip-rbot" id="strip-rbot" style="background:var(--green-bg);border:1px solid var(--green)"></div>
+      <div class="strip-rtop" id="strip-rtop" style="background:var(--amber-bg);border:1px solid var(--amber)"></div>
+      <div class="strip-wiper" id="strip-wiper"></div>
+    </div>
+    <div class="strip-labels-bot">
+      <span id="rbot-strip">R_bot: 5.0 kΩ</span>
+      <span id="rtop-strip">R_top: 5.0 kΩ</span>
+    </div>
+    <div class="strip-val-top" id="strip-vout">V_out = 2.50 V</div>
+  </div>
+</div>
+
+<!-- Explanation -->
+<button class="exp-btn" id="exp-btn" onclick="toggleExp()">▶ הצג הסבר</button>
+<div class="exp-box" id="exp-box">
+  <strong>איך עובד הפוטנציומטר כמחלק מתח?</strong>
+  הפוטנציומטר הוא נגד עם שלוש רגליים: קצה עליון (V_in), קצה תחתון (GND), ורגל אמצעית שנקראת וייפר (V_out).
+  הוייפר מחלק את פס ההתנגדות לשניים — R_top ו-R_bot. מיקום הוייפר קובע את היחס ביניהם.
+  כשהוייפר באמצע: R_top = R_bot, ו-V_out = V_in / 2. כשהוייפר למעלה: V_out = V_in. כשלמטה: V_out = 0.
+</div>
+
+</div>
+<script>
+/* ── pot geometry ── */
+const CX=130, CY=130, TRACK_R=96, WIPER_R=82;
+// clock angles (deg, 0=top, CW): 0%=225°, 100%=135° going CW through top
+const START_CLOCK = 225; // 7:30 o'clock
+const SWEEP = 270;
+
+function clockToXY(clockDeg, r){
+  const rad = clockDeg * Math.PI / 180;
+  return {x: CX + r*Math.sin(rad), y: CY - r*Math.cos(rad)};
+}
+function posToClockDeg(pos){ return START_CLOCK + pos*SWEEP; }
+function posToXY(pos, r){ return clockToXY(posToClockDeg(pos), r); }
+
+function makeArcPath(pos0, pos1, r){
+  const p0 = posToXY(pos0, r);
+  const p1 = posToXY(pos1, r);
+  const sweep = (pos1-pos0)*SWEEP;
+  const large = sweep > 180 ? 1 : 0;
+  if(Math.abs(sweep) < 0.1) return '';
+  return `M${p0.x},${p0.y} A${r},${r} 0 ${large} 1 ${p1.x},${p1.y}`;
+}
+
+/* state */
+let position = 0.5; // 0..1
+let dragging = false;
+
+function svgAngleToPos(dx, dy){
+  // atan2 in SVG coords (y-down), convert to clock angle
+  const svgAngle = Math.atan2(dy, dx) * 180/Math.PI;
+  let clock = 90 - svgAngle;
+  clock = ((clock%360)+360)%360;
+  // distance from start
+  let dist = clock - START_CLOCK;
+  if(dist < -30) dist += 360;
+  if(dist < 0) return 0;
+  if(dist > SWEEP) return 1;
+  return dist/SWEEP;
+}
+
+/* draw pot SVG */
+function drawPot(){
+  const dk = matchMedia('(prefers-color-scheme:dark)').matches;
+  const trackColor = dk ? '#444' : '#d0cec5';
+  const progColor = '#185FA5';
+
+  document.getElementById('track-arc').setAttribute('d', makeArcPath(0,1,TRACK_R));
+  document.getElementById('track-arc').setAttribute('stroke', trackColor);
+
+  const progPath = position > 0.01 ? makeArcPath(0, position, TRACK_R) : '';
+  document.getElementById('prog-arc').setAttribute('d', progPath);
+  document.getElementById('prog-arc').setAttribute('stroke', progColor);
+
+  // wiper line + dot
+  const wp = posToXY(position, WIPER_R);
+  const wl = document.getElementById('wiper-line');
+  wl.setAttribute('x2', wp.x); wl.setAttribute('y2', wp.y);
+  const wd = document.getElementById('wiper-dot');
+  wd.setAttribute('cx', wp.x); wd.setAttribute('cy', wp.y);
+
+  // terminal dots
+  const cwPt  = posToXY(1, TRACK_R);
+  const ccwPt = posToXY(0, TRACK_R);
+  const tc = document.getElementById('term-cw');
+  tc.setAttribute('cx', cwPt.x); tc.setAttribute('cy', cwPt.y);
+  const tcc = document.getElementById('term-ccw');
+  tcc.setAttribute('cx', ccwPt.x); tcc.setAttribute('cy', ccwPt.y);
+
+  // labels outside
+  const cwLbl  = posToXY(1, TRACK_R+20);
+  const ccwLbl = posToXY(0, TRACK_R+20);
+  const wLbl   = posToXY(position, TRACK_R+20);
+  const lc = document.getElementById('lbl-cw');
+  lc.setAttribute('x', cwLbl.x); lc.setAttribute('y', cwLbl.y+4);
+  const lcc = document.getElementById('lbl-ccw');
+  lcc.setAttribute('x', ccwLbl.x); lcc.setAttribute('y', ccwLbl.y+4);
+  const lw = document.getElementById('lbl-wiper');
+  // position V_out label away from wiper to avoid overlap
+  const wLblOffset = posToXY(position, TRACK_R+34);
+  lw.setAttribute('x', wLblOffset.x); lw.setAttribute('y', wLblOffset.y+4);
+
+  document.getElementById('knob-pct').textContent = Math.round(position*100)+'%';
+}
+
+function upd(){
+  const Vin = parseFloat(document.getElementById('vin').value);
+  const Rtotal = 10; // kΩ
+  const Rtop = (1-position)*Rtotal; // position 0% = wiper at bottom = R_top=full
+  const Rbot = position*Rtotal;
+  const Vout = Vin * position;
+
+  document.getElementById('vin-lbl').textContent = Vin.toFixed(1)+' V';
+
+  // circuit labels
+  document.getElementById('rtop-val').textContent = Rtop.toFixed(1)+' kΩ';
+  document.getElementById('rbot-val').textContent = Rbot.toFixed(1)+' kΩ';
+  document.getElementById('vout-circ').textContent = Vout.toFixed(2)+' V';
+  document.getElementById('formula-nums').textContent =
+    '= '+Vin.toFixed(1)+' × '+Rbot.toFixed(1)+' / '+Rtotal.toFixed(1)+' = '+Vout.toFixed(2)+' V';
+
+  // big display
+  document.getElementById('big-vin').textContent = Vin.toFixed(1)+' V';
+  document.getElementById('big-pos').textContent = Math.round(position*100)+'%';
+  document.getElementById('big-vout').textContent = Vout.toFixed(2)+' V';
+
+  // strip
+  const pct = position*100;
+  document.getElementById('strip-rtop').style.width = (100-pct)+'%';
+  document.getElementById('strip-rbot').style.width = pct+'%';
+  document.getElementById('strip-wiper').style.left = pct+'%';
+  document.getElementById('strip-mid-lbl').textContent = 'וייפר ('+Math.round(pct)+'%)';
+  document.getElementById('rbot-strip').textContent = 'R_bot: '+Rbot.toFixed(1)+' kΩ';
+  document.getElementById('rtop-strip').textContent = 'R_top: '+Rtop.toFixed(1)+' kΩ';
+  document.getElementById('strip-vout').textContent = 'V_out = '+Vout.toFixed(2)+' V';
+
+  document.getElementById('pos-slider').value = Math.round(position*100);
+  drawPot();
+}
+
+function onSlider(){
+  position = parseFloat(document.getElementById('pos-slider').value)/100;
+  upd();
+}
+
+/* drag interaction */
+function getPos(e, svg){
+  const rect = svg.getBoundingClientRect();
+  const scaleX = 260/rect.width, scaleY = 260/rect.height;
+  const cx = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+  const cy = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+  const dx = cx*scaleX - CX, dy = cy*scaleY - CY;
+  return svgAngleToPos(dx, dy);
+}
+
+const svg = document.getElementById('pot-svg');
+svg.addEventListener('mousedown',  e=>{dragging=true; position=getPos(e,svg); upd(); e.preventDefault();});
+svg.addEventListener('touchstart', e=>{dragging=true; position=getPos(e,svg); upd(); e.preventDefault();},{passive:false});
+document.addEventListener('mousemove',  e=>{if(dragging){position=getPos(e,svg);upd();}});
+document.addEventListener('touchmove',  e=>{if(dragging){position=getPos(e,svg);upd();}},{passive:false});
+document.addEventListener('mouseup',  ()=>dragging=false);
+document.addEventListener('touchend', ()=>dragging=false);
+
+/* explain toggle */
+function toggleExp(){
+  const b=document.getElementById('exp-box'), btn=document.getElementById('exp-btn');
+  const o=b.style.display==='none';
+  b.style.display=o?'block':'none';
+  btn.textContent=o?'▼ הסתר הסבר':'▶ הצג הסבר';
+}
+
+upd();
+</script>
+</body>
+</html>
