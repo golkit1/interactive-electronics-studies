@@ -75,7 +75,7 @@ h1{font-size:20px;font-weight:500;margin-bottom:2px}
 .legend{display:flex;gap:10px;font-size:11px;color:var(--text2);direction:ltr}
 .leg{display:flex;align-items:center;gap:4px}
 .leg-line{width:16px;height:3px;border-radius:2px;display:inline-block}
-canvas{display:block;width:100%;border-radius:var(--rs)}
+canvas{display:block;width:100%;height:220px;border-radius:var(--rs)}
 .play-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:18px;border:0.5px solid var(--bd2);background:transparent;color:var(--text);cursor:pointer;font-size:12px;font-family:inherit;transition:background .15s;white-space:nowrap}
 .play-btn:hover{background:var(--bg2)}
 .play-btn.playing{background:var(--amber-bg);border-color:var(--amber);color:var(--amber-txt)}
@@ -92,8 +92,8 @@ canvas{display:block;width:100%;border-radius:var(--rs)}
 <body>
 <div class="page">
 
-<h1>מעגל גליידה <span style="font-size:14px;font-weight:400;color:var(--text2)">(Glide / Portamento)</span></h1>
-<p class="sub">מעגל RC — נגד ועכבית — שמחליק מעברים בין ערכי CV</p>
+<h1>מעגל גלייד <span style="font-size:14px;font-weight:400;color:var(--text2)">(Glide / Portamento)</span></h1>
+<p class="sub">מעגל RC — נגד וקבל — שמחליק מעברים בין ערכי CV</p>
 
 
 
@@ -101,7 +101,7 @@ canvas{display:block;width:100%;border-radius:var(--rs)}
 <div class="sliders">
   <div class="srow">
     <label>R — נגד (פוטנציומטר)</label>
-    <input type="range" class="rc" id="s-r" min="1000" max="100000" step="1000" value="50000" oninput="upd()">
+    <input type="range" class="rc" id="s-r" min="0" max="100000" step="500" value="50000" oninput="upd()">
     <span class="val" id="v-r">50 kΩ</span>
   </div>
   <div class="srow">
@@ -258,7 +258,8 @@ function lerp(pts,t){
 
 function draw(ph){
   const cv=document.getElementById('wave'),ctx=cv.getContext('2d');
-  const W=cv.width,H=cv.height;
+  const dpr=window.devicePixelRatio||1;
+  const W=cv.width/dpr, H=cv.height/dpr;
   const PL=46,PR=20,PT=24,PB=38;
   const CW=W-PL-PR,CH=H-PT-PB;
   const Vlo=0.7,Vhi=2.3;
@@ -408,8 +409,10 @@ function init(){
   const cv=document.getElementById('wave');
   const dpr=window.devicePixelRatio||1;
   const r=cv.getBoundingClientRect();
-  cv.width=Math.round((r.width||800)*dpr);
-  cv.height=Math.round((r.height||240)*dpr);
+  const w=r.width||cv.offsetWidth||800;
+  const h=r.height||cv.offsetHeight||220;
+  cv.width=Math.round(w*dpr);
+  cv.height=Math.round(h*dpr);
   cv.getContext('2d').scale(dpr,dpr);
   upd();
 }
