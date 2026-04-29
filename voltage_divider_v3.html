@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מחלק מתח — עם ובלי באפר</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#f5f4ef; --bg2:#eceae3; --bg3:#ffffff;
+  --text:#2c2c2a; --text2:#5f5e5a;
+  --bd:rgba(0,0,0,0.13); --bd2:rgba(0,0,0,0.28);
+  --blue:#185FA5; --blue-bg:#e6f1fb; --blue-txt:#185FA5;
+  --red-txt:#a32d2d;
+  --green-bg:#eaf3de; --green-txt:#3B6D11;
+  --amber:#BA7517; --amber-bg:#faeeda; --amber-txt:#854F0B;
+  --r:10px; --rs:6px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1e1e1c; --bg2:#2a2a27; --bg3:#252523;
+  --text:#e8e6de; --text2:#9c9a92;
+  --bd:rgba(255,255,255,0.11); --bd2:rgba(255,255,255,0.26);
+  --blue-bg:#042c53; --blue-txt:#85b7eb;
+  --red-txt:#f09595;
+  --green-bg:#173404; --green-txt:#97c459;
+  --amber-bg:#412402; --amber-txt:#fac775;
+}}
+
+body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+.page{max-width:880px;margin:0 auto;padding:24px 16px 56px}
+h1{font-size:20px;font-weight:500;margin-bottom:3px}
+.sub{font-size:12px;color:var(--text2);margin-bottom:22px}
+
+/* ── sliders ── */
+.sliders{background:var(--bg2);border-radius:var(--r);padding:13px 18px;margin-bottom:16px;display:flex;flex-direction:column;gap:9px}
+.srow{display:flex;align-items:center;gap:10px}
+.srow label{min-width:170px;font-size:13px;color:var(--text2)}
+.srow input[type=range]{flex:1;accent-color:var(--blue);cursor:pointer}
+.srow .val{min-width:64px;font-weight:500;direction:ltr;text-align:right;font-size:13px}
+
+/* ── grid ── */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+
+/* ── panel ── */
+.panel{background:var(--bg3);border:0.5px solid var(--bd);border-radius:var(--r);padding:14px;overflow:hidden}
+.panel.hi{border:1.5px solid var(--blue)}
+
+.phead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
+.ptitle{font-weight:500;font-size:13px;color:var(--text2)}
+.phead-right{display:flex;align-items:center;gap:8px}
+.badge{font-size:10px;padding:2px 8px;border-radius:5px;background:var(--green-bg);color:var(--green-txt);white-space:nowrap}
+
+/* toggle button */
+.toggle-btn{font-size:11px;padding:3px 10px;border-radius:20px;border:0.5px solid var(--bd2);background:transparent;color:var(--text2);cursor:pointer;white-space:nowrap;transition:background .15s}
+.toggle-btn:hover{background:var(--bg2)}
+
+/* ── panel inner: circuit + formulas ── */
+.pinner{display:flex;gap:14px;align-items:flex-start}
+
+.circ-wrap{flex:0 0 auto}
+.circ-wrap svg{display:block;width:190px}  /* fixed pixel width, auto height from viewBox ratio */
+
+/* ── formula column ── */
+.formulas{flex:1;min-width:0;direction:ltr;font-size:12px;transition:opacity .2s}
+.formulas.hidden{display:none}
+
+.fsec{margin-bottom:12px}
+.flabel{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+
+/* fraction */
+.f-eq{display:flex;align-items:center;flex-wrap:wrap;gap:4px;font-size:12px;margin-bottom:3px}
+.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle}
+.frac>span{padding:1px 4px;white-space:nowrap;line-height:1.25;font-size:11px}
+.frac>span:first-child{border-bottom:1px solid currentColor}
+
+.fbox{border-radius:var(--rs);padding:6px 9px;margin-bottom:10px}
+.fbox.amber{background:var(--amber-bg)}
+.fbox.green{background:var(--green-bg)}
+.fbox-lbl{font-size:10px;margin-bottom:3px}
+.fbox-lbl.a{color:var(--amber-txt)}
+.fbox-lbl.g{color:var(--green-txt)}
+
+.note{font-size:11px;color:var(--blue-txt);background:var(--blue-bg);border-radius:var(--rs);padding:5px 9px;margin-top:4px;line-height:1.5}
+
+/* ── summary ── */
+.summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.card{background:var(--bg2);border-radius:var(--rs);padding:10px 14px;text-align:center}
+.clbl{font-size:11px;color:var(--text2);margin-bottom:3px}
+.cval{font-size:22px;font-weight:500;direction:ltr}
+.cval.d{color:var(--red-txt)}
+.cval.w{color:var(--amber-txt)}
+
+.wbox{display:none;background:#fcebeb;border:0.5px solid var(--red-txt);border-radius:var(--rs);padding:9px 14px;font-size:13px;color:var(--red-txt);text-align:center;margin-bottom:14px}
+@media(prefers-color-scheme:dark){.wbox{background:#501313}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>מחלק מתח — עם ובלי באפר</h1>
+<p class="sub">V_supply = 5V &nbsp;·&nbsp; פוטנציומטר 10kΩ &nbsp;·&nbsp; R1 = חלק עליון · R2 = חלק תחתון</p>
+
+<div class="sliders">
+  <div class="srow">
+    <label>מיקום וייפר — R1</label>
+    <input type="range" id="wiper" min="0" max="10" step="0.1" value="5" oninput="upd()">
+    <span class="val" id="wv">5.0 kΩ</span>
+  </div>
+  <div class="srow">
+    <label>עכבת עומס R<sub>L</sub></label>
+    <input type="range" id="rl" min="1" max="100" step="1" value="10" oninput="upd()">
+    <span class="val" id="rv">10 kΩ</span>
+  </div>
+</div>
+
+<div class="wbox" id="warn"></div>
+
+<div class="grid">
+
+  <!-- ══ NO BUFFER ══ -->
+  <div class="panel" id="p-nb">
+    <div class="phead">
+      <span class="ptitle">ללא באפר</span>
+      <div class="phead-right">
+        <button class="toggle-btn" onclick="toggleF('nb')">הסתר נוסחאות ▲</button>
+      </div>
+    </div>
+    <div class="pinner">
+
+      <div class="circ-wrap">
+        <!-- viewBox 190×205 — main branch x=68, R_L branch x=155 -->
+        <svg viewBox="0 0 190 205" style="width:190px">
+          <text x="68" y="11" text-anchor="middle" font-size="12" font-weight="500" fill="var(--text)">+5V</text>
+          <line x1="68" y1="14" x2="68" y2="36" stroke="var(--bd2)" stroke-width="1.5"/>
+
+          <!-- R1 -->
+          <rect x="44" y="36" width="48" height="36" rx="4" fill="var(--bg2)" stroke="var(--bd2)" stroke-width="1"/>
+          <text x="68" y="51" text-anchor="middle" font-size="10" fill="var(--text2)">R1</text>
+          <text id="n-r1" x="68" y="64" text-anchor="middle" font-size="10" font-weight="500" fill="var(--text)">5.0kΩ</text>
+
+          <!-- wire to junction -->
+          <line x1="68" y1="72" x2="68" y2="93" stroke="var(--bd2)" stroke-width="1.5"/>
+          <circle cx="68" cy="93" r="4.5" fill="var(--blue)"/>
+
+          <!-- V_out label left of junction -->
+          <text id="n-vl" x="2" y="89" text-anchor="start" font-size="9" font-weight="500" fill="var(--blue)">V_out=</text>
+          <text id="n-vv" x="2" y="101" text-anchor="start" font-size="10" font-weight="500" fill="var(--blue)">2.000V</text>
+
+          <!-- horizontal wire to R_L -->
+          <line x1="68" y1="93" x2="155" y2="93" stroke="var(--bd2)" stroke-width="1.5"/>
+          <text x="111" y="89" text-anchor="middle" font-size="13" font-weight="500" fill="var(--amber)">∥</text>
+
+          <!-- R2 amber -->
+          <rect x="44" y="101" width="48" height="40" rx="4" fill="var(--amber-bg)" stroke="var(--amber)" stroke-width="1.8"/>
+          <text x="68" y="116" text-anchor="middle" font-size="10" fill="var(--amber-txt)">R2</text>
+          <text id="n-r2" x="68" y="130" text-anchor="middle" font-size="10" font-weight="500" fill="var(--amber-txt)">5.0kΩ</text>
+
+          <!-- R_par label in between -->
+          <text x="111" y="115" text-anchor="middle" font-size="8" fill="var(--amber-txt)">R_par=</text>
+          <text id="n-rpd" x="111" y="126" text-anchor="middle" font-size="8" font-weight="500" fill="var(--amber-txt)">3.33k</text>
+
+          <!-- R_L amber -->
+          <rect x="131" y="101" width="48" height="40" rx="4" fill="var(--amber-bg)" stroke="var(--amber)" stroke-width="1.8"/>
+          <text x="155" y="116" text-anchor="middle" font-size="10" fill="var(--amber-txt)">R_L</text>
+          <text id="n-rld" x="155" y="130" text-anchor="middle" font-size="10" font-weight="500" fill="var(--amber-txt)">10kΩ</text>
+
+          <!-- GND R2 -->
+          <line x1="68" y1="141" x2="68" y2="161" stroke="var(--bd2)" stroke-width="1.5"/>
+          <line x1="52" y1="161" x2="84" y2="161" stroke="var(--bd2)" stroke-width="1.5"/>
+          <line x1="57" y1="167" x2="79" y2="167" stroke="var(--bd2)" stroke-width="1"/>
+          <line x1="62" y1="173" x2="74" y2="173" stroke="var(--bd2)" stroke-width="0.7"/>
+          <text x="68" y="188" text-anchor="middle" font-size="9" fill="var(--text2)">GND</text>
+
+          <!-- GND R_L -->
+          <line x1="155" y1="141" x2="155" y2="161" stroke="var(--bd2)" stroke-width="1.5"/>
+          <line x1="139" y1="161" x2="171" y2="161" stroke="var(--bd2)" stroke-width="1.5"/>
+          <line x1="144" y1="167" x2="166" y2="167" stroke="var(--bd2)" stroke-width="1"/>
+          <line x1="149" y1="173" x2="161" y2="173" stroke="var(--bd2)" stroke-width="0.7"/>
+          <text x="155" y="188" text-anchor="middle" font-size="9" fill="var(--text2)">GND</text>
+        </svg>
+      </div>
+
+      <!-- FORMULAS no-buffer -->
+      <div class="formulas" id="f-nb">
+
+        <div class="fsec">
+          <div class="flabel">כניסה — V<sub>ideal</sub></div>
+          <div class="f-eq">
+            <span>V =</span>
+            <span class="frac"><span>R2</span><span>R1 + R2</span></span>
+            <span>× 5V</span>
+          </div>
+          <div id="n-fi" style="font-size:12px;"></div>
+        </div>
+
+        <div class="fbox amber">
+          <div class="fbox-lbl a">R2 ∥ R_L (מקביל)</div>
+          <div class="f-eq">
+            <span>R_par =</span>
+            <span class="frac"><span>R2 × R_L</span><span>R2 + R_L</span></span>
+          </div>
+          <div id="n-fp" style="font-size:12px;"></div>
+        </div>
+
+        <div class="fsec">
+          <div class="flabel">יציאה — V<sub>out</sub></div>
+          <div class="f-eq">
+            <span>V =</span>
+            <span class="frac"><span>R_par</span><span>R1 + R_par</span></span>
+            <span>× 5V</span>
+          </div>
+          <div id="n-fo" style="font-size:12px;"></div>
+        </div>
+
+        <div id="n-fe" style="font-size:12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ WITH BUFFER ══ -->
+  <div class="panel hi" id="p-b">
+    <div class="phead">
+      <span class="ptitle">עם באפר</span>
+      <div class="phead-right">
+        <span class="badge">ללא שגיאת העמסה</span>
+        <button class="toggle-btn" onclick="toggleF('b')">הסתר נוסחאות ▲</button>
+      </div>
+    </div>
+    <div class="pinner">
+
+      <div class="circ-wrap">
+        <!-- viewBox 190×205 — main branch x=48, output x=155 -->
+        <svg viewBox="0 0 190 205" style="width:190px">
+          <text x="48" y="11" text-anchor="middle" font-size="12" font-weight="500" fill="var(--text)">+5V</text>
+          <line x1="48" y1="14" x2="48" y2="36" stroke="var(--bd2)" stroke-width="1.5"/>
+
+          <!-- R1 -->
+          <rect x="24" y="36" width="48" height="36" rx="4" fill="var(--bg2)" stroke="var(--bd2)" stroke-width="1"/>
+          <text x="48" y="51" text-anchor="middle" font-size="10" fill="var(--text2)">R1</text>
+          <text id="b-r1" x="48" y="64" text-anchor="middle" font-size="10" font-weight="500" fill="var(--text)">5.0kΩ</text>
+
+          <!-- wire to junction -->
+          <line x1="48" y1="72" x2="48" y2="93" stroke="var(--bd2)" stroke-width="1.5"/>
+          <circle cx="48" cy="93" r="3.5" fill="var(--bd2)"/>
+
+          <!-- R2 -->
+          <rect x="24" y="101" width="48" height="40" rx="4" fill="var(--bg2)" stroke="var(--bd2)" stroke-width="1"/>
+          <text x="48" y="116" text-anchor="middle" font-size="10" fill="var(--text2)">R2</text>
+          <text id="b-r2" x="48" y="130" text-anchor="middle" font-size="10" font-weight="500" fill="var(--text)">5.0kΩ</text>
+
+          <!-- GND R2 -->
+          <line x1="48" y1="141" x2="48" y2="161" stroke="var(--bd2)" stroke-width="1.5"/>
+          <line x1="32" y1="161" x2="64" y2="161" stroke="var(--bd2)" stroke-width="1.5"/>
+          <line x1="37" y1="167" x2="59" y2="167" stroke="var(--bd2)" stroke-width="1"/>
+          <line x1="42" y1="173" x2="54" y2="173" stroke="var(--bd2)" stroke-width="0.7"/>
+          <text x="48" y="188" text-anchor="middle" font-size="9" fill="var(--text2)">GND</text>
+
+          <!-- wire junction → op-amp -->
+          <line x1="48" y1="93" x2="86" y2="93" stroke="var(--bd2)" stroke-width="1.5"/>
+
+          <!-- op-amp triangle -->
+          <polygon points="86,74 86,112 126,93" fill="var(--blue-bg)" stroke="var(--blue)" stroke-width="1.5" stroke-linejoin="round"/>
+          <text x="97" y="90" text-anchor="middle" font-size="10" fill="var(--blue)">+</text>
+          <text x="97" y="102" text-anchor="middle" font-size="10" fill="var(--blue)">−</text>
+          <text x="106" y="72" text-anchor="middle" font-size="9" fill="var(--blue)">באפר</text>
+
+          <!-- feedback dashed -->
+          <path d="M126,93 Q138,93 138,111 Q138,127 114,129 Q92,131 87,112" fill="none" stroke="var(--blue)" stroke-width="0.8" stroke-dasharray="3 2"/>
+
+          <!-- R_out label on output wire -->
+          <line x1="126" y1="93" x2="158" y2="93" stroke="var(--bd2)" stroke-width="1.5"/>
+          <text x="142" y="88" text-anchor="middle" font-size="8" fill="var(--blue)">R_out ≈ 0Ω</text>
+
+          <!-- V_out dot -->
+          <circle cx="158" cy="93" r="4.5" fill="var(--blue)"/>
+          <text id="b-vv" x="158" y="80" text-anchor="middle" font-size="9" font-weight="500" fill="var(--blue)">2.500V</text>
+
+          <!-- R_L -->
+          <line x1="158" y1="93" x2="158" y2="108" stroke="var(--bd2)" stroke-width="1.5"/>
+          <rect x="134" y="108" width="48" height="40" rx="4" fill="var(--bg2)" stroke="var(--bd2)" stroke-width="1"/>
+          <text x="158" y="122" text-anchor="middle" font-size="10" fill="var(--text2)">R_L</text>
+          <text id="b-rld" x="158" y="136" text-anchor="middle" font-size="10" font-weight="500" fill="var(--text)">10kΩ</text>
+
+          <!-- GND R_L -->
+          <line x1="158" y1="148" x2="158" y2="161" stroke="var(--bd2)" stroke-width="1.5"/>
+          <line x1="142" y1="161" x2="174" y2="161" stroke="var(--bd2)" stroke-width="1.5"/>
+          <line x1="147" y1="167" x2="169" y2="167" stroke="var(--bd2)" stroke-width="1"/>
+          <line x1="152" y1="173" x2="164" y2="173" stroke="var(--bd2)" stroke-width="0.7"/>
+          <text x="158" y="188" text-anchor="middle" font-size="9" fill="var(--text2)">GND</text>
+        </svg>
+      </div>
+
+      <!-- FORMULAS buffer -->
+      <div class="formulas" id="f-b">
+
+        <div class="fsec">
+          <div class="flabel">כניסה — V<sub>ideal</sub></div>
+          <div class="f-eq">
+            <span>V =</span>
+            <span class="frac"><span>R2</span><span>R1 + R2</span></span>
+            <span>× 5V</span>
+          </div>
+          <div id="b-fi" style="font-size:12px;"></div>
+        </div>
+
+        <div class="fbox green">
+          <div class="fbox-lbl g">יציאה — V<sub>out</sub></div>
+          <div class="f-eq">
+            <span>V<sub>out</sub> = V<sub>ideal</sub></span>
+          </div>
+          <div id="b-fo" style="font-size:12px;"></div>
+        </div>
+
+        <div class="note">
+          R<sub>in</sub>(באפר) ≈ ∞Ω &nbsp;→&nbsp; לא טוען את המחלק<br>
+          R<sub>out</sub>(באפר) ≈ 0Ω &nbsp;→&nbsp; R_L <strong>לא משפיע כלל</strong>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="summary">
+  <div class="card">
+    <div class="clbl">כניסה — V<sub>ideal</sub></div>
+    <div class="cval" id="si">2.500 V</div>
+  </div>
+  <div class="card">
+    <div class="clbl">יציאה ללא באפר</div>
+    <div class="cval d" id="sa">2.000 V</div>
+  </div>
+  <div class="card">
+    <div class="clbl">שגיאת העמסה</div>
+    <div class="cval w" id="se">0.500 V</div>
+  </div>
+</div>
+
+</div>
+<script>
+function f(v,d){return v.toFixed(d===undefined?3:d)}
+
+function toggleF(id){
+  const el=document.getElementById('f-'+id);
+  const btn=document.querySelector('#p-'+id+' .toggle-btn');
+  const hidden=el.classList.toggle('hidden');
+  btn.textContent=hidden?'הצג נוסחאות ▼':'הסתר נוסחאות ▲';
+}
+
+function upd(){
+  const W=parseFloat(document.getElementById('wiper').value);
+  const RL=parseFloat(document.getElementById('rl').value);
+  const R1=W, R2=+(10-W).toFixed(4);
+  document.getElementById('wv').textContent=f(R1,1)+' kΩ';
+  document.getElementById('rv').textContent=f(RL,0)+' kΩ';
+
+  const Rp=R2===0?0:(R2*RL)/(R2+RL);
+  const Vi=(R1+R2)===0?5:5*R2/(R1+R2);
+  const Vo=(R1+Rp)===0?0:5*Rp/(R1+Rp);
+  const err=Vi-Vo;
+  const ep=Vi>0.001?err/Vi*100:0;
+
+  // SVG labels
+  document.getElementById('n-r1').textContent=f(R1,1)+'kΩ';
+  document.getElementById('n-r2').textContent=f(R2,1)+'kΩ';
+  document.getElementById('n-rld').textContent=f(RL,0)+'kΩ';
+  document.getElementById('n-rpd').textContent=f(Rp,2)+'k';
+  document.getElementById('n-vv').textContent=f(Vo)+'V';
+  document.getElementById('b-r1').textContent=f(R1,1)+'kΩ';
+  document.getElementById('b-r2').textContent=f(R2,1)+'kΩ';
+  document.getElementById('b-rld').textContent=f(RL,0)+'kΩ';
+  document.getElementById('b-vv').textContent=f(Vi)+'V';
+
+  // Formulas no-buffer
+  document.getElementById('n-fi').innerHTML='= <strong>'+f(Vi)+' V</strong>';
+  document.getElementById('n-fp').innerHTML=f(R2,1)+'k ∥ '+f(RL,0)+'k = <strong>'+f(Rp,2)+' kΩ</strong>';
+  document.getElementById('n-fo').innerHTML='= <strong style="color:var(--red-txt)">'+f(Vo)+' V</strong>';
+  document.getElementById('n-fe').innerHTML='שגיאה = <strong style="color:var(--amber-txt)">'+f(err)+' V</strong> <span style="color:var(--text2)">('+f(ep,1)+'%)</span>';
+
+  // Formulas buffer
+  document.getElementById('b-fi').innerHTML='= <strong>'+f(Vi)+' V</strong>';
+  document.getElementById('b-fo').innerHTML='= <strong style="color:var(--green-txt)">'+f(Vi)+' V</strong> &nbsp;·&nbsp; שגיאה = <strong style="color:var(--green-txt)">0.000 V</strong>';
+
+  // Summary
+  document.getElementById('si').textContent=f(Vi)+' V';
+  document.getElementById('sa').textContent=f(Vo)+' V';
+  document.getElementById('se').textContent=f(err)+' V';
+
+  const w=document.getElementById('warn');
+  if(Math.abs(ep)>20&&Vi>0.01){
+    w.style.display='block';
+    w.textContent='שגיאת העמסה גדולה ('+f(ep,0)+'%) — R_L קטן מדי ביחס ל-R2. הבאפר מחסל שגיאה זו לחלוטין.';
+  }else{w.style.display='none';}
+}
+upd();
+</script>
+</body>
+</html>
