@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מעגל גליידה</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f4ef;--bg2:#eceae3;--bg3:#ffffff;
+  --text:#2c2c2a;--text2:#5f5e5a;
+  --bd:rgba(0,0,0,0.12);--bd2:rgba(0,0,0,0.28);
+  --blue:#185FA5;--blue-bg:#e6f1fb;--blue-txt:#185FA5;
+  --red:#E24B4A;
+  --amber:#BA7517;--amber-bg:#faeeda;--amber-txt:#854F0B;
+  --green:#3B6D11;--green-bg:#eaf3de;--green-txt:#3B6D11;
+  --r:10px;--rs:6px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1e1e1c;--bg2:#2a2a27;--bg3:#252523;
+  --text:#e8e6de;--text2:#9c9a92;
+  --bd:rgba(255,255,255,0.10);--bd2:rgba(255,255,255,0.26);
+  --blue-bg:#042c53;--blue-txt:#85b7eb;
+  --amber-bg:#412402;--amber-txt:#fac775;
+  --green-bg:#173404;--green-txt:#97c459;
+}}
+body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;min-height:100vh}
+.page{max-width:900px;margin:0 auto;padding:24px 16px 60px}
+h1{font-size:20px;font-weight:500;margin-bottom:2px}
+.sub{font-size:12px;color:var(--text2);margin-bottom:18px}
+
+/* tau note */
+.tau-note{font-size:12px;color:var(--text2);background:var(--amber-bg);border-radius:var(--rs);padding:6px 12px;margin-bottom:14px;direction:ltr}
+.tau-note strong{color:var(--amber-txt)}
+
+/* sliders */
+.sliders{background:var(--bg2);border-radius:var(--r);padding:12px 18px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px}
+.srow{display:flex;align-items:center;gap:10px}
+.srow label{min-width:155px;font-size:13px;color:var(--text2)}
+.srow input[type=range]{flex:1;cursor:pointer}
+.srow input.rc{accent-color:var(--amber)}
+.srow input.clk{accent-color:var(--blue)}
+.srow .val{min-width:68px;font-weight:500;direction:ltr;text-align:right;font-size:13px}
+.sdivider{border:none;border-top:0.5px solid var(--bd);margin:2px 0}
+
+/* 3 metric cards */
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.mcard{background:var(--bg3);border:0.5px solid var(--bd);border-radius:var(--rs);padding:10px 14px;text-align:center;transition:background .2s,border-color .2s}
+.mcard-lbl{font-size:11px;color:var(--text2);margin-bottom:3px}
+.mcard-val{font-size:20px;font-weight:500;direction:ltr}
+.mcard-sub{font-size:10px;color:var(--text2);margin-top:2px}
+.mcard.good{border-color:var(--green);background:var(--green-bg)}
+.mcard.mid {border-color:var(--amber);background:var(--amber-bg)}
+.mcard.bad {border-color:var(--red);background:#fcebeb}
+@media(prefers-color-scheme:dark){.mcard.bad{background:#501313}}
+.mcard.good .mcard-val{color:var(--green-txt)}
+.mcard.mid  .mcard-val{color:var(--amber-txt)}
+.mcard.bad  .mcard-val{color:#f09595}
+
+/* ratio bar */
+.rbar-wrap{margin-bottom:16px;direction:ltr}
+.rbar-lbl{font-size:11px;color:var(--text2);margin-bottom:4px}
+.rbar-track{height:8px;background:var(--bg2);border-radius:4px;overflow:hidden}
+.rbar-fill{height:100%;border-radius:4px;transition:width .3s,background .3s;min-width:4px}
+.rbar-marks{display:flex;justify-content:space-between;font-size:9px;color:var(--text2);margin-top:2px}
+
+/* main grid */
+.mgrid{display:grid;grid-template-columns:245px 1fr;gap:14px;align-items:start;margin-bottom:14px}
+@media(max-width:640px){.mgrid{grid-template-columns:1fr}}
+.panel{background:var(--bg3);border:0.5px solid var(--bd);border-radius:var(--r);padding:14px}
+.ptitle{font-weight:500;font-size:13px;color:var(--text2);margin-bottom:10px}
+
+/* wave */
+.wave-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px;flex-wrap:wrap}
+.legend{display:flex;gap:10px;font-size:11px;color:var(--text2);direction:ltr}
+.leg{display:flex;align-items:center;gap:4px}
+.leg-line{width:16px;height:3px;border-radius:2px;display:inline-block}
+canvas{display:block;width:100%;border-radius:var(--rs)}
+.play-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:18px;border:0.5px solid var(--bd2);background:transparent;color:var(--text);cursor:pointer;font-size:12px;font-family:inherit;transition:background .15s;white-space:nowrap}
+.play-btn:hover{background:var(--bg2)}
+.play-btn.playing{background:var(--amber-bg);border-color:var(--amber);color:var(--amber-txt)}
+.live-vals{display:flex;gap:14px;direction:ltr;font-size:12px;margin-top:6px;font-weight:500}
+.lv-in{color:var(--blue-txt)} .lv-out{color:var(--red)}
+
+/* explain */
+.explain{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:540px){.explain{grid-template-columns:1fr}}
+.ebox{background:var(--bg2);border-radius:var(--rs);padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.7}
+.ebox strong{color:var(--text);display:block;margin-bottom:2px;font-size:13px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>מעגל גליידה <span style="font-size:14px;font-weight:400;color:var(--text2)">(Glide / Portamento)</span></h1>
+<p class="sub">מעגל RC — נגד ועכבית — שמחליק מעברים בין ערכי CV</p>
+
+
+
+<!-- Sliders -->
+<div class="sliders">
+  <div class="srow">
+    <label>R — נגד (פוטנציומטר)</label>
+    <input type="range" class="rc" id="s-r" min="1000" max="100000" step="1000" value="50000" oninput="upd()">
+    <span class="val" id="v-r">50 kΩ</span>
+  </div>
+  <div class="srow">
+    <label>C — קיבולת</label>
+    <input type="range" class="rc" id="s-c" min="1e-6" max="100e-6" step="1e-6" value="10e-6" oninput="upd()">
+    <span class="val" id="v-c">10 μF</span>
+  </div>
+  <hr class="sdivider">
+  <div class="srow">
+    <label>BPM — מהירות סיקוונסר</label>
+    <input type="range" class="clk" id="s-bpm" min="40" max="240" step="1" value="120" oninput="upd()">
+    <span class="val" id="v-bpm">120 BPM</span>
+  </div>
+</div>
+
+<!-- 3 metric cards -->
+<div class="metrics">
+  <div class="mcard">
+    <div class="mcard-lbl">τ = R × C</div>
+    <div class="mcard-val" style="color:var(--amber)" id="m-tau">500 ms</div>
+    <div class="mcard-sub">קבוע זמן הגליידה</div>
+  </div>
+  <div class="mcard">
+    <div class="mcard-lbl">משך תו (¼ ב-BPM)</div>
+    <div class="mcard-val" style="color:var(--blue-txt)" id="m-note">500 ms</div>
+    <div class="mcard-sub">= 60 / BPM שניות</div>
+  </div>
+  <div class="mcard" id="ratio-card">
+    <div class="mcard-lbl">יחס τ / משך_תו</div>
+    <div class="mcard-val" id="m-ratio">1.00×</div>
+    <div class="mcard-sub" id="m-rlbl">גליידה = משך תו</div>
+  </div>
+</div>
+
+<!-- Ratio bar -->
+<div class="rbar-wrap">
+  <div class="rbar-lbl">גליידה: מהירה ←──────────────────────→ אינסופית</div>
+  <div class="rbar-track"><div class="rbar-fill" id="rbar" style="width:50%"></div></div>
+  <div class="rbar-marks"><span>0.1× (מהיר)</span><span>0.5×</span><span>1× (=תו)</span><span>3×</span><span>5×+</span></div>
+</div>
+
+<!-- Main grid -->
+<div class="mgrid">
+
+  <!-- Circuit -->
+  <div class="panel">
+    <div class="ptitle">תרשים מעגל</div>
+    <svg viewBox="0 0 240 210" style="width:100%">
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+        <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker></defs>
+
+      <text x="4" y="74" font-size="11" fill="var(--blue-txt)" font-weight="500">CV_in</text>
+      <line x1="46" y1="70" x2="66" y2="70" stroke="var(--bd2)" stroke-width="1.8"/>
+
+      <!-- R variable resistor -->
+      <rect x="66" y="54" width="64" height="32" rx="4" fill="var(--bg2)" stroke="var(--bd2)" stroke-width="1.5"/>
+      <line x1="70" y1="83" x2="126" y2="57" stroke="var(--bd2)" stroke-width="1.2" marker-end="url(#ar)"/>
+      <text x="98" y="50" text-anchor="middle" font-size="11" fill="var(--text2)">R</text>
+      <text id="c-r" x="98" y="96" text-anchor="middle" font-size="10" font-weight="500" fill="var(--amber-txt)">50 kΩ</text>
+
+      <line x1="130" y1="70" x2="158" y2="70" stroke="var(--bd2)" stroke-width="1.8"/>
+      <circle cx="158" cy="70" r="4.5" fill="var(--red)"/>
+      <line x1="158" y1="70" x2="228" y2="70" stroke="var(--bd2)" stroke-width="1.8" marker-end="url(#ar)"/>
+      <text x="232" y="74" font-size="11" fill="var(--red)" font-weight="500">CV_out</text>
+
+      <!-- Capacitor -->
+      <line x1="158" y1="70" x2="158" y2="112" stroke="var(--bd2)" stroke-width="1.8"/>
+      <line x1="134" y1="112" x2="182" y2="112" stroke="var(--bd2)" stroke-width="3"/>
+      <line x1="134" y1="124" x2="182" y2="124" stroke="var(--bd2)" stroke-width="3"/>
+      <text x="122" y="116" text-anchor="end" font-size="11" fill="var(--text2)">C</text>
+      <text id="c-c" x="122" y="128" text-anchor="end" font-size="10" font-weight="500" fill="var(--blue-txt)">10 μF</text>
+      <line x1="158" y1="124" x2="158" y2="158" stroke="var(--bd2)" stroke-width="1.8"/>
+
+      <!-- GND -->
+      <line x1="140" y1="158" x2="176" y2="158" stroke="var(--bd2)" stroke-width="1.8"/>
+      <line x1="145" y1="165" x2="171" y2="165" stroke="var(--bd2)" stroke-width="1.2"/>
+      <line x1="150" y1="172" x2="166" y2="172" stroke="var(--bd2)" stroke-width="0.8"/>
+      <text x="158" y="186" text-anchor="middle" font-size="10" fill="var(--text2)">GND</text>
+
+      <!-- τ box -->
+      <rect x="4" y="155" width="114" height="42" rx="5" fill="var(--amber-bg)" stroke="var(--amber)" stroke-width="0.8"/>
+      <text x="61" y="170" text-anchor="middle" font-size="10" fill="var(--amber-txt)">τ = R × C</text>
+      <text id="c-tau" x="61" y="188" text-anchor="middle" font-size="12" font-weight="700" fill="var(--amber)">= 500 ms</text>
+    </svg>
+  </div>
+
+  <!-- Waveform -->
+  <div class="panel">
+    <div class="wave-top">
+      <span class="ptitle">CV לאורך זמן</span>
+      <div class="legend">
+        <span class="leg"><span class="leg-line" style="border:2px dashed #185FA5;background:transparent"></span>CV_in</span>
+        <span class="leg"><span class="leg-line" style="background:#E24B4A"></span>CV_out</span>
+        <span class="leg"><span class="leg-line" style="background:var(--amber);opacity:.8"></span>τ (קבוע זמן)</span>
+      </div>
+      <button class="play-btn" id="play-btn" onclick="togglePlay()">▶ הפעל</button>
+    </div>
+    <canvas id="wave" width="800" height="240"></canvas>
+    <div class="live-vals">
+      <span class="lv-in" id="lv-in">CV_in: —</span>
+      <span class="lv-out" id="lv-out">CV_out: —</span>
+    </div>
+  </div>
+</div>
+
+<!-- Explanations (collapsible) -->
+<div style="margin-top:4px">
+  <button onclick="toggleExp()" id="exp-btn" style="background:none;border:none;color:var(--text2);font-size:12px;cursor:pointer;padding:4px 0;font-family:inherit">▶ הצג הסבר</button>
+  <div id="exp-box" style="display:none;margin-top:8px">
+    <div class="ebox">
+      <strong>BPM ו-τ — הקשר</strong>
+      τ (R×C) קבוע. משך תו = 60/BPM שניות. אם τ גדול ממשך התו — הגליידה לא מגיעה לפני שהתו הבא מגיע. שנה BPM ושים לב לשינוי בגרף.
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+const PAT=[{v:1.000,b:1},{v:1.583,b:1},{v:1.333,b:1},{v:2.000,b:2},{v:1.750,b:1},{v:1.333,b:1},{v:1.000,b:1}];
+let playing=false,playT=0,lastTS=null,rafID=null,cPts=null,cKey='';
+
+function getNotes(){
+  const bpm=+document.getElementById('s-bpm').value;
+  const bd=60/bpm; // quarter note duration
+  return PAT.map(n=>({v:n.v,dur:n.b*bd}));
+}
+function totT(ns){return ns.reduce((s,n)=>s+n.dur,0);}
+function getTau(){return +document.getElementById('s-r').value * +document.getElementById('s-c').value;}
+function inV(ns,t){let a=0;for(const n of ns){if(t<a+n.dur)return n.v;a+=n.dur;}return ns[ns.length-1].v;}
+
+function glide(ns,tau){
+  const DT=1/500,tot=totT(ns),pts=[];let v=ns[0].v;
+  for(let t=0;t<=tot+DT;t+=DT){
+    const tg=inV(ns,t);v=tau<1e-9?tg:tg+(v-tg)*Math.exp(-DT/tau);
+    pts.push({t:+t.toFixed(5),v});
+  }return pts;
+}
+function getG(){
+  const ns=getNotes(),tau=getTau();
+  const k=JSON.stringify([ns.map(n=>n.dur),tau]);
+  if(k!==cKey){cPts=glide(ns,tau);cKey=k;}
+  return{pts:cPts,ns};
+}
+function lerp(pts,t){
+  if(!pts||!pts.length)return 0;
+  if(t<=pts[0].t)return pts[0].v;
+  if(t>=pts[pts.length-1].t)return pts[pts.length-1].v;
+  let lo=0,hi=pts.length-1;
+  while(hi-lo>1){const m=(lo+hi)>>1;pts[m].t<=t?lo=m:hi=m;}
+  const f=(t-pts[lo].t)/(pts[hi].t-pts[lo].t);
+  return pts[lo].v+(pts[hi].v-pts[lo].v)*f;
+}
+
+function draw(ph){
+  const cv=document.getElementById('wave'),ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height;
+  const PL=46,PR=20,PT=24,PB=38;
+  const CW=W-PL-PR,CH=H-PT-PB;
+  const Vlo=0.7,Vhi=2.3;
+  const{pts,ns}=getG();const tot=totT(ns);const tau=getTau();
+  const tx=t=>PL+t/tot*CW, ty=v=>PT+(1-(v-Vlo)/(Vhi-Vlo))*CH;
+  const dk=matchMedia('(prefers-color-scheme:dark)').matches;
+  ctx.fillStyle=dk?'#252523':'#fff';ctx.fillRect(0,0,W,H);
+  const gc=dk?'rgba(255,255,255,.07)':'rgba(0,0,0,.06)';
+  const tc=dk?'#9c9a92':'#5f5e5a';
+
+  // h-grid + labels
+  for(let v=0.5;v<=2.5;v+=.5){const y=ty(v);if(y<PT-4||y>PT+CH+4)continue;
+    ctx.strokeStyle=gc;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(PL,y);ctx.lineTo(PL+CW,y);ctx.stroke();
+    ctx.fillStyle=tc;ctx.font='10px system-ui';ctx.textAlign='right';ctx.fillText(v.toFixed(1)+'V',PL-5,y+4);}
+
+  // note boundary markers + time labels
+  let acc=0;ns.forEach((n,i)=>{
+    const x=tx(acc);
+    ctx.strokeStyle=dk?'rgba(255,255,255,.1)':'rgba(0,0,0,.08)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(x,PT);ctx.lineTo(x,PT+CH);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=tc;ctx.font='9px system-ui';ctx.textAlign='center';
+    ctx.fillText(acc.toFixed(1)+'s',x,PT+CH+14);
+    acc+=n.dur;});
+  ctx.fillStyle=tc;ctx.font='9px system-ui';ctx.textAlign='center';
+  ctx.fillText(tot.toFixed(1)+'s',tx(tot),PT+CH+14);
+
+  // note-duration bracket under first note
+  const nbx=tx(ns[0].dur);
+  ctx.strokeStyle='rgba(24,95,165,.4)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(PL+2,PT+CH+26);ctx.lineTo(nbx-2,PT+CH+26);ctx.stroke();
+  ctx.fillStyle='rgba(24,95,165,.7)';ctx.font='9px system-ui';ctx.textAlign='center';
+  ctx.fillText('תו ¼',(PL+nbx)/2,PT+CH+35);
+
+  // axes
+  ctx.strokeStyle=dk?'rgba(255,255,255,.18)':'rgba(0,0,0,.18)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(PL,PT);ctx.lineTo(PL,PT+CH);ctx.lineTo(PL+CW,PT+CH);ctx.stroke();
+
+  // τ annotation on first transition
+  const t1=ns[0].dur,vS=ns[0].v,vE=ns[1].v;
+  const vTau=vE+(vS-vE)*Math.exp(-1),tTau=t1+tau;
+  if(tTau<tot-0.05){
+    ctx.strokeStyle='rgba(186,117,23,.7)';ctx.lineWidth=1;ctx.setLineDash([4,3]);
+    const xt=tx(tTau),yt=ty(vTau);
+    ctx.beginPath();ctx.moveTo(xt,PT+2);ctx.lineTo(xt,yt);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(tx(t1),yt);ctx.lineTo(xt,yt);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#BA7517';ctx.beginPath();ctx.arc(xt,yt,4,0,Math.PI*2);ctx.fill();
+    ctx.font='bold 10px system-ui';ctx.textAlign='center';ctx.fillText('τ',xt,PT+13);
+  } else {
+    ctx.setLineDash([]);
+    ctx.fillStyle='rgba(186,117,23,.85)';ctx.font='bold 10px system-ui';ctx.textAlign='right';
+    ctx.fillText('τ > סך הכל',PL+CW-4,PT+13);}
+
+  // input stepped dashed
+  ctx.strokeStyle='rgba(24,95,165,.7)';ctx.lineWidth=2;ctx.setLineDash([7,4]);
+  ctx.beginPath();acc=0;ns.forEach((n,i)=>{const x1=tx(acc),x2=tx(acc+n.dur),y=ty(n.v);
+    i===0?ctx.moveTo(x1,y):ctx.lineTo(x1,y);ctx.lineTo(x2,y);acc+=n.dur;});
+  ctx.stroke();ctx.setLineDash([]);
+
+  // glide curve
+  ctx.strokeStyle='#E24B4A';ctx.lineWidth=2.8;ctx.beginPath();
+  pts.forEach((p,i)=>{const x=tx(p.t),y=ty(Math.max(Vlo,Math.min(Vhi,p.v)));i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.stroke();
+
+  // playhead
+  if(ph!=null){
+    const xp=tx(Math.min(ph,tot));
+    ctx.strokeStyle=dk?'rgba(255,255,255,.4)':'rgba(0,0,0,.3)';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(xp,PT);ctx.lineTo(xp,PT+CH);ctx.stroke();
+    const iv=inV(ns,ph),ov=lerp(pts,ph);
+    ctx.fillStyle='#185FA5';ctx.beginPath();ctx.arc(xp,ty(iv),5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#E24B4A';ctx.beginPath();ctx.arc(xp,ty(Math.max(Vlo,Math.min(Vhi,ov))),5,0,Math.PI*2);ctx.fill();
+    document.getElementById('lv-in').textContent='CV_in: '+iv.toFixed(3)+' V';
+    document.getElementById('lv-out').textContent='CV_out: '+ov.toFixed(3)+' V';
+  } else {
+    document.getElementById('lv-in').textContent='CV_in: —';
+    document.getElementById('lv-out').textContent='CV_out: —';
+  }
+}
+
+function anim(ts){
+  if(!playing)return;if(lastTS===null)lastTS=ts;
+  const dt=(ts-lastTS)/1000;lastTS=ts;
+  const tot=totT(getNotes());playT=Math.min(playT+dt,tot);
+  draw(playT);if(playT>=tot){stop();return;}
+  rafID=requestAnimationFrame(anim);
+}
+function togglePlay(){playing?stop():start();}
+function start(){
+  playing=true;lastTS=null;const tot=totT(getNotes());if(playT>=tot)playT=0;
+  document.getElementById('play-btn').textContent='⏹ עצור';
+  document.getElementById('play-btn').classList.add('playing');
+  rafID=requestAnimationFrame(anim);
+}
+function stop(){
+  playing=false;lastTS=null;cancelAnimationFrame(rafID);
+  document.getElementById('play-btn').textContent='▶ הפעל';
+  document.getElementById('play-btn').classList.remove('playing');
+  draw(playT<totT(getNotes())?playT:null);
+}
+
+function fms(s){return s>=1?(s*1000).toFixed(0)+' ms':(s*1000).toFixed(1)+' ms';}
+function fR(o){return o>=1e6?(o/1e6).toFixed(2)+' MΩ':o>=1000?(o/1000).toFixed(0)+' kΩ':o+' Ω';}
+function fC(f){return f>=1e-3?(f*1e3).toFixed(0)+' mF':f>=1e-6?(f*1e6).toFixed(0)+' μF':(f*1e9).toFixed(0)+' nF';}
+
+function upd(){
+  cKey='';
+  const R=+document.getElementById('s-r').value;
+  const C=+document.getElementById('s-c').value;
+  const bpm=+document.getElementById('s-bpm').value;
+  const tau=R*C, noteDur=60/bpm, ratio=tau/noteDur;
+
+  document.getElementById('v-r').textContent=fR(R);
+  document.getElementById('v-c').textContent=fC(C);
+  document.getElementById('v-bpm').textContent=bpm+' BPM';
+  document.getElementById('c-r').textContent=fR(R);
+  document.getElementById('c-c').textContent=fC(C);
+  document.getElementById('c-tau').textContent='= '+fms(tau);
+  document.getElementById('m-tau').textContent=fms(tau);
+  document.getElementById('m-note').textContent=(noteDur*1000).toFixed(0)+' ms';
+  document.getElementById('m-ratio').textContent=ratio.toFixed(2)+'×';
+
+  const rc=document.getElementById('ratio-card');
+  const rl=document.getElementById('m-rlbl');
+  rc.className='mcard';
+  if(ratio<0.3){rc.classList.add('good');rl.textContent='גלייד מהיר ✓';}
+  else if(ratio<1.2){rc.classList.add('mid');rl.textContent='פורטמנטו מוזיקלי';}
+  else{rc.classList.add('bad');rl.textContent='ארוך מהתו — תמיד גולש';}
+
+  const lMin=Math.log(.05),lMax=Math.log(5);
+  const pct=Math.min(100,Math.max(0,(Math.log(Math.max(.01,ratio))-lMin)/(lMax-lMin)*100));
+  const rb=document.getElementById('rbar');
+  rb.style.width=pct+'%';
+  rb.style.background=ratio<0.3?'var(--green)':ratio<1.2?'var(--amber)':'var(--red)';
+
+  draw(playing?playT:null);
+}
+
+function toggleExp(){
+  const box=document.getElementById('exp-box');
+  const btn=document.getElementById('exp-btn');
+  const open=box.style.display==='none';
+  box.style.display=open?'block':'none';
+  btn.textContent=open?'▼ הסתר הסבר':'▶ הצג הסבר';
+}
+
+function init(){
+  const cv=document.getElementById('wave');
+  const dpr=window.devicePixelRatio||1;
+  const r=cv.getBoundingClientRect();
+  cv.width=Math.round((r.width||800)*dpr);
+  cv.height=Math.round((r.height||240)*dpr);
+  cv.getContext('2d').scale(dpr,dpr);
+  upd();
+}
+window.addEventListener('load',init);
+window.addEventListener('resize',()=>{if(!playing){cancelAnimationFrame(rafID);init();}});
+</script>
+</body>
+</html>
