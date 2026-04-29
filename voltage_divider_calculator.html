@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מחשבון מחלק מתח</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f4ef;--bg2:#eceae3;--bg3:#ffffff;
+  --text:#2c2c2a;--text2:#5f5e5a;
+  --bd:rgba(0,0,0,0.13);--bd2:rgba(0,0,0,0.30);
+  --blue:#185FA5;--blue-bg:#e6f1fb;--blue-txt:#185FA5;
+  --green-bg:#eaf3de;--green-txt:#3B6D11;
+  --amber:#BA7517;--amber-bg:#faeeda;--amber-txt:#854F0B;
+  --red-txt:#a32d2d;--red-bg:#fcebeb;
+  --r:10px;--rs:6px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1e1e1c;--bg2:#2a2a27;--bg3:#252523;
+  --text:#e8e6de;--text2:#9c9a92;
+  --bd:rgba(255,255,255,0.11);--bd2:rgba(255,255,255,0.28);
+  --blue-bg:#042c53;--blue-txt:#85b7eb;
+  --green-bg:#173404;--green-txt:#97c459;
+  --amber-bg:#412402;--amber-txt:#fac775;
+  --red-txt:#f09595;--red-bg:#501313;
+}}
+
+body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;min-height:100vh}
+.page{max-width:880px;margin:0 auto;padding:28px 16px 60px}
+
+h1{font-size:22px;font-weight:500;margin-bottom:4px}
+.sub{font-size:12px;color:var(--text2);margin-bottom:24px}
+
+/* ── grid ── */
+.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+@media(max-width:620px){.main-grid{grid-template-columns:1fr}}
+
+/* ── left column ── */
+.left-col{display:flex;flex-direction:column;gap:16px}
+
+/* big formula */
+.big-formula{background:var(--bg2);border-radius:var(--r);padding:20px 24px;display:flex;align-items:center;justify-content:center}
+.bf-inner{display:flex;align-items:center;gap:14px;direction:ltr}
+.bf-lhs{font-size:26px;font-weight:500;color:var(--blue);white-space:nowrap}
+.bf-frac{display:flex;flex-direction:column;align-items:center;gap:2px}
+.bf-num{font-size:18px;border-bottom:2.5px solid var(--text);padding:3px 10px;white-space:nowrap}
+.bf-den{font-size:18px;padding:3px 10px;white-space:nowrap}
+
+/* variable list */
+.var-list{list-style:none;padding:0 16px;display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--text2)}
+.var-list li strong{color:var(--text)}
+
+/* circuit SVG wrapper */
+.circ-outer{display:flex;justify-content:center}
+
+/* ── right column (calculator) ── */
+.right-col{background:var(--bg3);border:0.5px solid var(--bd);border-radius:var(--r);padding:20px}
+
+.calc-title{font-weight:500;font-size:15px;margin-bottom:4px}
+.calc-hint{font-size:12px;color:var(--text2);margin-bottom:18px}
+
+/* input rows */
+.cf-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+
+.cf-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--rs);border:1px solid transparent;transition:background .15s,border-color .15s;cursor:pointer;direction:ltr}
+.cf-row:hover{background:var(--bg2)}
+.cf-row.solving{background:var(--blue-bg);border-color:var(--blue-txt)}
+
+/* radio */
+.cf-radio{display:flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--bd2);cursor:pointer;flex-shrink:0;transition:border-color .15s,background .15s}
+.cf-row.solving .cf-radio{border-color:var(--blue);background:var(--blue)}
+.cf-row.solving .cf-radio::after{content:'';width:6px;height:6px;border-radius:50%;background:#fff;display:block}
+
+.cf-name{min-width:44px;font-size:14px;font-weight:500;color:var(--text)}
+.cf-input{flex:1;border:0.5px solid var(--bd2);border-radius:var(--rs);padding:6px 10px;font-size:14px;background:var(--bg3);color:var(--text);outline:none;transition:border-color .15s;font-family:inherit;min-width:0}
+.cf-input:focus{border-color:var(--blue)}
+.cf-input:read-only{background:var(--blue-bg);color:var(--blue-txt);border-color:transparent;font-weight:500}
+.cf-input::placeholder{color:var(--text2)}
+
+select.cf-unit{border:0.5px solid var(--bd2);border-radius:var(--rs);padding:6px 8px;font-size:13px;background:var(--bg3);color:var(--text);cursor:pointer;outline:none;font-family:inherit}
+.cf-unit-lbl{font-size:13px;color:var(--text2);white-space:nowrap}
+
+/* results */
+.result-box{border-radius:var(--rs);padding:12px 14px;font-size:13px;direction:ltr;background:var(--green-bg);color:var(--green-txt);display:none;margin-bottom:10px;line-height:1.8}
+.result-box.err{background:var(--red-bg);color:var(--red-txt)}
+
+.ratio-box{background:var(--bg2);border-radius:var(--rs);padding:10px 14px;font-size:13px;direction:ltr;display:none;margin-bottom:10px}
+
+/* expanded formula */
+.exp-formula{margin-top:6px;font-size:12px;color:var(--text2)}
+.exp-val{font-weight:500;color:var(--green-txt);font-size:15px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>מחשבון מחלק מתח</h1>
+<p class="sub">בחר את הנעלם (●), הכנס שלושה ערכים — התוצאה מחושבת אוטומטית</p>
+
+<div class="main-grid">
+
+  <!-- ══ LEFT COLUMN ══ -->
+  <div class="left-col">
+
+    <!-- Big formula -->
+    <div class="big-formula">
+      <div class="bf-inner">
+        <span class="bf-lhs">V<sub>out</sub> =</span>
+        <div class="bf-frac">
+          <span class="bf-num">V<sub>s</sub> &times; R<sub>2</sub></span>
+          <span class="bf-den">R<sub>1</sub> + R<sub>2</sub></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Variable descriptions -->
+    <ul class="var-list">
+      <li><strong>V<sub>s</sub></strong> — מתח אספקה</li>
+      <li><strong>R<sub>1</sub></strong> — נגד עליון (בין Vs ל-V_out)</li>
+      <li><strong>R<sub>2</sub></strong> — נגד תחתון (בין V_out ל-GND)</li>
+      <li><strong>V<sub>out</sub></strong> — מתח יציאה = מתח על R2</li>
+    </ul>
+
+    <!-- Circuit diagram -->
+    <div class="circ-outer">
+      <svg viewBox="0 0 310 230" style="width:100%;max-width:270px">
+        <defs>
+          <marker id="arw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+
+        <!-- Left wire top -->
+        <line x1="65" y1="18" x2="65" y2="97" stroke="var(--bd2)" stroke-width="2"/>
+        <!-- Battery symbol -->
+        <line x1="46" y1="97" x2="84" y2="97" stroke="var(--bd2)" stroke-width="2.5"/>
+        <line x1="53" y1="112" x2="77" y2="112" stroke="var(--bd2)" stroke-width="1.5"/>
+        <!-- + − labels -->
+        <text x="91" y="101" font-size="14" font-weight="500" fill="var(--text)" text-anchor="start">+</text>
+        <text x="91" y="118" font-size="14" font-weight="500" fill="var(--text)" text-anchor="start">−</text>
+        <!-- Vs label -->
+        <text x="38" y="107" font-size="11" fill="var(--text2)" text-anchor="end">Vs</text>
+        <text id="d-vs" x="38" y="120" font-size="10" font-weight="500" fill="var(--text)" text-anchor="end">5V</text>
+        <!-- Left wire bottom -->
+        <line x1="65" y1="112" x2="65" y2="210" stroke="var(--bd2)" stroke-width="2"/>
+
+        <!-- Top wire -->
+        <line x1="65" y1="18" x2="228" y2="18" stroke="var(--bd2)" stroke-width="2"/>
+
+        <!-- R1 box -->
+        <rect x="204" y="18" width="48" height="90" rx="5" fill="var(--bg2)" stroke="var(--bd2)" stroke-width="1.5"/>
+        <text x="228" y="55" text-anchor="middle" font-size="11" fill="var(--text2)">R1</text>
+        <text id="d-r1" x="228" y="72" text-anchor="middle" font-size="10" font-weight="500" fill="var(--text)">5kΩ</text>
+        <text id="d-r1b" x="228" y="86" text-anchor="middle" font-size="9" fill="var(--text2)"></text>
+
+        <!-- Junction dot -->
+        <circle cx="228" cy="108" r="5.5" fill="var(--blue)"/>
+
+        <!-- V_out line going right -->
+        <line x1="228" y1="108" x2="285" y2="108" stroke="var(--blue)" stroke-width="1.8" marker-end="url(#arw)"/>
+        <text x="230" y="101" text-anchor="start" font-size="10" fill="var(--blue)">V_out</text>
+        <text id="d-vout" x="230" y="124" text-anchor="start" font-size="11" font-weight="500" fill="var(--blue)">?</text>
+
+        <!-- R2 box -->
+        <rect x="204" y="108" width="48" height="90" rx="5" fill="var(--bg2)" stroke="var(--bd2)" stroke-width="1.5"/>
+        <text x="228" y="146" text-anchor="middle" font-size="11" fill="var(--text2)">R2</text>
+        <text id="d-r2" x="228" y="163" text-anchor="middle" font-size="10" font-weight="500" fill="var(--text)">5kΩ</text>
+        <text id="d-r2b" x="228" y="177" text-anchor="middle" font-size="9" fill="var(--text2)"></text>
+
+        <!-- Bottom wire -->
+        <line x1="228" y1="198" x2="65" y2="198" stroke="var(--bd2)" stroke-width="2"/>
+
+        <!-- GND symbol -->
+        <line x1="50" y1="210" x2="80" y2="210" stroke="var(--bd2)" stroke-width="1.5"/>
+        <line x1="55" y1="217" x2="75" y2="217" stroke="var(--bd2)" stroke-width="1"/>
+        <line x1="60" y1="224" x2="70" y2="224" stroke="var(--bd2)" stroke-width="0.7"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ══ RIGHT COLUMN ══ -->
+  <div class="right-col">
+    <div class="calc-title">מחשבון</div>
+    <div class="calc-hint">לחץ ● על הנעלם שרוצים לחשב</div>
+
+    <div class="cf-rows">
+
+      <!-- Vs -->
+      <div class="cf-row" id="row-vs" onclick="setSolve('vs')">
+        <div class="cf-radio" id="rd-vs"></div>
+        <span class="cf-name">V<sub>s</sub></span>
+        <input class="cf-input" id="i-vs" type="number" value="5" step="any" min="0" oninput="autoCalc()" onclick="event.stopPropagation()">
+        <span class="cf-unit-lbl">V</span>
+      </div>
+
+      <!-- R1 -->
+      <div class="cf-row" id="row-r1" onclick="setSolve('r1')">
+        <div class="cf-radio" id="rd-r1"></div>
+        <span class="cf-name">R<sub>1</sub></span>
+        <input class="cf-input" id="i-r1" type="number" value="5" step="any" min="0" oninput="autoCalc()" onclick="event.stopPropagation()">
+        <select class="cf-unit" id="u-r1" onchange="autoCalc()" onclick="event.stopPropagation()">
+          <option value="1">Ω</option>
+          <option value="1000" selected>kΩ</option>
+          <option value="1000000">MΩ</option>
+        </select>
+      </div>
+
+      <!-- R2 -->
+      <div class="cf-row" id="row-r2" onclick="setSolve('r2')">
+        <div class="cf-radio" id="rd-r2"></div>
+        <span class="cf-name">R<sub>2</sub></span>
+        <input class="cf-input" id="i-r2" type="number" value="5" step="any" min="0" oninput="autoCalc()" onclick="event.stopPropagation()">
+        <select class="cf-unit" id="u-r2" onchange="autoCalc()" onclick="event.stopPropagation()">
+          <option value="1">Ω</option>
+          <option value="1000" selected>kΩ</option>
+          <option value="1000000">MΩ</option>
+        </select>
+      </div>
+
+      <!-- Vout -->
+      <div class="cf-row solving" id="row-vout" onclick="setSolve('vout')">
+        <div class="cf-radio" id="rd-vout"></div>
+        <span class="cf-name">V<sub>out</sub></span>
+        <input class="cf-input" id="i-vout" type="number" placeholder="?" step="any" readonly oninput="autoCalc()" onclick="event.stopPropagation()">
+        <span class="cf-unit-lbl">V</span>
+      </div>
+
+    </div>
+
+    <!-- Result -->
+    <div class="result-box" id="res-box"></div>
+    <div class="ratio-box" id="ratio-box"></div>
+  </div>
+
+</div>
+</div>
+
+<script>
+let solving = 'vout';
+
+const ids = ['vs','r1','r2','vout'];
+
+function setSolve(id) {
+  solving = id;
+  ids.forEach(x => {
+    const row = document.getElementById('row-' + x);
+    const rd  = document.getElementById('rd-' + x);
+    const inp = document.getElementById('i-' + x);
+    if (x === id) {
+      row.classList.add('solving');
+      inp.readOnly = true;
+      inp.value = '';
+      inp.placeholder = '?';
+    } else {
+      row.classList.remove('solving');
+      inp.readOnly = false;
+      inp.placeholder = '';
+    }
+  });
+  autoCalc();
+}
+
+function gv(id) {
+  const v = parseFloat(document.getElementById('i-' + id).value);
+  return isNaN(v) ? null : v;
+}
+
+function gu(id) {
+  const s = document.getElementById('u-' + id);
+  return s ? parseFloat(s.value) : 1;
+}
+
+function fmtR(ohm) {
+  if (ohm >= 1e6)  return (ohm/1e6).toFixed(3).replace(/\.?0+$/,'') + ' MΩ';
+  if (ohm >= 1000) return (ohm/1000).toFixed(3).replace(/\.?0+$/,'') + ' kΩ';
+  return ohm.toFixed(1).replace(/\.0$/,'') + ' Ω';
+}
+
+function fmtV(v) {
+  if (Math.abs(v) < 0.001) return v.toExponential(2) + ' V';
+  if (Math.abs(v) >= 1000) return (v/1000).toFixed(3) + ' kV';
+  return v.toFixed(4).replace(/\.?0+$/,'') + ' V';
+}
+
+function setR(id, ohm) {
+  const inp = document.getElementById('i-' + id);
+  const sel = document.getElementById('u-' + id);
+  if (ohm >= 1e6)       { inp.value = +(ohm/1e6).toFixed(6);   sel.value = '1000000'; }
+  else if (ohm >= 1000) { inp.value = +(ohm/1000).toFixed(6);  sel.value = '1000'; }
+  else                  { inp.value = +ohm.toFixed(6);          sel.value = '1'; }
+}
+
+function autoCalc() {
+  const Vs   = solving === 'vs'   ? null : gv('vs');
+  const R1   = solving === 'r1'   ? null : gv('r1') * gu('r1');
+  const R2   = solving === 'r2'   ? null : gv('r2') * gu('r2');
+  const Vout = solving === 'vout' ? null : gv('vout');
+
+  const res = document.getElementById('res-box');
+  const rat = document.getElementById('ratio-box');
+  res.style.display = 'none';
+  rat.style.display = 'none';
+  res.classList.remove('err');
+
+  // Check for errors
+  const inputs = {vs: Vs, r1: R1, r2: R2, vout: Vout};
+  for (const [k, v] of Object.entries(inputs)) {
+    if (k !== solving && v === null) return; // missing input
+    if (k !== solving && v < 0) {
+      res.style.display='block'; res.classList.add('err');
+      res.textContent = 'ערכים שליליים אינם תקניים'; return;
+    }
+  }
+
+  let result = null;
+  try {
+    if (solving === 'vout') {
+      if (R1 + R2 === 0) throw 'R1 + R2 = 0';
+      result = Vs * R2 / (R1 + R2);
+      document.getElementById('i-vout').value = +result.toFixed(8);
+    } else if (solving === 'vs') {
+      if (R2 === 0) throw 'R2 = 0';
+      result = Vout * (R1 + R2) / R2;
+      document.getElementById('i-vs').value = +result.toFixed(8);
+    } else if (solving === 'r1') {
+      if (Vout === 0) throw 'V_out = 0 → R1 = ∞';
+      if (Vs - Vout < 0) throw 'V_out > Vs';
+      result = R2 * (Vs - Vout) / Vout;
+      setR('r1', result);
+    } else if (solving === 'r2') {
+      if (Vs - Vout === 0) throw 'Vs = V_out → R2 = ∞';
+      if (Vs - Vout < 0) throw 'V_out > Vs';
+      result = R1 * Vout / (Vs - Vout);
+      setR('r2', result);
+    }
+  } catch(e) {
+    res.style.display='block'; res.classList.add('err');
+    res.innerHTML = '⚠ ' + e; return;
+  }
+
+  // Read all final values
+  const fVs   = gv('vs');
+  const fR1   = gv('r1') * gu('r1');
+  const fR2   = gv('r2') * gu('r2');
+  const fVout = gv('vout');
+
+  if (fVs===null||fR1===null||fR2===null||fVout===null) return;
+
+  const ratio = fVout / fVs * 100;
+
+  res.style.display = 'block';
+  res.innerHTML =
+    '<div>V<sub>out</sub> = ' + fVs.toFixed(4).replace(/\.?0+$/,'') + 'V × ' +
+    fmtR(fR2) + ' / (' + fmtR(fR1) + ' + ' + fmtR(fR2) + ')</div>' +
+    '<div class="exp-val">= ' + fmtV(fVout) + '</div>';
+
+  rat.style.display = 'block';
+  rat.innerHTML =
+    '<span style="color:var(--text2)">יחס מתח: </span>' +
+    '<strong>' + ratio.toFixed(2) + '%</strong>' +
+    '&nbsp;&nbsp;|&nbsp;&nbsp;' +
+    '<span style="color:var(--text2)">R<sub>th</sub> = </span>' +
+    '<strong>' + fmtR(fR1 * fR2 / (fR1 + fR2)) + '</strong>';
+
+  // Update circuit diagram
+  document.getElementById('d-vs').textContent   = fmtV(fVs);
+  document.getElementById('d-r1').textContent   = fmtR(fR1);
+  document.getElementById('d-r2').textContent   = fmtR(fR2);
+  document.getElementById('d-vout').textContent = fmtV(fVout);
+}
+
+// Init
+setSolve('vout');
+autoCalc();
+</script>
+</body>
+</html>
