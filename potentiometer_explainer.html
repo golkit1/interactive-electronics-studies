@@ -66,8 +66,8 @@ h1{font-size:21px;font-weight:500;margin-bottom:3px}
 .strip-wrap{direction:ltr;padding:0 8px}
 .strip-labels-top{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:4px;direction:ltr}
 .strip-bar{position:relative;height:28px;border-radius:6px;overflow:visible;margin-bottom:4px}
-.strip-rtop{position:absolute;right:0;top:0;height:100%;border-radius:0 6px 6px 0;transition:width .1s}
-.strip-rbot{position:absolute;left:0;top:0;height:100%;border-radius:6px 0 0 6px;transition:width .1s}
+.strip-r1{position:absolute;right:0;top:0;height:100%;border-radius:0 6px 6px 0;transition:width .1s}
+.strip-r2{position:absolute;left:0;top:0;height:100%;border-radius:6px 0 0 6px;transition:width .1s}
 .strip-wiper{position:absolute;top:-6px;bottom:-6px;width:3px;background:var(--text);border-radius:2px;transform:translateX(-50%);transition:left .1s}
 .strip-wiper::before{content:'▼';position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:12px;color:var(--text)}
 .strip-labels-bot{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-top:8px}
@@ -83,48 +83,47 @@ h1{font-size:21px;font-weight:500;margin-bottom:3px}
 <div class="page">
 
 <h1>פוטנציומטר כמחלק מתח</h1>
-<p class="sub">גרור את הידית לשינוי מיקום הוייפר — הפוטנציומטר מחלק את מתח הכניסה לפי מיקום</p>
+<p class="sub">גרור את הידית לשינוי מיקום הזחלן — הפוטנציומטר מחלק את מתח הכניסה לפי מיקום</p>
 
 <!-- Vin slider -->
 <div class="vin-bar">
   <label>V<sub>in</sub> — מתח כניסה</label>
-  <input type="range" id="vin" min="1" max="12" step="0.1" value="5" oninput="upd()">
+  <input type="range" id="vin" min="1" max="12" step="0.1" value="5" oninput="upd()" ondblclick="document.getElementById('vin').value=5;upd()" title="לחץ פעמיים לאיפוס ל-5V">
   <span class="vinval" id="vin-lbl">5.0 V</span>
 </div>
 
-<!-- Schematic symbol (full width) -->
+<!-- Schematic symbol -->
 <div class="panel" style="margin-bottom:16px;align-items:stretch">
   <div class="ptitle">סמל סכמטי — פוטנציומטר</div>
-  <svg viewBox="0 0 400 182" style="width:100%;max-width:460px;display:block;margin:0 auto">
+  <svg viewBox="-10 -10 300 210" style="width:100%;max-width:300px;display:block;margin:0 auto">
     <defs>
-      <marker id="arw-pot" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="5" markerHeight="5" orient="auto">
+      <marker id="arw-pot" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="6" markerHeight="6" orient="auto">
         <path d="M0 0L8 4L0 8Z" fill="var(--text)"/>
       </marker>
     </defs>
 
-    <!-- Pot body rectangle (clean, outline only — schematic style) -->
-    <rect x="80" y="60" width="240" height="36" rx="2" fill="none" stroke="var(--text)" stroke-width="2.2"/>
+    <!-- Left wire -->
+    <line x1="28" y1="66" x2="50" y2="66" stroke="var(--text)" stroke-width="2.5"/>
+    <!-- Zigzag -->
+    <polyline points="50,66 62,42 74,90 86,42 98,90 110,42 122,90 134,66" fill="none" stroke="var(--text)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <!-- Right wire -->
+    <line x1="134" y1="66" x2="156" y2="66" stroke="var(--text)" stroke-width="2.5"/>
 
-    <!-- Terminal 1 wire — left end of track -->
-    <line x1="80" y1="78" x2="22" y2="78" stroke="var(--text)" stroke-width="2"/>
-    <circle cx="18" cy="78" r="4.5" fill="var(--blue-txt)"/>
-    <text x="18" y="96" text-anchor="middle" font-size="10" fill="var(--blue-txt)" font-weight="500">① V_in</text>
+    <!-- Terminal ① GND left -->
+    <circle cx="22" cy="66" r="7" fill="none" stroke="var(--green-txt)" stroke-width="2.5"/>
+    <text x="22" y="96" text-anchor="middle" font-size="14" font-weight="600" fill="var(--green-txt)">① GND</text>
 
-    <!-- Terminal 3 wire — right end of track -->
-    <line x1="320" y1="78" x2="378" y2="78" stroke="var(--text)" stroke-width="2"/>
-    <circle cx="382" cy="78" r="4.5" fill="var(--green-txt)"/>
-    <text x="382" y="96" text-anchor="middle" font-size="10" fill="var(--green-txt)" font-weight="500">③ GND</text>
+    <!-- Terminal ③ Vin right -->
+    <circle cx="162" cy="66" r="7" fill="none" stroke="var(--blue-txt)" stroke-width="2.5"/>
+    <text x="162" y="46" text-anchor="middle" font-size="14" font-weight="600" fill="var(--blue-txt)">③ Vin</text>
+    <text x="162" y="30" text-anchor="middle" font-size="13" fill="var(--blue-txt)">(V+)</text>
 
-    <!-- Wiper: diagonal arrow touching the bottom edge of the rectangle -->
-    <line x1="148" y1="128" x2="174" y2="97" stroke="var(--text)" stroke-width="2" marker-end="url(#arw-pot)"/>
+    <!-- Wiper arrow straight up -->
+    <line x1="92" y1="152" x2="92" y2="108" stroke="var(--text)" stroke-width="2.5" marker-end="url(#arw-pot)"/>
 
-    <!-- Junction dot where arrow meets terminal-2 wire -->
-    <circle cx="148" cy="128" r="3" fill="var(--text)"/>
-
-    <!-- Terminal 2 wire — straight down from junction -->
-    <line x1="148" y1="128" x2="148" y2="158" stroke="var(--text)" stroke-width="2"/>
-    <circle cx="148" cy="162" r="4.5" fill="var(--red)"/>
-    <text x="148" y="176" text-anchor="middle" font-size="10" fill="var(--red)" font-weight="500">② V_out (וייפר)</text>
+    <!-- Terminal ② זחלן bottom -->
+    <circle cx="92" cy="160" r="7" fill="none" stroke="var(--red)" stroke-width="2.5"/>
+    <text x="92" y="183" text-anchor="middle" font-size="14" font-weight="600" fill="var(--red)">② זחלן (V_out)</text>
   </svg>
 </div>
 
@@ -149,19 +148,19 @@ h1{font-size:21px;font-weight:500;margin-bottom:3px}
       <circle id="term-cw"  r="7" fill="var(--blue-bg)" stroke="var(--blue)" stroke-width="1.5"/>
       <circle id="term-ccw" r="7" fill="var(--green-bg)" stroke="var(--green)" stroke-width="1.5"/>
       <!-- Terminal labels -->
-      <text id="lbl-cw"  font-size="11" font-weight="500" fill="var(--blue-txt)" text-anchor="middle">V+</text>
+      <text id="lbl-cw"  font-size="11" font-weight="500" fill="var(--blue-txt)" text-anchor="middle">Vin (V+)</text>
       <text id="lbl-ccw" font-size="11" font-weight="500" fill="var(--green-txt)" text-anchor="middle">GND</text>
       <text font-size="11" fill="var(--red)" font-weight="500" text-anchor="middle" id="lbl-wiper">V_out</text>
       <!-- Knob inner circle -->
       <circle cx="130" cy="130" r="54" fill="var(--bg3)" stroke="var(--bd)" stroke-width="0.5"/>
       <!-- Position readout in knob -->
       <text id="knob-pct" x="130" y="126" text-anchor="middle" font-size="20" font-weight="500" fill="var(--text)">50%</text>
-      <text x="130" y="143" text-anchor="middle" font-size="10" fill="var(--text2)">מיקום וייפר</text>
+      <text x="130" y="143" text-anchor="middle" font-size="10" fill="var(--text2)">מיקום זחלן</text>
     </svg>
     <div style="margin-top:10px;width:100%;max-width:260px;display:flex;align-items:center;gap:8px">
       <span style="font-size:11px;color:var(--green-txt);white-space:nowrap">GND 0%</span>
       <input type="range" id="pos-slider" min="0" max="100" step="1" value="50"
-             style="flex:1;accent-color:var(--red);cursor:pointer" oninput="onSlider()">
+             style="flex:1;accent-color:var(--red);cursor:pointer" oninput="onSlider()" ondblclick="position=0.5;document.getElementById('pos-slider').value=50;upd()" title="לחץ פעמיים לאיפוס ל-50%">
       <span style="font-size:11px;color:var(--blue-txt);white-space:nowrap">100% V+</span>
     </div>
   </div>
@@ -186,30 +185,30 @@ h1{font-size:21px;font-weight:500;margin-bottom:3px}
       <!-- Top wire -->
       <line x1="28" y1="24" x2="100" y2="24" stroke="var(--blue-txt)" stroke-width="1.8"/>
 
-      <!-- Top horizontal wire to R_top -->
+      <!-- Top horizontal wire to R1 -->
       <line x1="100" y1="24" x2="100" y2="50" stroke="var(--bd2)" stroke-width="1.8"/>
 
-      <!-- R_top box -->
+      <!-- R1 box -->
       <rect x="76" y="50" width="48" height="54" rx="4" fill="var(--amber-bg)" stroke="var(--amber)" stroke-width="1.5"/>
-      <text x="100" y="72" text-anchor="middle" font-size="11" fill="var(--amber-txt)">R_top</text>
-      <text id="rtop-val" x="100" y="88" text-anchor="middle" font-size="10" font-weight="500" fill="var(--amber-txt)">5.0 kΩ</text>
+      <text x="100" y="72" text-anchor="middle" font-size="11" fill="var(--amber-txt)">R1</text>
+      <text id="r1-val" x="100" y="88" text-anchor="middle" font-size="10" font-weight="500" fill="var(--amber-txt)">5.0 kΩ</text>
 
-      <!-- Junction dot -->
-      <line x1="100" y1="104" x2="100" y2="124" stroke="var(--bd2)" stroke-width="1.8"/>
-      <circle cx="100" cy="124" r="5" fill="var(--red)"/>
+      <!-- Junction dot — midpoint between R1 and R2 -->
+      <line x1="100" y1="104" x2="100" y2="130" stroke="var(--bd2)" stroke-width="1.8"/>
+      <circle cx="100" cy="114" r="5" fill="var(--red)"/>
 
       <!-- V_out wire right -->
-      <line x1="100" y1="124" x2="208" y2="124" stroke="var(--red)" stroke-width="1.8" marker-end="url(#ar2)"/>
-      <text x="214" y="120" text-anchor="start" font-size="10" fill="var(--red)">V_out</text>
-      <text id="vout-circ" x="214" y="135" text-anchor="start" font-size="12" font-weight="500" fill="var(--red)">2.50 V</text>
+      <line x1="100" y1="114" x2="208" y2="114" stroke="var(--red)" stroke-width="1.8" marker-end="url(#ar2)"/>
+      <text x="214" y="110" text-anchor="start" font-size="10" fill="var(--red)">V_out</text>
+      <text id="vout-circ" x="214" y="125" text-anchor="start" font-size="12" font-weight="500" fill="var(--red)">2.50 V</text>
 
-      <!-- R_bot box -->
-      <rect x="76" y="124" width="48" height="54" rx="4" fill="var(--green-bg)" stroke="var(--green)" stroke-width="1.5"/>
-      <text x="100" y="146" text-anchor="middle" font-size="11" fill="var(--green-txt)">R_bot</text>
-      <text id="rbot-val" x="100" y="162" text-anchor="middle" font-size="10" font-weight="500" fill="var(--green-txt)">5.0 kΩ</text>
+      <!-- R2 box -->
+      <rect x="76" y="130" width="48" height="54" rx="4" fill="var(--green-bg)" stroke="var(--green)" stroke-width="1.5"/>
+      <text x="100" y="152" text-anchor="middle" font-size="11" fill="var(--green-txt)">R2</text>
+      <text id="r2-val" x="100" y="168" text-anchor="middle" font-size="10" font-weight="500" fill="var(--green-txt)">5.0 kΩ</text>
 
       <!-- Wire to GND -->
-      <line x1="100" y1="178" x2="100" y2="210" stroke="var(--bd2)" stroke-width="1.8"/>
+      <line x1="100" y1="184" x2="100" y2="210" stroke="var(--bd2)" stroke-width="1.8"/>
 
       <!-- Bottom wire back to source -->
       <line x1="28" y1="210" x2="100" y2="210" stroke="var(--bd2)" stroke-width="1.8"/>
@@ -222,7 +221,7 @@ h1{font-size:21px;font-weight:500;margin-bottom:3px}
 
       <!-- Formula -->
       <rect x="4" y="238" width="260" height="36" rx="5" fill="var(--blue-bg)" stroke="var(--blue)" stroke-width="0.8"/>
-      <text x="134" y="253" text-anchor="middle" font-size="10" fill="var(--blue-txt)">V_out = V_in × R_bot / (R_top + R_bot)</text>
+      <text x="134" y="253" text-anchor="middle" font-size="10" fill="var(--blue-txt)">V_out = V_in × R2 / (R1 + R2)</text>
       <text id="formula-nums" x="134" y="268" text-anchor="middle" font-size="10" font-weight="500" fill="var(--blue-txt)">= 5.0 × 5.0 / 10.0 = 2.50 V</text>
     </svg>
   </div>
@@ -236,7 +235,7 @@ h1{font-size:21px;font-weight:500;margin-bottom:3px}
   </div>
   <div class="vout-divider"></div>
   <div class="vout-item">
-    <div class="vout-lbl">מיקום וייפר</div>
+    <div class="vout-lbl">מיקום זחלן</div>
     <div class="vout-val" style="color:var(--text)" id="big-pos">50%</div>
   </div>
   <div class="vout-divider"></div>
@@ -252,17 +251,17 @@ h1{font-size:21px;font-weight:500;margin-bottom:3px}
   <div class="strip-wrap">
     <div class="strip-labels-top">
       <span style="color:var(--green-txt)">GND</span>
-      <span id="strip-mid-lbl" style="color:var(--text2)">וייפר (50%)</span>
+      <span id="strip-mid-lbl" style="color:var(--text2)">זחלן (50%)</span>
       <span style="color:var(--blue-txt)">V_in</span>
     </div>
     <div class="strip-bar" id="strip-bar">
-      <div class="strip-rbot" id="strip-rbot" style="background:var(--green-bg);border:1px solid var(--green)"></div>
-      <div class="strip-rtop" id="strip-rtop" style="background:var(--amber-bg);border:1px solid var(--amber)"></div>
+      <div class="strip-r2" id="strip-r2" style="background:var(--green-bg);border:1px solid var(--green)"></div>
+      <div class="strip-r1" id="strip-r1" style="background:var(--amber-bg);border:1px solid var(--amber)"></div>
       <div class="strip-wiper" id="strip-wiper"></div>
     </div>
     <div class="strip-labels-bot">
-      <span id="rbot-strip">R_bot: 5.0 kΩ</span>
-      <span id="rtop-strip">R_top: 5.0 kΩ</span>
+      <span id="r2-strip">R2: 5.0 kΩ</span>
+      <span id="r1-strip">R1: 5.0 kΩ</span>
     </div>
     <div class="strip-val-top" id="strip-vout">V_out = 2.50 V</div>
   </div>
@@ -272,9 +271,9 @@ h1{font-size:21px;font-weight:500;margin-bottom:3px}
 <button class="exp-btn" id="exp-btn" onclick="toggleExp()">▶ הצג הסבר</button>
 <div class="exp-box" id="exp-box">
   <strong>איך עובד הפוטנציומטר כמחלק מתח?</strong>
-  הפוטנציומטר הוא נגד עם שלוש רגליים: קצה עליון (V_in), קצה תחתון (GND), ורגל אמצעית שנקראת וייפר (V_out).
-  הוייפר מחלק את פס ההתנגדות לשניים — R_top ו-R_bot. מיקום הוייפר קובע את היחס ביניהם.
-  כשהוייפר באמצע: R_top = R_bot, ו-V_out = V_in / 2. כשהוייפר למעלה: V_out = V_in. כשלמטה: V_out = 0.
+  הפוטנציומטר הוא נגד עם שלוש רגליים: קצה עליון (V_in), קצה תחתון (GND), ורגל אמצעית שנקראת זחלן (V_out).
+  הזחלן מחלק את פס ההתנגדות לשניים — R1 ו-R2. מיקום הזחלן קובע את היחס ביניהם.
+  כשהזחלן באמצע: R1 = R2, ו-V_out = V_in / 2. כשהזחלן למעלה: V_out = V_in. כשלמטה: V_out = 0.
 </div>
 
 </div>
@@ -355,9 +354,11 @@ function drawPot(){
   const lcc = document.getElementById('lbl-ccw');
   lcc.setAttribute('x', ccwLbl.x); lcc.setAttribute('y', ccwLbl.y+4);
   const lw = document.getElementById('lbl-wiper');
-  // position V_out label away from wiper to avoid overlap
   const wLblOffset = posToXY(position, TRACK_R+34);
-  lw.setAttribute('x', wLblOffset.x); lw.setAttribute('y', wLblOffset.y+4);
+  // clamp inside viewBox (0–260)
+  const lwx = Math.min(240, Math.max(20, wLblOffset.x));
+  const lwy = Math.min(252, Math.max(12, wLblOffset.y+4));
+  lw.setAttribute('x', lwx); lw.setAttribute('y', lwy);
 
   document.getElementById('knob-pct').textContent = Math.round(position*100)+'%';
 }
@@ -365,15 +366,15 @@ function drawPot(){
 function upd(){
   const Vin = parseFloat(document.getElementById('vin').value);
   const Rtotal = 10; // kΩ
-  const Rtop = (1-position)*Rtotal; // position 0% = wiper at bottom = R_top=full
+  const Rtop = (1-position)*Rtotal; // position 0% = wiper at bottom = R1=full
   const Rbot = position*Rtotal;
   const Vout = Vin * position;
 
   document.getElementById('vin-lbl').textContent = Vin.toFixed(1)+' V';
 
   // circuit labels
-  document.getElementById('rtop-val').textContent = Rtop.toFixed(1)+' kΩ';
-  document.getElementById('rbot-val').textContent = Rbot.toFixed(1)+' kΩ';
+  document.getElementById('r1-val').textContent = Rtop.toFixed(1)+' kΩ';
+  document.getElementById('r2-val').textContent = Rbot.toFixed(1)+' kΩ';
   document.getElementById('vout-circ').textContent = Vout.toFixed(2)+' V';
   document.getElementById('formula-nums').textContent =
     '= '+Vin.toFixed(1)+' × '+Rbot.toFixed(1)+' / '+Rtotal.toFixed(1)+' = '+Vout.toFixed(2)+' V';
@@ -385,12 +386,12 @@ function upd(){
 
   // strip
   const pct = position*100;
-  document.getElementById('strip-rtop').style.width = (100-pct)+'%';
-  document.getElementById('strip-rbot').style.width = pct+'%';
+  document.getElementById('strip-r1').style.width = (100-pct)+'%';
+  document.getElementById('strip-r2').style.width = pct+'%';
   document.getElementById('strip-wiper').style.left = pct+'%';
-  document.getElementById('strip-mid-lbl').textContent = 'וייפר ('+Math.round(pct)+'%)';
-  document.getElementById('rbot-strip').textContent = 'R_bot: '+Rbot.toFixed(1)+' kΩ';
-  document.getElementById('rtop-strip').textContent = 'R_top: '+Rtop.toFixed(1)+' kΩ';
+  document.getElementById('strip-mid-lbl').textContent = 'זחלן ('+Math.round(pct)+'%)';
+  document.getElementById('r2-strip').textContent = 'R2: '+Rbot.toFixed(1)+' kΩ';
+  document.getElementById('r1-strip').textContent = 'R1: '+Rtop.toFixed(1)+' kΩ';
   document.getElementById('strip-vout').textContent = 'V_out = '+Vout.toFixed(2)+' V';
 
   document.getElementById('pos-slider').value = Math.round(position*100);
