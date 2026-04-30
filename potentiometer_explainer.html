@@ -140,6 +140,10 @@ h1{font-size:21px;font-weight:500;margin-bottom:3px}
       <path id="prog-arc" d="" fill="none" stroke-width="14" stroke-linecap="round"/>
       <!-- Knob body -->
       <circle cx="130" cy="130" r="62" fill="var(--bg2)" stroke="var(--bd2)" stroke-width="2"/>
+      <!-- R2 arc (GND side → wiper, green) -->
+      <path id="arc-r2" d="" fill="none" stroke="#3B6D11" stroke-width="14" stroke-linecap="round" opacity="0.7"/>
+      <!-- R1 arc (wiper → Vin side, amber) -->
+      <path id="arc-r1" d="" fill="none" stroke="#BA7517" stroke-width="14" stroke-linecap="round" opacity="0.7"/>
       <!-- Wiper line -->
       <line id="wiper-line" x1="130" y1="130" x2="130" y2="70" stroke="var(--text)" stroke-width="3" stroke-linecap="round"/>
       <!-- Wiper dot -->
@@ -153,9 +157,10 @@ h1{font-size:21px;font-weight:500;margin-bottom:3px}
       <text font-size="11" fill="var(--red)" font-weight="500" text-anchor="middle" id="lbl-wiper">V_out</text>
       <!-- Knob inner circle -->
       <circle cx="130" cy="130" r="54" fill="var(--bg3)" stroke="var(--bd)" stroke-width="0.5"/>
-      <!-- Position readout in knob -->
-      <text id="knob-pct" x="130" y="126" text-anchor="middle" font-size="20" font-weight="500" fill="var(--text)">50%</text>
-      <text x="130" y="143" text-anchor="middle" font-size="10" fill="var(--text2)">מיקום זחלן</text>
+      <!-- R1 / R2 live labels inside knob -->
+      <text id="knob-r2" x="130" y="114" text-anchor="middle" font-size="13" font-weight="600" fill="#3B6D11">R2: 5.0kΩ</text>
+      <text id="knob-pct" x="130" y="133" text-anchor="middle" font-size="18" font-weight="500" fill="var(--text)">50%</text>
+      <text id="knob-r1" x="130" y="152" text-anchor="middle" font-size="13" font-weight="600" fill="#BA7517">R1: 5.0kΩ</text>
     </svg>
     <div style="margin-top:10px;width:100%;max-width:260px;display:flex;align-items:center;gap:8px">
       <span style="font-size:11px;color:var(--blue-txt);white-space:nowrap">V+ 100%</span>
@@ -326,6 +331,14 @@ function drawPot(){
   document.getElementById('track-arc').setAttribute('d', makeArcPath(0,1,TRACK_R));
   document.getElementById('track-arc').setAttribute('stroke', trackColor);
 
+  // R2 arc: from 0 (GND) to wiper — green
+  const r2Path = position > 0.01 ? makeArcPath(0, position, TRACK_R) : '';
+  document.getElementById('arc-r2').setAttribute('d', r2Path);
+
+  // R1 arc: from wiper to 1 (Vin) — amber
+  const r1Path = position < 0.99 ? makeArcPath(position, 1, TRACK_R) : '';
+  document.getElementById('arc-r1').setAttribute('d', r1Path);
+
   const progPath = position > 0.01 ? makeArcPath(0, position, TRACK_R) : '';
   document.getElementById('prog-arc').setAttribute('d', progPath);
   document.getElementById('prog-arc').setAttribute('stroke', progColor);
@@ -395,6 +408,8 @@ function upd(){
   document.getElementById('strip-vout').textContent = 'V_out = '+Vout.toFixed(2)+' V';
 
   document.getElementById('pos-slider').value = Math.round(position*100);
+  document.getElementById('knob-r1').textContent = 'R1: '+Rtop.toFixed(1)+'kΩ';
+  document.getElementById('knob-r2').textContent = 'R2: '+Rbot.toFixed(1)+'kΩ';
   drawPot();
 }
 
