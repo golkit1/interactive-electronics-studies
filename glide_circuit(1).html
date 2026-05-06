@@ -114,31 +114,27 @@ canvas{display:block;width:100%;height:220px;border-radius:var(--rs)}
     <label>BPM — מהירות סיקוונסר</label>
     <input type="range" class="clk" id="s-bpm" min="40" max="240" step="1" value="120" oninput="upd()">
     <span class="val" id="v-bpm">120 BPM</span>
+    <span style="font-size:12px;color:var(--text2);min-width:44px;direction:ltr" id="v-hz">2.0 Hz</span>
   </div>
 </div>
 
-<!-- 3 metric cards -->
-<div class="metrics">
+<!-- 2 metric cards -->
+<div class="metrics" style="grid-template-columns:1fr 1fr">
   <div class="mcard">
     <div class="mcard-lbl">τ = R × C</div>
     <div class="mcard-val" style="color:var(--amber)" id="m-tau">500 ms</div>
-    <div class="mcard-sub">קבוע זמן הגליידה</div>
+    <div class="mcard-sub">זמן טעינת קבל</div>
   </div>
   <div class="mcard">
-    <div class="mcard-lbl">משך תו (¼ ב-BPM)</div>
+    <div class="mcard-lbl">משך מדרגה</div>
     <div class="mcard-val" style="color:var(--blue-txt)" id="m-note">500 ms</div>
-    <div class="mcard-sub">= 60 / BPM שניות</div>
-  </div>
-  <div class="mcard" id="ratio-card">
-    <div class="mcard-lbl">יחס τ / משך_תו</div>
-    <div class="mcard-val" id="m-ratio">1.00×</div>
-    <div class="mcard-sub" id="m-rlbl">גליידה = משך תו</div>
+    <div class="mcard-sub" id="m-hz">2.0 Hz</div>
   </div>
 </div>
 
 <!-- Ratio bar -->
 <div class="rbar-wrap">
-  <div class="rbar-lbl">גליידה: מהירה ←──────────────────────→ אינסופית</div>
+  <div class="rbar-lbl">גלייד: מהיר ←──────────────────────→ אינסופי</div>
   <div class="rbar-track"><div class="rbar-fill" id="rbar" style="width:50%"></div></div>
   <div class="rbar-marks"><span>0.1× (מהיר)</span><span>0.5×</span><span>1× (=תו)</span><span>3×</span><span>5×+</span></div>
 </div>
@@ -214,7 +210,7 @@ canvas{display:block;width:100%;height:220px;border-radius:var(--rs)}
   <div id="exp-box" style="display:none;margin-top:8px">
     <div class="ebox">
       <strong>BPM ו-τ — הקשר</strong>
-      τ (R×C) קבוע. משך תו = 60/BPM שניות. אם τ גדול ממשך התו — הגליידה לא מגיעה לפני שהתו הבא מגיע. שנה BPM ושים לב לשינוי בגרף.
+      τ (R×C) קבוע. משך מדרגה = 60/BPM שניות. אם τ גדול ממשך התו — הגליידה לא מגיעה לפני שהתו הבא מגיע. שנה BPM ושים לב לשינוי בגרף.
     </div>
   </div>
 </div>
@@ -291,7 +287,7 @@ function draw(ph){
   ctx.strokeStyle='rgba(24,95,165,.4)';ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(PL+2,PT+CH+26);ctx.lineTo(nbx-2,PT+CH+26);ctx.stroke();
   ctx.fillStyle='rgba(24,95,165,.7)';ctx.font='9px system-ui';ctx.textAlign='center';
-  ctx.fillText('תו ¼',(PL+nbx)/2,PT+CH+35);
+  ctx.fillText('מדרגה',(PL+nbx)/2,PT+CH+35);
 
   // axes
   ctx.strokeStyle=dk?'rgba(255,255,255,.18)':'rgba(0,0,0,.18)';ctx.lineWidth=1;
@@ -374,19 +370,14 @@ function upd(){
   document.getElementById('v-r').textContent=fR(R);
   document.getElementById('v-c').textContent=fC(C);
   document.getElementById('v-bpm').textContent=bpm+' BPM';
+  const hz=(bpm/60);
+  document.getElementById('v-hz').textContent=(hz%1===0?hz.toFixed(0):hz.toFixed(2))+' Hz';
+  document.getElementById('m-hz').textContent=(hz%1===0?hz.toFixed(0):hz.toFixed(2))+' Hz';
   document.getElementById('c-r').textContent=fR(R);
   document.getElementById('c-c').textContent=fC(C);
   document.getElementById('c-tau').textContent='= '+fms(tau);
   document.getElementById('m-tau').textContent=fms(tau);
   document.getElementById('m-note').textContent=(noteDur*1000).toFixed(0)+' ms';
-  document.getElementById('m-ratio').textContent=ratio.toFixed(2)+'×';
-
-  const rc=document.getElementById('ratio-card');
-  const rl=document.getElementById('m-rlbl');
-  rc.className='mcard';
-  if(ratio<0.3){rc.classList.add('good');rl.textContent='גלייד מהיר ✓';}
-  else if(ratio<1.2){rc.classList.add('mid');rl.textContent='פורטמנטו מוזיקלי';}
-  else{rc.classList.add('bad');rl.textContent='ארוך מהתו — תמיד גולש';}
 
   const lMin=Math.log(.05),lMax=Math.log(5);
   const pct=Math.min(100,Math.max(0,(Math.log(Math.max(.01,ratio))-lMin)/(lMax-lMin)*100));
