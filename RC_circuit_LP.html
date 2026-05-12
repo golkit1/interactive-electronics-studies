@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RC Filter — Low Pass Filter</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #f5f4f0; color: #2c2c2a; padding: 10px 14px; }
+  h1 { font-size: 15px; font-weight: 500; margin-bottom: 8px; }
+  .card { background: #fff; border-radius: 10px; border: 0.5px solid rgba(0,0,0,0.1); padding: 10px 12px; margin-bottom: 8px; }
+  .controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px 16px; margin-bottom: 8px; }
+  .ctrl label { font-size: 11px; color: #888; display: block; margin-bottom: 1px; }
+  .ctrl .val  { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+  input[type=range] { width: 100%; accent-color: #7F77DD; height: 14px; }
+  .tick-row { display: flex; justify-content: space-between; font-size: 9px; color: #bbb; margin-top: 1px; }
+  .divider { border: none; border-top: 0.5px solid rgba(0,0,0,0.08); margin: 6px 0; }
+  .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; }
+  .stat { background: #f5f4f0; border-radius: 6px; padding: 5px 8px; }
+  .stat .s-label { font-size: 10px; color: #888; }
+  .stat .s-val   { font-size: 13px; font-weight: 500; }
+  .pass  { color: #1D9E75; }
+  .block { color: #D85A30; }
+  .edge  { color: #BA7517; }
+  .wave-header { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
+  .wave-header .btns { display: flex; gap: 4px; }
+  .wave-header .sep  { width: 1px; height: 14px; background: #ddd; }
+  .wave-header .vval { font-size: 11px; color: #888; display: flex; align-items: center; gap: 3px; }
+  .wdot { display: inline-block; width: 14px; height: 2px; border-radius: 1px; vertical-align: middle; }
+  canvas { width: 100%; border-radius: 6px; display: block; }
+  .legend { display: flex; gap: 12px; font-size: 10px; color: #888; margin-top: 5px; }
+  .legend span { display: flex; align-items: center; gap: 4px; }
+  .dot { width: 16px; height: 2px; border-radius: 1px; display: inline-block; }
+  #circuit { width: 100%; }
+  @keyframes flow { to { stroke-dashoffset: -20; } }
+  .flow-dash { stroke-dasharray: 6 6; }
+</style>
+</head>
+<body>
+<h1>RC Filter — Low Pass Filter</h1>
+
+<div class="card">
+  <div class="controls">
+    <div class="ctrl">
+      <label>תדר f</label>
+      <div class="val" id="v-f">1,000 Hz</div>
+      <input type="range" id="sl-f" min="1" max="4.301" step="0.01" value="3">
+      <div class="tick-row"><span>10 Hz</span><span>20 kHz</span></div>
+    </div>
+    <div class="ctrl">
+      <label>נגד R</label>
+      <div class="val" id="v-r">1,000 Ω</div>
+      <input type="range" id="sl-r" min="1" max="6" step="0.01" value="3">
+      <div class="tick-row"><span>10 Ω</span><span>1 MΩ</span></div>
+    </div>
+    <div class="ctrl">
+      <label>קבל C</label>
+      <div class="val" id="v-c">100 nF</div>
+      <input type="range" id="sl-c" min="-9" max="-4" step="0.01" value="-7">
+      <div class="tick-row"><span>1 nF</span><span>10 µF</span></div>
+    </div>
+  </div>
+  <hr class="divider">
+  <div class="stats">
+    <div class="stat">
+      <div class="s-label">תדר חיתוך fc</div>
+      <div class="s-val" id="s-fc" style="color:#7F77DD">—</div>
+    </div>
+    <div class="stat">
+      <div class="s-label">עכבת קבל</div>
+      <div class="s-val" id="s-xc">—</div>
+    </div>
+    <div class="stat">
+      <div class="s-label">הנחתה</div>
+      <div class="s-val" id="s-db">—</div>
+    </div>
+    <div class="stat">
+      <div class="s-label">Vout / Vin</div>
+      <div class="s-val" id="s-ratio">—</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="wave-header">
+    <div class="btns">
+      <button id="btn-square"   onclick="setWave('square')"   style="font-size:10px;padding:3px 8px;border-radius:5px;border:1.5px solid #7F77DD;background:#EEEDFE;color:#534AB7;cursor:pointer;font-weight:500">■ מרובע</button>
+      <button id="btn-triangle" onclick="setWave('triangle')" style="font-size:10px;padding:3px 8px;border-radius:5px;border:0.5px solid #ccc;background:transparent;color:#888;cursor:pointer">▲ משולש</button>
+      <button id="btn-sine"     onclick="setWave('sine')"     style="font-size:10px;padding:3px 8px;border-radius:5px;border:0.5px solid #ccc;background:transparent;color:#888;cursor:pointer">∿ סינוס</button>
+    </div>
+    <div class="sep"></div>
+    <div class="vval" style="gap:5px">
+      <span style="font-size:10px;color:#888">מחזורים:</span>
+      <input type="range" id="sl-cycles" min="1" max="8" step="1" value="8" style="width:60px;height:12px;accent-color:#7F77DD">
+      <span id="v-cycles" style="font-size:11px;font-weight:500;min-width:14px">8</span>
+    </div>
+    <div class="sep"></div>
+    <div class="vval"><span class="wdot" style="background:#7F77DD"></span>Vin <b>5.00 V</b></div>
+    <div class="vval"><span class="wdot" style="background:#1D9E75"></span>Vout <b id="w-vout" style="color:#1D9E75">—</b></div>
+  </div>
+  <canvas id="cv-wave" height="110"></canvas>
+</div>
+
+<div class="card">
+  <canvas id="cv" height="170"></canvas>
+  <div class="legend">
+    <span><span class="dot" style="background:#7F77DD"></span>עקומת מסנן (Bode)</span>
+    <span><span class="dot" style="background:#D85A30"></span>תדר נוכחי</span>
+    <span><span class="dot" style="background:#1D9E75"></span>תדר חיתוך fc</span>
+  </div>
+</div>
+
+<div class="card" style="padding:8px 10px">
+  <svg id="circuit" viewBox="0 0 680 170">
+    <defs>
+      <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+    </defs>
+    <circle cx="44" cy="84" r="18" fill="none" stroke="#888" stroke-width="1.2"/>
+    <text x="44" y="80" text-anchor="middle" style="font-size:12px;fill:#888">~</text>
+    <text x="44" y="92" text-anchor="middle" style="font-size:9px;fill:#888">Vin</text>
+    <line x1="62" y1="84" x2="140" y2="84" stroke="#888" stroke-width="1.5"/>
+    <rect x="140" y="73" width="80" height="22" rx="4" fill="#f0efea" stroke="#ccc" stroke-width="0.8"/>
+    <text id="r-lbl" x="180" y="88" text-anchor="middle" style="font-size:11px;font-weight:500;fill:#2c2c2a">R = 1 kΩ</text>
+    <line x1="220" y1="84" x2="310" y2="84" stroke="#888" stroke-width="1.5"/>
+    <circle cx="310" cy="84" r="4" fill="#2c2c2a"/>
+    <line x1="310" y1="84" x2="310" y2="105" stroke="#888" stroke-width="1.5"/>
+    <line x1="287" y1="105" x2="333" y2="105" stroke="#2c2c2a" stroke-width="3" stroke-linecap="round"/>
+    <line x1="287" y1="115" x2="333" y2="115" stroke="#2c2c2a" stroke-width="3" stroke-linecap="round"/>
+    <text id="c-lbl" x="346" y="114" style="font-size:11px;font-weight:500;fill:#2c2c2a">C = 100 nF</text>
+    <line x1="310" y1="115" x2="310" y2="136" stroke="#888" stroke-width="1.5"/>
+    <line x1="291" y1="136" x2="329" y2="136" stroke="#2c2c2a" stroke-width="2"/>
+    <line x1="297" y1="143" x2="323" y2="143" stroke="#2c2c2a" stroke-width="1.5"/>
+    <line x1="303" y1="150" x2="317" y2="150" stroke="#2c2c2a" stroke-width="1"/>
+    <line x1="310" y1="84" x2="440" y2="84" stroke="#888" stroke-width="1.5"/>
+    <rect x="440" y="67" width="72" height="34" rx="5" fill="#f0efea" stroke="#ccc" stroke-width="0.8"/>
+    <text x="476" y="82" text-anchor="middle" style="font-size:10px;font-weight:500;fill:#888">Vout</text>
+    <text id="vout-pct" x="476" y="96" text-anchor="middle" style="font-size:12px;font-weight:500;fill:#1D9E75">—%</text>
+    <line id="flow-cap" x1="310" y1="86" x2="310" y2="103" stroke="#D85A30" stroke-width="2.5" class="flow-dash" style="animation:flow 0.5s linear infinite" marker-end="url(#arr)"/>
+    <line id="flow-out" x1="312" y1="84" x2="438" y2="84" stroke="#1D9E75" stroke-width="2.5" class="flow-dash" style="animation:flow 0.5s linear infinite" marker-end="url(#arr)"/>
+    <g id="bars-reset" style="cursor:pointer" ondblclick="resetDefaults()">
+      <text x="600" y="44" text-anchor="middle" style="font-size:10px;fill:#888">עכבת קבל</text>
+      <text x="654" y="44" text-anchor="end" style="font-size:8px;fill:#bbb;font-style:italic">דאבל-קליק לאיפוס</text>
+      <rect x="550" y="51" width="110" height="11" rx="3" fill="#fee" opacity="0.5"/>
+      <rect id="bar-xc" x="550" y="51" width="55" height="11" rx="3" fill="#D85A30" opacity="0.85"/>
+      <text x="546" y="49" text-anchor="start" style="font-size:8px;fill:#bbb">נמוכה</text>
+      <text x="664" y="49" text-anchor="end" style="font-size:8px;fill:#bbb">גבוהה</text>
+    </g>
+    <rect id="badge-bg" x="545" y="72" width="110" height="22" rx="5" fill="#E1F5EE" stroke="#1D9E75" stroke-width="0.8"/>
+    <text id="badge-txt" x="600" y="87" text-anchor="middle" style="font-size:11px;font-weight:500;fill:#085041">עובר ✓</text>
+  </svg>
+</div>
+
+<script>
+const slF=document.getElementById('sl-f'), slR=document.getElementById('sl-r'), slC=document.getElementById('sl-c');
+const slCycles=document.getElementById('sl-cycles');
+const canvas=document.getElementById('cv'), ctx=canvas.getContext('2d');
+const cvWave=document.getElementById('cv-wave'), ctxW=cvWave.getContext('2d');
+let waveType='square', waveR=1000, waveC=100e-9, waveF=100, animT=0;
+const VP=5;
+
+function setWave(type) {
+  waveType=type;
+  ['square','triangle','sine'].forEach(id=>{
+    const b=document.getElementById('btn-'+id), on=id===type;
+    b.style.border=on?'1.5px solid #7F77DD':'0.5px solid #ccc';
+    b.style.background=on?'#EEEDFE':'transparent';
+    b.style.color=on?'#534AB7':'#888';
+    b.style.fontWeight=on?'500':'400';
+  });
+}
+
+function vinSample(ph) {
+  if (waveType==='square') return (Math.sin(ph)>=0?1:-1)*VP;
+  if (waveType==='triangle') return (2/Math.PI)*Math.asin(Math.sin(ph))*VP;
+  return Math.sin(ph)*VP;
+}
+
+function drawWave(t) {
+  const dpr=window.devicePixelRatio||1, W=cvWave.offsetWidth||640, H=110;
+  cvWave.width=W*dpr; cvWave.height=H*dpr; ctxW.scale(dpr,dpr);
+  const pl=38,pr=38,pt=10,pb=18,cw=W-pl-pr,ch=H-pt-pb,mid=pt+ch/2,amp=ch/2*0.8;
+  ctxW.fillStyle='#fafaf8'; ctxW.beginPath(); ctxW.roundRect(0,0,W,H,6); ctxW.fill();
+  ctxW.strokeStyle='rgba(0,0,0,0.06)'; ctxW.lineWidth=0.5;
+  [0.5,1,1.5,2].forEach(c=>{const x=pl+(c/2)*cw; ctxW.beginPath(); ctxW.moveTo(x,pt); ctxW.lineTo(x,pt+ch); ctxW.stroke();});
+  ctxW.beginPath(); ctxW.moveTo(pl,mid); ctxW.lineTo(pl+cw,mid); ctxW.stroke();
+  ctxW.fillStyle='#bbb'; ctxW.font='8px system-ui'; ctxW.textAlign='center';
+  const dispCycles=parseInt(slCycles.value);
+  for(let i=0;i<=dispCycles;i++){
+    const lbl=i===0?'0':i===1?'T':(i+'T');
+    ctxW.fillText(lbl, pl+(i/dispCycles)*cw, pt+ch+12);
+  }
+  ctxW.textAlign='right';
+  ctxW.fillText('+'+VP+'V',pl-3,pt+(ch-amp*2)/2+3);
+  ctxW.fillText('0',pl-3,mid+3);
+  ctxW.fillText('-'+VP+'V',pl-3,pt+ch-(ch-amp*2)/2+3);
+  const fc=1/(2*Math.PI*waveR*waveC), alpha=Math.min(0.98,(2*Math.PI*fc)/(400*waveF));
+  const warmup=4, total=(warmup+dispCycles)*400, disp=warmup*400;
+  const vin=new Float32Array(total),vout=new Float32Array(total);
+  for(let i=0;i<total;i++){const ph=((i-total)/400)*2*Math.PI+t; vin[i]=vinSample(ph);}
+  vout[0]=vin[0];
+  for(let i=1;i<total;i++) vout[i]=vout[i-1]+alpha*(vin[i]-vout[i-1]);
+  const draw=(arr,col,lw)=>{
+    ctxW.strokeStyle=col; ctxW.lineWidth=lw; ctxW.beginPath();
+    const n=dispCycles*400;
+    for(let i=0;i<n;i++){const x=pl+(i/n)*cw,y=mid-(arr[disp+i]/VP)*amp; i===0?ctxW.moveTo(x,y):ctxW.lineTo(x,y);}
+    ctxW.stroke();
+  };
+  draw(vin,'#7F77DD',1.8); draw(vout,'#1D9E75',2.2);
+  let vMax=0; const n2=dispCycles*400; for(let i=0;i<n2;i++) if(Math.abs(vout[disp+i])>vMax) vMax=Math.abs(vout[disp+i]);
+  const ax=pl+cw+14;
+  ctxW.strokeStyle='#7F77DD'; ctxW.lineWidth=1;
+  ctxW.beginPath(); ctxW.moveTo(ax,mid-amp); ctxW.lineTo(ax,mid); ctxW.stroke();
+  ctxW.fillStyle='#7F77DD'; ctxW.font='8px system-ui'; ctxW.textAlign='left';
+  ctxW.fillText(VP.toFixed(1)+'V',ax+2,mid-amp/2+3);
+  const vPx=(vMax/VP)*amp;
+  if(vPx>2){
+    ctxW.strokeStyle='#1D9E75'; ctxW.lineWidth=1;
+    ctxW.beginPath(); ctxW.moveTo(ax,mid-vPx); ctxW.lineTo(ax,mid); ctxW.stroke();
+    ctxW.fillStyle='#1D9E75'; ctxW.fillText(vMax.toFixed(2)+'V',ax+2,mid-vPx/2+3);
+  }
+}
+
+function animLoop(){animT+=0.022; drawWave(animT); requestAnimationFrame(animLoop);}
+
+function fmt(v,u){
+  if(v>=1e6) return (v/1e6).toPrecision(3)+' M'+u;
+  if(v>=1e3) return (v/1e3).toPrecision(3)+' k'+u;
+  if(v>=1)   return v.toPrecision(3)+' '+u;
+  if(v>=1e-3)return (v*1e3).toPrecision(3)+' m'+u;
+  if(v>=1e-6)return (v*1e6).toPrecision(3)+' µ'+u;
+  if(v>=1e-9)return (v*1e9).toPrecision(3)+' n'+u;
+  return (v*1e12).toPrecision(3)+' p'+u;
+}
+function gain(f,R,C){const Xc=1/(2*Math.PI*f*C); return Xc/Math.sqrt(R*R+Xc*Xc);}
+
+function drawChart(f,R,C){
+  const dpr=window.devicePixelRatio||1,W=canvas.offsetWidth||640,H=170;
+  canvas.width=W*dpr; canvas.height=H*dpr; ctx.scale(dpr,dpr);
+  const pl=44,pr=12,pt=12,pb=28,cw=W-pl-pr,ch=H-pt-pb;
+  ctx.fillStyle='#fafaf8'; ctx.beginPath(); ctx.roundRect(0,0,W,H,6); ctx.fill();
+  const fc=1/(2*Math.PI*R*C),fMin=1,fMax=1e6,fLMin=0,fLMax=6;
+  const xP=fr=>pl+(Math.log10(fr)-fLMin)/(fLMax-fLMin)*cw;
+  const yP=g=>{const db=20*Math.log10(Math.max(g,1e-7)); return pt+(1-(db+60)/63)*ch;};
+  ctx.strokeStyle='rgba(0,0,0,0.07)'; ctx.lineWidth=0.5;
+  [1,10,100,1e3,1e4,1e5,1e6].forEach(fr=>{ctx.beginPath();ctx.moveTo(xP(fr),pt);ctx.lineTo(xP(fr),pt+ch);ctx.stroke();});
+  [-60,-40,-20,-10,-3,0].forEach(db=>{
+    const y=yP(Math.pow(10,db/20));
+    ctx.beginPath();ctx.moveTo(pl,y);ctx.lineTo(pl+cw,y);ctx.stroke();
+    ctx.fillStyle='#aaa';ctx.font='9px system-ui';ctx.textAlign='right';ctx.fillText(db+'dB',pl-3,y+3);
+  });
+  ctx.fillStyle='#aaa'; ctx.font='9px system-ui'; ctx.textAlign='center';
+  [[10,'10'],[100,'100'],[1e3,'1k'],[10e3,'10k'],[100e3,'100k'],[1e6,'1M']].forEach(([fr,l])=>ctx.fillText(l,xP(fr),pt+ch+11));
+  ctx.fillText('Hz',pl+cw/2,pt+ch+22);
+  const xFc=xP(Math.max(1,Math.min(1e6,fc)));
+  ctx.strokeStyle='#1D9E75'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.moveTo(xFc,pt);ctx.lineTo(xFc,pt+ch);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#1D9E75'; ctx.font='9px system-ui';
+  ctx.textAlign=xFc>pl+cw*0.7?'right':'left';
+  ctx.fillText('fc',xFc+(xFc>pl+cw*0.7?-3:3),pt+8);
+  const xF=xP(Math.max(1,Math.min(1e6,f)));
+  ctx.strokeStyle='#D85A30'; ctx.lineWidth=1.5; ctx.setLineDash([5,3]);
+  ctx.beginPath();ctx.moveTo(xF,pt);ctx.lineTo(xF,pt+ch);ctx.stroke();ctx.setLineDash([]);
+  ctx.strokeStyle='#7F77DD'; ctx.lineWidth=2.5; ctx.beginPath();
+  let first=true;
+  for(let i=0;i<=cw*2;i++){
+    const fr=Math.pow(10,fLMin+i/(cw*2)*(fLMax-fLMin)),y=yP(gain(fr,R,C)),x=pl+i/2;
+    if(y<pt-2||y>pt+ch+2){first=true;continue;}
+    first?ctx.moveTo(x,y):ctx.lineTo(x,y); first=false;
+  }
+  ctx.stroke();
+  const gNow=gain(f,R,C),yNow=yP(gNow);
+  if(yNow>=pt&&yNow<=pt+ch){
+    ctx.fillStyle='#D85A30'; ctx.beginPath(); ctx.arc(xF,yNow,5,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(xF,yNow,5,0,Math.PI*2); ctx.stroke();
+  }
+  const xA=xP(fc*5),yA=yP(gain(fc*5,R,C));
+  if(xA<pl+cw-10&&xA>pl+10&&yA>pt+14&&yA<pt+ch-6){
+    ctx.save(); ctx.translate(xA+3,yA-6);
+    ctx.rotate(Math.atan(-(ch*Math.log10(2))/(cw*(fLMax-fLMin))));
+    ctx.font='9px system-ui'; ctx.fillStyle='#7F77DD'; ctx.globalAlpha=0.65; ctx.textAlign='left';
+    ctx.fillText('−6 dB/oct  (−20 dB/dec)',0,0); ctx.restore();
+  }
+}
+
+function update(){
+  const f=Math.pow(10,parseFloat(slF.value)),R=Math.pow(10,parseFloat(slR.value)),C=Math.pow(10,parseFloat(slC.value));
+  const Xc=1/(2*Math.PI*f*C),fc=1/(2*Math.PI*R*C),g=gain(f,R,C);
+  const db=20*Math.log10(Math.max(g,1e-7)),norm=f/fc;
+  document.getElementById('v-f').textContent=fmt(f,'Hz');
+  document.getElementById('v-r').textContent=fmt(R,'Ω');
+  document.getElementById('v-c').textContent=fmt(C,'F');
+  document.getElementById('s-fc').textContent=fmt(fc,'Hz');
+  document.getElementById('s-xc').textContent=fmt(Xc,'Ω');
+  document.getElementById('s-db').textContent=db.toFixed(1)+' dB';
+  document.getElementById('r-lbl').textContent='R = '+fmt(R,'Ω');
+  document.getElementById('c-lbl').textContent='C = '+fmt(C,'F');
+  const re=document.getElementById('s-ratio');
+  re.textContent=(g*100).toFixed(1)+'%';
+  re.className='s-val '+(norm<0.5?'pass':norm>2?'block':'edge');
+  document.getElementById('vout-pct').textContent=Math.round(g*100)+'%';
+  document.getElementById('vout-pct').style.fill=g>0.7?'#1D9E75':g>0.3?'#BA7517':'#D85A30';
+  const capOp=Math.min(0.95,Math.max(0.05,1-g)),outOp=Math.min(0.95,Math.max(0.05,g));
+  document.getElementById('flow-cap').style.opacity=capOp;
+  document.getElementById('flow-cap').style.animationDuration=(0.3+(1-g)*0.5).toFixed(2)+'s';
+  document.getElementById('flow-out').style.opacity=outOp;
+  document.getElementById('flow-out').style.animationDuration=(0.3+g*0.5).toFixed(2)+'s';
+  const xcLog=Math.log10(Math.max(1,Xc));
+  document.getElementById('bar-xc').setAttribute('width',Math.min(110,Math.max(4,(xcLog/7)*110)).toFixed(1));
+  document.getElementById('bar-xc').setAttribute('fill',Xc>R?'#1D9E75':Xc<R*0.1?'#D85A30':'#BA7517');
+  const bb=document.getElementById('badge-bg'),bt=document.getElementById('badge-txt');
+  if(norm<0.5){bb.setAttribute('fill','#E1F5EE');bb.setAttribute('stroke','#1D9E75');bt.textContent='עובר ✓';bt.style.fill='#085041';}
+  else if(norm>2){bb.setAttribute('fill','#FAECE7');bb.setAttribute('stroke','#D85A30');bt.textContent='נחסם ✗';bt.style.fill='#993C1D';}
+  else{bb.setAttribute('fill','#FAEEDA');bb.setAttribute('stroke','#BA7517');bt.textContent='אזור חיתוך';bt.style.fill='#633806';}
+  waveR=R; waveC=C; waveF=f;
+  const wo=document.getElementById('w-vout');
+  wo.textContent=(VP*g).toFixed(2)+' V'; wo.style.color=g>0.7?'#1D9E75':g>0.3?'#BA7517':'#D85A30';
+  drawChart(f,R,C);
+}
+
+function resetDefaults(){
+  slF.value=Math.log10(200).toFixed(4);
+  slR.value=Math.log10(1000).toFixed(4);
+  slC.value=Math.log10(100e-9).toFixed(4);
+  update();
+}
+
+slF.addEventListener('input',update);
+slR.addEventListener('input',update);
+slC.addEventListener('input',update);
+slF.addEventListener('dblclick',()=>{ slF.value=Math.log10(200).toFixed(4); update(); });
+slR.addEventListener('dblclick',()=>{ slR.value=Math.log10(1000).toFixed(4); update(); });
+slC.addEventListener('dblclick',()=>{ slC.value=Math.log10(100e-9).toFixed(4); update(); });
+slCycles.addEventListener('input',()=>{ document.getElementById('v-cycles').textContent=slCycles.value; });
+document.getElementById('bars-reset').addEventListener('dblclick',resetDefaults);
+window.addEventListener('resize',update);
+update();
+animLoop();
+</script>
+</body>
+</html>
