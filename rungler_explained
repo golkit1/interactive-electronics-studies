@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="he" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Benjolin Rungler</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:#f6f5f0; --bg2:#eeede8; --bg3:#e5e4de;
+      --text:#1a1a18; --text2:#5a5a55; --text3:#9a9890;
+      --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+      --amber:#854F0B; --amber-bg:#FAEEDA;
+      --green:#0F6E56; --green-bg:#E1F5EE;
+      --blue:#185FA5;  --blue-bg:#E6F1FB;
+      --red:#A32D2D;   --red-bg:#FCEBEB;
+      --mono:'Courier New',Courier,monospace; --r:12px; --rs:8px;
+    }
+    @media (prefers-color-scheme:dark){
+      :root{
+        --bg:#13131a; --bg2:#1c1c24; --bg3:#24242e;
+        --text:#e8e6de; --text2:#9a9890; --text3:#5a5854;
+        --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.22);
+        --amber:#EF9F27; --amber-bg:#412402;
+        --green:#5DCAA5; --green-bg:#04342C;
+        --blue:#85B7EB;  --blue-bg:#042C53;
+        --red:#F09595;   --red-bg:#501313;
+      }
+    }
+    body{ background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:2rem 1rem 4rem; }
+    .wrap{ width:100%; max-width:740px; }
+    h1{ font-size:22px; font-weight:600; letter-spacing:-.02em; margin-bottom:4px; }
+    .sub{ font-size:13px; color:var(--text2); font-family:var(--mono); margin-bottom:2rem; }
+
+    .reg-row{ display:flex; align-items:flex-end; justify-content:center; margin-bottom:1.25rem; }
+    .cell{ display:flex; flex-direction:column; align-items:center; gap:6px; padding:1rem; background:var(--bg2); border:.5px solid var(--border); }
+    .cell:first-child{ border-radius:var(--r) 0 0 var(--r); }
+    .cell:last-child { border-radius:0 var(--r) var(--r) 0; }
+    .arrow{ display:flex; align-items:center; justify-content:center; background:var(--bg); border-top:.5px solid var(--border); border-bottom:.5px solid var(--border); height:72px; margin-bottom:38px; color:var(--text3); transition:color .15s; }
+    .arrow.w{ width:32px; font-size:18px; } .arrow.n{ width:24px; font-size:16px; }
+    .arrow.pulse{ color:var(--text); }
+    .lbl{ font-size:11px; font-family:var(--mono); color:var(--text2); }
+    .lbl.c{ color:var(--blue); } .lbl.b{ color:var(--green); } .lbl.a{ color:var(--amber); }
+    .sub2{ font-size:10px; font-family:var(--mono); color:var(--text3); text-align:center; }
+
+    .bit{ width:72px; height:72px; border-radius:var(--rs); display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:600; font-family:var(--mono); border:.5px solid var(--border); background:var(--bg); color:var(--text2); transition:background .12s,color .12s,transform .12s,border-color .12s; }
+    .bit.flash{ transform:scale(1.1); }
+    .bit.din-on{ background:var(--red-bg); color:var(--red); border-color:var(--red); }
+    .bit.on-c{ background:var(--blue-bg); color:var(--blue); border-color:var(--blue); }
+    .bit.on-b{ background:var(--green-bg); color:var(--green); border-color:var(--green); }
+    .bit.on-a{ background:var(--amber-bg); color:var(--amber); border-color:var(--amber); }
+
+    .panel{ background:var(--bg2); border-radius:var(--r); border:.5px solid var(--border); padding:1rem 1.25rem; margin-bottom:1rem; }
+    .dac-simple{ display:flex; align-items:center; gap:16px; margin-bottom:10px; flex-wrap:wrap; }
+    .dac-bit{ display:flex; flex-direction:column; align-items:center; gap:3px; }
+    .dac-bit-name{ font-size:10px; font-family:var(--mono); color:var(--text3); }
+    .dac-bit-val{ font-size:20px; font-weight:700; font-family:var(--mono); color:var(--text2); }
+    .dac-bit-val.c{ color:var(--blue); } .dac-bit-val.b{ color:var(--green); } .dac-bit-val.a{ color:var(--amber); }
+    .dac-sep{ font-size:18px; color:var(--text3); font-family:var(--mono); }
+    .dac-result{ font-size:15px; font-family:var(--mono); color:var(--text); }
+    .bar-wrap{ display:flex; align-items:center; gap:10px; margin-bottom:4px; }
+    .bar-track{ flex:1; height:22px; background:var(--bg); border-radius:11px; overflow:hidden; border:.5px solid var(--border); position:relative; }
+    .bar-fill{ height:100%; border-radius:11px; transition:width .25s ease; background:var(--blue-bg); border-right:2px solid var(--blue); }
+    .bar-ticks{ position:absolute; top:0; left:0; right:0; bottom:0; display:flex; justify-content:space-between; padding:0 1px; pointer-events:none; }
+    .bar-ticks span{ width:1px; background:var(--border); display:block; }
+    .bar-num{ font-size:20px; font-weight:700; font-family:var(--mono); min-width:32px; color:var(--text); }
+    .step-lbls{ display:flex; justify-content:space-between; font-size:10px; color:var(--text3); font-family:var(--mono); padding:0 1px; margin-top:3px; }
+
+    .collapsible{ background:var(--bg2); border-radius:var(--r); border:.5px solid var(--border); margin-bottom:1rem; overflow:hidden; }
+    .coll-header{ display:flex; align-items:center; justify-content:space-between; padding:0.75rem 1.25rem; cursor:pointer; user-select:none; }
+    .coll-header:hover{ background:var(--bg3); }
+    .coll-title{ font-size:12px; font-family:var(--mono); color:var(--text2); }
+    .coll-arrow{ font-size:12px; color:var(--text3); transition:transform .2s; }
+    .coll-arrow.open{ transform:rotate(90deg); }
+    .coll-body{ display:none; padding:0 1.25rem 1rem; border-top:.5px solid var(--border); }
+    .coll-body.open{ display:block; }
+    .xor-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding-top:0.875rem; }
+    .xor-box{ width:52px; height:52px; border-radius:var(--rs); display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; font-family:var(--mono); border:.5px solid var(--border); background:var(--bg); color:var(--text2); transition:background .1s,color .1s; }
+    .xor-box.hi{ background:var(--red-bg); color:var(--red); border-color:var(--red); }
+    .xor-box.res{ width:60px; height:60px; font-size:26px; }
+    .xor-op{ font-size:18px; color:var(--text3); font-family:var(--mono); }
+    .xor-lbl{ font-size:10px; font-family:var(--mono); color:var(--text3); text-align:center; margin-bottom:3px; }
+    .xor-table{ font-size:11px; font-family:var(--mono); color:var(--text3); line-height:1.9; margin-left:auto; }
+
+    .ctrl-row{ display:flex; align-items:center; gap:10px; margin-bottom:1.25rem; flex-wrap:wrap; }
+    button{ padding:9px 22px; font-size:14px; font-family:var(--mono); cursor:pointer; border-radius:var(--rs); border:.5px solid var(--border2); background:var(--bg2); color:var(--text); transition:background .1s,transform .1s; font-weight:500; }
+    button:hover{ background:var(--bg3); } button:active{ transform:scale(.97); }
+    button.pri{ background:var(--text); color:var(--bg); border-color:var(--text); }
+    button.pri:hover{ opacity:.85; }
+    .step-ct{ font-size:12px; color:var(--text3); font-family:var(--mono); margin-left:auto; }
+
+    .sliders{ background:var(--bg2); border-radius:var(--r); border:.5px solid var(--border); padding:1rem 1.25rem; }
+    .sg{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media(max-width:480px){ .sg{ grid-template-columns:1fr; } }
+    .sl-lbl{ font-size:12px; color:var(--text2); font-family:var(--mono); margin-bottom:6px; }
+    .sl-lbl span{ color:var(--text); font-weight:500; }
+    input[type=range]{ width:100%; accent-color:var(--text); cursor:pointer; }
+    .note{ margin-top:2rem; font-size:11px; color:var(--text3); font-family:var(--mono); text-align:center; line-height:1.9; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Benjolin — Rungler</h1>
+  <p class="sub">3-bit shift register · LSB first · R-2R DAC</p>
+
+  <div class="reg-row">
+    <div class="cell">
+      <div class="lbl">DATA IN</div>
+      <div id="din" class="bit">0</div>
+      <div class="sub2">VCO2 <span id="dv2" style="color:var(--text);font-weight:700">0</span><br>⊕ Q6 <span id="dbc" style="color:var(--text);font-weight:700">0</span></div>
+    </div>
+    <div class="arrow w" id="arr">→</div>
+    <div class="cell">
+      <div class="lbl c">Q6 &nbsp;×1</div>
+      <div id="bc" class="bit">0</div>
+      <div class="sub2">LSB</div>
+    </div>
+    <div class="arrow n">→</div>
+    <div class="cell">
+      <div class="lbl b">Q5 &nbsp;×2</div>
+      <div id="bb" class="bit">0</div>
+      <div class="sub2">&nbsp;</div>
+    </div>
+    <div class="arrow n">→</div>
+    <div class="cell">
+      <div class="lbl a">Q4 &nbsp;×4</div>
+      <div id="ba" class="bit">0</div>
+      <div class="sub2">MSB</div>
+    </div>
+    <div class="arrow w">→</div>
+    <div class="cell">
+      <div class="lbl">DAC OUT</div>
+      <div id="dv" style="font-size:26px;font-weight:700;font-family:var(--mono);color:var(--text);padding:10px 0;line-height:1">0.00V</div>
+      <div id="df" class="sub2">0 / 7 × 5V</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="dac-simple">
+      <div class="dac-bit"><div class="dac-bit-name">Q6 ×1</div><div id="fbc" class="dac-bit-val c">0</div></div>
+      <div class="dac-sep">+</div>
+      <div class="dac-bit"><div class="dac-bit-name">Q5 ×2</div><div id="fbb" class="dac-bit-val b">0</div></div>
+      <div class="dac-sep">+</div>
+      <div class="dac-bit"><div class="dac-bit-name">Q4 ×4</div><div id="fba" class="dac-bit-val a">0</div></div>
+      <div class="dac-sep">=</div>
+      <div id="fres" class="dac-result">0 / 7 × 5V = 0.00V</div>
+    </div>
+    <div class="bar-wrap">
+      <div class="bar-track">
+        <div class="bar-fill" id="bar" style="width:0%"></div>
+        <div class="bar-ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      </div>
+      <div class="bar-num" id="bn">0</div>
+    </div>
+    <div class="step-lbls"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></div>
+  </div>
+
+  <div class="collapsible">
+    <div class="coll-header" onclick="tog('xor-body','xor-arr')">
+      <span class="coll-title">XOR — איך DATA IN מחושב</span>
+      <span class="coll-arrow" id="xor-arr">▶</span>
+    </div>
+    <div class="coll-body" id="xor-body">
+      <div class="xor-row">
+        <div><div class="xor-lbl">VCO2</div><div id="xv2" class="xor-box">0</div></div>
+        <div class="xor-op">⊕</div>
+        <div><div class="xor-lbl">Q6 (feedback)</div><div id="xq6" class="xor-box">0</div></div>
+        <div class="xor-op">=</div>
+        <div><div class="xor-lbl">→ DATA IN</div><div id="xres" class="xor-box res">0</div></div>
+        <div class="xor-table">0⊕0=0<br>0⊕1=1<br>1⊕0=1<br>1⊕1=0</div>
+      </div>
+      <div style="font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:10px;line-height:1.7">XOR = ring modulator אנלוגי — מחליף בין ×+1 ל-×−1 לפי Q6.</div>
+    </div>
+  </div>
+
+  <div class="collapsible">
+    <div class="coll-header" onclick="tog('r2r-body','r2r-arr')">
+      <span class="coll-title">R-2R Ladder — איך הביטים הופכים למתח</span>
+      <span class="coll-arrow" id="r2r-arr">▶</span>
+    </div>
+    <div class="coll-body" id="r2r-body">
+      <div style="padding-top:0.875rem">
+        <svg id="svg" viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;overflow:visible"></svg>
+        <div style="font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:10px;line-height:1.7">Q6 הכי רחוק → ×1. Q4 הכי קרוב → ×4.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ctrl-row">
+    <button class="pri" onclick="doStep()">→ צעד</button>
+    <button id="btna" onclick="toggleAuto()">▶ אוטומטי</button>
+    <button onclick="resetAll()">↺ איפוס</button>
+    <span class="step-ct" id="sc">צעד 0</span>
+  </div>
+
+  <div class="sliders">
+    <div class="sg">
+      <div>
+        <div class="sl-lbl">VCO1 — <span id="v1l">3.0</span> Hz</div>
+        <input type="range" min="0.1" max="25" value="3" step="0.1"
+          oninput="f1=+this.value;document.getElementById('v1l').textContent=(+this.value).toFixed(1);refreshPending()">
+      </div>
+      <div>
+        <div class="sl-lbl">VCO2 — <span id="v2l">1.9</span> Hz</div>
+        <input type="range" min="0.1" max="20" value="1.9" step="0.1"
+          oninput="f2=+this.value;document.getElementById('v2l').textContent=(+this.value).toFixed(1);refreshPending()">
+      </div>
+      <div>
+        <div class="sl-lbl">Vcc — <span id="vccl">5</span> V</div>
+        <input type="range" min="1" max="15" value="5" step="1"
+          oninput="vcc=+this.value;document.getElementById('vccl').textContent=this.value;renderDac();drawR2R()">
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    Benjolin by Rob Hordijk · כל לחיצה = rising edge של VCO1<br>
+    DATA IN = XOR(VCO2, Q6) · Q6(×1) → Q5(×2) → Q4(×4) · Vout = sum / 7 × Vcc
+  </div>
+</div>
+
+<script>
+var f1=3, f2=1.9, vcc=5;
+var ph2=0, vco2Out=0;
+var bC=0, bB=0, bA=0;
+var pending=0, steps=0, timer=null;
+
+function computeVco2(){ ph2=(ph2+f2/f1)%1; vco2Out=ph2>=.5?1:0; }
+function calcPending(){ pending=vco2Out^bC; }
+function refreshPending(){ calcPending(); renderDin(); renderXor(); }
+
+function renderDin(){
+  var d=document.getElementById('din');
+  d.textContent=pending; d.className='bit'+(pending?' din-on':'');
+  document.getElementById('dv2').textContent=vco2Out;
+  document.getElementById('dbc').textContent=bC;
+}
+
+function renderXor(){
+  var xv2=document.getElementById('xv2'); xv2.textContent=vco2Out; xv2.className='xor-box'+(vco2Out?' hi':'');
+  var xq6=document.getElementById('xq6'); xq6.textContent=bC; xq6.className='xor-box'+(bC?' hi':'');
+  var xr=document.getElementById('xres'); xr.textContent=pending; xr.className='xor-box res'+(pending?' hi':'');
+}
+
+function renderBits(){
+  var ec=document.getElementById('bc'); ec.textContent=bC; ec.className='bit'+(bC?' on-c':'');
+  var eb=document.getElementById('bb'); eb.textContent=bB; eb.className='bit'+(bB?' on-b':'');
+  var ea=document.getElementById('ba'); ea.textContent=bA; ea.className='bit'+(bA?' on-a':'');
+}
+
+function renderDac(){
+  var num=bC*1+bB*2+bA*4, volts=num/7*vcc;
+  document.getElementById('fbc').textContent=bC;
+  document.getElementById('fbb').textContent=bB;
+  document.getElementById('fba').textContent=bA;
+  document.getElementById('fres').textContent=num+' / 7 × '+vcc+'V = '+volts.toFixed(2)+'V';
+  document.getElementById('dv').textContent=volts.toFixed(2)+'V';
+  document.getElementById('df').textContent=num+' / 7 × '+vcc+'V';
+  document.getElementById('bar').style.width=(num/7*100).toFixed(1)+'%';
+  document.getElementById('bn').textContent=num;
+}
+
+function doStep(){
+  bA=bB; bB=bC; bC=pending;
+  renderBits(); renderDac();
+  if(document.getElementById('r2r-body').classList.contains('open')) drawR2R();
+  computeVco2(); calcPending(); renderDin(); renderXor();
+  steps++;
+  document.getElementById('sc').textContent='צעד '+steps;
+  var els=[document.getElementById('bc'),document.getElementById('bb'),document.getElementById('ba')];
+  els.forEach(function(e){e.classList.add('flash');});
+  document.getElementById('arr').classList.add('pulse');
+  setTimeout(function(){
+    els.forEach(function(e){e.classList.remove('flash');});
+    document.getElementById('arr').classList.remove('pulse');
+  },180);
+}
+
+function toggleAuto(){
+  var b=document.getElementById('btna');
+  if(timer){clearInterval(timer);timer=null;b.textContent='▶ אוטומטי';}
+  else{b.textContent='⏸ עצור';timer=setInterval(doStep,700);}
+}
+
+function resetAll(){
+  if(timer){clearInterval(timer);timer=null;document.getElementById('btna').textContent='▶ אוטומטי';}
+  ph2=0;vco2Out=0;bC=0;bB=0;bA=0;steps=0;
+  calcPending();renderDin();renderXor();renderBits();renderDac();
+  if(document.getElementById('r2r-body').classList.contains('open')) drawR2R();
+  document.getElementById('sc').textContent='צעד 0';
+}
+
+function tog(bodyId,arrId){
+  var b=document.getElementById(bodyId),a=document.getElementById(arrId);
+  var open=b.classList.toggle('open'); a.classList.toggle('open',open);
+  if(open&&bodyId==='r2r-body') drawR2R();
+}
+
+function cv(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+
+function gndSym(x,y,col){
+  return '<line x1="'+(x-14)+'" y1="'+y+'" x2="'+(x+14)+'" y2="'+y+'" stroke="'+col+'" stroke-width="2"/>'+
+         '<line x1="'+(x-9)+'" y1="'+(y+6)+'" x2="'+(x+9)+'" y2="'+(y+6)+'" stroke="'+col+'" stroke-width="1.5"/>'+
+         '<line x1="'+(x-4)+'" y1="'+(y+12)+'" x2="'+(x+4)+'" y2="'+(y+12)+'" stroke="'+col+'" stroke-width="1"/>'+
+         '<text x="'+x+'" y="'+(y+26)+'" font-family="Courier New,monospace" font-size="10" text-anchor="middle" fill="'+col+'">GND</text>';
+}
+
+function drawR2R(){
+  var svg=document.getElementById('svg');
+  var ct=cv('--text'),ct2=cv('--text2'),ct3=cv('--text3'),cbg2=cv('--bg2');
+  var bits=[bC,bB,bA], bCols=[cv('--blue'),cv('--green'),cv('--amber')];
+  var labels=['Q6 ×1','Q5 ×2','Q4 ×4'];
+  var nodeY=100,srcY=20,gndY=178,voutX=600,XS=[100,290,480];
+  var s='';
+  s+='<line x1="'+XS[0]+'" y1="'+nodeY+'" x2="'+voutX+'" y2="'+nodeY+'" stroke="'+ct3+'" stroke-width="1.5"/>';
+  s+='<line x1="'+voutX+'" y1="'+nodeY+'" x2="688" y2="'+nodeY+'" stroke="'+ct+'" stroke-width="2"/>';
+  for(var i=0;i<3;i++){
+    var x=XS[i],bit=bits[i],col=bit?bCols[i]:ct3;
+    s+='<circle cx="'+x+'" cy="'+srcY+'" r="5" fill="'+col+'"/>';
+    s+='<text x="'+x+'" y="'+(srcY-10)+'" font-family="Courier New,monospace" font-size="12" text-anchor="middle" fill="'+col+'">'+(bit?(vcc+'V'):'0V')+'</text>';
+    s+='<text x="'+x+'" y="'+(srcY+18)+'" font-family="Courier New,monospace" font-size="11" text-anchor="middle" fill="'+col+'">'+labels[i]+'='+bit+'</text>';
+    s+='<line x1="'+x+'" y1="'+(srcY+5)+'" x2="'+x+'" y2="'+(nodeY-28)+'" stroke="'+col+'" stroke-width="2"/>';
+    s+='<rect x="'+(x-16)+'" y="'+(nodeY-28)+'" width="32" height="20" rx="3" fill="'+cbg2+'" stroke="'+col+'" stroke-width="1.5"/>';
+    s+='<text x="'+x+'" y="'+(nodeY-15)+'" font-family="Courier New,monospace" font-size="11" text-anchor="middle" fill="'+col+'">2R</text>';
+    s+='<line x1="'+x+'" y1="'+(nodeY-8)+'" x2="'+x+'" y2="'+nodeY+'" stroke="'+col+'" stroke-width="2"/>';
+    s+='<circle cx="'+x+'" cy="'+nodeY+'" r="4" fill="'+ct2+'"/>';
+  }
+  var rSegs=[[XS[0],XS[1]],[XS[1],XS[2]],[XS[2],voutX]];
+  for(var j=0;j<rSegs.length;j++){
+    var x1=rSegs[j][0],x2=rSegs[j][1],xm=(x1+x2)/2,rrx=xm-22,rry=nodeY-9;
+    s+='<line x1="'+x1+'" y1="'+nodeY+'" x2="'+rrx+'" y2="'+nodeY+'" stroke="'+ct3+'" stroke-width="1.5"/>';
+    s+='<rect x="'+rrx+'" y="'+rry+'" width="44" height="18" rx="3" fill="'+cbg2+'" stroke="'+ct2+'" stroke-width="1.5"/>';
+    s+='<text x="'+xm+'" y="'+(rry+12)+'" font-family="Courier New,monospace" font-size="11" text-anchor="middle" fill="'+ct2+'">R</text>';
+    s+='<line x1="'+(rrx+44)+'" y1="'+nodeY+'" x2="'+x2+'" y2="'+nodeY+'" stroke="'+ct3+'" stroke-width="1.5"/>';
+  }
+  s+='<circle cx="'+voutX+'" cy="'+nodeY+'" r="4" fill="'+ct2+'"/>';
+  s+='<line x1="'+voutX+'" y1="'+nodeY+'" x2="'+voutX+'" y2="'+(gndY-20)+'" stroke="'+ct3+'" stroke-width="1.5"/>';
+  s+='<rect x="'+(voutX-16)+'" y="'+(gndY-20)+'" width="32" height="18" rx="3" fill="'+cbg2+'" stroke="'+ct3+'" stroke-width="1.5"/>';
+  s+='<text x="'+voutX+'" y="'+(gndY-9)+'" font-family="Courier New,monospace" font-size="11" text-anchor="middle" fill="'+ct3+'">2R</text>';
+  s+=gndSym(voutX,gndY,ct3);
+  var volts=(bC+bB*2+bA*4)/7*vcc;
+  s+='<circle cx="688" cy="'+nodeY+'" r="5" fill="'+ct+'"/>';
+  s+='<text x="690" y="'+(nodeY-12)+'" font-family="Courier New,monospace" font-size="11" fill="'+ct2+'" text-anchor="start">Vout</text>';
+  s+='<text x="690" y="'+(nodeY+16)+'" font-family="Courier New,monospace" font-size="14" font-weight="700" fill="'+ct+'" text-anchor="start">'+volts.toFixed(2)+'V</text>';
+  svg.innerHTML=s;
+}
+
+calcPending(); renderDin(); renderXor(); renderBits(); renderDac();
+</script>
+</body>
+</html>
