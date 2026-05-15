@@ -91,6 +91,9 @@
     .xor-box{ width:52px; height:52px; border-radius:var(--rs); display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; font-family:var(--mono); border:.5px solid var(--border); background:var(--bg); color:var(--text2); transition:background .08s,color .08s; }
     .xor-box.hi{ background:var(--red-bg); color:var(--red); border-color:var(--red); }
     .xor-box.res{ width:60px; height:60px; font-size:26px; }
+    .xgbit{width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;font-family:var(--mono);border:.5px solid var(--border);background:var(--bg);color:var(--text2);transition:background .08s,color .08s}
+    .xgbit.hi{background:var(--green-bg);color:var(--green);border-color:var(--green)}
+    .xgbit.xgout.hi{background:var(--red-bg);color:var(--red);border-color:var(--red)}
     .xor-op{ font-size:18px; color:var(--text3); font-family:var(--mono); }
     .xor-lbl{ font-size:10px; font-family:var(--mono); color:var(--text3); text-align:center; margin-bottom:3px; }
     .xor-table{ font-size:11px; font-family:var(--mono); color:var(--text3); line-height:1.9; margin-left:auto; }
@@ -237,15 +240,36 @@
       <span class="coll-arrow" id="xor-arr">▶</span>
     </div>
     <div class="coll-body" id="xor-body">
-      <div class="xor-row">
-        <div><div class="xor-lbl">VCO2</div><div id="xv2" class="xor-box">0</div></div>
-        <div class="xor-op">⊕</div>
-        <div><div class="xor-lbl">Q6 (feedback)</div><div id="xq6" class="xor-box">0</div></div>
-        <div class="xor-op">=</div>
-        <div><div class="xor-lbl">→ DATA IN</div><div id="xres" class="xor-box res">0</div></div>
-        <div class="xor-table">0⊕0=0<br>0⊕1=1<br>1⊕0=1<br>1⊕1=0</div>
+      <div style="padding:8px 0 4px;display:flex;gap:12px;align-items:center">
+
+        <div style="display:grid;grid-template-columns:36px 1fr;gap:2px 0;align-items:center;flex:1">
+          <div style="font-size:10px;font-family:var(--mono);color:var(--amber);text-align:right;padding-right:6px">VCO2</div>
+          <canvas id="xc1" height="36" style="width:100%;height:36px;display:block;border-radius:4px;border:.5px solid var(--border)"></canvas>
+          <div style="font-size:10px;font-family:var(--mono);color:var(--blue);text-align:right;padding-right:6px;margin-top:2px">Q6</div>
+          <canvas id="xc2" height="36" style="width:100%;height:36px;display:block;border-radius:4px;border:.5px solid var(--border);margin-top:2px"></canvas>
+          <div style="font-size:10px;font-family:var(--mono);color:var(--red);text-align:right;padding-right:6px;margin-top:2px;font-weight:500">DATA</div>
+          <canvas id="xc3" height="36" style="width:100%;height:36px;display:block;border-radius:4px;border:.5px solid var(--border);margin-top:2px"></canvas>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+          <div id="xbit-v2" class="xgbit" style="width:28px;height:28px;font-size:14px">0</div>
+          <div style="font-size:13px;color:var(--text3);font-family:var(--mono)">⊕</div>
+          <div id="xbit-q6" class="xgbit" style="width:28px;height:28px;font-size:14px">0</div>
+          <div style="font-size:13px;color:var(--text3);font-family:var(--mono)">=</div>
+          <div id="xbit-out" class="xgbit xgout" style="width:28px;height:28px;font-size:14px">0</div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+          <button id="xlink-btn" onclick="toggleXLink()" style="font-size:10px;padding:4px 8px;font-family:var(--mono);border-radius:var(--rs);cursor:pointer;white-space:nowrap">⛓ עצמאי</button>
+          <div id="xsliders" style="display:flex;flex-direction:column;gap:3px">
+            <span style="font-size:10px;font-family:var(--mono);color:var(--text2)">VCO2 <span id="xv2l" style="color:var(--text);font-weight:500">2.0</span>Hz</span>
+            <input type="range" min="0.5" max="8" value="2" step="0.1" style="width:100px" oninput="xf2=+this.value;document.getElementById('xv2l').textContent=(+this.value).toFixed(1)">
+            <span style="font-size:10px;font-family:var(--mono);color:var(--text2)">Q6 <span id="xq6l" style="color:var(--text);font-weight:500">0.7</span>Hz</span>
+            <input type="range" min="0.1" max="4" value="0.7" step="0.1" style="width:100px" oninput="xfq6=+this.value;document.getElementById('xq6l').textContent=(+this.value).toFixed(1)">
+          </div>
+        </div>
+
       </div>
-      <div style="font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:10px;line-height:1.7">XOR = ring modulator אנלוגי — מחליף בין ×+1 ל-×−1 לפי Q6.</div>
     </div>
   </div>
   </div>
@@ -385,9 +409,6 @@ function updateLive(){
   var d=document.getElementById('din');
   d.textContent=pending; d.className='bit'+(pending?' din-on':'');
   if(document.getElementById('xor-body').classList.contains('open')){
-    var xv2=document.getElementById('xv2'); xv2.textContent=vco2Out; xv2.className='xor-box'+(vco2Out?' hi':'');
-    var xq6=document.getElementById('xq6'); xq6.textContent=bC; xq6.className='xor-box'+(bC?' hi':'');
-    var xr=document.getElementById('xres'); xr.textContent=pending; xr.className='xor-box res'+(pending?' hi':'');
   }
 }
 
@@ -564,7 +585,14 @@ function drawR2R(){
   var con=document.getElementById('drag-container');
   function getSecs(){ return Array.from(con.querySelectorAll('.dsec')); }
   con.addEventListener('dragstart',function(e){
-    dragSrc=e.target.closest('.dsec');
+    var t=e.target;
+    if(t.tagName==='INPUT'||t.tagName==='SELECT'||t.tagName==='BUTTON'||t.tagName==='TEXTAREA'){
+      e.preventDefault(); return;
+    }
+    if(!t.classList.contains('dhandle')){
+      e.preventDefault(); return;
+    }
+    dragSrc=t.closest('.dsec');
     if(!dragSrc) return;
     dragSrc.classList.add('dragging');
     e.dataTransfer.effectAllowed='move';
@@ -590,6 +618,84 @@ function drawR2R(){
     getSecs().forEach(function(s){s.classList.remove('drag-over');});
   });
 })();
+
+/* ── XOR wave visualizer ── */
+var xf2=2,xfq6=0.7,xph2=0,xphq6=0,xLinked=false;
+var XBUF=300,XRATE=200;
+var xb1=new Uint8Array(XBUF),xb2=new Uint8Array(XBUF),xb3=new Uint8Array(XBUF);
+var xbh=0,xlastTs=null;
+
+function toggleXLink(){
+  xLinked=!xLinked;
+  var btn=document.getElementById('xlink-btn');
+  var sl=document.getElementById('xsliders');
+  if(xLinked){
+    btn.textContent='⛓ קשור למעגל';
+    btn.style.background='var(--amber-bg)';
+    btn.style.color='var(--amber)';
+    btn.style.borderColor='var(--amber)';
+    sl.style.opacity='0.3';
+    sl.style.pointerEvents='none';
+  } else {
+    btn.textContent='⛓ עצמאי';
+    btn.style.background='';
+    btn.style.color='';
+    btn.style.borderColor='';
+    sl.style.opacity='1';
+    sl.style.pointerEvents='auto';
+  }
+}
+
+function xdrawWave(cvs,buf,col){
+  var w=cvs.offsetWidth,h=36;
+  if(!w)return;
+  cvs.width=w;cvs.height=h;
+  var ctx=cvs.getContext('2d');
+  var dk=window.matchMedia('(prefers-color-scheme:dark)').matches;
+  ctx.fillStyle=dk?'#12121a':'#f5f4f0';ctx.fillRect(0,0,w,h);
+  var HI=h*.1,LO=h*.9;
+  ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.beginPath();
+  var pY=null;
+  for(var i=0;i<XBUF;i++){
+    var x=i/(XBUF-1)*w,v=buf[(xbh+i)%XBUF],y=v?HI:LO;
+    if(pY===null)ctx.moveTo(x,y);
+    else if(y!==pY){ctx.lineTo(x,pY);ctx.lineTo(x,y);}
+    else ctx.lineTo(x,y);
+    pY=y;
+  }
+  ctx.stroke();
+}
+
+function xtick(ts){
+  if(!xlastTs)xlastTs=ts;
+  var dt=(ts-xlastTs)/1000;xlastTs=ts;
+  var steps=Math.max(1,Math.round(dt*XRATE));
+  for(var s=0;s<steps;s++){
+    var v1,v2;
+    if(xLinked){
+      /* use real simulation values */
+      v1=vco2Out;
+      v2=bC; /* Q6 from shift register */
+    } else {
+      xph2=(xph2+xf2/XRATE)%1;xphq6=(xphq6+xfq6/XRATE)%1;
+      v1=xph2>=.5?1:0; v2=xphq6>=.5?1:0;
+    }
+    xb1[xbh]=v1;xb2[xbh]=v2;xb3[xbh]=v1^v2;
+    xbh=(xbh+1)%XBUF;
+  }
+  if(document.getElementById('xor-body').classList.contains('open')){
+    var dk=window.matchMedia('(prefers-color-scheme:dark)').matches;
+    xdrawWave(document.getElementById('xc1'),xb1,dk?'#EF9F27':'#854F0B');
+    xdrawWave(document.getElementById('xc2'),xb2,dk?'#85B7EB':'#185FA5');
+    xdrawWave(document.getElementById('xc3'),xb3,dk?'#F09595':'#A32D2D');
+    var cv1=xb1[(xbh+XBUF-1)%XBUF],cv2=xb2[(xbh+XBUF-1)%XBUF],cv3=xb3[(xbh+XBUF-1)%XBUF];
+    var bv2=document.getElementById('xbit-v2');bv2.textContent=cv1;cv1?bv2.classList.add('hi'):bv2.classList.remove('hi');
+    var bq6=document.getElementById('xbit-q6');bq6.textContent=cv2;cv2?bq6.classList.add('hi'):bq6.classList.remove('hi');
+    var bo=document.getElementById('xbit-out');bo.textContent=cv3;cv3?bo.classList.add('hi'):bo.classList.remove('hi');
+  }
+  requestAnimationFrame(xtick);
+}
+requestAnimationFrame(xtick);
 
 renderBits(); renderDac();
 requestAnimationFrame(loop);
