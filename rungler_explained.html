@@ -32,6 +32,20 @@
     h1{ font-size:22px; font-weight:600; letter-spacing:-.02em; margin-bottom:4px; }
     .sub{ font-size:13px; color:var(--text2); font-family:var(--mono); margin-bottom:2rem; }
 
+    .vco2-panel{ background:var(--bg2); border-radius:var(--r); border:.5px solid var(--border); padding:1rem 1.25rem; margin-bottom:1.25rem; }
+    .vco2-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    .vco2-title{ font-size:12px; font-family:var(--mono); color:var(--text2); }
+    .vco2-state{ font-size:13px; font-weight:700; font-family:var(--mono); transition:color .05s; }
+    .vco2-state.hi{ color:var(--amber); }
+    .vco2-state.lo{ color:var(--text3); }
+    .wave-wrap{ height:60px; border-radius:var(--rs); overflow:hidden; border:.5px solid var(--border); background:var(--bg); position:relative; }
+    #wave-canvas{ display:block; width:100%; height:100%; }
+    .sample-flash{ position:absolute; top:0;left:0;right:0;bottom:0; background:var(--green); opacity:0; pointer-events:none; border-radius:var(--rs); transition:opacity .04s; }
+    .sample-flash.fire{ opacity:0.2; }
+    .vco2-footer{ display:flex; align-items:center; gap:8px; margin-top:7px; font-size:11px; font-family:var(--mono); color:var(--text3); }
+    .din-live-val{ font-size:16px; font-weight:700; font-family:var(--mono); color:var(--text2); min-width:16px; transition:color .05s; }
+    .din-live-val.hi{ color:var(--red); }
+
     .reg-row{ display:flex; align-items:flex-end; justify-content:center; margin-bottom:1.25rem; }
     .cell{ display:flex; flex-direction:column; align-items:center; gap:6px; padding:1rem; background:var(--bg2); border:.5px solid var(--border); }
     .cell:first-child{ border-radius:var(--r) 0 0 var(--r); }
@@ -42,8 +56,7 @@
     .lbl{ font-size:11px; font-family:var(--mono); color:var(--text2); }
     .lbl.c{ color:var(--blue); } .lbl.b{ color:var(--green); } .lbl.a{ color:var(--amber); }
     .sub2{ font-size:10px; font-family:var(--mono); color:var(--text3); text-align:center; }
-
-    .bit{ width:72px; height:72px; border-radius:var(--rs); display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:600; font-family:var(--mono); border:.5px solid var(--border); background:var(--bg); color:var(--text2); transition:background .12s,color .12s,transform .12s,border-color .12s; }
+    .bit{ width:72px; height:72px; border-radius:var(--rs); display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:600; font-family:var(--mono); border:.5px solid var(--border); background:var(--bg); color:var(--text2); transition:background .08s,color .08s,transform .12s,border-color .08s; }
     .bit.flash{ transform:scale(1.1); }
     .bit.din-on{ background:var(--red-bg); color:var(--red); border-color:var(--red); }
     .bit.on-c{ background:var(--blue-bg); color:var(--blue); border-color:var(--blue); }
@@ -75,7 +88,7 @@
     .coll-body{ display:none; padding:0 1.25rem 1rem; border-top:.5px solid var(--border); }
     .coll-body.open{ display:block; }
     .xor-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding-top:0.875rem; }
-    .xor-box{ width:52px; height:52px; border-radius:var(--rs); display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; font-family:var(--mono); border:.5px solid var(--border); background:var(--bg); color:var(--text2); transition:background .1s,color .1s; }
+    .xor-box{ width:52px; height:52px; border-radius:var(--rs); display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; font-family:var(--mono); border:.5px solid var(--border); background:var(--bg); color:var(--text2); transition:background .08s,color .08s; }
     .xor-box.hi{ background:var(--red-bg); color:var(--red); border-color:var(--red); }
     .xor-box.res{ width:60px; height:60px; font-size:26px; }
     .xor-op{ font-size:18px; color:var(--text3); font-family:var(--mono); }
@@ -104,11 +117,27 @@
   <h1>Benjolin — Rungler</h1>
   <p class="sub">3-bit shift register · LSB first · R-2R DAC</p>
 
+  <div class="vco2-panel">
+    <div class="vco2-header">
+      <span class="vco2-title">VCO2 — data clock (רץ תמיד)</span>
+      <span class="vco2-state lo" id="vco2-state">LOW</span>
+    </div>
+    <div class="wave-wrap">
+      <canvas id="wave-canvas"></canvas>
+      <div class="sample-flash" id="sflash"></div>
+    </div>
+    <div class="vco2-footer">
+      <span>DATA IN עכשיו:</span>
+      <span class="din-live-val" id="dlv">0</span>
+      <span id="dl-formula">= XOR( VCO2=0, Q6=0 )</span>
+    </div>
+  </div>
+
   <div class="reg-row">
     <div class="cell">
       <div class="lbl">DATA IN</div>
       <div id="din" class="bit">0</div>
-      <div class="sub2">VCO2 <span id="dv2" style="color:var(--text);font-weight:700">0</span><br>⊕ Q6 <span id="dbc" style="color:var(--text);font-weight:700">0</span></div>
+      <div class="sub2">סומפל ב-↑ clock</div>
     </div>
     <div class="arrow w" id="arr">→</div>
     <div class="cell">
@@ -156,6 +185,17 @@
     <div class="step-lbls"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></div>
   </div>
 
+  <!-- CV staircase history -->
+  <div class="panel" style="padding-bottom:0.75rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:12px;font-family:var(--mono);color:var(--text2)">CV — גל מדרגות</span>
+      <span style="font-size:11px;font-family:var(--mono);color:var(--text3)">← היסטוריה</span>
+    </div>
+    <div style="position:relative;height:120px;border-radius:var(--rs);overflow:hidden;border:.5px solid var(--border);background:var(--bg)">
+      <canvas id="cv-canvas" style="display:block;width:100%;height:100%"></canvas>
+    </div>
+  </div>
+
   <div class="collapsible">
     <div class="coll-header" onclick="tog('xor-body','xor-arr')">
       <span class="coll-title">XOR — איך DATA IN מחושב</span>
@@ -187,6 +227,14 @@
     </div>
   </div>
 
+  <!-- VCO1 auto speed — shown only in auto mode -->
+  <div id="vco1-panel" style="display:none;background:var(--bg2);border-radius:var(--r);border:.5px solid var(--border);padding:1rem 1.25rem;margin-bottom:1rem;">
+    <div class="sl-lbl" style="margin-bottom:6px">VCO1 — מהירות אוטומטי &nbsp;<span id="v1l" style="color:var(--text);font-weight:500">1.4</span> צעד/שנייה</div>
+    <input type="range" min="0.2" max="8" value="1.4" step="0.1" style="width:100%;accent-color:var(--text);cursor:pointer"
+      oninput="setAutoSpeed(+this.value);document.getElementById('v1l').textContent=(+this.value).toFixed(1)">
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:3px"><span>איטי</span><span>מהיר</span></div>
+  </div>
+
   <div class="ctrl-row">
     <button class="pri" onclick="doStep()">→ צעד</button>
     <button id="btna" onclick="toggleAuto()">▶ אוטומטי</button>
@@ -195,16 +243,11 @@
   </div>
 
   <div class="sliders">
-    <div class="sg">
-      <div>
-        <div class="sl-lbl">VCO1 — <span id="v1l">3.0</span> Hz</div>
-        <input type="range" min="0.1" max="25" value="3" step="0.1"
-          oninput="f1=+this.value;document.getElementById('v1l').textContent=(+this.value).toFixed(1);refreshPending()">
-      </div>
+    <div class="sg" style="grid-template-columns:1fr 1fr">
       <div>
         <div class="sl-lbl">VCO2 — <span id="v2l">1.9</span> Hz</div>
-        <input type="range" min="0.1" max="20" value="1.9" step="0.1"
-          oninput="f2=+this.value;document.getElementById('v2l').textContent=(+this.value).toFixed(1);refreshPending()">
+        <input type="range" min="0.1" max="10" value="1.9" step="0.1"
+          oninput="f2=+this.value;document.getElementById('v2l').textContent=(+this.value).toFixed(1)">
       </div>
       <div>
         <div class="sl-lbl">Vcc — <span id="vccl">5</span> V</div>
@@ -215,32 +258,189 @@
   </div>
 
   <div class="note">
-    Benjolin by Rob Hordijk · כל לחיצה = rising edge של VCO1<br>
-    DATA IN = XOR(VCO2, Q6) · Q6(×1) → Q5(×2) → Q4(×4) · Vout = sum / 7 × Vcc
+    Benjolin by Rob Hordijk · VCO2 רץ תמיד — לחיצה מסמפלת את ערכו באותו רגע<br>
+    DATA IN = XOR(VCO2, Q6) · Q6(×1) → Q5(×2) → Q4(×4)
   </div>
 </div>
 
 <script>
-var f1=3, f2=1.9, vcc=5;
+var f2=1.9, vcc=5, jitter=0.4;
 var ph2=0, vco2Out=0;
 var bC=0, bB=0, bA=0;
-var pending=0, steps=0, timer=null;
+var pending=0, steps=0, autoTimer=null;
+var lastTs=null;
+var autoSpeed=1.4;
 
-function computeVco2(){ ph2=(ph2+f2/f1)%1; vco2Out=ph2>=.5?1:0; }
-function calcPending(){ pending=vco2Out^bC; }
-function refreshPending(){ calcPending(); renderDin(); renderXor(); }
+var WBUF=300;
+var waveBuf=new Uint8Array(WBUF);
+var wHead=0;
 
-function renderDin(){
-  var d=document.getElementById('din');
-  d.textContent=pending; d.className='bit'+(pending?' din-on':'');
-  document.getElementById('dv2').textContent=vco2Out;
-  document.getElementById('dbc').textContent=bC;
+/* CV history — one entry per step */
+var CVBUF=64;
+var cvBuf=new Float32Array(CVBUF); /* values 0–7 */
+var cvHead=0;
+var cvCount=0;
+
+function pushCV(num){
+  cvBuf[cvHead]=num;
+  cvHead=(cvHead+1)%CVBUF;
+  if(cvCount<CVBUF) cvCount++;
 }
 
-function renderXor(){
-  var xv2=document.getElementById('xv2'); xv2.textContent=vco2Out; xv2.className='xor-box'+(vco2Out?' hi':'');
-  var xq6=document.getElementById('xq6'); xq6.textContent=bC; xq6.className='xor-box'+(bC?' hi':'');
-  var xr=document.getElementById('xres'); xr.textContent=pending; xr.className='xor-box res'+(pending?' hi':'');
+function loop(ts){
+  if(!lastTs) lastTs=ts;
+  var dt=(ts-lastTs)/1000;
+  lastTs=ts;
+  ph2=(ph2+(f2+(Math.random()-0.5)*jitter*f2*0.1)*dt)%1;
+  vco2Out=ph2>=.5?1:0;
+  /* analog noise at threshold — near 0.5 phase, noise can flip the bit */
+  var distFromThresh=Math.abs(ph2-0.5);
+  var flipProb=jitter>0?(jitter*0.08)*Math.exp(-distFromThresh*20):0;
+  if(Math.random()<flipProb) vco2Out=1-vco2Out;
+  pending=vco2Out^bC;
+  waveBuf[wHead]=vco2Out;
+  wHead=(wHead+1)%WBUF;
+  drawWave();
+  updateLive();
+  requestAnimationFrame(loop);
+}
+
+function drawWave(){
+  var cvs=document.getElementById('wave-canvas');
+  var w=cvs.offsetWidth, h=cvs.offsetHeight;
+  if(cvs.width!==w||cvs.height!==h){cvs.width=w;cvs.height=h;}
+  var ctx=cvs.getContext('2d');
+  var dk=window.matchMedia('(prefers-color-scheme:dark)').matches;
+  ctx.fillStyle=dk?'#13131a':'#f6f5f0';
+  ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle=dk?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)';
+  ctx.lineWidth=.5;
+  ctx.beginPath();ctx.moveTo(0,h*.5);ctx.lineTo(w,h*.5);ctx.stroke();
+  var col=dk?'#EF9F27':'#854F0B';
+  ctx.strokeStyle=col; ctx.lineWidth=2;
+  ctx.beginPath();
+  var pY=null;
+  for(var i=0;i<WBUF;i++){
+    var x=i/(WBUF-1)*w;
+    var v=waveBuf[(wHead+i)%WBUF];
+    var y=v?h*.15:h*.85;
+    if(pY===null){ctx.moveTo(x,y);}
+    else if(y!==pY){ctx.lineTo(x,pY);ctx.lineTo(x,y);}
+    else{ctx.lineTo(x,y);}
+    pY=y;
+  }
+  ctx.stroke();
+  ctx.fillStyle=col;
+  ctx.beginPath();ctx.arc(w-2,vco2Out?h*.15:h*.85,3,0,Math.PI*2);ctx.fill();
+}
+
+function updateLive(){
+  var st=document.getElementById('vco2-state');
+  st.textContent=vco2Out?'HIGH':'LOW';
+  st.className='vco2-state '+(vco2Out?'hi':'lo');
+  var dlv=document.getElementById('dlv');
+  dlv.textContent=pending;
+  dlv.className='din-live-val'+(pending?' hi':'');
+  document.getElementById('dl-formula').textContent='= XOR( VCO2='+vco2Out+', Q6='+bC+' )';
+  var d=document.getElementById('din');
+  d.textContent=pending; d.className='bit'+(pending?' din-on':'');
+  if(document.getElementById('xor-body').classList.contains('open')){
+    var xv2=document.getElementById('xv2'); xv2.textContent=vco2Out; xv2.className='xor-box'+(vco2Out?' hi':'');
+    var xq6=document.getElementById('xq6'); xq6.textContent=bC; xq6.className='xor-box'+(bC?' hi':'');
+    var xr=document.getElementById('xres'); xr.textContent=pending; xr.className='xor-box res'+(pending?' hi':'');
+  }
+}
+
+function doStep(){
+  var sf=document.getElementById('sflash');
+  sf.classList.add('fire');
+  setTimeout(function(){sf.classList.remove('fire');},120);
+  bA=bB; bB=bC; bC=pending;
+  renderBits(); renderDac();
+  if(document.getElementById('r2r-body').classList.contains('open')) drawR2R();
+  steps++;
+  document.getElementById('sc').textContent='צעד '+steps;
+  var els=[document.getElementById('bc'),document.getElementById('bb'),document.getElementById('ba')];
+  els.forEach(function(e){e.classList.add('flash');});
+  document.getElementById('arr').classList.add('pulse');
+  setTimeout(function(){
+    els.forEach(function(e){e.classList.remove('flash');});
+    document.getElementById('arr').classList.remove('pulse');
+  },180);
+}
+
+function setAutoSpeed(v){
+  autoSpeed=v;
+  if(autoTimer){clearInterval(autoTimer);autoTimer=setInterval(doStep,1000/autoSpeed);}
+}
+
+function toggleAuto(){
+  var b=document.getElementById('btna');
+  var panel=document.getElementById('vco1-panel');
+  if(autoTimer){
+    clearInterval(autoTimer);autoTimer=null;
+    b.textContent='▶ אוטומטי';
+    panel.style.display='none';
+  } else {
+    b.textContent='⏸ עצור';
+    panel.style.display='block';
+    autoTimer=setInterval(doStep,1000/autoSpeed);
+  }
+}
+
+function resetAll(){
+  if(autoTimer){clearInterval(autoTimer);autoTimer=null;document.getElementById('btna').textContent='▶ אוטומטי';document.getElementById('vco1-panel').style.display='none';}
+  ph2=0;bC=0;bB=0;bA=0;steps=0;
+  waveBuf=new Uint8Array(WBUF);
+  cvBuf=new Float32Array(CVBUF); cvHead=0; cvCount=0;
+  renderBits();renderDac();
+  if(document.getElementById('r2r-body').classList.contains('open')) drawR2R();
+  document.getElementById('sc').textContent='צעד 0';
+}
+
+function drawCvWave(){
+  var cvs=document.getElementById('cv-canvas');
+  var w=cvs.offsetWidth, h=cvs.offsetHeight;
+  if(cvs.width!==w||cvs.height!==h){cvs.width=w;cvs.height=h;}
+  var ctx=cvs.getContext('2d');
+  var dk=window.matchMedia('(prefers-color-scheme:dark)').matches;
+  ctx.fillStyle=dk?'#13131a':'#f6f5f0';
+  ctx.fillRect(0,0,w,h);
+  /* 8 levels with padding top and bottom */
+  var PAD=0.08;
+  for(var lv=0;lv<=7;lv++){
+    var y=h*(1-PAD)-(lv/7)*h*(1-2*PAD);
+    ctx.strokeStyle=dk?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)';
+    ctx.lineWidth=.5;
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();
+    ctx.fillStyle=dk?'rgba(255,255,255,0.3)':'rgba(0,0,0,0.35)';
+    ctx.font='10px Courier New,monospace';
+    ctx.fillText(lv,4,y-3);
+  }
+  if(cvCount===0) return;
+  var n=Math.min(cvCount,CVBUF);
+  var stepW=w/n;
+  var col=dk?'#85B7EB':'#185FA5';
+  var fillCol=dk?'rgba(133,183,235,0.12)':'rgba(24,95,165,0.08)';
+  ctx.fillStyle=fillCol;
+  ctx.strokeStyle=col;
+  ctx.lineWidth=2;
+  ctx.beginPath();
+  for(var i=0;i<n;i++){
+    var idx=(cvHead-n+i+CVBUF)%CVBUF;
+    var val=cvBuf[idx];
+    var x=i*stepW;
+    var y2=h*(1-PAD)-(val/7)*h*(1-2*PAD);
+    if(i===0) ctx.moveTo(x,y2);
+    else ctx.lineTo(x,y2);
+    if(i<n-1) ctx.lineTo((i+1)*stepW,y2);
+  }
+  ctx.stroke();
+  ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.closePath();ctx.fill();
+  var last=cvBuf[(cvHead-1+CVBUF)%CVBUF];
+  var dotY=h*(1-PAD)-(last/7)*h*(1-2*PAD);
+  ctx.fillStyle=col;
+  ctx.beginPath();ctx.arc(w-stepW/2,dotY,5,0,Math.PI*2);ctx.fill();
 }
 
 function renderBits(){
@@ -259,36 +459,8 @@ function renderDac(){
   document.getElementById('df').textContent=num+' / 7 × '+vcc+'V';
   document.getElementById('bar').style.width=(num/7*100).toFixed(1)+'%';
   document.getElementById('bn').textContent=num;
-}
-
-function doStep(){
-  bA=bB; bB=bC; bC=pending;
-  renderBits(); renderDac();
-  if(document.getElementById('r2r-body').classList.contains('open')) drawR2R();
-  computeVco2(); calcPending(); renderDin(); renderXor();
-  steps++;
-  document.getElementById('sc').textContent='צעד '+steps;
-  var els=[document.getElementById('bc'),document.getElementById('bb'),document.getElementById('ba')];
-  els.forEach(function(e){e.classList.add('flash');});
-  document.getElementById('arr').classList.add('pulse');
-  setTimeout(function(){
-    els.forEach(function(e){e.classList.remove('flash');});
-    document.getElementById('arr').classList.remove('pulse');
-  },180);
-}
-
-function toggleAuto(){
-  var b=document.getElementById('btna');
-  if(timer){clearInterval(timer);timer=null;b.textContent='▶ אוטומטי';}
-  else{b.textContent='⏸ עצור';timer=setInterval(doStep,700);}
-}
-
-function resetAll(){
-  if(timer){clearInterval(timer);timer=null;document.getElementById('btna').textContent='▶ אוטומטי';}
-  ph2=0;vco2Out=0;bC=0;bB=0;bA=0;steps=0;
-  calcPending();renderDin();renderXor();renderBits();renderDac();
-  if(document.getElementById('r2r-body').classList.contains('open')) drawR2R();
-  document.getElementById('sc').textContent='צעד 0';
+  pushCV(num);
+  drawCvWave();
 }
 
 function tog(bodyId,arrId){
@@ -309,7 +481,7 @@ function gndSym(x,y,col){
 function drawR2R(){
   var svg=document.getElementById('svg');
   var ct=cv('--text'),ct2=cv('--text2'),ct3=cv('--text3'),cbg2=cv('--bg2');
-  var bits=[bC,bB,bA], bCols=[cv('--blue'),cv('--green'),cv('--amber')];
+  var bits=[bC,bB,bA],bCols=[cv('--blue'),cv('--green'),cv('--amber')];
   var labels=['Q6 ×1','Q5 ×2','Q4 ×4'];
   var nodeY=100,srcY=20,gndY=178,voutX=600,XS=[100,290,480];
   var s='';
@@ -346,7 +518,8 @@ function drawR2R(){
   svg.innerHTML=s;
 }
 
-calcPending(); renderDin(); renderXor(); renderBits(); renderDac();
+renderBits(); renderDac();
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
