@@ -74,8 +74,8 @@
     .bar-wrap{ display:flex; align-items:center; gap:10px; margin-bottom:4px; }
     .bar-track{ flex:1; height:22px; background:var(--bg); border-radius:11px; overflow:hidden; border:.5px solid var(--border); position:relative; }
     .bar-fill{ height:100%; border-radius:11px; transition:width .25s ease; background:var(--blue-bg); border-right:2px solid var(--blue); }
-    .bar-ticks{ position:absolute; top:0; left:0; right:0; bottom:0; display:flex; justify-content:space-between; padding:0 1px; pointer-events:none; }
-    .bar-ticks span{ width:1px; background:var(--border); display:block; }
+    .bar-ticks{ position:absolute; top:0; left:0; right:0; bottom:0; pointer-events:none; }
+    .bar-ticks span{ position:absolute; top:0; bottom:0; width:1px; background:var(--border); display:block; transform:translateX(-50%); }
     .bar-num{ font-size:20px; font-weight:700; font-family:var(--mono); min-width:32px; color:var(--text); }
     .step-lbls{ display:flex; justify-content:space-between; font-size:10px; color:var(--text3); font-family:var(--mono); padding:0 1px; margin-top:3px; }
 
@@ -108,6 +108,17 @@
     .sl-lbl{ font-size:12px; color:var(--text2); font-family:var(--mono); margin-bottom:6px; }
     .sl-lbl span{ color:var(--text); font-weight:500; }
     input[type=range]{ width:100%; accent-color:var(--text); cursor:pointer; }
+    .dsec{ position:relative; }
+    .dsec.drag-over{ outline:2px dashed var(--amber); border-radius:var(--r); }
+    .dsec.dragging{ opacity:0.4; }
+    .dhandle{
+      position:absolute; left:-22px; top:50%; transform:translateY(-50%);
+      font-size:16px; color:var(--text3); cursor:grab; user-select:none;
+      padding:4px 2px; line-height:1;
+    }
+    .dhandle:active{ cursor:grabbing; }
+    @media(max-width:600px){ .dhandle{ display:none; } }
+
     .note{ margin-top:2rem; font-size:11px; color:var(--text3); font-family:var(--mono); text-align:center; line-height:1.9; }
   </style>
 </head>
@@ -117,6 +128,10 @@
   <h1>Benjolin — Rungler</h1>
   <p class="sub">3-bit shift register · LSB first · R-2R DAC</p>
 
+  <div id="drag-container">
+
+  <div class="dsec" id="sec-vco2" draggable="true">
+  <div class="dhandle" title="גרור">⠿</div>
   <div class="vco2-panel">
     <div class="vco2-header">
       <span class="vco2-title">VCO2 — data clock (רץ תמיד)</span>
@@ -132,7 +147,10 @@
       <span id="dl-formula">= XOR( VCO2=0, Q6=0 )</span>
     </div>
   </div>
+  </div>
 
+  <div class="dsec" id="sec-register" draggable="true">
+  <div class="dhandle" title="גרור">⠿</div>
   <div class="reg-row">
     <div class="cell">
       <div class="lbl">DATA IN</div>
@@ -141,8 +159,8 @@
     </div>
     <div class="arrow w" id="arr">→</div>
     <div class="cell">
-      <div class="lbl c">Q6 &nbsp;×1</div>
-      <div id="bc" class="bit">0</div>
+      <div class="lbl a">Q4 &nbsp;×1</div>
+      <div id="ba" class="bit">0</div>
       <div class="sub2">LSB</div>
     </div>
     <div class="arrow n">→</div>
@@ -153,9 +171,9 @@
     </div>
     <div class="arrow n">→</div>
     <div class="cell">
-      <div class="lbl a">Q4 &nbsp;×4</div>
-      <div id="ba" class="bit">0</div>
-      <div class="sub2">MSB</div>
+      <div class="lbl c">Q6 &nbsp;×4</div>
+      <div id="bc" class="bit">0</div>
+      <div class="sub2">MSB + feedback</div>
     </div>
     <div class="arrow w">→</div>
     <div class="cell">
@@ -164,28 +182,42 @@
       <div id="df" class="sub2">0 / 7 × 5V</div>
     </div>
   </div>
+  </div>
 
+  <div class="dsec" id="sec-dac" draggable="true">
+  <div class="dhandle" title="גרור">⠿</div>
   <div class="panel">
     <div class="dac-simple">
-      <div class="dac-bit"><div class="dac-bit-name">Q6 ×1</div><div id="fbc" class="dac-bit-val c">0</div></div>
+      <div class="dac-bit"><div class="dac-bit-name">Q4 ×1</div><div id="fba" class="dac-bit-val a">0</div></div>
       <div class="dac-sep">+</div>
       <div class="dac-bit"><div class="dac-bit-name">Q5 ×2</div><div id="fbb" class="dac-bit-val b">0</div></div>
       <div class="dac-sep">+</div>
-      <div class="dac-bit"><div class="dac-bit-name">Q4 ×4</div><div id="fba" class="dac-bit-val a">0</div></div>
+      <div class="dac-bit"><div class="dac-bit-name">Q6 ×4</div><div id="fbc" class="dac-bit-val c">0</div></div>
       <div class="dac-sep">=</div>
       <div id="fres" class="dac-result">0 / 7 × 5V = 0.00V</div>
     </div>
     <div class="bar-wrap">
       <div class="bar-track">
         <div class="bar-fill" id="bar" style="width:0%"></div>
-        <div class="bar-ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="bar-ticks">
+          <span style="left:0%"></span>
+          <span style="left:14.286%"></span>
+          <span style="left:28.571%"></span>
+          <span style="left:42.857%"></span>
+          <span style="left:57.143%"></span>
+          <span style="left:71.429%"></span>
+          <span style="left:85.714%"></span>
+          <span style="left:100%"></span>
+        </div>
       </div>
       <div class="bar-num" id="bn">0</div>
     </div>
     <div class="step-lbls"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></div>
   </div>
+  </div>
 
-  <!-- CV staircase history -->
+  <div class="dsec" id="sec-cv" draggable="true">
+  <div class="dhandle" title="גרור">⠿</div>
   <div class="panel" style="padding-bottom:0.75rem">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <span style="font-size:12px;font-family:var(--mono);color:var(--text2)">CV — גל מדרגות</span>
@@ -195,7 +227,10 @@
       <canvas id="cv-canvas" style="display:block;width:100%;height:100%"></canvas>
     </div>
   </div>
+  </div>
 
+  <div class="dsec" id="sec-xor" draggable="true">
+  <div class="dhandle" title="גרור">⠿</div>
   <div class="collapsible">
     <div class="coll-header" onclick="tog('xor-body','xor-arr')">
       <span class="coll-title">XOR — איך DATA IN מחושב</span>
@@ -213,7 +248,10 @@
       <div style="font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:10px;line-height:1.7">XOR = ring modulator אנלוגי — מחליף בין ×+1 ל-×−1 לפי Q6.</div>
     </div>
   </div>
+  </div>
 
+  <div class="dsec" id="sec-r2r" draggable="true">
+  <div class="dhandle" title="גרור">⠿</div>
   <div class="collapsible">
     <div class="coll-header" onclick="tog('r2r-body','r2r-arr')">
       <span class="coll-title">R-2R Ladder — איך הביטים הופכים למתח</span>
@@ -222,12 +260,15 @@
     <div class="coll-body" id="r2r-body">
       <div style="padding-top:0.875rem">
         <svg id="svg" viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;overflow:visible"></svg>
-        <div style="font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:10px;line-height:1.7">Q6 הכי רחוק → ×1. Q4 הכי קרוב → ×4.</div>
+        <div style="font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:10px;line-height:1.7">Q4 הכי חדש → ×1 (LSB). Q6 הכי ישן → ×4 (MSB).</div>
       </div>
     </div>
   </div>
+  </div>
 
-  <!-- VCO1 auto speed — shown only in auto mode -->
+  </div><!-- end drag-container -->
+
+  <!-- VCO1 auto speed -->
   <div id="vco1-panel" style="display:none;background:var(--bg2);border-radius:var(--r);border:.5px solid var(--border);padding:1rem 1.25rem;margin-bottom:1rem;">
     <div class="sl-lbl" style="margin-bottom:6px">VCO1 — מהירות אוטומטי &nbsp;<span id="v1l" style="color:var(--text);font-weight:500">1.4</span> צעד/שנייה</div>
     <input type="range" min="0.2" max="8" value="1.4" step="0.1" style="width:100%;accent-color:var(--text);cursor:pointer"
@@ -259,7 +300,7 @@
 
   <div class="note">
     Benjolin by Rob Hordijk · VCO2 רץ תמיד — לחיצה מסמפלת את ערכו באותו רגע<br>
-    DATA IN = XOR(VCO2, Q6) · Q6(×1) → Q5(×2) → Q4(×4)
+    DATA IN = XOR(VCO2, Q6) · Q6(×4, MSB) → Q5(×2) → Q4(×1, LSB)
   </div>
 </div>
 
@@ -291,13 +332,12 @@ function loop(ts){
   if(!lastTs) lastTs=ts;
   var dt=(ts-lastTs)/1000;
   lastTs=ts;
-  ph2=(ph2+(f2+(Math.random()-0.5)*jitter*f2*0.1)*dt)%1;
+  ph2=(ph2+f2*dt)%1;
   vco2Out=ph2>=.5?1:0;
-  /* analog noise at threshold — near 0.5 phase, noise can flip the bit */
+  /* jitter רק בנקודת הסמפול — לא משפיע על הגל הויזואלי */
   var distFromThresh=Math.abs(ph2-0.5);
-  var flipProb=jitter>0?(jitter*0.08)*Math.exp(-distFromThresh*20):0;
-  if(Math.random()<flipProb) vco2Out=1-vco2Out;
-  pending=vco2Out^bC;
+  var flipProb=jitter>0?(jitter*0.04)*Math.exp(-distFromThresh*30):0;
+  pending=(Math.random()<flipProb)?(1-(vco2Out^bC)):(vco2Out^bC);
   waveBuf[wHead]=vco2Out;
   wHead=(wHead+1)%WBUF;
   drawWave();
@@ -355,12 +395,12 @@ function doStep(){
   var sf=document.getElementById('sflash');
   sf.classList.add('fire');
   setTimeout(function(){sf.classList.remove('fire');},120);
-  bA=bB; bB=bC; bC=pending;
+  bC=bB; bB=bA; bA=pending;
   renderBits(); renderDac();
   if(document.getElementById('r2r-body').classList.contains('open')) drawR2R();
   steps++;
   document.getElementById('sc').textContent='צעד '+steps;
-  var els=[document.getElementById('bc'),document.getElementById('bb'),document.getElementById('ba')];
+  var els=[document.getElementById('ba'),document.getElementById('bb'),document.getElementById('bc')];
   els.forEach(function(e){e.classList.add('flash');});
   document.getElementById('arr').classList.add('pulse');
   setTimeout(function(){
@@ -450,13 +490,13 @@ function renderBits(){
 }
 
 function renderDac(){
-  var num=bC*1+bB*2+bA*4, volts=num/7*vcc;
+  var num=bC*4+bB*2+bA*1, volts=num/7*vcc;
   document.getElementById('fbc').textContent=bC;
   document.getElementById('fbb').textContent=bB;
   document.getElementById('fba').textContent=bA;
-  document.getElementById('fres').textContent=num+' / 7 × '+vcc+'V = '+volts.toFixed(2)+'V';
+  document.getElementById('fres').textContent='('+num+'/7) × '+vcc+'V = '+volts.toFixed(2)+'V';
   document.getElementById('dv').textContent=volts.toFixed(2)+'V';
-  document.getElementById('df').textContent=num+' / 7 × '+vcc+'V';
+  document.getElementById('df').textContent='('+num+'/7) × '+vcc+'V';
   document.getElementById('bar').style.width=(num/7*100).toFixed(1)+'%';
   document.getElementById('bn').textContent=num;
   pushCV(num);
@@ -482,7 +522,7 @@ function drawR2R(){
   var svg=document.getElementById('svg');
   var ct=cv('--text'),ct2=cv('--text2'),ct3=cv('--text3'),cbg2=cv('--bg2');
   var bits=[bC,bB,bA],bCols=[cv('--blue'),cv('--green'),cv('--amber')];
-  var labels=['Q6 ×1','Q5 ×2','Q4 ×4'];
+  var labels=['Q6 ×4','Q5 ×2','Q4 ×1'];
   var nodeY=100,srcY=20,gndY=178,voutX=600,XS=[100,290,480];
   var s='';
   s+='<line x1="'+XS[0]+'" y1="'+nodeY+'" x2="'+voutX+'" y2="'+nodeY+'" stroke="'+ct3+'" stroke-width="1.5"/>';
@@ -511,12 +551,45 @@ function drawR2R(){
   s+='<rect x="'+(voutX-16)+'" y="'+(gndY-20)+'" width="32" height="18" rx="3" fill="'+cbg2+'" stroke="'+ct3+'" stroke-width="1.5"/>';
   s+='<text x="'+voutX+'" y="'+(gndY-9)+'" font-family="Courier New,monospace" font-size="11" text-anchor="middle" fill="'+ct3+'">2R</text>';
   s+=gndSym(voutX,gndY,ct3);
-  var volts=(bC+bB*2+bA*4)/7*vcc;
+  var volts=(bC*4+bB*2+bA*1)/7*vcc;
   s+='<circle cx="688" cy="'+nodeY+'" r="5" fill="'+ct+'"/>';
   s+='<text x="690" y="'+(nodeY-12)+'" font-family="Courier New,monospace" font-size="11" fill="'+ct2+'" text-anchor="start">Vout</text>';
   s+='<text x="690" y="'+(nodeY+16)+'" font-family="Courier New,monospace" font-size="14" font-weight="700" fill="'+ct+'" text-anchor="start">'+volts.toFixed(2)+'V</text>';
   svg.innerHTML=s;
 }
+
+/* ── drag & drop sections ───────────────────────── */
+(function(){
+  var dragSrc=null;
+  var con=document.getElementById('drag-container');
+  function getSecs(){ return Array.from(con.querySelectorAll('.dsec')); }
+  con.addEventListener('dragstart',function(e){
+    dragSrc=e.target.closest('.dsec');
+    if(!dragSrc) return;
+    dragSrc.classList.add('dragging');
+    e.dataTransfer.effectAllowed='move';
+  });
+  con.addEventListener('dragend',function(){
+    getSecs().forEach(function(s){s.classList.remove('dragging','drag-over');});
+    dragSrc=null;
+  });
+  con.addEventListener('dragover',function(e){
+    e.preventDefault();
+    var over=e.target.closest('.dsec');
+    if(!over||over===dragSrc) return;
+    getSecs().forEach(function(s){s.classList.remove('drag-over');});
+    over.classList.add('drag-over');
+  });
+  con.addEventListener('drop',function(e){
+    e.preventDefault();
+    var over=e.target.closest('.dsec');
+    if(!over||over===dragSrc||!dragSrc) return;
+    var secs=getSecs();
+    var ai=secs.indexOf(dragSrc), bi=secs.indexOf(over);
+    if(ai<bi) over.after(dragSrc); else over.before(dragSrc);
+    getSecs().forEach(function(s){s.classList.remove('drag-over');});
+  });
+})();
 
 renderBits(); renderDac();
 requestAnimationFrame(loop);
