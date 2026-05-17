@@ -74,7 +74,7 @@
     /* ── Main grid ── */
     .main-grid {
       display: grid;
-      grid-template-columns: 230px 1fr;
+      grid-template-columns: 1fr 265px;
       gap: 2rem;
       align-items: start;
       margin-bottom: 1.5rem;
@@ -89,12 +89,6 @@
     .circuit-wrap svg {
       display: block;
       overflow: visible;
-    }
-
-    @keyframes flowDash { to { stroke-dashoffset: -24; } }
-    .fl {
-      stroke-dasharray: 5 16;
-      animation: flowDash 2s linear infinite;
     }
 
     /* ── Controls ── */
@@ -213,7 +207,11 @@
       border-radius: 5px;
       overflow: hidden;
       border: 0.5px solid var(--border);
+      cursor: pointer;
+      transition: border-color .2s;
     }
+    .bar-track:hover { border-color: var(--border2); }
+    .bar-row { position: relative; }
     .bar-fill {
       height: 100%;
       border-radius: 5px;
@@ -237,11 +235,11 @@
       padding: 12px 14px;
       background: var(--bg2);
       border: 0.5px solid var(--border);
-      border-right: 3px solid var(--r2);
-      border-radius: 8px 0 0 8px;
+      border-left: 3px solid var(--r2);
+      border-radius: 0 8px 8px 0;
       line-height: 1.75;
-      direction: rtl;
-      transition: border-right-color .3s;
+      direction: ltr;
+      transition: border-left-color .3s;
     }
 
     /* ── Footer ── */
@@ -266,85 +264,13 @@
 
   <div class="main-grid">
 
-    <!-- ── Circuit SVG ── -->
-    <div class="circuit-wrap">
-      <svg width="265" viewBox="0 0 265 420">
-        <defs>
-          <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5"
-            markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke"
-              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </marker>
-        </defs>
-
-        <!-- Wires -->
-        <line x1="34" y1="34" x2="34" y2="170" stroke="var(--text2)" stroke-width="2.5"/>
-        <line x1="34" y1="212" x2="34" y2="386" stroke="var(--text2)" stroke-width="2.5"/>
-        <line x1="34" y1="34" x2="155" y2="34" stroke="var(--text2)" stroke-width="2.5"/>
-        <line x1="34" y1="386" x2="155" y2="386" stroke="var(--text2)" stroke-width="2.5"/>
-
-        <!-- Battery -->
-        <line x1="22" y1="176" x2="46" y2="176" stroke="var(--text)" stroke-width="3" stroke-linecap="round"/>
-        <line x1="26" y1="186" x2="42" y2="186" stroke="var(--text)" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="22" y1="199" x2="46" y2="199" stroke="var(--text)" stroke-width="3" stroke-linecap="round"/>
-        <line x1="26" y1="209" x2="42" y2="209" stroke="var(--text)" stroke-width="1.5" stroke-linecap="round"/>
-        <text x="50" y="181" font-size="13" fill="var(--text2)">+</text>
-        <text x="50" y="215" font-size="13" fill="var(--text2)">−</text>
-        <text id="svgVsLbl" x="50" y="200" font-size="11" font-weight="500" fill="var(--text2)">10V</text>
-
-        <!-- R1 body -->
-        <line x1="155" y1="34" x2="155" y2="62" stroke="var(--text2)" stroke-width="2.5"/>
-        <polyline id="r1z"
-          points="155,62 142,76 168,91 142,106 168,121 142,136 168,151 155,165"
-          fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
-          style="stroke:var(--text3); transition:stroke .3s;"/>
-        <line x1="155" y1="165" x2="155" y2="194" stroke="var(--text2)" stroke-width="2.5"/>
-
-        <!-- R1 labels — right side of zigzag -->
-        <text id="r1lbl" x="173" y="107" font-size="12" font-weight="500"
-          text-anchor="start" style="fill:var(--text3); transition:fill .3s;">R₁</text>
-        <text id="r1val" x="173" y="121" font-size="10"
-          text-anchor="start" style="fill:var(--text3); transition:fill .3s;">10 kΩ</text>
-
-        <!-- Junction dot -->
-        <circle cx="155" cy="194" r="4.5" fill="var(--text)" opacity=".55"/>
-
-        <!-- R2 body -->
-        <line x1="155" y1="194" x2="155" y2="224" stroke="var(--text2)" stroke-width="2.5"/>
-        <polyline id="r2z"
-          points="155,224 142,238 168,253 142,268 168,283 142,298 168,313 155,327"
-          fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
-          style="stroke:var(--text3); transition:stroke .3s;"/>
-        <line x1="155" y1="327" x2="155" y2="386" stroke="var(--text2)" stroke-width="2.5"/>
-
-        <!-- R2 labels — right side of zigzag -->
-        <text id="r2lbl" x="173" y="269" font-size="12" font-weight="500"
-          text-anchor="start" style="fill:var(--text3); transition:fill .3s;">R₂</text>
-        <text id="r2val" x="173" y="283" font-size="10"
-          text-anchor="start" style="fill:var(--text3); transition:fill .3s;">100 kΩ</text>
-
-        <!-- Vout bracket — pushed further right -->
-        <line x1="155" y1="194" x2="248" y2="194" stroke="var(--border2)" stroke-width="1" stroke-dasharray="3 2"/>
-        <line x1="155" y1="386" x2="248" y2="386" stroke="var(--border2)" stroke-width="1" stroke-dasharray="3 2"/>
-        <line x1="246" y1="196" x2="246" y2="384"
-          stroke="var(--r2)" stroke-width="1.5"
-          marker-end="url(#arr)" marker-start="url(#arr)"/>
-        <text id="svgVoutLbl" x="251" y="297" font-size="11" font-weight="500" fill="var(--r2)">9.09V</text>
-
-        <!-- Animated flow -->
-        <path id="flowp" class="fl"
-          d="M34,170 L34,34 L155,34 L155,62 L142,76 L168,91 L142,106 L168,121 L142,136 L168,151 L155,165 L155,224 L142,238 L168,253 L142,268 L168,283 L142,298 L168,313 L155,327 L155,386 L34,386 L34,212"
-          fill="none" stroke="var(--amber)" stroke-width="1.8" opacity=".55" stroke-linecap="round"/>
-      </svg>
-    </div>
-
     <!-- ── Controls ── -->
     <div class="controls">
 
       <div class="slider-group">
         <label>
           <span>מתח מקור (Vₛ)</span>
-          <span class="slider-val" id="lblVs">10 V</span>
+          <span class="slider-val" id="lblVs" style="direction:ltr;">10 V</span>
         </label>
         <input type="range" id="slVs" min="1" max="30" value="10" step="1" oninput="calc()">
       </div>
@@ -352,7 +278,7 @@
       <div class="slider-group">
         <label>
           <span style="color:var(--r1-dark);">נגד 1 (R₁)</span>
-          <span class="slider-val r1c" id="lblR1">10 kΩ</span>
+          <span class="slider-val r1c" id="lblR1" style="direction:ltr;">10 kΩ</span>
         </label>
         <input type="range" id="slR1" min="1" max="200" value="10" step="1" oninput="calc()">
       </div>
@@ -360,7 +286,7 @@
       <div class="slider-group">
         <label>
           <span style="color:var(--r2-dark);">נגד 2 (R₂)</span>
-          <span class="slider-val r2c" id="lblR2">100 kΩ</span>
+          <span class="slider-val r2c" id="lblR2" style="direction:ltr;">100 kΩ</span>
         </label>
         <input type="range" id="slR2" min="1" max="200" value="100" step="1" oninput="calc()">
       </div>
@@ -375,7 +301,125 @@
         </div>
       </div>
 
+      <!-- Toggle R1 bracket -->
+      <label style="display:flex; align-items:center; gap:10px; margin-top:14px; cursor:pointer; direction:rtl; user-select:none;">
+        <span style="font-size:13px; color:var(--r1-dark);">הצג חץ מתח על R₁</span>
+        <span style="font-size:13px; color:var(--text3);" id="r1BracketVal">(0.91V)</span>
+        <span style="position:relative; width:36px; height:20px; flex-shrink:0;">
+          <input type="checkbox" id="toggleR1" checked
+            onchange="document.getElementById('r1bracket').style.display = this.checked ? 'block' : 'none';"
+            style="position:absolute; opacity:0; width:100%; height:100%; cursor:pointer; margin:0; z-index:1;">
+          <span id="trackEl" style="position:absolute; inset:0; background:var(--r1-light); border-radius:10px; transition:background .2s;"></span>
+          <span id="thumbEl" style="position:absolute; top:2px; right:2px; width:16px; height:16px; background:#fff; border-radius:50%; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.25);"></span>
+        </span>
+      </label>
+
     </div>
+
+    <!-- ── Circuit SVG ── -->
+    <div class="circuit-wrap">
+      <svg width="315" viewBox="0 0 315 420">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke"
+              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+          <!-- Circuit path used by animateMotion dots -->
+          <path id="cpath" d="M34,170 L34,34 L155,34 L155,62 L142,76 L168,91 L142,106 L168,121 L142,136 L168,151 L155,165 L155,224 L142,238 L168,253 L142,268 L168,283 L142,298 L168,313 L155,327 L155,386 L34,386 L34,212"/>
+        </defs>
+
+        <!-- Wires -->
+        <line x1="34" y1="34" x2="34" y2="170" stroke="var(--text2)" stroke-width="2.5"/>
+        <line x1="34" y1="212" x2="34" y2="386" stroke="var(--text2)" stroke-width="2.5"/>
+        <line x1="34" y1="34" x2="155" y2="34" stroke="var(--text2)" stroke-width="2.5"/>
+        <line x1="34" y1="386" x2="155" y2="386" stroke="var(--text2)" stroke-width="2.5"/>
+
+        <!-- Battery -->
+        <line x1="22" y1="176" x2="46" y2="176" stroke="var(--text)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="26" y1="186" x2="42" y2="186" stroke="var(--text)" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="22" y1="199" x2="46" y2="199" stroke="var(--text)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="26" y1="209" x2="42" y2="209" stroke="var(--text)" stroke-width="1.5" stroke-linecap="round"/>
+        <text x="50" y="181" font-size="13" direction="ltr" fill="var(--text2)">+</text>
+        <text x="50" y="215" font-size="13" direction="ltr" fill="var(--text2)">−</text>
+        <text id="svgVsLbl" x="50" y="200" font-size="11" font-weight="500" direction="ltr" fill="var(--text2)">10V</text>
+
+        <!-- R1 body -->
+        <line x1="155" y1="34" x2="155" y2="62" stroke="var(--text2)" stroke-width="2.5"/>
+        <polyline id="r1z"
+          points="155,62 142,76 168,91 142,106 168,121 142,136 168,151 155,165"
+          fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+          style="stroke:var(--text3); transition:stroke .3s;"/>
+        <line x1="155" y1="165" x2="155" y2="194" stroke="var(--text2)" stroke-width="2.5"/>
+
+        <!-- R1 labels — right side of zigzag -->
+        <text id="r1lbl" x="186" y="104" font-size="12" font-weight="500"
+          text-anchor="start" direction="ltr" style="fill:var(--text3); transition:fill .3s;">R₁</text>
+        <text id="r1val" x="186" y="119" font-size="10"
+          text-anchor="start" direction="ltr" style="fill:var(--text3); transition:fill .3s;">10 kΩ</text>
+
+        <!-- Junction dot -->
+        <circle cx="155" cy="194" r="4.5" fill="var(--text)" opacity=".55"/>
+
+        <!-- R2 body -->
+        <line x1="155" y1="194" x2="155" y2="224" stroke="var(--text2)" stroke-width="2.5"/>
+        <polyline id="r2z"
+          points="155,224 142,238 168,253 142,268 168,283 142,298 168,313 155,327"
+          fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+          style="stroke:var(--text3); transition:stroke .3s;"/>
+        <line x1="155" y1="327" x2="155" y2="386" stroke="var(--text2)" stroke-width="2.5"/>
+
+        <!-- R2 labels — right side of zigzag -->
+        <text id="r2lbl" x="186" y="266" font-size="12" font-weight="500"
+          text-anchor="start" direction="ltr" style="fill:var(--text3); transition:fill .3s;">R₂</text>
+        <text id="r2val" x="186" y="281" font-size="10"
+          text-anchor="start" direction="ltr" style="fill:var(--text3); transition:fill .3s;">100 kΩ</text>
+
+        <!-- Vout bracket -->
+        <line x1="155" y1="194" x2="248" y2="194" stroke="var(--border2)" stroke-width="1" stroke-dasharray="3 2"/>
+        <line x1="155" y1="386" x2="248" y2="386" stroke="var(--border2)" stroke-width="1" stroke-dasharray="3 2"/>
+        <line x1="246" y1="196" x2="246" y2="384"
+          stroke="var(--r2)" stroke-width="1.5"
+          marker-end="url(#arr)" marker-start="url(#arr)"/>
+        <text id="svgVoutLbl" x="251" y="297" font-size="11" font-weight="500" direction="ltr" fill="var(--r2)">9.09V</text>
+
+        <!-- R1 voltage bracket (toggleable) -->
+        <g id="r1bracket">
+          <line x1="155" y1="34" x2="278" y2="34" stroke="var(--border2)" stroke-width="1" stroke-dasharray="3 2"/>
+          <line x1="248" y1="194" x2="278" y2="194" stroke="var(--border2)" stroke-width="1" stroke-dasharray="3 2"/>
+          <line x1="276" y1="36" x2="276" y2="192"
+            stroke="var(--r1)" stroke-width="1.5"
+            marker-end="url(#arr)" marker-start="url(#arr)"/>
+          <text id="svgVR1Lbl" x="281" y="120" font-size="11" font-weight="500" direction="ltr" fill="var(--r1)">0.91V</text>
+        </g>
+
+        <!-- Electron dots — 4 evenly spaced via phase-offset keyPoints -->
+        <circle r="4" fill="#EF9F27">
+          <animateMotion id="am1" dur="2.8s" repeatCount="indefinite" calcMode="linear">
+            <mpath href="#cpath"/>
+          </animateMotion>
+        </circle>
+        <circle r="4" fill="#EF9F27" opacity="0.8">
+          <animateMotion id="am2" dur="2.8s" repeatCount="indefinite" calcMode="linear"
+            keyTimes="0;0.75;0.75;1" keyPoints="0.25;1;0;0.25">
+            <mpath href="#cpath"/>
+          </animateMotion>
+        </circle>
+        <circle r="4" fill="#EF9F27" opacity="0.65">
+          <animateMotion id="am3" dur="2.8s" repeatCount="indefinite" calcMode="linear"
+            keyTimes="0;0.5;0.5;1" keyPoints="0.5;1;0;0.5">
+            <mpath href="#cpath"/>
+          </animateMotion>
+        </circle>
+        <circle r="4" fill="#EF9F27" opacity="0.5">
+          <animateMotion id="am4" dur="2.8s" repeatCount="indefinite" calcMode="linear"
+            keyTimes="0;0.25;0.25;1" keyPoints="0.75;1;0;0.75">
+            <mpath href="#cpath"/>
+          </animateMotion>
+        </circle>
+      </svg>
+    </div>
+
   </div>
 
   <!-- ── Bars ── -->
@@ -383,24 +427,27 @@
     <div class="section-title">חלוקת המתח בין הנגדים:</div>
     <div class="bar-row">
       <span class="bar-lbl r1c">R₁</span>
-      <div class="bar-track">
+      <div class="bar-track" onclick="resetR(1)" title="לחץ לאפס ל-100kΩ">
         <div id="br1" class="bar-fill" style="width:9%;"></div>
       </div>
       <span class="bar-info r1c" id="ir1">9% — 0.91V</span>
     </div>
     <div class="bar-row">
       <span class="bar-lbl r2c">R₂ = Vout</span>
-      <div class="bar-track">
+      <div class="bar-track" onclick="resetR(2)" title="לחץ לאפס ל-100kΩ">
         <div id="br2" class="bar-fill" style="width:91%;"></div>
       </div>
       <span class="bar-info r2c" id="ir2">91% — 9.09V</span>
+    </div>
+    <div style="font-size:11px; color:var(--text3); direction:rtl; margin-top:5px;">
+      לחץ על הבר לאיפוס ל-100kΩ
     </div>
   </div>
 
   <!-- ── Insight ── -->
   <div id="ins">
-    💡 R₂ גדול פי <strong style="color:var(--r2-dark);">10</strong> מ-R₁ ← R₂ בולע
-    <strong style="color:var(--r2-dark);">91%</strong> מהמתח ← Vout = 9.09V
+    💡 R₂ is <strong style="color:var(--r2-dark);">10×</strong> larger than R₁ → R₂ absorbs <strong style="color:var(--r2-dark);">91%</strong> of the voltage → Vout = <strong style="color:var(--r2-dark);">9.09V</strong><br>
+    <span style="color:var(--text3); font-size:12px;">R₂ is large → hard path to ground → voltage accumulates across R₂ → high Vout</span>
   </div>
 
   <footer>
@@ -409,6 +456,13 @@
 
 </div>
 <script>
+  document.getElementById('toggleR1').addEventListener('change', function() {
+    const on = this.checked;
+    document.getElementById('r1bracket').style.display = on ? 'block' : 'none';
+    document.getElementById('thumbEl').style.transform = on ? 'translateX(0)' : 'translateX(-16px)';
+    document.getElementById('trackEl').style.background = on ? 'var(--r1-light)' : 'var(--bg3)';
+  });
+
   function calc() {
     const vs = +document.getElementById('slVs').value;
     const r1 = +document.getElementById('slR1').value;
@@ -427,6 +481,8 @@
     // SVG labels
     document.getElementById('svgVsLbl').textContent  = vs + 'V';
     document.getElementById('svgVoutLbl').textContent = vout.toFixed(2) + 'V';
+    document.getElementById('svgVR1Lbl').textContent  = vr1.toFixed(2) + 'V';
+    document.getElementById('r1BracketVal').textContent = '(' + vr1.toFixed(2) + 'V)';
     document.getElementById('r1val').textContent = r1 + ' kΩ';
     document.getElementById('r2val').textContent = r2 + ' kΩ';
 
@@ -453,26 +509,41 @@
 
     // Flow speed: faster = more current = lower resistance
     const spd = (0.7 + Math.min((r1 + r2) / 40, 1) * 2.8).toFixed(1);
-    document.getElementById('flowp').style.animationDuration = spd + 's';
+    ['am1','am2','am3','am4'].forEach(function(id) {
+      document.getElementById(id).setAttribute('dur', spd + 's');
+    });
 
-    // Insight text
     const ins = document.getElementById('ins');
     if (Math.abs(r1 - r2) <= 2) {
-      ins.style.borderRightColor = 'var(--text3)';
-      ins.innerHTML = '⚖️ R₁ = R₂ — המתח מתחלק <strong>שווה בשווה</strong>: כל נגד מקבל ~50%';
+      ins.style.borderLeftColor = 'var(--text3)';
+      ins.innerHTML =
+        '⚖️ R₁ = R₂ — equal resistance to ground and source<br>'
+        + '<span style="color:var(--text3); font-size:12px;">Voltage splits evenly: each resistor gets ~50%</span>';
     } else if (r2 > r1) {
       const rt = (r2 / r1).toFixed(r2 / r1 < 2 ? 1 : 0);
-      ins.style.borderRightColor = 'var(--r2)';
-      ins.innerHTML = '💡 R₂ גדול פי <strong style="color:var(--r2-dark);">' + rt +
-        '</strong> מ-R₁ \u2190 R₂ בולע <strong style="color:var(--r2-dark);">' + p2 +
-        '%</strong> מהמתח \u2190 Vout = ' + vout.toFixed(2) + 'V';
+      ins.style.borderLeftColor = 'var(--r2)';
+      ins.innerHTML =
+        '💡 R₂ is <strong style="color:var(--r2-dark);">' + rt + '×</strong> larger than R₁'
+        + ' → R₂ absorbs <strong style="color:var(--r2-dark);">' + p2 + '%</strong> of the voltage'
+        + ' → Vout = <strong style="color:var(--r2-dark);">' + vout.toFixed(2) + 'V</strong><br>'
+        + '<span style="color:var(--text3); font-size:12px;">R₂ is large → hard path to ground → voltage accumulates across R₂ → high Vout</span>';
     } else {
       const rt = (r1 / r2).toFixed(r1 / r2 < 2 ? 1 : 0);
-      ins.style.borderRightColor = 'var(--r1)';
-      ins.innerHTML = '💡 R₁ גדול פי <strong style="color:var(--r1-dark);">' + rt +
-        '</strong> מ-R₂ \u2190 R₁ בולע <strong style="color:var(--r1-dark);">' + p1 +
-        '%</strong> מהמתח \u2190 Vout נמוך: ' + vout.toFixed(2) + 'V';
+      ins.style.borderLeftColor = 'var(--r1)';
+      ins.innerHTML =
+        '💡 R₁ is <strong style="color:var(--r1-dark);">' + rt + '×</strong> larger than R₂'
+        + ' → R₁ absorbs <strong style="color:var(--r1-dark);">' + p1 + '%</strong> of the voltage'
+        + ' → Vout = <strong style="color:var(--r1-dark);">' + vout.toFixed(2) + 'V</strong><br>'
+        + '<span style="color:var(--text3); font-size:12px;">R₂ is small → easy path to ground → current escapes easily, most voltage drops on R₁ → low Vout</span>';
     }
+  }
+
+  function resetR(n) {
+    const sl = document.getElementById('slR' + n);
+    sl.value = 100;
+    // flash the track to give feedback
+    const track = sl.closest('.slider-group').querySelector('input');
+    calc();
   }
 
   calc();
