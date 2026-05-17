@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מחלק מתח — כלי לימוד אינטרקטיבי</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #ffffff;
+      --bg2:       #f5f4f0;
+      --bg3:       #eeece7;
+      --text:      #1a1a18;
+      --text2:     #5a5a55;
+      --text3:     #9a9890;
+      --border:    rgba(0,0,0,0.12);
+      --border2:   rgba(0,0,0,0.22);
+      --r1:        #E24B4A;
+      --r1-light:  #F09595;
+      --r1-dark:   #A32D2D;
+      --r2:        #378ADD;
+      --r2-light:  #85B7EB;
+      --r2-dark:   #185FA5;
+      --amber:     #EF9F27;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:      #1c1c1a;
+        --bg2:     #272724;
+        --bg3:     #313130;
+        --text:    #e8e6e0;
+        --text2:   #a0a09a;
+        --text3:   #606058;
+        --border:  rgba(255,255,255,0.10);
+        --border2: rgba(255,255,255,0.20);
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    header {
+      margin-bottom: 2rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 0.5px solid var(--border);
+    }
+    header h1 {
+      font-size: 22px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+    header p {
+      font-size: 14px;
+      color: var(--text2);
+      line-height: 1.65;
+    }
+
+    /* ── Main grid ── */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 230px 1fr;
+      gap: 2rem;
+      align-items: start;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 580px) {
+      .main-grid { grid-template-columns: 1fr; }
+      .circuit-wrap { display: flex; justify-content: center; }
+    }
+
+    /* ── Circuit SVG ── */
+    .circuit-wrap svg {
+      display: block;
+      overflow: visible;
+    }
+
+    @keyframes flowDash { to { stroke-dashoffset: -24; } }
+    .fl {
+      stroke-dasharray: 5 16;
+      animation: flowDash 2s linear infinite;
+    }
+
+    /* ── Controls ── */
+    .controls { display: flex; flex-direction: column; gap: 0; }
+
+    .slider-group { margin-bottom: 1.25rem; }
+    .slider-group label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+    .slider-group label span:first-child { color: var(--text2); }
+    .slider-val { font-weight: 500; font-size: 13px; }
+    .slider-val.r1c { color: var(--r1-dark); }
+    .slider-val.r2c { color: var(--r2-dark); }
+
+    input[type=range] {
+      width: 100%;
+      height: 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--bg3);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--text);
+      cursor: pointer;
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 0 1px var(--border2);
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--text);
+      cursor: pointer;
+      border: 2px solid var(--bg);
+    }
+    #slR1::-webkit-slider-thumb { background: var(--r1); }
+    #slR1::-moz-range-thumb      { background: var(--r1); }
+    #slR2::-webkit-slider-thumb { background: var(--r2); }
+    #slR2::-moz-range-thumb      { background: var(--r2); }
+
+    /* ── Result card ── */
+    .result-card {
+      background: var(--bg2);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.25rem;
+      border: 0.5px solid var(--border);
+    }
+    .result-card .label {
+      font-size: 11px;
+      color: var(--text3);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .result-card .formula {
+      font-size: 12px;
+      color: var(--text2);
+      font-family: "SF Mono", "Fira Mono", monospace;
+      direction: ltr;
+      margin-bottom: 10px;
+      padding: 6px 8px;
+      background: var(--bg3);
+      border-radius: var(--radius-sm);
+    }
+    .result-card .vout-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      direction: rtl;
+    }
+    .result-card .vout-num {
+      font-size: 32px;
+      font-weight: 500;
+      color: var(--r2-dark);
+      transition: color .3s;
+    }
+    .result-card .vout-unit { font-size: 18px; color: var(--text2); }
+    .result-card .vout-desc { font-size: 13px; color: var(--text3); margin-right: 8px; }
+
+    /* ── Bar chart ── */
+    .bars-section { margin-bottom: 1.25rem; }
+    .bars-section .section-title {
+      font-size: 12px;
+      color: var(--text3);
+      margin-bottom: 10px;
+      direction: rtl;
+    }
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .bar-row .bar-lbl {
+      font-size: 12px;
+      font-weight: 500;
+      min-width: 66px;
+      text-align: right;
+      direction: rtl;
+    }
+    .bar-row .bar-lbl.r1c { color: var(--r1-dark); }
+    .bar-row .bar-lbl.r2c { color: var(--r2-dark); }
+    .bar-track {
+      flex: 1;
+      height: 22px;
+      background: var(--bg2);
+      border-radius: 5px;
+      overflow: hidden;
+      border: 0.5px solid var(--border);
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 5px;
+      transition: width .5s cubic-bezier(.4,0,.2,1);
+      min-width: 4px;
+    }
+    #br1 { background: var(--r1-light); }
+    #br2 { background: var(--r2-light); }
+    .bar-info {
+      font-size: 12px;
+      font-weight: 500;
+      min-width: 96px;
+      direction: ltr;
+    }
+    .bar-info.r1c { color: var(--r1-dark); }
+    .bar-info.r2c { color: var(--r2-dark); }
+
+    /* ── Insight ── */
+    #ins {
+      font-size: 14px;
+      padding: 12px 14px;
+      background: var(--bg2);
+      border: 0.5px solid var(--border);
+      border-right: 3px solid var(--r2);
+      border-radius: 8px 0 0 8px;
+      line-height: 1.75;
+      direction: rtl;
+      transition: border-right-color .3s;
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 0.5px solid var(--border);
+      font-size: 12px;
+      color: var(--text3);
+      text-align: center;
+      direction: rtl;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <h1>מחלק מתח</h1>
+    <p>שנה את ערכי הנגדים ומתח המקור וראה בזמן אמת כיצד מתחלק המתח. הנקודות הזהובות מדמות את הזרם — שים לב לשינוי מהירותן.</p>
+  </header>
+
+  <div class="main-grid">
+
+    <!-- ── Circuit SVG ── -->
+    <div class="circuit-wrap">
+      <svg width="265" viewBox="0 0 265 420">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke"
+              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+
+        <!-- Wires -->
+        <line x1="34" y1="34" x2="34" y2="170" stroke="var(--text2)" stroke-width="2.5"/>
+        <line x1="34" y1="212" x2="34" y2="386" stroke="var(--text2)" stroke-width="2.5"/>
+        <line x1="34" y1="34" x2="155" y2="34" stroke="var(--text2)" stroke-width="2.5"/>
+        <line x1="34" y1="386" x2="155" y2="386" stroke="var(--text2)" stroke-width="2.5"/>
+
+        <!-- Battery -->
+        <line x1="22" y1="176" x2="46" y2="176" stroke="var(--text)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="26" y1="186" x2="42" y2="186" stroke="var(--text)" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="22" y1="199" x2="46" y2="199" stroke="var(--text)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="26" y1="209" x2="42" y2="209" stroke="var(--text)" stroke-width="1.5" stroke-linecap="round"/>
+        <text x="50" y="181" font-size="13" fill="var(--text2)">+</text>
+        <text x="50" y="215" font-size="13" fill="var(--text2)">−</text>
+        <text id="svgVsLbl" x="50" y="200" font-size="11" font-weight="500" fill="var(--text2)">10V</text>
+
+        <!-- R1 body -->
+        <line x1="155" y1="34" x2="155" y2="62" stroke="var(--text2)" stroke-width="2.5"/>
+        <polyline id="r1z"
+          points="155,62 142,76 168,91 142,106 168,121 142,136 168,151 155,165"
+          fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+          style="stroke:var(--text3); transition:stroke .3s;"/>
+        <line x1="155" y1="165" x2="155" y2="194" stroke="var(--text2)" stroke-width="2.5"/>
+
+        <!-- R1 labels — right side of zigzag -->
+        <text id="r1lbl" x="173" y="107" font-size="12" font-weight="500"
+          text-anchor="start" style="fill:var(--text3); transition:fill .3s;">R₁</text>
+        <text id="r1val" x="173" y="121" font-size="10"
+          text-anchor="start" style="fill:var(--text3); transition:fill .3s;">10 kΩ</text>
+
+        <!-- Junction dot -->
+        <circle cx="155" cy="194" r="4.5" fill="var(--text)" opacity=".55"/>
+
+        <!-- R2 body -->
+        <line x1="155" y1="194" x2="155" y2="224" stroke="var(--text2)" stroke-width="2.5"/>
+        <polyline id="r2z"
+          points="155,224 142,238 168,253 142,268 168,283 142,298 168,313 155,327"
+          fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+          style="stroke:var(--text3); transition:stroke .3s;"/>
+        <line x1="155" y1="327" x2="155" y2="386" stroke="var(--text2)" stroke-width="2.5"/>
+
+        <!-- R2 labels — right side of zigzag -->
+        <text id="r2lbl" x="173" y="269" font-size="12" font-weight="500"
+          text-anchor="start" style="fill:var(--text3); transition:fill .3s;">R₂</text>
+        <text id="r2val" x="173" y="283" font-size="10"
+          text-anchor="start" style="fill:var(--text3); transition:fill .3s;">100 kΩ</text>
+
+        <!-- Vout bracket — pushed further right -->
+        <line x1="155" y1="194" x2="248" y2="194" stroke="var(--border2)" stroke-width="1" stroke-dasharray="3 2"/>
+        <line x1="155" y1="386" x2="248" y2="386" stroke="var(--border2)" stroke-width="1" stroke-dasharray="3 2"/>
+        <line x1="246" y1="196" x2="246" y2="384"
+          stroke="var(--r2)" stroke-width="1.5"
+          marker-end="url(#arr)" marker-start="url(#arr)"/>
+        <text id="svgVoutLbl" x="251" y="297" font-size="11" font-weight="500" fill="var(--r2)">9.09V</text>
+
+        <!-- Animated flow -->
+        <path id="flowp" class="fl"
+          d="M34,170 L34,34 L155,34 L155,62 L142,76 L168,91 L142,106 L168,121 L142,136 L168,151 L155,165 L155,224 L142,238 L168,253 L142,268 L168,283 L142,298 L168,313 L155,327 L155,386 L34,386 L34,212"
+          fill="none" stroke="var(--amber)" stroke-width="1.8" opacity=".55" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <!-- ── Controls ── -->
+    <div class="controls">
+
+      <div class="slider-group">
+        <label>
+          <span>מתח מקור (Vₛ)</span>
+          <span class="slider-val" id="lblVs">10 V</span>
+        </label>
+        <input type="range" id="slVs" min="1" max="30" value="10" step="1" oninput="calc()">
+      </div>
+
+      <div class="slider-group">
+        <label>
+          <span style="color:var(--r1-dark);">נגד 1 (R₁)</span>
+          <span class="slider-val r1c" id="lblR1">10 kΩ</span>
+        </label>
+        <input type="range" id="slR1" min="1" max="200" value="10" step="1" oninput="calc()">
+      </div>
+
+      <div class="slider-group">
+        <label>
+          <span style="color:var(--r2-dark);">נגד 2 (R₂)</span>
+          <span class="slider-val r2c" id="lblR2">100 kΩ</span>
+        </label>
+        <input type="range" id="slR2" min="1" max="200" value="100" step="1" oninput="calc()">
+      </div>
+
+      <div class="result-card">
+        <div class="label">נוסחה חיה</div>
+        <div id="fml" class="formula">Vout = 10 × 100 / (10+100) = 9.09 V</div>
+        <div class="vout-row">
+          <span id="vbig" class="vout-num">9.09</span>
+          <span class="vout-unit">V</span>
+          <span class="vout-desc">מתח יציאה</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Bars ── -->
+  <div class="bars-section">
+    <div class="section-title">חלוקת המתח בין הנגדים:</div>
+    <div class="bar-row">
+      <span class="bar-lbl r1c">R₁</span>
+      <div class="bar-track">
+        <div id="br1" class="bar-fill" style="width:9%;"></div>
+      </div>
+      <span class="bar-info r1c" id="ir1">9% — 0.91V</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-lbl r2c">R₂ = Vout</span>
+      <div class="bar-track">
+        <div id="br2" class="bar-fill" style="width:91%;"></div>
+      </div>
+      <span class="bar-info r2c" id="ir2">91% — 9.09V</span>
+    </div>
+  </div>
+
+  <!-- ── Insight ── -->
+  <div id="ins">
+    💡 R₂ גדול פי <strong style="color:var(--r2-dark);">10</strong> מ-R₁ ← R₂ בולע
+    <strong style="color:var(--r2-dark);">91%</strong> מהמתח ← Vout = 9.09V
+  </div>
+
+  <footer>
+    מבוסס על חוק אוהם ונוסחת מחלק המתח: Vout = Vs × R₂ / (R₁ + R₂)
+  </footer>
+
+</div>
+<script>
+  function calc() {
+    const vs = +document.getElementById('slVs').value;
+    const r1 = +document.getElementById('slR1').value;
+    const r2 = +document.getElementById('slR2').value;
+
+    const vout = vs * r2 / (r1 + r2);
+    const vr1  = vs - vout;
+    const p2   = Math.round(vout / vs * 100);
+    const p1   = 100 - p2;
+
+    // Slider labels
+    document.getElementById('lblVs').textContent = vs + ' V';
+    document.getElementById('lblR1').textContent = r1 + ' kΩ';
+    document.getElementById('lblR2').textContent = r2 + ' kΩ';
+
+    // SVG labels
+    document.getElementById('svgVsLbl').textContent  = vs + 'V';
+    document.getElementById('svgVoutLbl').textContent = vout.toFixed(2) + 'V';
+    document.getElementById('r1val').textContent = r1 + ' kΩ';
+    document.getElementById('r2val').textContent = r2 + ' kΩ';
+
+    // Formula & result
+    document.getElementById('fml').textContent =
+      'Vout = ' + vs + ' × ' + r2 + ' / (' + r1 + '+' + r2 + ') = ' + vout.toFixed(2) + ' V';
+    document.getElementById('vbig').textContent = vout.toFixed(2);
+
+    // Bars
+    document.getElementById('br1').style.width = Math.max(p1, 2) + '%';
+    document.getElementById('br2').style.width = Math.max(p2, 2) + '%';
+    document.getElementById('ir1').textContent = p1 + '% — ' + vr1.toFixed(2) + 'V';
+    document.getElementById('ir2').textContent = p2 + '% — ' + vout.toFixed(2) + 'V';
+
+    // Circuit color: highlight the bigger resistor
+    const c1 = r1 > r2 ? 'var(--r1)' : 'var(--text3)';
+    const c2 = r2 >= r1 ? 'var(--r2)' : 'var(--text3)';
+    document.getElementById('r1z').style.stroke = c1;
+    document.getElementById('r2z').style.stroke = c2;
+    document.getElementById('r1lbl').style.fill = c1;
+    document.getElementById('r2lbl').style.fill = c2;
+    document.getElementById('r1val').style.fill = c1;
+    document.getElementById('r2val').style.fill = c2;
+
+    // Flow speed: faster = more current = lower resistance
+    const spd = (0.7 + Math.min((r1 + r2) / 40, 1) * 2.8).toFixed(1);
+    document.getElementById('flowp').style.animationDuration = spd + 's';
+
+    // Insight text
+    const ins = document.getElementById('ins');
+    if (Math.abs(r1 - r2) <= 2) {
+      ins.style.borderRightColor = 'var(--text3)';
+      ins.innerHTML = '⚖️ R₁ = R₂ — המתח מתחלק <strong>שווה בשווה</strong>: כל נגד מקבל ~50%';
+    } else if (r2 > r1) {
+      const rt = (r2 / r1).toFixed(r2 / r1 < 2 ? 1 : 0);
+      ins.style.borderRightColor = 'var(--r2)';
+      ins.innerHTML = '💡 R₂ גדול פי <strong style="color:var(--r2-dark);">' + rt +
+        '</strong> מ-R₁ \u2190 R₂ בולע <strong style="color:var(--r2-dark);">' + p2 +
+        '%</strong> מהמתח \u2190 Vout = ' + vout.toFixed(2) + 'V';
+    } else {
+      const rt = (r1 / r2).toFixed(r1 / r2 < 2 ? 1 : 0);
+      ins.style.borderRightColor = 'var(--r1)';
+      ins.innerHTML = '💡 R₁ גדול פי <strong style="color:var(--r1-dark);">' + rt +
+        '</strong> מ-R₂ \u2190 R₁ בולע <strong style="color:var(--r1-dark);">' + p1 +
+        '%</strong> מהמתח \u2190 Vout נמוך: ' + vout.toFixed(2) + 'V';
+    }
+  }
+
+  calc();
+</script>
+</body>
+</html>
