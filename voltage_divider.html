@@ -3,255 +3,167 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>מחלק מתח — כלי לימוד אינטרקטיבי</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>Voltage Divider</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:        #ffffff;
-      --bg2:       #f5f4f0;
-      --bg3:       #eeece7;
-      --text:      #1a1a18;
-      --text2:     #5a5a55;
-      --text3:     #9a9890;
-      --border:    rgba(0,0,0,0.12);
-      --border2:   rgba(0,0,0,0.22);
-      --r1:        #E24B4A;
-      --r1-light:  #F09595;
-      --r1-dark:   #A32D2D;
-      --r2:        #378ADD;
-      --r2-light:  #85B7EB;
-      --r2-dark:   #185FA5;
-      --amber:     #EF9F27;
-      --radius-sm: 6px;
-      --radius-md: 10px;
-      --radius-lg: 14px;
+      --bg:       #ffffff;
+      --bg2:      #f5f4f0;
+      --bg3:      #eeece7;
+      --text:     #1a1a18;
+      --text2:    #5a5a55;
+      --text3:    #9a9890;
+      --border:   rgba(0,0,0,0.12);
+      --border2:  rgba(0,0,0,0.22);
+      --r1:       #E24B4A;
+      --r1-light: #F09595;
+      --r1-dark:  #A32D2D;
+      --r2:       #378ADD;
+      --r2-light: #85B7EB;
+      --r2-dark:  #185FA5;
+      --amber:    #EF9F27;
+      --rl:       #2A9D5C;
+      --rl-light: #7FCBA5;
+      --rl-dark:  #1A6B3C;
+      --buf:      #7B5EA7;
+      --buf-light:#B49FD4;
+      --buf-dark: #4A3470;
     }
-
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg:      #1c1c1a;
-        --bg2:     #272724;
-        --bg3:     #313130;
-        --text:    #e8e6e0;
-        --text2:   #a0a09a;
-        --text3:   #606058;
-        --border:  rgba(255,255,255,0.10);
-        --border2: rgba(255,255,255,0.20);
+        --bg:#1c1c1a;--bg2:#272724;--bg3:#313130;
+        --text:#e8e6e0;--text2:#a0a09a;--text3:#606058;
+        --border:rgba(255,255,255,0.10);--border2:rgba(255,255,255,0.20);
       }
     }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      padding: 2rem 1rem;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; padding: 2rem 1rem;
     }
+    .page { max-width: 860px; margin: 0 auto; }
 
-    .page {
-      max-width: 860px;
-      margin: 0 auto;
-    }
+    header { margin-bottom: 2rem; padding-bottom: 1.25rem; border-bottom: .5px solid var(--border); }
+    header h1 { font-size: 22px; font-weight: 500; margin-bottom: 6px; }
+    header p  { font-size: 14px; color: var(--text2); line-height: 1.65; }
 
-    /* ── Header ── */
-    header {
-      margin-bottom: 2rem;
-      padding-bottom: 1.25rem;
-      border-bottom: 0.5px solid var(--border);
-    }
-    header h1 {
-      font-size: 22px;
-      font-weight: 500;
-      margin-bottom: 6px;
-    }
-    header p {
-      font-size: 14px;
-      color: var(--text2);
-      line-height: 1.65;
-    }
-
-    /* ── Main grid ── */
     .main-grid {
-      display: grid;
-      grid-template-columns: 1fr 265px;
-      gap: 2rem;
-      align-items: start;
-      margin-bottom: 1.5rem;
+      display: grid; grid-template-columns: 1fr 370px;
+      gap: 2rem; align-items: start; margin-bottom: 1.5rem;
     }
-
-    @media (max-width: 580px) {
+    @media (max-width: 620px) {
       .main-grid { grid-template-columns: 1fr; }
       .circuit-wrap { display: flex; justify-content: center; }
     }
 
-    /* ── Circuit SVG ── */
-    .circuit-wrap svg {
-      display: block;
-      overflow: visible;
+    .circuit-wrap svg { display: block; overflow: visible; }
+
+    /* Mode toggle */
+    .mode-toggle {
+      display: flex; direction: ltr;
+      border: .5px solid var(--border2); border-radius: 20px;
+      overflow: hidden; margin-bottom: 1.25rem; width: fit-content;
     }
+    .mode-toggle button {
+      padding: 6px 16px; font-size: 13px; border: none;
+      background: transparent; color: var(--text2); cursor: pointer;
+      transition: background .2s, color .2s;
+    }
+    .mode-toggle button.active { background: var(--text); color: var(--bg); }
 
-    /* ── Controls ── */
-    .controls { display: flex; flex-direction: column; gap: 0; }
-
+    /* Sliders */
+    .controls { display: flex; flex-direction: column; }
     .slider-group { margin-bottom: 1.25rem; }
     .slider-group label {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 13px;
-      margin-bottom: 6px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 13px; margin-bottom: 6px;
     }
-    .slider-group label span:first-child { color: var(--text2); }
     .slider-val { font-weight: 500; font-size: 13px; }
     .slider-val.r1c { color: var(--r1-dark); }
     .slider-val.r2c { color: var(--r2-dark); }
 
     input[type=range] {
-      width: 100%;
-      height: 4px;
-      -webkit-appearance: none;
-      appearance: none;
-      background: var(--bg3);
-      border-radius: 2px;
-      outline: none;
-      cursor: pointer;
+      width: 100%; height: 4px; -webkit-appearance: none; appearance: none;
+      background: var(--bg3); border-radius: 2px; outline: none; cursor: pointer;
     }
     input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 18px; height: 18px;
-      border-radius: 50%;
-      background: var(--text);
-      cursor: pointer;
-      border: 2px solid var(--bg);
-      box-shadow: 0 0 0 1px var(--border2);
+      -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+      background: var(--text); cursor: pointer;
+      border: 2px solid var(--bg); box-shadow: 0 0 0 1px var(--border2);
     }
     input[type=range]::-moz-range-thumb {
-      width: 16px; height: 16px;
-      border-radius: 50%;
-      background: var(--text);
-      cursor: pointer;
-      border: 2px solid var(--bg);
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--text); cursor: pointer; border: 2px solid var(--bg);
     }
-    #slR1::-webkit-slider-thumb { background: var(--r1); }
-    #slR1::-moz-range-thumb      { background: var(--r1); }
-    #slR2::-webkit-slider-thumb { background: var(--r2); }
-    #slR2::-moz-range-thumb      { background: var(--r2); }
+    #slR1::-webkit-slider-thumb,#slR1::-moz-range-thumb { background: var(--r1); }
+    #slR2::-webkit-slider-thumb,#slR2::-moz-range-thumb { background: var(--r2); }
+    #slPot::-webkit-slider-thumb,#slPot::-moz-range-thumb { background: var(--amber); }
 
-    /* ── Result card ── */
+    /* Pot */
+    #potSection { display: none; }
+    .pot-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 8px 0 16px; }
+    .pot-axis { display: flex; align-items: center; gap: 8px; direction: ltr; width: 100%; }
+    .pot-axis span { font-size: 11px; white-space: nowrap; }
+    .pot-rvals { font-size: 12px; color: var(--text2); direction: ltr; text-align: center; }
+    .pot-rvals b.r1c { color: var(--r1-dark); }
+    .pot-rvals b.r2c { color: var(--r2-dark); }
+
+    /* Result card */
     .result-card {
-      background: var(--bg2);
-      border-radius: var(--radius-lg);
-      padding: 1rem 1.25rem;
-      border: 0.5px solid var(--border);
+      background: var(--bg2); border-radius: 14px;
+      padding: 1rem 1.25rem; border: .5px solid var(--border);
+      margin-bottom: 14px;
     }
-    .result-card .label {
-      font-size: 11px;
-      color: var(--text3);
-      margin-bottom: 5px;
-      text-transform: uppercase;
-      letter-spacing: .04em;
-    }
+    .result-card .label { font-size: 11px; color: var(--text3); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .04em; }
     .result-card .formula {
-      font-size: 12px;
-      color: var(--text2);
-      font-family: "SF Mono", "Fira Mono", monospace;
-      direction: ltr;
-      margin-bottom: 10px;
-      padding: 6px 8px;
-      background: var(--bg3);
-      border-radius: var(--radius-sm);
+      font-size: 12px; color: var(--text2); font-family: "SF Mono","Fira Mono",monospace;
+      direction: ltr; margin-bottom: 10px; padding: 6px 8px;
+      background: var(--bg3); border-radius: 6px;
     }
-    .result-card .vout-row {
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-      direction: rtl;
-    }
-    .result-card .vout-num {
-      font-size: 32px;
-      font-weight: 500;
-      color: var(--r2-dark);
-      transition: color .3s;
-    }
-    .result-card .vout-unit { font-size: 18px; color: var(--text2); }
-    .result-card .vout-desc { font-size: 13px; color: var(--text3); margin-right: 8px; }
+    .vout-row { display: flex; align-items: baseline; gap: 6px; direction: rtl; }
+    .vout-num  { font-size: 32px; font-weight: 500; color: var(--r2-dark); transition: color .3s; }
+    .vout-unit { font-size: 18px; color: var(--text2); }
+    .vout-desc { font-size: 13px; color: var(--text3); margin-right: 8px; }
 
-    /* ── Bar chart ── */
+    /* Toggle switch */
+    .toggle-row { display: flex; align-items: center; gap: 10px; cursor: pointer; direction: rtl; user-select: none; }
+    .sw { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+    .sw input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; margin: 0; z-index: 1; }
+    .sw-track { position: absolute; inset: 0; background: var(--r1-light); border-radius: 10px; transition: background .2s; }
+    .sw-thumb { position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+
+    /* Bars */
     .bars-section { margin-bottom: 1.25rem; }
-    .bars-section .section-title {
-      font-size: 12px;
-      color: var(--text3);
-      margin-bottom: 10px;
-      direction: rtl;
-    }
-    .bar-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
-    }
-    .bar-row .bar-lbl {
-      font-size: 12px;
-      font-weight: 500;
-      min-width: 66px;
-      text-align: right;
-      direction: rtl;
-    }
-    .bar-row .bar-lbl.r1c { color: var(--r1-dark); }
-    .bar-row .bar-lbl.r2c { color: var(--r2-dark); }
+    .section-title { font-size: 12px; color: var(--text3); margin-bottom: 10px; direction: rtl; }
+    .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .bar-lbl { font-size: 12px; font-weight: 500; min-width: 66px; text-align: right; direction: rtl; }
+    .bar-lbl.r1c { color: var(--r1-dark); }
+    .bar-lbl.r2c { color: var(--r2-dark); }
     .bar-track {
-      flex: 1;
-      height: 22px;
-      background: var(--bg2);
-      border-radius: 5px;
-      overflow: hidden;
-      border: 0.5px solid var(--border);
-      cursor: pointer;
-      transition: border-color .2s;
+      flex: 1; height: 22px; background: var(--bg2); border-radius: 5px;
+      overflow: hidden; border: .5px solid var(--border); cursor: pointer; transition: border-color .2s;
     }
     .bar-track:hover { border-color: var(--border2); }
-    .bar-row { position: relative; }
-    .bar-fill {
-      height: 100%;
-      border-radius: 5px;
-      transition: width .5s cubic-bezier(.4,0,.2,1);
-      min-width: 4px;
-    }
+    .bar-fill { height: 100%; border-radius: 5px; transition: width .5s cubic-bezier(.4,0,.2,1); min-width: 4px; }
     #br1 { background: var(--r1-light); }
     #br2 { background: var(--r2-light); }
-    .bar-info {
-      font-size: 12px;
-      font-weight: 500;
-      min-width: 96px;
-      direction: ltr;
-    }
+    .bar-info { font-size: 12px; font-weight: 500; min-width: 96px; direction: ltr; }
     .bar-info.r1c { color: var(--r1-dark); }
     .bar-info.r2c { color: var(--r2-dark); }
+    .bar-hint { font-size: 11px; color: var(--text3); direction: rtl; margin-top: 5px; }
 
-    /* ── Insight ── */
+    /* Insight */
     #ins {
-      font-size: 14px;
-      padding: 12px 14px;
-      background: var(--bg2);
-      border: 0.5px solid var(--border);
-      border-left: 3px solid var(--r2);
-      border-radius: 0 8px 8px 0;
-      line-height: 1.75;
-      direction: ltr;
+      font-size: 14px; padding: 12px 14px; background: var(--bg2);
+      border: .5px solid var(--border); border-left: 3px solid var(--r2);
+      border-radius: 0 8px 8px 0; line-height: 1.75; direction: ltr;
       transition: border-left-color .3s;
     }
 
-    /* ── Footer ── */
-    footer {
-      margin-top: 2rem;
-      padding-top: 1rem;
-      border-top: 0.5px solid var(--border);
-      font-size: 12px;
-      color: var(--text3);
-      text-align: center;
-      direction: rtl;
-    }
+    footer { margin-top: 2rem; padding-top: 1rem; border-top: .5px solid var(--border); font-size: 12px; color: var(--text3); text-align: center; direction: rtl; }
   </style>
 </head>
 <body>
@@ -259,14 +171,19 @@
 
   <header>
     <h1>מחלק מתח</h1>
-    <p>שנה את ערכי הנגדים ומתח המקור וראה בזמן אמת כיצד מתחלק המתח. הנקודות הזהובות מדמות את הזרם — שים לב לשינוי מהירותן.</p>
+    <p>שנה את ערכי הנגדים ומתח המקור וראה בזמן אמת כיצד מתחלק המתח.</p>
   </header>
 
   <div class="main-grid">
 
-    <!-- ── Controls ── -->
+    <!-- Controls -->
     <div class="controls">
 
+      <!-- hidden inputs used by calc() -->
+      <input type="hidden" id="slR1" value="50">
+      <input type="hidden" id="slR2" value="50">
+
+      <!-- Vs -->
       <div class="slider-group">
         <label>
           <span>מתח מקור (Vₛ)</span>
@@ -275,24 +192,53 @@
         <input type="range" id="slVs" min="1" max="30" value="10" step="1" oninput="calc()">
       </div>
 
-      <div class="slider-group">
-        <label>
-          <span style="color:var(--r1-dark);">נגד 1 (R₁)</span>
-          <span class="slider-val r1c" id="lblR1" style="direction:ltr;">10 kΩ</span>
-        </label>
-        <input type="range" id="slR1" min="1" max="200" value="10" step="1" oninput="calc()">
+      <!-- Pot section -->
+      <div id="potSection">
+
+        <!-- Knob + wiper slider side by side -->
+        <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">
+          <svg width="80" height="72" viewBox="0 0 150 108" style="flex-shrink:0; direction:ltr;">
+            <!-- Background arc = R1 (red) -->
+            <path d="M18,98 A57,57 0 1 1 132,98"
+              fill="none" stroke="var(--r1-light)" stroke-width="7" stroke-linecap="round"/>
+            <!-- Active arc = R2 (blue), grows from GND toward Vs -->
+            <path id="potArcEl" d="M18,98 A57,57 0 1 1 132,98"
+              fill="none" stroke="var(--r2-light)" stroke-width="7" stroke-linecap="round"
+              stroke-dasharray="0 1000"/>
+            <line id="potWiperEl" x1="75" y1="72" x2="75" y2="15"
+              stroke="var(--text)" stroke-width="3.5" stroke-linecap="round"/>
+            <circle cx="75" cy="72" r="7" fill="var(--text2)"/>
+            <circle cx="75" cy="72" r="3" fill="var(--bg2)"/>
+            <text x="14"  y="108" font-size="10" text-anchor="middle" fill="var(--r2-dark)">GND</text>
+            <text x="136" y="108" font-size="10" text-anchor="middle" fill="var(--r1-dark)">Vs</text>
+          </svg>
+
+          <div style="flex:1; min-width:0;">
+            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px; direction:ltr;">
+              <span style="color:var(--r2-dark); font-weight:500;">← GND</span>
+              <span id="potBarPct" style="font-weight:600; color:var(--text);">50%</span>
+              <span style="color:var(--r1-dark); font-weight:500;">Vs →</span>
+            </div>
+            <input type="range" id="slPot" min="0" max="100" value="50"
+              style="width:100%; direction:ltr;" oninput="calcPot()" ondblclick="resetPot()" title="לחץ פעמיים לאיפוס ל-50kΩ">
+            <!-- Fill bar -->
+            <div style="height:8px; background:var(--r2-light); border-radius:4px; overflow:hidden; margin-top:8px;">
+              <div id="potBarR1" style="height:100%; width:50%; background:var(--r1-light); border-radius:4px; transition:width .25s ease; min-width:4px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- R values -->
+        <div style="display:flex; justify-content:space-between; font-size:12px; direction:ltr; margin-bottom:10px;">
+          <b class="r1c" id="lblPotR1">R₁ = 100 kΩ</b>
+          <b class="r2c" id="lblPotR2">R₂ = 100 kΩ</b>
+        </div>
+
       </div>
 
-      <div class="slider-group">
-        <label>
-          <span style="color:var(--r2-dark);">נגד 2 (R₂)</span>
-          <span class="slider-val r2c" id="lblR2" style="direction:ltr;">100 kΩ</span>
-        </label>
-        <input type="range" id="slR2" min="1" max="200" value="100" step="1" oninput="calc()">
-      </div>
-
-      <div class="result-card">
-        <div class="label">נוסחה חיה</div>
+      <!-- Result card -->
+      <div class="result-card" style="margin-top:14px;">
+        <div class="label">נוסחה</div>
         <div id="fml" class="formula">Vout = 10 × 100 / (10+100) = 9.09 V</div>
         <div class="vout-row">
           <span id="vbig" class="vout-num">9.09</span>
@@ -301,252 +247,481 @@
         </div>
       </div>
 
-      <!-- Toggle R1 bracket -->
-      <label style="display:flex; align-items:center; gap:10px; margin-top:14px; cursor:pointer; direction:rtl; user-select:none;">
-        <span style="font-size:13px; color:var(--r1-dark);">הצג חץ מתח על R₁</span>
-        <span style="font-size:13px; color:var(--text3);" id="r1BracketVal">(0.91V)</span>
-        <span style="position:relative; width:36px; height:20px; flex-shrink:0;">
-          <input type="checkbox" id="toggleR1" checked
-            onchange="document.getElementById('r1bracket').style.display = this.checked ? 'block' : 'none';"
-            style="position:absolute; opacity:0; width:100%; height:100%; cursor:pointer; margin:0; z-index:1;">
-          <span id="trackEl" style="position:absolute; inset:0; background:var(--r1-light); border-radius:10px; transition:background .2s;"></span>
-          <span id="thumbEl" style="position:absolute; top:2px; right:2px; width:16px; height:16px; background:#fff; border-radius:50%; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.25);"></span>
+      <!-- R1 bracket toggle -->
+      <label class="toggle-row">
+        <span style="font-size:13px;color:var(--r1-dark);">הצג חץ מתח על R₁</span>
+        <span style="font-size:13px;color:var(--text3);" id="r1BracketVal">(0.91V)</span>
+        <span class="sw">
+          <input type="checkbox" id="toggleR1" checked onchange="toggleR1Bracket(this.checked)">
+          <span class="sw-track" id="trackEl"></span>
+          <span class="sw-thumb" id="thumbEl"></span>
         </span>
       </label>
 
+      <!-- Load resistor toggle -->
+      <label id="rlToggleRow" class="toggle-row" style="margin-top:10px;">
+        <span style="font-size:13px; color:var(--rl-dark);">נגד עומס (R<tspan style="font-size:10px; vertical-align:sub;">L</tspan>)</span>
+        <span class="sw">
+          <input type="checkbox" id="toggleRL" onchange="toggleRL(this.checked)">
+          <span class="sw-track" id="rlTrackEl" style="background:var(--bg3);"></span>
+          <span class="sw-thumb" id="rlThumbEl" style="transform:translateX(-16px);"></span>
+        </span>
+      </label>
+      <div id="rlSliderSection" style="display:none; margin-top:10px;">
+        <div class="slider-group" style="margin-bottom:0;">
+          <label>
+            <span style="color:var(--rl-dark);">R_L</span>
+            <span style="font-weight:500; font-size:13px; color:var(--rl-dark); direction:ltr;" id="lblRL">10 kΩ</span>
+          </label>
+          <!-- Preset tabs -->
+          <div style="display:flex; direction:ltr; gap:6px; margin-bottom:8px;">
+            <button id="rlPreset1"  onclick="setRL(1)"   style="flex:1; padding:5px 0; font-size:12px; border-radius:6px; border:.5px solid var(--rl); background:var(--bg3); color:var(--rl-dark); cursor:pointer; transition:background .15s;">1 kΩ</button>
+            <button id="rlPreset10" onclick="setRL(10)"  style="flex:1; padding:5px 0; font-size:12px; border-radius:6px; border:.5px solid var(--rl); background:var(--rl-light); color:var(--rl-dark); cursor:pointer; font-weight:600; transition:background .15s;">10 kΩ</button>
+            <button id="rlPreset100" onclick="setRL(100)" style="flex:1; padding:5px 0; font-size:12px; border-radius:6px; border:.5px solid var(--rl); background:var(--bg3); color:var(--rl-dark); cursor:pointer; transition:background .15s;">100 kΩ</button>
+          </div>
+          <input type="range" id="slRL" min="1" max="500" value="10" step="1"
+            style="width:100%; accent-color:var(--rl);" oninput="updateRLPresets(); calc()">
+          <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text3); direction:ltr; margin-top:2px;">
+            <span>1 kΩ</span><span>500 kΩ</span>
+          </div>
+          <div style="margin-top:8px; padding:7px 10px; background:var(--bg3); border-radius:6px; font-size:12px; direction:ltr; color:var(--text2);">
+            R₂ ‖ R<tspan style="font-size:9px;vertical-align:sub;">L</tspan> =
+            <strong id="lblR2eff" style="color:var(--rl-dark);">9.09 kΩ</strong>
+            <span style="color:var(--text3); font-size:11px; margin-right:4px;">(effective load on Vout node)</span>
+          </div>
+        </div>
+
+        <!-- Buffer toggle — only in pot mode, inside RL section -->
+        <div id="bufToggleWrap" style="display:none;">
+          <label class="toggle-row" style="margin-top:12px;">
+            <span style="font-size:13px; color:var(--buf-dark);">הוסף באפר (Op-Amp)</span>
+            <span class="sw">
+              <input type="checkbox" id="toggleBuf" onchange="toggleBuf(this.checked)">
+              <span class="sw-track" id="bufTrackEl" style="background:var(--bg3);"></span>
+              <span class="sw-thumb" id="bufThumbEl" style="transform:translateX(-16px);"></span>
+            </span>
+          </label>
+          <!-- Comparison card — shown when buffer is on -->
+          <div id="bufCompCard" style="display:none; margin-top:10px; background:var(--bg2); border-radius:10px; padding:10px 12px; border:.5px solid var(--border); direction:ltr; font-size:13px;">
+            <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Buffer comparison</div>
+            <div style="font-size:11px; color:var(--buf-dark); margin-bottom:8px; direction:ltr;">
+              ∞ input impedance → R_L has <strong>zero effect</strong> on Vout
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+              <span style="color:var(--buf-dark);">✓ With buffer</span>
+              <strong id="lblBufVout" style="color:var(--buf-dark);font-size:16px;">5.00 V</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
+              <span style="color:var(--r1-dark);">✗ Without buffer</span>
+              <strong id="lblNoBufVout" style="color:var(--r1-dark);font-size:16px;">4.76 V</strong>
+            </div>
+            <div style="padding-top:7px;border-top:.5px solid var(--border);display:flex;justify-content:space-between;">
+              <span style="color:var(--text3);font-size:12px;">Vout drop without buffer</span>
+              <strong id="lblBufSaving" style="color:var(--buf-dark);">+0.24 V</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <!-- ── Circuit SVG ── -->
     <div class="circuit-wrap">
-      <svg width="315" viewBox="0 0 315 420">
+      <svg width="370" viewBox="0 0 370 420">
         <defs>
           <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5"
             markerWidth="5" markerHeight="5" orient="auto-start-reverse">
             <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke"
               stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </marker>
-          <!-- Circuit path used by animateMotion dots -->
-          <path id="cpath" d="M34,170 L34,34 L155,34 L155,62 L142,76 L168,91 L142,106 L168,121 L142,136 L168,151 L155,165 L155,224 L142,238 L168,253 L142,268 L168,283 L142,298 L168,313 L155,327 L155,386 L34,386 L34,212"/>
         </defs>
 
+        <!-- Hidden path used for getPointAtLength -->
+        <path id="cpath"
+          d="M34,170 L34,34 L155,34 L155,62 L142,76 L168,91 L142,106 L168,121 L142,136 L168,151 L155,165 L155,224 L142,238 L168,253 L142,268 L168,283 L142,298 L168,313 L155,327 L155,386 L34,386 L34,212"
+          fill="none" stroke="none" visibility="hidden"/>
+
         <!-- Wires -->
-        <line x1="34" y1="34" x2="34" y2="170" stroke="var(--text2)" stroke-width="2.5"/>
-        <line x1="34" y1="212" x2="34" y2="386" stroke="var(--text2)" stroke-width="2.5"/>
-        <line x1="34" y1="34" x2="155" y2="34" stroke="var(--text2)" stroke-width="2.5"/>
-        <line x1="34" y1="386" x2="155" y2="386" stroke="var(--text2)" stroke-width="2.5"/>
+        <line x1="34"  y1="34"  x2="34"  y2="170" stroke="var(--text2)" stroke-width="2.5"/>
+        <line x1="34"  y1="212" x2="34"  y2="386" stroke="var(--text2)" stroke-width="2.5"/>
+        <line x1="34"  y1="34"  x2="155" y2="34"  stroke="var(--text2)" stroke-width="2.5"/>
+        <line x1="34"  y1="386" x2="155" y2="386" stroke="var(--text2)" stroke-width="2.5"/>
 
         <!-- Battery -->
-        <line x1="22" y1="176" x2="46" y2="176" stroke="var(--text)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="22" y1="176" x2="46" y2="176" stroke="var(--text)" stroke-width="3"   stroke-linecap="round"/>
         <line x1="26" y1="186" x2="42" y2="186" stroke="var(--text)" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="22" y1="199" x2="46" y2="199" stroke="var(--text)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="22" y1="199" x2="46" y2="199" stroke="var(--text)" stroke-width="3"   stroke-linecap="round"/>
         <line x1="26" y1="209" x2="42" y2="209" stroke="var(--text)" stroke-width="1.5" stroke-linecap="round"/>
         <text x="50" y="181" font-size="13" direction="ltr" fill="var(--text2)">+</text>
         <text x="50" y="215" font-size="13" direction="ltr" fill="var(--text2)">−</text>
         <text id="svgVsLbl" x="50" y="200" font-size="11" font-weight="500" direction="ltr" fill="var(--text2)">10V</text>
 
-        <!-- R1 body -->
-        <line x1="155" y1="34" x2="155" y2="62" stroke="var(--text2)" stroke-width="2.5"/>
+        <!-- R1 -->
+        <line x1="155" y1="34"  x2="155" y2="62"  stroke="var(--text2)" stroke-width="2.5"/>
         <polyline id="r1z"
           points="155,62 142,76 168,91 142,106 168,121 142,136 168,151 155,165"
           fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
-          style="stroke:var(--text3); transition:stroke .3s;"/>
+          style="stroke:var(--text3);transition:stroke .3s;"/>
         <line x1="155" y1="165" x2="155" y2="194" stroke="var(--text2)" stroke-width="2.5"/>
+        <text id="r1lbl" x="178" y="104" font-size="12" font-weight="500"
+          text-anchor="start" direction="ltr" style="fill:var(--text3);transition:fill .3s;">R₁</text>
+        <text id="r1val" x="178" y="119" font-size="10"
+          text-anchor="start" direction="ltr" style="fill:var(--text3);transition:fill .3s;">10 kΩ</text>
 
-        <!-- R1 labels — right side of zigzag -->
-        <text id="r1lbl" x="186" y="104" font-size="12" font-weight="500"
-          text-anchor="start" direction="ltr" style="fill:var(--text3); transition:fill .3s;">R₁</text>
-        <text id="r1val" x="186" y="119" font-size="10"
-          text-anchor="start" direction="ltr" style="fill:var(--text3); transition:fill .3s;">10 kΩ</text>
-
-        <!-- Junction dot -->
+        <!-- Junction -->
         <circle cx="155" cy="194" r="4.5" fill="var(--text)" opacity=".55"/>
 
-        <!-- R2 body -->
+        <!-- R2 -->
         <line x1="155" y1="194" x2="155" y2="224" stroke="var(--text2)" stroke-width="2.5"/>
         <polyline id="r2z"
           points="155,224 142,238 168,253 142,268 168,283 142,298 168,313 155,327"
           fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
-          style="stroke:var(--text3); transition:stroke .3s;"/>
+          style="stroke:var(--text3);transition:stroke .3s;"/>
         <line x1="155" y1="327" x2="155" y2="386" stroke="var(--text2)" stroke-width="2.5"/>
+        <text id="r2lbl" x="178" y="266" font-size="12" font-weight="500"
+          text-anchor="start" direction="ltr" style="fill:var(--text3);transition:fill .3s;">R₂</text>
+        <text id="r2val" x="178" y="281" font-size="10"
+          text-anchor="start" direction="ltr" style="fill:var(--text3);transition:fill .3s;">100 kΩ</text>
 
-        <!-- R2 labels — right side of zigzag -->
-        <text id="r2lbl" x="186" y="266" font-size="12" font-weight="500"
-          text-anchor="start" direction="ltr" style="fill:var(--text3); transition:fill .3s;">R₂</text>
-        <text id="r2val" x="186" y="281" font-size="10"
-          text-anchor="start" direction="ltr" style="fill:var(--text3); transition:fill .3s;">100 kΩ</text>
-
-        <!-- Vout bracket -->
-        <line x1="155" y1="194" x2="248" y2="194" stroke="var(--border2)" stroke-width="1" stroke-dasharray="3 2"/>
-        <line x1="155" y1="386" x2="248" y2="386" stroke="var(--border2)" stroke-width="1" stroke-dasharray="3 2"/>
-        <line x1="246" y1="196" x2="246" y2="384"
+        <!-- Vout bracket (blue) — at x=292 -->
+        <line x1="155" y1="194" x2="292" y2="194" stroke="var(--border2)" stroke-width="1" stroke-dasharray="3 2"/>
+        <line x1="155" y1="386" x2="292" y2="386" stroke="var(--border2)" stroke-width="1" stroke-dasharray="3 2"/>
+        <line x1="290" y1="196" x2="290" y2="384"
           stroke="var(--r2)" stroke-width="1.5"
           marker-end="url(#arr)" marker-start="url(#arr)"/>
-        <text id="svgVoutLbl" x="251" y="297" font-size="11" font-weight="500" direction="ltr" fill="var(--r2)">9.09V</text>
+        <text x="295" y="284" font-size="9" direction="ltr" fill="var(--r2)">Vout</text>
+        <text id="svgVoutLbl" x="295" y="298" font-size="11" font-weight="500" direction="ltr" fill="var(--r2)">9.09V</text>
 
-        <!-- R1 voltage bracket (toggleable) -->
+        <!-- R1 voltage bracket (red, toggleable) — at x=308 -->
         <g id="r1bracket">
-          <line x1="155" y1="34" x2="278" y2="34" stroke="var(--border2)" stroke-width="1" stroke-dasharray="3 2"/>
-          <line x1="248" y1="194" x2="278" y2="194" stroke="var(--border2)" stroke-width="1" stroke-dasharray="3 2"/>
-          <line x1="276" y1="36" x2="276" y2="192"
+          <line x1="155" y1="34"  x2="308" y2="34"  stroke="var(--border2)" stroke-width="1" stroke-dasharray="3 2"/>
+          <line x1="292" y1="194" x2="308" y2="194" stroke="var(--border2)" stroke-width="1" stroke-dasharray="3 2"/>
+          <line x1="306" y1="36" x2="306" y2="192"
             stroke="var(--r1)" stroke-width="1.5"
             marker-end="url(#arr)" marker-start="url(#arr)"/>
-          <text id="svgVR1Lbl" x="281" y="120" font-size="11" font-weight="500" direction="ltr" fill="var(--r1)">0.91V</text>
+          <text x="311" y="107" font-size="9" direction="ltr" fill="var(--r1)">VR₁</text>
+          <text id="svgVR1Lbl" x="311" y="120" font-size="11" font-weight="500" direction="ltr" fill="var(--r1)">0.91V</text>
         </g>
 
-        <!-- Electron dots — 4 evenly spaced via phase-offset keyPoints -->
-        <circle r="4" fill="#EF9F27">
-          <animateMotion id="am1" dur="2.8s" repeatCount="indefinite" calcMode="linear">
-            <mpath href="#cpath"/>
-          </animateMotion>
-        </circle>
-        <circle r="4" fill="#EF9F27" opacity="0.8">
-          <animateMotion id="am2" dur="2.8s" repeatCount="indefinite" calcMode="linear"
-            keyTimes="0;0.75;0.75;1" keyPoints="0.25;1;0;0.25">
-            <mpath href="#cpath"/>
-          </animateMotion>
-        </circle>
-        <circle r="4" fill="#EF9F27" opacity="0.65">
-          <animateMotion id="am3" dur="2.8s" repeatCount="indefinite" calcMode="linear"
-            keyTimes="0;0.5;0.5;1" keyPoints="0.5;1;0;0.5">
-            <mpath href="#cpath"/>
-          </animateMotion>
-        </circle>
-        <circle r="4" fill="#EF9F27" opacity="0.5">
-          <animateMotion id="am4" dur="2.8s" repeatCount="indefinite" calcMode="linear"
-            keyTimes="0;0.25;0.25;1" keyPoints="0.75;1;0;0.75">
-            <mpath href="#cpath"/>
-          </animateMotion>
-        </circle>
+        <!-- R_L load resistor group (toggleable, green) — right of R2 at x=225 -->
+        <g id="rlGroup" style="display:none;">
+          <!-- Horizontal tap from junction going right -->
+          <line x1="155" y1="194" x2="225" y2="194" stroke="var(--rl)" stroke-width="2"/>
+          <!-- Junction dot at RL tap -->
+          <circle cx="225" cy="194" r="3.5" fill="var(--rl)" opacity=".75"/>
+          <!-- RL top stub -->
+          <line x1="225" y1="194" x2="225" y2="214" stroke="var(--rl)" stroke-width="2.5"/>
+          <!-- RL zigzag -->
+          <polyline
+            points="225,214 212,228 238,243 212,258 238,273 212,288 238,303 225,317"
+            fill="none" stroke="var(--rl)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- RL bottom stub to ground -->
+          <line x1="225" y1="317" x2="225" y2="386" stroke="var(--rl)" stroke-width="2.5"/>
+          <!-- Bottom ground connection -->
+          <line x1="155" y1="386" x2="225" y2="386" stroke="var(--rl)" stroke-width="2"/>
+          <!-- RL labels — right of zigzag -->
+          <text x="243" y="258" font-size="12" font-weight="500"
+            text-anchor="start" direction="ltr" style="fill:var(--rl);">R<tspan dy="3" font-size="8">L</tspan></text>
+          <text id="rlValSvg" x="243" y="275" font-size="10"
+            text-anchor="start" direction="ltr" style="fill:var(--rl);">10 kΩ</text>
+        </g>
+
+        <!-- Buffer op-amp group (shown in buffer mode) -->
+        <g id="bufGroup" style="display:none;">
+          <!-- Wire from Vout node to op-amp input -->
+          <line x1="155" y1="194" x2="192" y2="194" stroke="var(--buf)" stroke-width="2"/>
+          <!-- Op-amp triangle: inputs at left (192,183) and (192,205), output at right (222,194) -->
+          <polygon points="192,178 192,210 224,194"
+            fill="none" stroke="var(--buf)" stroke-width="2" stroke-linejoin="round"/>
+          <!-- + input label -->
+          <text x="196" y="192" font-size="9" fill="var(--buf)" direction="ltr">+</text>
+          <!-- − input label -->
+          <text x="196" y="207" font-size="9" fill="var(--buf)" direction="ltr">−</text>
+          <!-- Feedback: − input connected to output (unity gain) -->
+          <polyline points="224,194 232,194 232,224 184,224 184,205"
+            fill="none" stroke="var(--buf)" stroke-width="1.5" stroke-dasharray="3 2" stroke-linejoin="round"/>
+          <!-- Output wire to RL -->
+          <line x1="224" y1="194" x2="248" y2="194" stroke="var(--buf)" stroke-width="2"/>
+          <!-- RL zigzag -->
+          <line x1="248" y1="194" x2="248" y2="214" stroke="var(--buf)" stroke-width="2.5"/>
+          <polyline
+            points="248,214 235,228 261,243 235,258 261,273 235,288 261,303 248,317"
+            fill="none" stroke="var(--buf)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="248" y1="317" x2="248" y2="386" stroke="var(--buf)" stroke-width="2.5"/>
+          <line x1="155" y1="386" x2="248" y2="386" stroke="var(--buf)" stroke-width="2"/>
+          <!-- Labels -->
+          <text x="202" y="172" font-size="9" font-weight="500" text-anchor="middle" direction="ltr" fill="var(--buf)">Buffer</text>
+          <text x="262" y="258" font-size="11" font-weight="500" text-anchor="start" direction="ltr" style="fill:var(--buf);">R<tspan dy="3" font-size="8">L</tspan></text>
+          <text id="rlBufValSvg" x="262" y="274" font-size="10" text-anchor="start" direction="ltr" style="fill:var(--buf);">10 kΩ</text>
+        </g>
+
+        <!-- Electron dots — driven by rAF below -->
+        <circle id="dot1" r="4.5" fill="#EF9F27" style="display:none;" cx="-20" cy="-20"/>
+        <circle id="dot2" r="4.5" fill="#EF9F27" style="display:none;" cx="-20" cy="-20"/>
+        <circle id="dot3" r="4.5" fill="#EF9F27" style="display:none;" cx="-20" cy="-20"/>
+        <circle id="dot4" r="4.5" fill="#EF9F27" style="display:none;" cx="-20" cy="-20"/>
       </svg>
     </div>
-
   </div>
 
-  <!-- ── Bars ── -->
+  <!-- Bars -->
   <div class="bars-section">
     <div class="section-title">חלוקת המתח בין הנגדים:</div>
     <div class="bar-row">
       <span class="bar-lbl r1c">R₁</span>
-      <div class="bar-track" onclick="resetR(1)" title="לחץ לאפס ל-100kΩ">
+      <div class="bar-track" ondblclick="resetR(1)" title="לחץ פעמיים לאיפוס ל-100kΩ">
         <div id="br1" class="bar-fill" style="width:9%;"></div>
       </div>
       <span class="bar-info r1c" id="ir1">9% — 0.91V</span>
     </div>
     <div class="bar-row">
       <span class="bar-lbl r2c">R₂ = Vout</span>
-      <div class="bar-track" onclick="resetR(2)" title="לחץ לאפס ל-100kΩ">
+      <div class="bar-track" ondblclick="resetR(2)" title="לחץ פעמיים לאיפוס ל-100kΩ">
         <div id="br2" class="bar-fill" style="width:91%;"></div>
       </div>
       <span class="bar-info r2c" id="ir2">91% — 9.09V</span>
     </div>
-    <div style="font-size:11px; color:var(--text3); direction:rtl; margin-top:5px;">
-      לחץ על הבר לאיפוס ל-100kΩ
-    </div>
+    <div class="bar-hint">לחץ פעמיים על הבר לאיפוס ל-100kΩ</div>
   </div>
 
-  <!-- ── Insight ── -->
   <div id="ins">
-    💡 R₂ is <strong style="color:var(--r2-dark);">10×</strong> larger than R₁ → R₂ absorbs <strong style="color:var(--r2-dark);">91%</strong> of the voltage → Vout = <strong style="color:var(--r2-dark);">9.09V</strong><br>
-    <span style="color:var(--text3); font-size:12px;">R₂ is large → hard path to ground → voltage accumulates across R₂ → high Vout</span>
+    💡 R₂ is <strong style="color:var(--r2-dark);">10×</strong> larger than R₁
+    → R₂ absorbs <strong style="color:var(--r2-dark);">91%</strong> of the voltage
+    → Vout = <strong style="color:var(--r2-dark);">9.09V</strong><br>
+    <span style="color:var(--text3);font-size:12px;">R₂ is large → hard path to ground → voltage accumulates across R₂ → high Vout</span>
   </div>
 
-  <footer>
-    מבוסס על חוק אוהם ונוסחת מחלק המתח: Vout = Vs × R₂ / (R₁ + R₂)
-  </footer>
-
+  <footer>מבוסס על חוק אוהם ונוסחת מחלק המתח: Vout = Vs × R₂ / (R₁ + R₂)</footer>
 </div>
+
 <script>
-  document.getElementById('toggleR1').addEventListener('change', function() {
-    const on = this.checked;
-    document.getElementById('r1bracket').style.display = on ? 'block' : 'none';
-    document.getElementById('thumbEl').style.transform = on ? 'translateX(0)' : 'translateX(-16px)';
-    document.getElementById('trackEl').style.background = on ? 'var(--r1-light)' : 'var(--bg3)';
+/* ─── POTENTIOMETER KNOB ─── */
+const POT_CX = 75, POT_CY = 72, POT_R = 54, POT_TOTAL = 200;
+let ARC_LEN = 268; // will be set precisely on load
+
+function updateKnob(pos) {
+  const a  = (225 - 270 * pos) * Math.PI / 180;
+  const wx = POT_CX + (POT_R - 10) * Math.cos(a);
+  const wy = POT_CY - (POT_R - 10) * Math.sin(a);
+  document.getElementById('potWiperEl').setAttribute('x2', wx.toFixed(1));
+  document.getElementById('potWiperEl').setAttribute('y2', wy.toFixed(1));
+  document.getElementById('potArcEl').setAttribute('stroke-dasharray',
+    (pos * ARC_LEN).toFixed(1) + ' ' + (ARC_LEN * 2));
+}
+
+function updatePotTotalLabel() { /* removed - pot total is fixed */ }
+
+function calcPot() {
+  const pos   = +document.getElementById('slPot').value / 100; // 0=GND(left), 1=Vs(right)
+  const total = 100;
+  const r2 = Math.round(pos * total);   // grows toward Vs (right)
+  const r1 = total - r2;               // shrinks toward Vs
+  document.getElementById('slR1').value = r1;
+  document.getElementById('slR2').value = r2;
+  document.getElementById('lblPotR1').textContent = 'R₁ = ' + r1 + ' kΩ';
+  document.getElementById('lblPotR2').textContent = 'R₂ = ' + r2 + ' kΩ';
+  const pct = Math.round(pos * 100);
+  // Red = R1 portion (left), Blue background = R2 portion (right)
+  document.getElementById('potBarR1').style.width = Math.max(100 - pct, 2) + '%';
+  document.getElementById('potBarPct').textContent = pct + '%';
+  updateKnob(pos);
+  calc();
+}
+
+/* ─── ELECTRON TOGGLE ─── */
+let dotsVisible = true;
+function toggleElectrons(on) {
+  dotsVisible = on;
+  const opacity = on ? '' : '0';
+  ['dot1','dot2','dot3','dot4'].forEach(id => {
+    document.getElementById(id).style.opacity = on ? null : '0';
+  });
+  const dotsTrack = document.getElementById('dotsTrackEl');
+  const dotsThumb = document.getElementById('dotsThumbEl');
+  if (dotsTrack) { dotsTrack.style.background = 'var(--bg3)'; }
+  if (dotsThumb) { dotsThumb.style.transform = 'translateX(-16px)'; }
+}
+
+/* ─── MODE (pot only) ─── */
+function setMode(mode) {
+  document.getElementById('potSection').style.display = 'block';
+  document.getElementById('rlToggleRow').style.display = '';
+  document.getElementById('rlSliderSection').style.display = document.getElementById('toggleRL').checked ? 'block' : 'none';
+  updateBufToggleVisibility();
+  calcPot();
+}
+
+function updateBufToggleVisibility() {
+  const isPot = document.getElementById('potSection').style.display === 'block';
+  const rlOn  = document.getElementById('toggleRL').checked;
+  const wrap  = document.getElementById('bufToggleWrap');
+  if (wrap) wrap.style.display = (isPot && rlOn) ? 'block' : 'none';
+  // Hide buffer SVG if not in pot+rl mode
+  if (!isPot || !rlOn) {
+    const bufOn = document.getElementById('toggleBuf');
+    if (bufOn && bufOn.checked) { bufOn.checked = false; toggleBuf(false); }
+  }
+}
+
+/* ─── R1 BRACKET TOGGLE ─── */
+function toggleR1Bracket(on) {
+  document.getElementById('r1bracket').style.display = on ? 'block' : 'none';
+  document.getElementById('thumbEl').style.transform  = on ? 'translateX(0)' : 'translateX(-16px)';
+  document.getElementById('trackEl').style.background  = on ? 'var(--r1-light)' : 'var(--bg3)';
+}
+
+/* ─── R_L LOAD TOGGLE ─── */
+function toggleRL(on) {
+  document.getElementById('rlGroup').style.display        = on ? 'block' : 'none';
+  document.getElementById('rlSliderSection').style.display = on ? 'block' : 'none';
+  document.getElementById('rlThumbEl').style.transform    = on ? 'translateX(0)' : 'translateX(-16px)';
+  document.getElementById('rlTrackEl').style.background   = on ? 'var(--rl-light)' : 'var(--bg3)';
+  updateBufToggleVisibility();
+  calc();
+}
+
+/* ─── BUFFER TOGGLE ─── */
+function toggleBuf(on) {
+  document.getElementById('bufGroup').style.display    = on ? 'block' : 'none';
+  document.getElementById('rlGroup').style.display     = on ? 'none' : (document.getElementById('toggleRL').checked ? 'block' : 'none');
+  document.getElementById('bufCompCard').style.display = on ? 'block' : 'none';
+  document.getElementById('bufThumbEl').style.transform  = on ? 'translateX(0)' : 'translateX(-16px)';
+  document.getElementById('bufTrackEl').style.background = on ? 'var(--buf-light)' : 'var(--bg3)';
+  calc();
+}
+
+/* ─── RESET BAR / SLIDER ─── */
+function resetR(n) {
+  document.getElementById('slR' + n).value = 100;
+  calc();
+}
+
+/* ─── RL PRESETS ─── */
+function setRL(val) {
+  document.getElementById('slRL').value = val;
+  updateRLPresets();
+  calc();
+}
+
+function updateRLPresets() {
+  const val = +document.getElementById('slRL').value;
+  [['rlPreset1',1],['rlPreset10',10],['rlPreset100',100]].forEach(function([id, pval]) {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.style.background = val === pval ? 'var(--rl-light)' : 'var(--bg3)';
+    btn.style.fontWeight = val === pval ? '600' : '400';
+  });
+}
+
+function resetPot() {
+  document.getElementById('slPot').value = 50;
+  calcPot();
+}
+
+/* ─── MAIN CALC ─── */
+function calc() {
+  const vs = +document.getElementById('slVs').value;
+  const r1 = +document.getElementById('slR1').value;
+  const r2 = +document.getElementById('slR2').value;
+
+  // R_L load resistor — disabled when buffer is active (buffer isolates load)
+  const bufEl = document.getElementById('toggleBuf');
+  const isBuf = bufEl && bufEl.checked;
+  const rlOn  = !isBuf && document.getElementById('toggleRL').checked;
+  const rl    = rlOn ? +document.getElementById('slRL').value : Infinity;
+  const r2eff = (!rlOn || !isFinite(rl)) ? r2
+                : (r2 === 0 ? 0 : r2 * rl / (r2 + rl));
+
+  const vout = (r1 + r2eff) === 0 ? 0 : vs * r2eff / (r1 + r2eff);
+  const vr1  = vs - vout;
+  const p2   = (vs === 0) ? 0 : Math.round(vout / vs * 100);
+  const p1   = 100 - p2;
+
+  // Buffer mode comparison
+  if (isBuf) {
+    const rlBuf = +document.getElementById('slRL').value;
+    const voutBuf   = (r1 + r2) === 0 ? 0 : vs * r2 / (r1 + r2);
+    const r2noB     = (r2 === 0 || rlBuf === 0) ? 0 : r2 * rlBuf / (r2 + rlBuf);
+    const voutNoBuf = (r1 + r2noB) === 0 ? 0 : vs * r2noB / (r1 + r2noB);
+    const saving    = voutBuf - voutNoBuf;
+    document.getElementById('lblBufVout').textContent    = voutBuf.toFixed(2) + ' V';
+    document.getElementById('lblNoBufVout').textContent  = voutNoBuf.toFixed(2) + ' V';
+    document.getElementById('lblBufSaving').textContent  = (saving >= 0 ? '+' : '') + saving.toFixed(2) + ' V';
+    document.getElementById('lblBufSaving').style.color  = saving > 0.01 ? 'var(--buf-dark)' : 'var(--text3)';
+    document.getElementById('rlBufValSvg').textContent   = rlBuf + ' kΩ';
+    document.getElementById('bufGroup').style.display    = 'block';
+    document.getElementById('rlGroup').style.display     = 'none';
+  } else {
+    const bg = document.getElementById('bufGroup');
+    if (bg) bg.style.display = 'none';
+  }
+  document.getElementById('lblRL').textContent = (isFinite(rl) ? rl : +document.getElementById('slRL').value) + ' kΩ';
+
+  if (rlOn) {
+    document.getElementById('rlValSvg').textContent = rl + ' kΩ';
+    document.getElementById('lblR2eff').textContent = r2eff.toFixed(2) + ' kΩ';
+  }
+
+  document.getElementById('lblVs').textContent = vs + ' V';
+  document.getElementById('svgVsLbl').textContent    = vs + 'V';
+  document.getElementById('svgVoutLbl').textContent  = vout.toFixed(2) + 'V';
+  document.getElementById('svgVR1Lbl').textContent   = vr1.toFixed(2) + 'V';
+  document.getElementById('r1BracketVal').textContent = '(' + vr1.toFixed(2) + 'V)';
+  document.getElementById('r1val').textContent = r1 + ' kΩ';
+  document.getElementById('r2val').textContent = r2 + ' kΩ';
+  document.getElementById('fml').textContent = rlOn
+    ? 'Vout = ' + vs + ' × (R2‖RL) / (R1 + R2‖RL) = ' + vout.toFixed(2) + ' V   [R2‖RL = ' + r2eff.toFixed(1) + 'kΩ]'
+    : isBuf
+    ? 'Vout = ' + vs + ' × ' + r2 + ' / (' + r1 + '+' + r2 + ') = ' + vout.toFixed(2) + ' V  [buffered]'
+    : 'Vout = ' + vs + ' × ' + r2 + ' / (' + r1 + '+' + r2 + ') = ' + vout.toFixed(2) + ' V';
+  document.getElementById('vbig').textContent = vout.toFixed(2);
+  document.getElementById('br1').style.width = Math.max(p1, 2) + '%';
+  document.getElementById('br2').style.width = Math.max(p2, 2) + '%';
+  document.getElementById('ir1').textContent = p1 + '% — ' + vr1.toFixed(2) + 'V';
+  document.getElementById('ir2').textContent = p2 + '% — ' + vout.toFixed(2) + 'V';
+
+  const c1 = r1 > r2 ? 'var(--r1)' : 'var(--text3)';
+  const c2 = r2 >= r1 ? 'var(--r2)' : 'var(--text3)';
+  ['r1z','r1lbl','r1val'].forEach(id => {
+    const el = document.getElementById(id);
+    el.style[id === 'r1z' ? 'stroke' : 'fill'] = c1;
+  });
+  ['r2z','r2lbl','r2val'].forEach(id => {
+    const el = document.getElementById(id);
+    el.style[id === 'r2z' ? 'stroke' : 'fill'] = c2;
   });
 
-  function calc() {
-    const vs = +document.getElementById('slVs').value;
-    const r1 = +document.getElementById('slR1').value;
-    const r2 = +document.getElementById('slR2').value;
-
-    const vout = vs * r2 / (r1 + r2);
-    const vr1  = vs - vout;
-    const p2   = Math.round(vout / vs * 100);
-    const p1   = 100 - p2;
-
-    // Slider labels
-    document.getElementById('lblVs').textContent = vs + ' V';
-    document.getElementById('lblR1').textContent = r1 + ' kΩ';
-    document.getElementById('lblR2').textContent = r2 + ' kΩ';
-
-    // SVG labels
-    document.getElementById('svgVsLbl').textContent  = vs + 'V';
-    document.getElementById('svgVoutLbl').textContent = vout.toFixed(2) + 'V';
-    document.getElementById('svgVR1Lbl').textContent  = vr1.toFixed(2) + 'V';
-    document.getElementById('r1BracketVal').textContent = '(' + vr1.toFixed(2) + 'V)';
-    document.getElementById('r1val').textContent = r1 + ' kΩ';
-    document.getElementById('r2val').textContent = r2 + ' kΩ';
-
-    // Formula & result
-    document.getElementById('fml').textContent =
-      'Vout = ' + vs + ' × ' + r2 + ' / (' + r1 + '+' + r2 + ') = ' + vout.toFixed(2) + ' V';
-    document.getElementById('vbig').textContent = vout.toFixed(2);
-
-    // Bars
-    document.getElementById('br1').style.width = Math.max(p1, 2) + '%';
-    document.getElementById('br2').style.width = Math.max(p2, 2) + '%';
-    document.getElementById('ir1').textContent = p1 + '% — ' + vr1.toFixed(2) + 'V';
-    document.getElementById('ir2').textContent = p2 + '% — ' + vout.toFixed(2) + 'V';
-
-    // Circuit color: highlight the bigger resistor
-    const c1 = r1 > r2 ? 'var(--r1)' : 'var(--text3)';
-    const c2 = r2 >= r1 ? 'var(--r2)' : 'var(--text3)';
-    document.getElementById('r1z').style.stroke = c1;
-    document.getElementById('r2z').style.stroke = c2;
-    document.getElementById('r1lbl').style.fill = c1;
-    document.getElementById('r2lbl').style.fill = c2;
-    document.getElementById('r1val').style.fill = c1;
-    document.getElementById('r2val').style.fill = c2;
-
-    // Flow speed: faster = more current = lower resistance
-    const spd = (0.7 + Math.min((r1 + r2) / 40, 1) * 2.8).toFixed(1);
-    ['am1','am2','am3','am4'].forEach(function(id) {
-      document.getElementById(id).setAttribute('dur', spd + 's');
-    });
-
-    const ins = document.getElementById('ins');
-    if (Math.abs(r1 - r2) <= 2) {
-      ins.style.borderLeftColor = 'var(--text3)';
-      ins.innerHTML =
-        '⚖️ R₁ = R₂ — equal resistance to ground and source<br>'
-        + '<span style="color:var(--text3); font-size:12px;">Voltage splits evenly: each resistor gets ~50%</span>';
-    } else if (r2 > r1) {
-      const rt = (r2 / r1).toFixed(r2 / r1 < 2 ? 1 : 0);
-      ins.style.borderLeftColor = 'var(--r2)';
-      ins.innerHTML =
-        '💡 R₂ is <strong style="color:var(--r2-dark);">' + rt + '×</strong> larger than R₁'
-        + ' → R₂ absorbs <strong style="color:var(--r2-dark);">' + p2 + '%</strong> of the voltage'
-        + ' → Vout = <strong style="color:var(--r2-dark);">' + vout.toFixed(2) + 'V</strong><br>'
-        + '<span style="color:var(--text3); font-size:12px;">R₂ is large → hard path to ground → voltage accumulates across R₂ → high Vout</span>';
-    } else {
-      const rt = (r1 / r2).toFixed(r1 / r2 < 2 ? 1 : 0);
-      ins.style.borderLeftColor = 'var(--r1)';
-      ins.innerHTML =
-        '💡 R₁ is <strong style="color:var(--r1-dark);">' + rt + '×</strong> larger than R₂'
-        + ' → R₁ absorbs <strong style="color:var(--r1-dark);">' + p1 + '%</strong> of the voltage'
-        + ' → Vout = <strong style="color:var(--r1-dark);">' + vout.toFixed(2) + 'V</strong><br>'
-        + '<span style="color:var(--text3); font-size:12px;">R₂ is small → easy path to ground → current escapes easily, most voltage drops on R₁ → low Vout</span>';
-    }
+  const ins = document.getElementById('ins');
+  if (Math.abs(r1 - r2) <= 2) {
+    ins.style.borderLeftColor = 'var(--text3)';
+    ins.innerHTML = '⚖️ R₁ = R₂ — equal resistance to ground and source<br>'
+      + '<span style="color:var(--text3);font-size:12px;">Voltage splits evenly ~50% each</span>';
+  } else if (r2 > r1) {
+    const rt = (r2/r1).toFixed(r2/r1 < 2 ? 1 : 0);
+    ins.style.borderLeftColor = 'var(--r2)';
+    ins.innerHTML = '💡 R₂ is <strong style="color:var(--r2-dark);">' + rt + '×</strong> larger than R₁'
+      + ' → R₂ absorbs <strong style="color:var(--r2-dark);">' + p2 + '%</strong> of the voltage'
+      + ' → Vout = <strong style="color:var(--r2-dark);">' + vout.toFixed(2) + 'V</strong><br>'
+      + '<span style="color:var(--text3);font-size:12px;">R₂ is large → hard path to ground → voltage accumulates across R₂ → high Vout</span>';
+  } else {
+    const rt = (r1/r2).toFixed(r1/r2 < 2 ? 1 : 0);
+    ins.style.borderLeftColor = 'var(--r1)';
+    ins.innerHTML = '💡 R₁ is <strong style="color:var(--r1-dark);">' + rt + '×</strong> larger than R₂'
+      + ' → R₁ absorbs <strong style="color:var(--r1-dark);">' + p1 + '%</strong> of the voltage'
+      + ' → Vout = <strong style="color:var(--r1-dark);">' + vout.toFixed(2) + 'V</strong><br>'
+      + '<span style="color:var(--text3);font-size:12px;">R₂ is small → easy path to ground → current escapes easily, most voltage drops on R₁ → low Vout</span>';
   }
+}
 
-  function resetR(n) {
-    const sl = document.getElementById('slR' + n);
-    sl.value = 100;
-    // flash the track to give feedback
-    const track = sl.closest('.slider-group').querySelector('input');
-    calc();
+/* ─── INIT ─── */
+window.addEventListener('load', function() {
+  const arcEl = document.getElementById('potArcEl');
+  if (arcEl && arcEl.getTotalLength) {
+    ARC_LEN = arcEl.getTotalLength();
   }
-
-  calc();
+  document.getElementById('potSection').style.display = 'block';
+  updateBufToggleVisibility();
+  calcPot();
+});
 </script>
 </body>
 </html>
