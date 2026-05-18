@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מגברי שרת – לימוד אינטרקטיבי</title>
+<style>
+  :root {
+    --bg:      #f7f6f2;
+    --surface: #ffffff;
+    --sf2:     #f0efe9;
+    --sf3:     #e8e6de;
+    --text:    #1c1c1a;
+    --text2:   #5c5b56;
+    --text3:   #9c9a92;
+    --border:  rgba(0,0,0,0.09);
+    --border2: rgba(0,0,0,0.16);
+    --accent:  #1c1c1a;
+    --blue:    #2272C3;
+    --green:   #0f6e56;
+    --red:     #c93030;
+    --r: 8px; --rl: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#141412; --surface:#1e1e1b; --sf2:#262624; --sf3:#2e2e2b;
+      --text:#e8e6de; --text2:#a8a69e; --text3:#5c5b56;
+      --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
+      --accent:#e8e6de; --blue:#5ba3e8; --green:#2ec090; --red:#e86060;
+    }
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:32px 20px 48px}
+  .page-wrap{max-width:720px;margin:0 auto}
+  header{margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+  header h1{font-size:22px;font-weight:600;letter-spacing:-0.3px;margin-bottom:3px}
+  header p{font-size:13px;color:var(--text2)}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
+  .tabs{display:flex;border-bottom:1px solid var(--border);background:var(--sf2);overflow-x:auto}
+  .tab-btn{padding:11px 16px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .14s,border-color .14s;font-family:inherit;white-space:nowrap}
+  .tab-btn.active{color:var(--text);background:var(--surface);border-bottom:2px solid var(--accent)}
+  .tab-btn:hover:not(.active){color:var(--text)}
+  .supply-bar{display:flex;align-items:center;gap:10px;padding:8px 20px;border-bottom:1px solid var(--border);background:var(--sf2)}
+  .supply-label{font-size:12px;color:var(--text2);min-width:100px;text-align:right}
+  .supply-val{font-family:'Courier New',monospace;font-size:12px;font-weight:600;color:var(--text);min-width:46px}
+  .panel{display:none;padding:20px}
+  .panel.active{display:block}
+  .schematic-wrap{background:var(--sf2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:16px;overflow:hidden}
+  .canvas-wrap{position:relative;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--sf2);margin-bottom:12px}
+  canvas{display:block;width:100%}
+  .pause-btn{position:absolute;top:8px;left:8px;width:30px;height:30px;border-radius:50%;border:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .12s;opacity:0.45;z-index:10;font-family:inherit;user-select:none}
+  .pause-btn:hover{opacity:1;color:var(--text)}
+  .pause-btn.paused{opacity:1;background:var(--sf3);color:var(--text)}
+  .wave-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .wave-label{font-size:12px;color:var(--text2);min-width:56px;text-align:right}
+  .wbtn{padding:4px 13px;border:1px solid var(--border2);border-radius:20px;font-size:12px;cursor:pointer;background:none;color:var(--text2);transition:all .12s;font-family:inherit}
+  .wbtn.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+  .wbtn:hover:not(.active){border-color:var(--text3);color:var(--text)}
+  .controls{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+  .ctrl-row{display:flex;align-items:center;gap:10px}
+  .ctrl-label{min-width:80px;font-size:12px;color:var(--text2);text-align:right}
+  input[type=range]{flex:1;height:4px;accent-color:var(--accent);cursor:pointer}
+  .ctrl-val{min-width:52px;text-align:left;font-family:'Courier New',monospace;font-size:12px;font-weight:600;color:var(--text)}
+  .formula-bar{
+    display:flex;align-items:stretch;
+    background:var(--sf2);border:1px solid var(--border);border-radius:var(--r);
+    overflow:hidden;margin-top:0;
+  }
+  .formula-cell{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:4px;padding:11px 14px;text-align:center;direction:ltr;
+  }
+  .formula-cell + .formula-cell{
+    border-right: 1px solid var(--border);   /* RTL: visually a left border */
+  }
+  .fc-label{font-size:10px;color:var(--text3);letter-spacing:0.04em;text-transform:uppercase}
+  .fc-formula{font-family:'Courier New',monospace;font-size:13px;font-weight:600;color:var(--text)}
+  .fc-value{font-family:'Courier New',monospace;font-size:22px;font-weight:700;line-height:1}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+  <header>
+    <h1>מגברי שרת — Op-Amp</h1>
+    <p>לימוד אינטרקטיבי · כניסה ויציאה בזמן אמת</p>
+  </header>
+
+  <div class="card">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab('buf')">Buffer</button>
+      <button class="tab-btn"        onclick="showTab('cmp')">Comparator</button>
+      <button class="tab-btn"        onclick="showTab('inv')">Inverting Amp</button>
+      <button class="tab-btn"        onclick="showTab('noninv')">Non-Inverting Amp</button>
+      <button class="tab-btn"        onclick="showTab('sum')">Summing Amp</button>
+      <button class="tab-btn"        onclick="showTab('pot')">Volume / Pot</button>
+      <button class="tab-btn"        onclick="showTab('preamp')">Pre-amp + Volume</button>
+    </div>
+    <div class="supply-bar">
+      <span class="supply-label">Supply voltage</span>
+      <input type="range" min="3" max="15" step="1.5" value="9" id="supply-slider"
+        style="flex:1;height:4px;accent-color:var(--accent);cursor:pointer"
+        oninput="updateSupply(+this.value)" ondblclick="resetSlider('supply-slider',9)">
+      <span class="supply-val">±<span id="supply-v">9</span> V</span>
+    </div>
+
+    <!-- ═══════ BUFFER ═══════ -->
+    <div class="panel active" id="tab-buf">
+      <div class="schematic-wrap">
+        <svg width="100%" viewBox="0 0 520 110" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="a0" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker></defs>
+          <!-- Vin -->
+          <line x1="20" y1="55" x2="150" y2="55" stroke="currentColor" stroke-width="1.4" opacity="0.6" marker-end="url(#a0)"/>
+          <text x="10" y="51" font-size="11" fill="currentColor" opacity="0.6" text-anchor="middle">Vin</text>
+          <!-- op-amp -->
+          <polygon points="150,25 150,85 260,55" fill="var(--sf2)" stroke="currentColor" stroke-width="1.5" opacity="0.85"/>
+          <text x="164" y="47" font-size="13" fill="currentColor" opacity="0.75">+</text>
+          <text x="164" y="71" font-size="13" fill="currentColor" opacity="0.75">–</text>
+          <!-- output -->
+          <line x1="260" y1="55" x2="400" y2="55" stroke="currentColor" stroke-width="1.4" opacity="0.6" marker-end="url(#a0)"/>
+          <circle cx="330" cy="55" r="3.5" fill="currentColor" opacity="0.65"/>
+          <text x="415" y="59" font-size="11" fill="currentColor" opacity="0.6" text-anchor="middle">Vout</text>
+          <!-- feedback -->
+          <line x1="330" y1="55"  x2="330" y2="93"  stroke="currentColor" stroke-width="1.4" opacity="0.5"/>
+          <line x1="330" y1="93"  x2="158" y2="93"  stroke="currentColor" stroke-width="1.4" opacity="0.5"/>
+          <line x1="158" y1="93"  x2="158" y2="76"  stroke="currentColor" stroke-width="1.4" opacity="0.5"/>
+          <text x="244" y="104" text-anchor="middle" font-size="9" fill="currentColor" opacity="0">
+        </svg>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="cv-buf" style="height:160px"></canvas>
+        <button class="pause-btn" id="pbtn-buf" onclick="togglePause()">⏸</button>
+      </div>
+      <div class="wave-row">
+        <span class="wave-label">Wave:</span>
+        <button class="wbtn active" onclick="setWave('buf','sine',this)">Sine</button>
+        <button class="wbtn" onclick="setWave('buf','tri',this)">Triangle</button>
+        <button class="wbtn" onclick="setWave('buf','sq',this)">Square</button>
+      </div>
+      <div class="controls">
+        <div class="ctrl-row">
+          <span class="ctrl-label">Amplitude</span>
+          <input type="range" min="0.5" max="9" step="0.1" value="3" id="buf-amp"
+            oninput="st.buf.amp=+this.value;byId('buf-amp-v').textContent=fmtV(this.value);byId('buf-vout-v').textContent=parseFloat(this.value).toFixed(2)+' V'"
+            ondblclick="resetSlider('buf-amp',3)">
+          <span class="ctrl-val" id="buf-amp-v">3.0 V</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label" style="color:var(--green)">Vout amp</span>
+          <div style="flex:1"></div>
+          <span class="ctrl-val" id="buf-vout-v" style="color:var(--green)">3.00 V</span>
+        </div>
+      </div>
+      <div class="formula-bar">
+        <div class="formula-cell">
+          <span class="fc-label">Buffer · Gain = 1</span>
+          <span class="fc-formula">Vout = Vin</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ COMPARATOR ═══════ -->
+    <div class="panel" id="tab-cmp">
+      <div class="schematic-wrap">
+        <svg width="100%" viewBox="0 0 520 110" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="a1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker></defs>
+          <line x1="20" y1="44" x2="150" y2="44" stroke="currentColor" stroke-width="1.4" opacity="0.6" marker-end="url(#a1)"/>
+          <text x="10" y="40" font-size="11" fill="currentColor" opacity="0.6" text-anchor="middle">Vin</text>
+          <line x1="20" y1="66" x2="150" y2="66" stroke="var(--blue)" stroke-width="1.4" opacity="0.75" marker-end="url(#a1)"/>
+          <text x="10" y="82" font-size="11" fill="var(--blue)" opacity="0.85" text-anchor="middle">Vref</text>
+          <polygon points="150,18 150,92 260,55" fill="var(--sf2)" stroke="currentColor" stroke-width="1.5" opacity="0.85"/>
+          <text x="164" y="47" font-size="13" fill="currentColor" opacity="0.75">+</text>
+          <text x="164" y="74" font-size="13" fill="currentColor" opacity="0.75">–</text>
+          <text x="275" y="16" font-size="9" fill="currentColor" opacity="0.35">no feedback</text>
+          <line x1="260" y1="55" x2="420" y2="55" stroke="currentColor" stroke-width="1.4" opacity="0.6" marker-end="url(#a1)"/>
+          <text x="435" y="59" font-size="11" fill="currentColor" opacity="0.6" text-anchor="middle">Vout</text>
+        </svg>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="cv-cmp" style="height:160px"></canvas>
+        <button class="pause-btn" id="pbtn-cmp" onclick="togglePause()">⏸</button>
+      </div>
+      <div class="wave-row">
+        <span class="wave-label">Wave:</span>
+        <button class="wbtn active" onclick="setWave('cmp','sine',this)">Sine</button>
+        <button class="wbtn" onclick="setWave('cmp','tri',this)">Triangle</button>
+        <button class="wbtn" onclick="setWave('cmp','sq',this)">Square</button>
+      </div>
+      <div class="controls">
+        <div class="ctrl-row">
+          <span class="ctrl-label">Amplitude</span>
+          <input type="range" min="0.5" max="9" step="0.1" value="3" id="cmp-amp"
+            oninput="st.cmp.amp=+this.value;byId('cmp-amp-v').textContent=fmtV(this.value)" ondblclick="resetSlider('cmp-amp',3)">
+          <span class="ctrl-val" id="cmp-amp-v">3.0 V</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label" style="color:var(--green)">Vout amp</span>
+          <div style="flex:1"></div>
+          <span class="ctrl-val" id="cmp-vout-v" style="color:var(--green)">±9.00 V</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Vref</span>
+          <input type="range" min="-8.5" max="8.5" step="0.1" value="1" id="cmp-vref"
+            oninput="st.cmp.vref=+this.value;byId('cmp-vref-v').textContent=fmtV(this.value)" ondblclick="resetSlider('cmp-vref',1)">
+          <span class="ctrl-val" id="cmp-vref-v">1.0 V</span>
+        </div>
+      </div>
+      <div class="formula-bar">
+        <div class="formula-cell">
+          <span class="fc-label">Comparator · no feedback</span>
+          <span class="fc-formula">Vout = +Vcc if Vin &gt; Vref, else −Vee</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ INVERTING AMP ═══════ -->
+    <div class="panel" id="tab-inv">
+      <div class="schematic-wrap">
+        <!--
+          Layout (y=0 top):
+          y=20  : R2 feedback wire level
+          y=62  : main signal wire (–) input level
+          y=85  : (+) input / GND junction level
+
+          x layout:
+          20  : Vin label
+          40  : wire start
+          80  : R1 zigzag start
+          170 : R1 zigzag end / junction
+          200 : op-amp left
+          310 : op-amp tip (output)
+          360 : output tap
+          490 : Vout label
+        -->
+        <svg width="100%" viewBox="0 0 520 148" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="a2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker></defs>
+
+          <!--
+            Op-amp: left x=200, tip x=310, center y=65
+            (–) pin: (200, 52)   ← top-left input
+            (+) pin: (200, 80)   ← bottom-left input
+          -->
+          <polygon points="200,24 200,106 310,65" fill="var(--sf2)" stroke="currentColor" stroke-width="1.5" opacity="0.85"/>
+          <text x="214" y="54" font-size="13" fill="currentColor" opacity="0.75">–</text>
+          <text x="214" y="82" font-size="13" fill="currentColor" opacity="0.75">+</text>
+
+          <!-- Vin label -->
+          <text x="10" y="49" font-size="11" fill="currentColor" opacity="0.6" text-anchor="middle">Vin</text>
+
+          <!-- Vin wire to R1 -->
+          <line x1="20" y1="52" x2="55" y2="52" stroke="currentColor" stroke-width="1.4" opacity="0.6" marker-end="url(#a2)"/>
+
+          <!-- R1 zigzag at y=52, from x=55 to x=160 -->
+          <line x1="55"  y1="52" x2="68"  y2="52" stroke="currentColor" stroke-width="1.3" opacity="0.65"/>
+          <polyline points="68,52 75,40 84,64 93,40 102,64 111,40 120,64 129,40 134,52"
+            fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.8"/>
+          <line x1="134" y1="52" x2="170" y2="52" stroke="currentColor" stroke-width="1.3" opacity="0.65"/>
+          <!-- R1 labels — below resistor -->
+          <text x="100" y="80" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.65">R1</text>
+          <text x="100" y="92" text-anchor="middle" font-size="10" fill="var(--blue)" opacity="0.9" id="inv-r1-lbl">50 kΩ</text>
+
+          <!-- node A at (170,52) — junction of R1, R2 feedback, and (–) pin -->
+          <circle cx="170" cy="52" r="3.5" fill="currentColor" opacity="0.65"/>
+          <!-- node A → (–) pin -->
+          <line x1="170" y1="52" x2="200" y2="52" stroke="currentColor" stroke-width="1.4" opacity="0.6"/>
+
+          <!-- (+) pin → short stub left → down → GND symbol -->
+          <line x1="200" y1="80" x2="176" y2="80"  stroke="currentColor" stroke-width="1.4" opacity="0.6"/>
+          <line x1="176" y1="80" x2="176" y2="94"  stroke="currentColor" stroke-width="1.4" opacity="0.6"/>
+          <line x1="162" y1="94"  x2="190" y2="94"  stroke="currentColor" stroke-width="1.8" opacity="0.65"/>
+          <line x1="166" y1="100" x2="186" y2="100" stroke="currentColor" stroke-width="1.2" opacity="0.45"/>
+          <line x1="170" y1="106" x2="182" y2="106" stroke="currentColor" stroke-width="0.8" opacity="0.3"/>
+
+          <!-- output wire + tap -->
+          <line x1="310" y1="65" x2="490" y2="65" stroke="currentColor" stroke-width="1.4" opacity="0.6" marker-end="url(#a2)"/>
+          <circle cx="400" cy="65" r="3.5" fill="currentColor" opacity="0.65"/>
+          <text x="505" y="69" font-size="11" fill="currentColor" opacity="0.6" text-anchor="middle">Vout</text>
+
+          <!-- R2 feedback: node A (170,52) → up to y=14 → R2 zigzag → right to x=400 → down to tap (400,65) -->
+          <line x1="170" y1="52" x2="170" y2="14" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <line x1="170" y1="14" x2="240" y2="14" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <polyline points="240,14 247,2 256,26 265,2 274,26 283,2 292,26 301,2 306,14"
+            fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.8"/>
+          <line x1="306" y1="14" x2="400" y2="14" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <line x1="400" y1="14" x2="400" y2="65" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <!-- R2 labels — between zigzag and main wire -->
+          <text x="273" y="40" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.65">R2</text>
+          <text x="273" y="52" text-anchor="middle" font-size="10" fill="var(--green)" opacity="0.9" id="inv-r2-lbl">50 kΩ</text>
+        </svg>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="cv-inv" style="height:160px"></canvas>
+        <button class="pause-btn" id="pbtn-inv" onclick="togglePause()">⏸</button>
+      </div>
+      <div class="wave-row">
+        <span class="wave-label">Wave:</span>
+        <button class="wbtn active" onclick="setWave('inv','sine',this)">Sine</button>
+        <button class="wbtn" onclick="setWave('inv','tri',this)">Triangle</button>
+        <button class="wbtn" onclick="setWave('inv','sq',this)">Square</button>
+      </div>
+      <div class="controls">
+        <div class="ctrl-row">
+          <span class="ctrl-label">Amplitude</span>
+          <input type="range" min="0.5" max="9" step="0.1" value="2" id="inv-amp"
+            oninput="st.inv.amp=+this.value;byId('inv-amp-v').textContent=fmtV(this.value);updateInvVout()" ondblclick="resetSlider('inv-amp',3)">
+          <span class="ctrl-val" id="inv-amp-v">2.0 V</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label" style="color:var(--blue)">R1</span>
+          <input type="range" min="1" max="100" step="1" value="50" id="inv-r1"
+            oninput="updateInvGain()" ondblclick="resetSlider('inv-r1',50)">
+          <span class="ctrl-val" id="inv-r1-v" style="color:var(--blue)">50 kΩ</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label" style="color:var(--green)">R2</span>
+          <input type="range" min="1" max="100" step="1" value="50" id="inv-r2"
+            oninput="updateInvGain()" ondblclick="resetSlider('inv-r2',50)">
+          <span class="ctrl-val" id="inv-r2-v" style="color:var(--green)">50 kΩ</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label" style="color:var(--green)">Vout amp</span>
+          <div style="flex:1"></div>
+          <span class="ctrl-val" id="inv-vout-v" style="color:var(--green)">2.00 V</span>
+        </div>
+      </div>
+      <div class="formula-bar">
+        <div class="formula-cell">
+          <span class="fc-label">Gain</span>
+          <span class="fc-formula" id="inv-gain-fml">−R2/R1 = −50/50</span>
+          <span class="fc-value" id="inv-gain-num" style="color:var(--red)">−1.00×</span>
+        </div>
+        <div class="formula-cell">
+          <span class="fc-label">Output</span>
+          <span class="fc-formula">Vout = −(R2/R1) × Vin</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ NON-INVERTING AMP ═══════ -->
+    <div class="panel" id="tab-noninv">
+      <div class="schematic-wrap">
+        <!--
+          y=55  : (+) input / Vin level
+          y=75  : (–) input level
+          y=120 : junction (R1 bottom of vertical, R2 right end)
+          x:
+          20  : Vin
+          150 : op-amp left
+          260 : op-amp tip
+          340 : output tap
+          490 : Vout
+          90  : junction (left side)
+        -->
+        <svg width="100%" viewBox="0 0 520 215" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="a3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker></defs>
+
+          <!-- Vin → (+) -->
+          <line x1="20" y1="55" x2="150" y2="55" stroke="currentColor" stroke-width="1.4" opacity="0.6" marker-end="url(#a3)"/>
+          <text x="10" y="51" font-size="11" fill="currentColor" opacity="0.6" text-anchor="middle">Vin</text>
+
+          <!-- op-amp -->
+          <polygon points="150,25 150,97 260,61" fill="var(--sf2)" stroke="currentColor" stroke-width="1.5" opacity="0.85"/>
+          <text x="164" y="50" font-size="13" fill="currentColor" opacity="0.75">+</text>
+          <text x="164" y="80" font-size="13" fill="currentColor" opacity="0.75">–</text>
+
+          <!-- output tap -->
+          <line x1="260" y1="61" x2="490" y2="61" stroke="currentColor" stroke-width="1.4" opacity="0.6" marker-end="url(#a3)"/>
+          <circle cx="360" cy="61" r="3.5" fill="currentColor" opacity="0.65"/>
+          <text x="505" y="65" font-size="11" fill="currentColor" opacity="0.6" text-anchor="middle">Vout</text>
+
+          <!-- junction node -->
+          <circle cx="90" cy="120" r="3.5" fill="currentColor" opacity="0.65"/>
+
+          <!-- junction → up → (–) input -->
+          <line x1="90" y1="120" x2="90"  y2="73" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <line x1="90" y1="73"  x2="150" y2="73" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+
+          <!-- R2 zigzag from junction(90,120) → right → tap connection(360,120) -->
+          <line x1="90"  y1="120" x2="140" y2="120" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <polyline points="140,120 147,108 156,132 165,108 174,132 183,108 192,132 201,108 206,120"
+            fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.8"/>
+          <line x1="206" y1="120" x2="360" y2="120" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <line x1="360" y1="61"  x2="360" y2="120" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <!-- R2 label -->
+          <text x="173" y="146" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.65">R2</text>
+          <text x="173" y="159" text-anchor="middle" font-size="10" fill="var(--green)" opacity="0.9" id="noninv-r2-lbl">50 kΩ</text>
+
+          <!-- R1 zigzag from junction(90,120) → down to GND -->
+          <line x1="90" y1="120" x2="90" y2="133" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <polyline points="90,133 78,141 102,151 78,161 102,171 78,181 102,191"
+            fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.8"/>
+          <line x1="90" y1="191" x2="90"  y2="197" stroke="currentColor" stroke-width="1.3" opacity="0.5"/>
+          <!-- GND symbol immediately after R1 -->
+          <line x1="76"  y1="197" x2="104" y2="197" stroke="currentColor" stroke-width="1.8" opacity="0.65"/>
+          <line x1="80"  y1="203" x2="100" y2="203" stroke="currentColor" stroke-width="1.2" opacity="0.45"/>
+          <line x1="84"  y1="209" x2="96"  y2="209" stroke="currentColor" stroke-width="0.8" opacity="0.3"/>
+          <!-- R1 label -->
+          <text x="118" y="163" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.65">R1</text>
+          <text x="118" y="176" text-anchor="middle" font-size="10" fill="var(--blue)" opacity="0.9" id="noninv-r1-lbl">50 kΩ</text>
+        </svg>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="cv-noninv" style="height:160px"></canvas>
+        <button class="pause-btn" id="pbtn-noninv" onclick="togglePause()">⏸</button>
+      </div>
+      <div class="wave-row">
+        <span class="wave-label">Wave:</span>
+        <button class="wbtn active" onclick="setWave('noninv','sine',this)">Sine</button>
+        <button class="wbtn" onclick="setWave('noninv','tri',this)">Triangle</button>
+        <button class="wbtn" onclick="setWave('noninv','sq',this)">Square</button>
+      </div>
+      <div class="controls">
+        <div class="ctrl-row">
+          <span class="ctrl-label">Amplitude</span>
+          <input type="range" min="0.5" max="9" step="0.1" value="2" id="noninv-amp"
+            oninput="st.noninv.amp=+this.value;byId('noninv-amp-v').textContent=fmtV(this.value);updateNoninvVout()" ondblclick="resetSlider('noninv-amp',3)">
+          <span class="ctrl-val" id="noninv-amp-v">2.0 V</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label" style="color:var(--blue)">R1</span>
+          <input type="range" min="1" max="100" step="1" value="50" id="noninv-r1"
+            oninput="updateNoninvGain()" ondblclick="resetSlider('noninv-r1',50)">
+          <span class="ctrl-val" id="noninv-r1-v" style="color:var(--blue)">50 kΩ</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label" style="color:var(--green)">R2</span>
+          <input type="range" min="1" max="100" step="1" value="50" id="noninv-r2"
+            oninput="updateNoninvGain()" ondblclick="resetSlider('noninv-r2',50)">
+          <span class="ctrl-val" id="noninv-r2-v" style="color:var(--green)">50 kΩ</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label" style="color:var(--green)">Vout amp</span>
+          <div style="flex:1"></div>
+          <span class="ctrl-val" id="noninv-vout-v" style="color:var(--green)">4.00 V</span>
+        </div>
+      </div>
+      <div class="formula-bar">
+        <div class="formula-cell">
+          <span class="fc-label">Gain</span>
+          <span class="fc-formula" id="noninv-gain-fml">1 + R2/R1 = 1 + 50/50</span>
+          <span class="fc-value" id="noninv-gain-num" style="color:var(--green)">+2.00×</span>
+        </div>
+        <div class="formula-cell">
+          <span class="fc-label">Output</span>
+          <span class="fc-formula">Vout = (1 + R2/R1) × Vin</span>
+        </div>
+      </div>
+    </div>
+    <!-- ═══════ SUMMING AMP ═══════ -->
+    <div class="panel" id="tab-sum">
+      <div class="schematic-wrap">
+        <svg width="100%" viewBox="0 0 520 158" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="a4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker></defs>
+
+          <!--
+            Op-amp: left x=220, tip x=330
+            (–) pin at (220, 52)  ← top input
+            (+) pin at (220, 88)  ← bottom input
+            center y = 70
+          -->
+          <polygon points="220,24 220,116 330,70" fill="var(--sf2)" stroke="currentColor" stroke-width="1.5" opacity="0.85"/>
+          <text x="234" y="54" font-size="13" fill="currentColor" opacity="0.75">–</text>
+          <text x="234" y="90" font-size="13" fill="currentColor" opacity="0.75">+</text>
+
+          <!-- Node A at (170, 52) — junction of Rin1, Rin2, Rf and (–) -->
+          <circle cx="170" cy="52" r="3.5" fill="currentColor" opacity="0.65"/>
+          <line x1="170" y1="52" x2="220" y2="52" stroke="currentColor" stroke-width="1.4" opacity="0.6"/>
+
+          <!-- V1 (y=28) → Rin1 → turn down → Node A -->
+          <line x1="20" y1="28" x2="55" y2="28" stroke="currentColor" stroke-width="1.4" opacity="0.6" marker-end="url(#a4)"/>
+          <text x="10" y="25" font-size="11" fill="var(--blue)" opacity="0.85" text-anchor="middle">V1</text>
+          <text x="10" y="37" font-size="9" fill="var(--blue)" opacity="0.7" text-anchor="middle" id="sum-v1-svg">2.0 V</text>
+          <line x1="55"  y1="28" x2="68"  y2="28" stroke="currentColor" stroke-width="1.3" opacity="0.65"/>
+          <polyline points="68,28 75,16 84,40 93,16 102,40 111,16 120,40 129,16 134,28"
+            fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.8"/>
+          <line x1="134" y1="28" x2="170" y2="28" stroke="currentColor" stroke-width="1.3" opacity="0.65"/>
+          <line x1="170" y1="28" x2="170" y2="52" stroke="currentColor" stroke-width="1.3" opacity="0.65"/>
+          <text x="100" y="52" text-anchor="middle" font-size="10" fill="var(--blue)" opacity="0.65">Rin1</text>
+          <text x="100" y="63" text-anchor="middle" font-size="9"  fill="var(--blue)" opacity="0.9" id="sum-rin1-lbl">50 kΩ</text>
+
+          <!-- V2 (y=92) → Rin2 → turn up → Node A -->
+          <line x1="20" y1="92" x2="55" y2="92" stroke="currentColor" stroke-width="1.4" opacity="0.6" marker-end="url(#a4)"/>
+          <text x="10" y="107" font-size="11" fill="var(--green)" opacity="0.85" text-anchor="middle">V2</text>
+          <text x="10" y="119" font-size="9" fill="var(--green)" opacity="0.7" text-anchor="middle" id="sum-v2-svg">1.5 V</text>
+          <line x1="55"  y1="92" x2="68"  y2="92" stroke="currentColor" stroke-width="1.3" opacity="0.65"/>
+          <polyline points="68,92 75,80 84,104 93,80 102,104 111,80 120,104 129,80 134,92"
+            fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.8"/>
+          <line x1="134" y1="92" x2="170" y2="92" stroke="currentColor" stroke-width="1.3" opacity="0.65"/>
+          <line x1="170" y1="92" x2="170" y2="52" stroke="currentColor" stroke-width="1.3" opacity="0.65"/>
+          <text x="100" y="116" text-anchor="middle" font-size="10" fill="var(--green)" opacity="0.65">Rin2</text>
+          <text x="100" y="127" text-anchor="middle" font-size="9"  fill="var(--green)" opacity="0.9" id="sum-rin2-lbl">50 kΩ</text>
+
+          <!-- (+) pin → short stub left → down → GND symbol -->
+          <line x1="220" y1="88" x2="196" y2="88"  stroke="currentColor" stroke-width="1.4" opacity="0.6"/>
+          <line x1="196" y1="88" x2="196" y2="102" stroke="currentColor" stroke-width="1.4" opacity="0.6"/>
+          <line x1="182" y1="102" x2="210" y2="102" stroke="currentColor" stroke-width="1.8" opacity="0.65"/>
+          <line x1="186" y1="108" x2="206" y2="108" stroke="currentColor" stroke-width="1.2" opacity="0.45"/>
+          <line x1="190" y1="114" x2="202" y2="114" stroke="currentColor" stroke-width="0.8" opacity="0.3"/>
+
+          <!-- output tap + wire -->
+          <line x1="330" y1="70" x2="490" y2="70" stroke="currentColor" stroke-width="1.4" opacity="0.6" marker-end="url(#a4)"/>
+          <circle cx="420" cy="70" r="3.5" fill="currentColor" opacity="0.65"/>
+          <text x="505" y="74" font-size="11" fill="currentColor" opacity="0.6" text-anchor="middle">Vout</text>
+
+          <!-- Rf: Node A → up to y=8 → zigzag → right → down to tap -->
+          <line x1="170" y1="52" x2="170" y2="8" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <line x1="170" y1="8"  x2="245" y2="8" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <polyline points="245,8 252,-4 261,20 270,-4 279,20 288,-4 297,20 306,-4 311,8"
+            fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.8"/>
+          <line x1="311" y1="8"  x2="420" y2="8" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <line x1="420" y1="8"  x2="420" y2="70" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <text x="278" y="30" text-anchor="middle" font-size="10" fill="var(--red)" opacity="0.7">Rf</text>
+          <text x="278" y="41" text-anchor="middle" font-size="9"  fill="var(--red)" opacity="0.9" id="sum-rf-lbl">50 kΩ</text>
+        </svg>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="cv-sum" style="height:200px"></canvas>
+        <button class="pause-btn" id="pbtn-sum" onclick="togglePause()">⏸</button>
+      </div>
+
+      <!-- V1 section -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <button id="sum-v1-toggle" onclick="toggleSumInput(1)"
+          style="padding:3px 12px;border:1px solid var(--blue);border-radius:20px;font-size:12px;cursor:pointer;background:var(--blue);color:var(--bg);font-family:inherit;transition:all .12s">
+          V1 ON
+        </button>
+      </div>
+      <div id="sum-v1-section">
+        <div class="wave-row">
+          <span class="wave-label" style="color:var(--blue)">V1 wave:</span>
+          <button class="wbtn active" onclick="setSumWave(1,'sine',this)">Sine</button>
+          <button class="wbtn"        onclick="setSumWave(1,'tri', this)">Triangle</button>
+          <button class="wbtn"        onclick="setSumWave(1,'sq',  this)">Square</button>
+        </div>
+        <div class="controls" style="margin-bottom:8px">
+          <div class="ctrl-row">
+            <span class="ctrl-label" style="color:var(--blue)">V1 amp</span>
+            <input type="range" min="0.5" max="9" step="0.1" value="2" id="sum-v1"
+              oninput="st.sum.v1=+this.value;byId('sum-v1-v').textContent=fmtV(this.value);byId('sum-v1-svg').textContent=fmtV(this.value);updateSumVout()"
+              ondblclick="resetSlider('sum-v1',2)">
+            <span class="ctrl-val" id="sum-v1-v" style="color:var(--blue)">2.0 V</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- V2 section -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <button id="sum-v2-toggle" onclick="toggleSumInput(2)"
+          style="padding:3px 12px;border:1px solid var(--green);border-radius:20px;font-size:12px;cursor:pointer;background:var(--green);color:var(--bg);font-family:inherit;transition:all .12s">
+          V2 ON
+        </button>
+      </div>
+      <div id="sum-v2-section">
+        <div class="wave-row">
+          <span class="wave-label" style="color:var(--green)">V2 wave:</span>
+          <button class="wbtn active" onclick="setSumWave(2,'sine',this)">Sine</button>
+          <button class="wbtn"        onclick="setSumWave(2,'tri', this)">Triangle</button>
+          <button class="wbtn"        onclick="setSumWave(2,'sq',  this)">Square</button>
+        </div>
+        <div class="controls" style="margin-bottom:8px">
+          <div class="ctrl-row">
+            <span class="ctrl-label" style="color:var(--green)">V2 amp</span>
+            <input type="range" min="0.5" max="9" step="0.1" value="1.5" id="sum-v2"
+              oninput="st.sum.v2=+this.value;byId('sum-v2-v').textContent=fmtV(this.value);byId('sum-v2-svg').textContent=fmtV(this.value);updateSumVout()"
+              ondblclick="resetSlider('sum-v2',1.5)">
+            <span class="ctrl-val" id="sum-v2-v" style="color:var(--green)">1.5 V</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="ctrl-row">
+          <span class="ctrl-label" style="color:var(--red)">Rf</span>
+          <input type="range" min="1" max="100" step="1" value="50" id="sum-rf"
+            oninput="updateSumGain()" ondblclick="resetSlider('sum-rf',50)">
+          <span class="ctrl-val" id="sum-rf-v" style="color:var(--red)">50 kΩ</span>
+        </div>
+        <div class="ctrl-row" id="sum-rin1-row">
+          <span class="ctrl-label" style="color:var(--blue)">Rin1</span>
+          <input type="range" min="1" max="100" step="1" value="50" id="sum-rin1"
+            oninput="updateSumGain()" ondblclick="resetSlider('sum-rin1',50)">
+          <span class="ctrl-val" id="sum-rin1-v" style="color:var(--blue)">50 kΩ</span>
+        </div>
+        <div class="ctrl-row" id="sum-rin2-row">
+          <span class="ctrl-label" style="color:var(--green)">Rin2</span>
+          <input type="range" min="1" max="100" step="1" value="50" id="sum-rin2"
+            oninput="updateSumGain()" ondblclick="resetSlider('sum-rin2',50)">
+          <span class="ctrl-val" id="sum-rin2-v" style="color:var(--green)">50 kΩ</span>
+        </div>
+        <div class="ctrl-row" id="sum-gain1-row">
+          <span class="ctrl-label" style="color:var(--blue)">V1 gain</span>
+          <div style="flex:1"></div>
+          <span class="ctrl-val" id="sum-gain1-v" style="color:var(--blue)">−1.00×</span>
+        </div>
+        <div class="ctrl-row" id="sum-gain2-row">
+          <span class="ctrl-label" style="color:var(--green)">V2 gain</span>
+          <div style="flex:1"></div>
+          <span class="ctrl-val" id="sum-gain2-v" style="color:var(--green)">−1.00×</span>
+        </div>
+        <div class="ctrl-row" id="sum-out1-row">
+          <span class="ctrl-label" style="color:var(--blue)">V1→Vout</span>
+          <div style="flex:1"></div>
+          <span class="ctrl-val" id="sum-out1-v" style="color:var(--blue)">2.00 V</span>
+        </div>
+        <div class="ctrl-row" id="sum-out2-row">
+          <span class="ctrl-label" style="color:var(--green)">V2→Vout</span>
+          <div style="flex:1"></div>
+          <span class="ctrl-val" id="sum-out2-v" style="color:var(--green)">1.50 V</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label" style="color:var(--red)">Vout amp</span>
+          <div style="flex:1"></div>
+          <span class="ctrl-val" id="sum-vout-v" style="color:var(--red)">3.50 V</span>
+        </div>
+      </div>
+      <div class="formula-bar">
+        <div class="formula-cell">
+          <span class="fc-label">Weights</span>
+          <span class="fc-formula" id="sum-gain-fml">−Rf/Rin1 · V1 − Rf/Rin2 · V2</span>
+        </div>
+        <div class="formula-cell">
+          <span class="fc-label">Output</span>
+          <span class="fc-formula">Vout = −Rf·(V1/Rin1 + V2/Rin2)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ VOLUME / POT ═══════ -->
+    <div class="panel" id="tab-pot">
+      <div class="schematic-wrap">
+        <svg width="100%" viewBox="0 0 520 168" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="a5" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+          <marker id="a5w" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker></defs>
+
+          <!-- Vin label + wire into pot top -->
+          <text x="10" y="21" font-size="11" fill="currentColor" opacity="0.6" text-anchor="middle">Vin</text>
+          <line x1="10" y1="26" x2="10" y2="40" stroke="currentColor" stroke-width="1.4" opacity="0.6"/>
+
+          <!-- Pot body (vertical zigzag) at x=10, from y=40 to y=130 -->
+          <polyline points="10,40 0,50 20,62 0,74 20,86 0,98 20,110 10,120"
+            fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.8"/>
+
+          <!-- Pot bottom → GND -->
+          <line x1="10" y1="120" x2="10" y2="132" stroke="currentColor" stroke-width="1.4" opacity="0.5"/>
+          <line x1="-4"  y1="132" x2="24"  y2="132" stroke="currentColor" stroke-width="1.8" opacity="0.65"/>
+          <line x1="0"   y1="138" x2="20"  y2="138" stroke="currentColor" stroke-width="1.2" opacity="0.45"/>
+          <line x1="4"   y1="144" x2="16"  y2="144" stroke="currentColor" stroke-width="0.8" opacity="0.3"/>
+
+          <!-- Wiper arrow (fixed at middle of pot for schematic) -->
+          <line x1="32" y1="80" x2="10" y2="80" stroke="var(--blue)" stroke-width="1.4" opacity="0.8" marker-end="url(#a5w)"/>
+          <text x="28" y="72" font-size="9" fill="var(--blue)" opacity="0.75" text-anchor="middle">wiper</text>
+          <text x="28" y="96" font-size="9" fill="var(--blue)" opacity="0.75" text-anchor="middle" id="pot-pct-lbl">70%</text>
+
+          <!-- Wiper → Rin → Node A -->
+          <line x1="32" y1="80" x2="60" y2="80" stroke="currentColor" stroke-width="1.3" opacity="0.65"/>
+          <polyline points="60,80 67,68 76,92 85,68 94,92 103,68 112,92 121,68 126,80"
+            fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.8"/>
+          <line x1="126" y1="80" x2="165" y2="80" stroke="currentColor" stroke-width="1.3" opacity="0.65"/>
+          <text x="93" y="106" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.55">Rin</text>
+          <text x="93" y="117" text-anchor="middle" font-size="9"  fill="currentColor" opacity="0.7">100 kΩ</text>
+
+          <!-- Node A -->
+          <circle cx="165" cy="80" r="3.5" fill="currentColor" opacity="0.65"/>
+          <line x1="165" y1="80" x2="210" y2="80" stroke="currentColor" stroke-width="1.4" opacity="0.6"/>
+
+          <!-- Op-amp: left x=210, tip x=320 -->
+          <polygon points="210,48 210,112 320,80" fill="var(--sf2)" stroke="currentColor" stroke-width="1.5" opacity="0.85"/>
+          <text x="224" y="70" font-size="13" fill="currentColor" opacity="0.75">–</text>
+          <text x="224" y="98" font-size="13" fill="currentColor" opacity="0.75">+</text>
+
+          <!-- (+) → short stub → GND -->
+          <line x1="210" y1="96" x2="186" y2="96"  stroke="currentColor" stroke-width="1.4" opacity="0.6"/>
+          <line x1="186" y1="96" x2="186" y2="110" stroke="currentColor" stroke-width="1.4" opacity="0.6"/>
+          <line x1="172" y1="110" x2="200" y2="110" stroke="currentColor" stroke-width="1.8" opacity="0.65"/>
+          <line x1="176" y1="116" x2="196" y2="116" stroke="currentColor" stroke-width="1.2" opacity="0.45"/>
+          <line x1="180" y1="122" x2="192" y2="122" stroke="currentColor" stroke-width="0.8" opacity="0.3"/>
+
+          <!-- Output tap + wire -->
+          <line x1="320" y1="80" x2="490" y2="80" stroke="currentColor" stroke-width="1.4" opacity="0.6" marker-end="url(#a5)"/>
+          <circle cx="410" cy="80" r="3.5" fill="currentColor" opacity="0.65"/>
+          <text x="505" y="84" font-size="11" fill="currentColor" opacity="0.6" text-anchor="middle">Vout</text>
+
+          <!-- Rf feedback: Node A → up → zigzag → down to tap -->
+          <line x1="165" y1="80" x2="165" y2="22" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <line x1="165" y1="22" x2="240" y2="22" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <polyline points="240,22 247,10 256,34 265,10 274,34 283,10 292,34 301,10 306,22"
+            fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.8"/>
+          <line x1="306" y1="22" x2="410" y2="22" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <line x1="410" y1="22" x2="410" y2="80" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <text x="273" y="45" text-anchor="middle" font-size="10" fill="var(--red)" opacity="0.7">Rf</text>
+          <text x="273" y="56" text-anchor="middle" font-size="9" fill="var(--red)" opacity="0.9" id="pot-rf-svg">100 kΩ</text>
+        </svg>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="cv-pot" style="height:200px"></canvas>
+        <button class="pause-btn" id="pbtn-pot" onclick="togglePause()">⏸</button>
+      </div>
+
+      <div class="wave-row">
+        <span class="wave-label">Wave:</span>
+        <button class="wbtn active" onclick="setWave('pot','sine',this)">Sine</button>
+        <button class="wbtn"        onclick="setWave('pot','tri', this)">Triangle</button>
+        <button class="wbtn"        onclick="setWave('pot','sq',  this)">Square</button>
+      </div>
+      <div class="controls">
+        <div class="ctrl-row">
+          <span class="ctrl-label">Vin amp</span>
+          <input type="range" min="0.5" max="9" step="0.1" value="4" id="pot-amp"
+            oninput="st.pot.amp=+this.value;byId('pot-amp-v').textContent=fmtV(this.value);updatePotVout()"
+            ondblclick="resetSlider('pot-amp',4)">
+          <span class="ctrl-val" id="pot-amp-v">4.0 V</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label" style="color:var(--blue)">Potentiometer</span>
+          <input type="range" min="0" max="100" step="1" value="70" id="pot-pos"
+            oninput="updatePot(+this.value)" ondblclick="resetSlider('pot-pos',70)">
+          <span class="ctrl-val" id="pot-pos-v" style="color:var(--blue)">70%</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label" style="color:var(--blue)">After pot</span>
+          <div style="flex:1"></div>
+          <span class="ctrl-val" id="pot-mid-v" style="color:var(--blue)">2.80 V</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label" style="color:var(--green)">Vout amp</span>
+          <div style="flex:1"></div>
+          <span class="ctrl-val" id="pot-vout-v" style="color:var(--green)">2.80 V</span>
+        </div>
+      </div>
+      <div class="formula-bar">
+        <div class="formula-cell">
+          <span class="fc-label">After pot · Rin = 100 kΩ</span>
+          <span class="fc-formula">Vpot = Vin × pot%</span>
+        </div>
+        <div class="formula-cell">
+          <span class="fc-label" id="pot-rf-label">Output · Rf = Rin = 100 kΩ</span>
+          <span class="fc-formula" id="pot-vout-formula">Vout = −Vpot</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ PRE-AMP + VOLUME ═══════ -->
+    <div class="panel" id="tab-preamp">
+      <div class="schematic-wrap">
+        <svg width="100%" viewBox="0 0 620 148" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="a6" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+          <marker id="a6b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker></defs>
+
+          <!-- ── STAGE 1: Pre-amp (inverting) ── -->
+          <text x="90" y="10" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.35">Stage 1 · Pre-amp</text>
+
+          <!-- Vin → Rin1 → Node A -->
+          <line x1="10" y1="55" x2="30" y2="55" stroke="currentColor" stroke-width="1.4" opacity="0.6" marker-end="url(#a6)"/>
+          <text x="10" y="46" font-size="10" fill="currentColor" opacity="0.6" text-anchor="middle">Vin</text>
+          <line x1="30" y1="55" x2="40" y2="55" stroke="currentColor" stroke-width="1.3" opacity="0.65"/>
+          <polyline points="40,55 46,44 53,66 60,44 67,66 74,44 81,66 87,44 91,55" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.8"/>
+          <line x1="91" y1="55" x2="118" y2="55" stroke="currentColor" stroke-width="1.3" opacity="0.65"/>
+          <text x="65" y="76" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.5">Rin</text>
+          <text x="65" y="86" text-anchor="middle" font-size="8" fill="currentColor" opacity="0.6">10 kΩ</text>
+          <circle cx="118" cy="55" r="3" fill="currentColor" opacity="0.65"/>
+          <line x1="118" y1="55" x2="148" y2="55" stroke="currentColor" stroke-width="1.4" opacity="0.6"/>
+
+          <!-- Op-amp 1 -->
+          <polygon points="148,25 148,85 238,55" fill="var(--sf2)" stroke="currentColor" stroke-width="1.5" opacity="0.85"/>
+          <text x="160" y="46" font-size="12" fill="currentColor" opacity="0.75">–</text>
+          <text x="160" y="72" font-size="12" fill="currentColor" opacity="0.75">+</text>
+
+          <!-- (+)1 → GND -->
+          <line x1="148" y1="68" x2="128" y2="68" stroke="currentColor" stroke-width="1.4" opacity="0.6"/>
+          <line x1="128" y1="68" x2="128" y2="80" stroke="currentColor" stroke-width="1.4" opacity="0.6"/>
+          <line x1="116" y1="80" x2="140" y2="80" stroke="currentColor" stroke-width="1.8" opacity="0.65"/>
+          <line x1="120" y1="86" x2="136" y2="86" stroke="currentColor" stroke-width="1.2" opacity="0.45"/>
+          <line x1="124" y1="92" x2="132" y2="92" stroke="currentColor" stroke-width="0.8" opacity="0.3"/>
+
+          <!-- Rf1 feedback (variable) -->
+          <line x1="118" y1="55" x2="118" y2="18" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <line x1="118" y1="18" x2="165" y2="18" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <polyline points="165,18 171,7 178,29 185,7 192,29 199,7 206,29 213,7 217,18" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.8"/>
+          <line x1="217" y1="18" x2="268" y2="18" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <line x1="268" y1="18" x2="268" y2="55" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <text x="193" y="37" text-anchor="middle" font-size="9" fill="var(--red)" opacity="0.7">Rf</text>
+          <text x="193" y="47" text-anchor="middle" font-size="8" fill="var(--red)" opacity="0.9" id="preamp-rf-lbl">50 kΩ</text>
+
+          <!-- stage 1 output to stage 2 -->
+          <line x1="238" y1="55" x2="268" y2="55" stroke="currentColor" stroke-width="1.3" opacity="0.6"/>
+          <circle cx="268" cy="55" r="3" fill="currentColor" opacity="0.65"/>
+          <line x1="268" y1="55" x2="310" y2="55" stroke="currentColor" stroke-width="1.4" opacity="0.6" marker-end="url(#a6)"/>
+
+          <!-- ── STAGE 2: Volume pot ── -->
+          <text x="430" y="10" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.35">Stage 2 · Volume</text>
+
+          <!-- Pot (vertical) at x=330 -->
+          <line x1="330" y1="30" x2="330" y2="40" stroke="currentColor" stroke-width="1.4" opacity="0.6"/>
+          <polyline points="330,40 320,48 340,57 320,66 340,75 320,84 340,93 330,98" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.8"/>
+          <line x1="330" y1="98" x2="330" y2="108" stroke="currentColor" stroke-width="1.4" opacity="0.5"/>
+          <line x1="318" y1="108" x2="342" y2="108" stroke="currentColor" stroke-width="1.8" opacity="0.65"/>
+          <line x1="322" y1="114" x2="338" y2="114" stroke="currentColor" stroke-width="1.2" opacity="0.45"/>
+          <line x1="326" y1="120" x2="334" y2="120" stroke="currentColor" stroke-width="0.8" opacity="0.3"/>
+
+          <!-- wire from stage1 down into pot top -->
+          <line x1="310" y1="55" x2="330" y2="55" stroke="currentColor" stroke-width="1.4" opacity="0.6"/>
+          <line x1="330" y1="30" x2="330" y2="55" stroke="currentColor" stroke-width="1.4" opacity="0.6"/>
+          <circle cx="330" cy="55" r="3" fill="currentColor" opacity="0.65"/>
+
+          <!-- wiper → output -->
+          <line x1="348" y1="68" x2="330" y2="68" stroke="var(--blue)" stroke-width="1.4" opacity="0.8" marker-end="url(#a6b)"/>
+          <text x="365" y="62" font-size="8" fill="var(--blue)" opacity="0.75" text-anchor="start" id="preamp-pot-lbl">70%</text>
+          <line x1="380" y1="68" x2="348" y2="68" stroke="currentColor" stroke-width="1.4" opacity="0.6"/>
+          <line x1="380" y1="68" x2="580" y2="68" stroke="currentColor" stroke-width="1.4" opacity="0.6" marker-end="url(#a6)"/>
+          <text x="600" y="72" font-size="10" fill="currentColor" opacity="0.6" text-anchor="middle">Vout</text>
+        </svg>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="cv-preamp" style="height:200px"></canvas>
+        <button class="pause-btn" id="pbtn-preamp" onclick="togglePause()">⏸</button>
+      </div>
+
+      <div class="wave-row">
+        <span class="wave-label">Wave:</span>
+        <button class="wbtn active" onclick="setWave('preamp','sine',this)">Sine</button>
+        <button class="wbtn"        onclick="setWave('preamp','tri', this)">Triangle</button>
+        <button class="wbtn"        onclick="setWave('preamp','sq',  this)">Square</button>
+      </div>
+      <div class="controls">
+        <div class="ctrl-row">
+          <span class="ctrl-label">Vin amp</span>
+          <input type="range" min="0.5" max="9" step="0.1" value="2" id="preamp-amp"
+            oninput="st.preamp.amp=+this.value;byId('preamp-amp-v').textContent=fmtV(this.value);updatePreampVout()"
+            ondblclick="resetSlider('preamp-amp',2)">
+          <span class="ctrl-val" id="preamp-amp-v">2.0 V</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label" style="color:var(--red)">Rf (gain)</span>
+          <input type="range" min="10" max="200" step="10" value="50" id="preamp-rf"
+            oninput="updatePreampRf(+this.value)" ondblclick="resetSlider('preamp-rf',50)">
+          <span class="ctrl-val" id="preamp-rf-v" style="color:var(--red)">50 kΩ</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label" style="color:var(--blue)">Volume</span>
+          <input type="range" min="0" max="100" step="1" value="70" id="preamp-vol"
+            oninput="updatePreampVol(+this.value)" ondblclick="resetSlider('preamp-vol',70)">
+          <span class="ctrl-val" id="preamp-vol-v" style="color:var(--blue)">70%</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label" style="color:var(--red)">After pre-amp</span>
+          <div style="flex:1"></div>
+          <span class="ctrl-val" id="preamp-mid-v" style="color:var(--red)">10.00 V</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label" style="color:var(--green)">Vout</span>
+          <div style="flex:1"></div>
+          <span class="ctrl-val" id="preamp-vout-v" style="color:var(--green)">7.00 V</span>
+        </div>
+      </div>
+      <div class="formula-bar">
+        <div class="formula-cell">
+          <span class="fc-label">Pre-amp · Rin = 10 kΩ</span>
+          <span class="fc-formula" id="preamp-gain-fml">Gain = −Rf/Rin = −50/10 = −5×</span>
+        </div>
+        <div class="formula-cell">
+          <span class="fc-label">Volume fader (0–100%)</span>
+          <span class="fc-formula">Vout = Vpre × vol%</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /card -->
+</div><!-- /page-wrap -->
+
+<script>
+const byId = s => document.getElementById(s);
+const fmtV = v => parseFloat(v).toFixed(1) + ' V';
+const fmtR = v => parseInt(v) + ' kΩ';
+
+function resetSlider(id, val) {
+  const el = byId(id);
+  if (!el) return;
+  el.value = val;
+  el.dispatchEvent(new Event('input'));
+}
+
+let VCC = 9;
+const st = {
+  buf:    { wave:'sine', amp:3 },
+  cmp:    { wave:'sine', amp:3, vref:1 },
+  inv:    { wave:'sine', amp:2, r1:50, r2:50 },
+  noninv: { wave:'sine', amp:2, r1:50, r2:50 },
+  sum:    { wave1:'sine', wave2:'sine', v1:2, v2:1.5, rf:50, rin1:50, rin2:50, v1on:true, v2on:true },
+  pot:    { wave:'sine', amp:4, pos:0.7, rf:100 },
+  preamp: { wave:'sine', amp:2, rf:50, vol:0.7 }
+};
+let ph = 0, paused = false;
+
+function invGain()    { return -(st.inv.r2 / st.inv.r1); }
+function noninvGain() { return 1 + (st.noninv.r2 / st.noninv.r1); }
+
+function fmtVout(v) {
+  const clamped = Math.min(VCC, v);
+  return clamped.toFixed(2) + ' V' + (v > VCC ? ' (clipped)' : '');
+}
+
+function toggleSumInput(n) {
+  const s = st.sum;
+  const key = n===1 ? 'v1on' : 'v2on';
+  s[key] = !s[key];
+  const on = s[key];
+  const color = n===1 ? 'var(--blue)' : 'var(--green)';
+  const btn = byId('sum-v'+n+'-toggle');
+  btn.textContent = 'V'+n+' '+(on?'ON':'OFF');
+  btn.style.background = on ? color : 'none';
+  btn.style.color = on ? 'var(--bg)' : color;
+  const show = on ? '' : 'none';
+  byId('sum-v'+n+'-section').style.display  = show;
+  byId('sum-rin'+n+'-row').style.display    = show;
+  byId('sum-gain'+n+'-row').style.display   = show;
+  byId('sum-out'+n+'-row').style.display    = show;
+  const svgLbl = byId('sum-v'+n+'-svg');
+  if (svgLbl) svgLbl.style.opacity = on ? '0.7' : '0.25';
+  updateSumVout();
+}
+
+function updateSumVout() {
+  const s = st.sum;
+  const out1 = s.v1on ? Math.min(VCC, (s.rf/s.rin1)*s.v1) : 0;
+  const out2 = s.v2on ? Math.min(VCC, (s.rf/s.rin2)*s.v2) : 0;
+  const total = Math.min(VCC, out1 + out2);
+  byId('sum-out1-v').textContent = s.v1on ? fmtVout(out1) : '—';
+  byId('sum-out2-v').textContent = s.v2on ? fmtVout(out2) : '—';
+  byId('sum-vout-v').textContent = fmtVout(total);
+}
+
+function updateSumGain() {
+  const rf   = +byId('sum-rf').value;
+  const rin1 = +byId('sum-rin1').value;
+  const rin2 = +byId('sum-rin2').value;
+  st.sum.rf = rf; st.sum.rin1 = rin1; st.sum.rin2 = rin2;
+  byId('sum-rf-v').textContent   = fmtR(rf);
+  byId('sum-rin1-v').textContent = fmtR(rin1);
+  byId('sum-rin2-v').textContent = fmtR(rin2);
+  byId('sum-rf-lbl').textContent   = fmtR(rf);
+  byId('sum-rin1-lbl').textContent = fmtR(rin1);
+  byId('sum-rin2-lbl').textContent = fmtR(rin2);
+  byId('sum-gain-fml').textContent =
+    `−${rf}/${rin1} · V1 − ${rf}/${rin2} · V2`;
+  byId('sum-gain1-v').textContent = (-(rf/rin1)).toFixed(2) + '×';
+  byId('sum-gain2-v').textContent = (-(rf/rin2)).toFixed(2) + '×';
+  updateSumVout();
+}
+
+function setSumWave(n, type, btn) {
+  if (n===1) st.sum.wave1 = type; else st.sum.wave2 = type;
+  btn.closest('.wave-row').querySelectorAll('.wbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function updatePotVout() {
+  const s = st.pot;
+  const gain = s.rf / 100;   /* Rf / Rin(100k) */
+  const mid  = Math.min(VCC, s.amp * s.pos);
+  const vout = Math.min(VCC, gain * mid);
+  byId('pot-mid-v').textContent  = fmtVout(mid);
+  byId('pot-vout-v').textContent = fmtVout(vout);
+}
+
+function updatePotRf(rf) {
+  st.pot.rf = rf;
+  byId('pot-rf-v').textContent = rf + ' kΩ';
+  byId('pot-rf-svg').textContent = rf + ' kΩ';
+  const gain = (rf / 100).toFixed(2);
+  byId('pot-rf-label').textContent = `Output · Rf = ${rf} kΩ`;
+  byId('pot-vout-formula').textContent = `Vout = −${gain} × Vpot`;
+  updatePotVout();
+}
+
+function updatePot(pct) {
+  st.pot.pos = pct / 100;
+  byId('pot-pos-v').textContent  = pct + '%';
+  byId('pot-pct-lbl').textContent = pct + '%';
+  updatePotVout();
+}
+
+function drawPotCanvas() {
+  const cv = byId('cv-pot'); if (!cv) return;
+  const dpr = window.devicePixelRatio || 1;
+  const CW = cv.offsetWidth, CH = cv.offsetHeight || 200;
+  if (!CW) return;
+  if (cv.width!==CW*dpr||cv.height!==CH*dpr){cv.width=CW*dpr;cv.height=CH*dpr;}
+
+  const ctx = cv.getContext('2d');
+  ctx.save(); ctx.scale(dpr,dpr); ctx.clearRect(0,0,CW,CH);
+
+  const dark = matchMedia('(prefers-color-scheme:dark)').matches;
+  const bgC   = dark?'rgba(255,255,255,0.02)':'rgba(0,0,0,0.018)';
+  const gridC = dark?'rgba(220,218,210,0.07)':'rgba(20,20,18,0.06)';
+  const zeroC = dark?'rgba(220,218,210,0.16)':'rgba(20,20,18,0.12)';
+  const tickC = dark?'rgba(220,218,210,0.38)':'rgba(20,20,18,0.32)';
+  const divC  = dark?'rgba(220,218,210,0.09)':'rgba(20,20,18,0.07)';
+  const blueC  = dark?'#5ba3e8':'#2272C3';
+  const greenC = dark?'#2ec090':'#0f6e56';
+  const redC   = dark?'#e86060':'#c93030';
+
+  const s = st.pot;
+  const rowH = CH/3, lbW=32, rbW=28, plotW=CW-lbW-rbW;
+  const vscale = rowH/2-8, CYCLES = 2;
+
+  const rows = [
+    { label:'Vin',  color:blueC,  getV:(t)=> sample(s.wave,t,s.amp) },
+    { label:'Vpot', color:redC,   getV:(t)=> sample(s.wave,t,s.amp*s.pos) },
+    { label:'Vout', color:greenC, getV:(t)=> {
+      const gain = s.rf / 100;
+      const v = sample(s.wave,t,s.amp*s.pos);
+      return Math.max(-VCC, Math.min(VCC, -gain * v));
+    }}
+  ];
+
+  ctx.strokeStyle=divC; ctx.lineWidth=1;
+  [1,2].forEach(i=>{
+    ctx.beginPath(); ctx.moveTo(lbW,i*rowH); ctx.lineTo(lbW+plotW,i*rowH); ctx.stroke();
+  });
+
+  rows.forEach(({label,color,getV},ri)=>{
+    const y0=ri*rowH, mid=y0+rowH/2;
+    ctx.fillStyle=bgC; ctx.fillRect(lbW,y0+2,plotW,rowH-4);
+    ctx.strokeStyle=gridC; ctx.lineWidth=0.5;
+    [-VCC/2,VCC/2].forEach(v=>{
+      const gy=mid-(v/VCC)*vscale;
+      ctx.beginPath(); ctx.moveTo(lbW,gy); ctx.lineTo(lbW+plotW,gy); ctx.stroke();
+    });
+    ctx.strokeStyle=zeroC; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(lbW,mid); ctx.lineTo(lbW+plotW,mid); ctx.stroke();
+    ctx.fillStyle=color; ctx.font='bold 10px sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(label,lbW/2,mid);
+    ctx.fillStyle=tickC; ctx.font='9px sans-serif';
+    ctx.textAlign='left'; ctx.textBaseline='middle';
+    [VCC,0,-VCC].forEach(v=>{
+      const ty=mid-(v/VCC)*vscale;
+      if(ty>y0+3&&ty<y0+rowH-3) ctx.fillText(v===0?'0':(v>0?'+':'')+v,lbW+plotW+3,ty);
+    });
+    ctx.strokeStyle=color; ctx.lineWidth=1.9; ctx.lineJoin='round'; ctx.beginPath();
+    for(let x=0;x<Math.floor(plotW);x++){
+      const t=(x/plotW)*CYCLES+ph;
+      const py=mid-(getV(t)/VCC)*vscale;
+      x===0?ctx.moveTo(lbW,py):ctx.lineTo(lbW+x,py);
+    }
+    ctx.stroke();
+  });
+  ctx.restore();
+}
+
+function updatePreampVout() {
+  const s = st.preamp;
+  const preGain = s.rf / 10;   /* Rf / Rin(10k) */
+  const vpre  = Math.min(VCC, preGain * s.amp);
+  const vout  = Math.min(VCC, vpre * s.vol);
+  byId('preamp-mid-v').textContent  = fmtVout(vpre);
+  byId('preamp-vout-v').textContent = fmtVout(vout);
+}
+
+function updatePreampRf(rf) {
+  st.preamp.rf = rf;
+  byId('preamp-rf-v').textContent  = rf + ' kΩ';
+  byId('preamp-rf-lbl').textContent = rf + ' kΩ';
+  const g = (rf/10).toFixed(1);
+  byId('preamp-gain-fml').textContent = `Gain = −Rf/Rin = −${rf}/10 = −${g}×`;
+  updatePreampVout();
+}
+
+function updatePreampVol(pct) {
+  st.preamp.vol = pct / 100;
+  byId('preamp-vol-v').textContent   = pct + '%';
+  byId('preamp-pot-lbl').textContent = pct + '%';
+  updatePreampVout();
+}
+
+function drawPreampCanvas() {
+  const cv = byId('cv-preamp'); if (!cv) return;
+  const dpr = window.devicePixelRatio || 1;
+  const CW = cv.offsetWidth, CH = cv.offsetHeight || 200;
+  if (!CW) return;
+  if (cv.width!==CW*dpr||cv.height!==CH*dpr){cv.width=CW*dpr;cv.height=CH*dpr;}
+  const ctx = cv.getContext('2d');
+  ctx.save(); ctx.scale(dpr,dpr); ctx.clearRect(0,0,CW,CH);
+
+  const dark = matchMedia('(prefers-color-scheme:dark)').matches;
+  const bgC   = dark?'rgba(255,255,255,0.02)':'rgba(0,0,0,0.018)';
+  const gridC = dark?'rgba(220,218,210,0.07)':'rgba(20,20,18,0.06)';
+  const zeroC = dark?'rgba(220,218,210,0.16)':'rgba(20,20,18,0.12)';
+  const tickC = dark?'rgba(220,218,210,0.38)':'rgba(20,20,18,0.32)';
+  const divC  = dark?'rgba(220,218,210,0.09)':'rgba(20,20,18,0.07)';
+  const blueC  = dark?'#5ba3e8':'#2272C3';
+  const greenC = dark?'#2ec090':'#0f6e56';
+  const redC   = dark?'#e86060':'#c93030';
+
+  const s = st.preamp;
+  const preGain = s.rf / 10;
+  const rowH = CH/3, lbW=32, rbW=28, plotW=CW-lbW-rbW;
+  const vscale = rowH/2-8, CYCLES=2;
+
+  const rows = [
+    { label:'Vin',  color:blueC,  getV:(t)=> sample(s.wave,t,s.amp) },
+    { label:'Vpre', color:redC,   getV:(t)=> Math.max(-VCC,Math.min(VCC,-preGain*sample(s.wave,t,s.amp))) },
+    { label:'Vout', color:greenC, getV:(t)=> {
+      const vpre = Math.max(-VCC,Math.min(VCC,-preGain*sample(s.wave,t,s.amp)));
+      return vpre * s.vol;
+    }}
+  ];
+
+  ctx.strokeStyle=divC; ctx.lineWidth=1;
+  [1,2].forEach(i=>{ctx.beginPath();ctx.moveTo(lbW,i*rowH);ctx.lineTo(lbW+plotW,i*rowH);ctx.stroke();});
+
+  rows.forEach(({label,color,getV},ri)=>{
+    const y0=ri*rowH, mid=y0+rowH/2;
+    ctx.fillStyle=bgC; ctx.fillRect(lbW,y0+2,plotW,rowH-4);
+    ctx.strokeStyle=gridC; ctx.lineWidth=0.5;
+    [-VCC/2,VCC/2].forEach(v=>{const gy=mid-(v/VCC)*vscale;ctx.beginPath();ctx.moveTo(lbW,gy);ctx.lineTo(lbW+plotW,gy);ctx.stroke();});
+    ctx.strokeStyle=zeroC; ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(lbW,mid);ctx.lineTo(lbW+plotW,mid);ctx.stroke();
+    ctx.fillStyle=color;ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(label,lbW/2,mid);
+    ctx.fillStyle=tickC;ctx.font='9px sans-serif';ctx.textAlign='left';ctx.textBaseline='middle';
+    [VCC,0,-VCC].forEach(v=>{const ty=mid-(v/VCC)*vscale;if(ty>y0+3&&ty<y0+rowH-3)ctx.fillText(v===0?'0':(v>0?'+':'')+v,lbW+plotW+3,ty);});
+    ctx.strokeStyle=color;ctx.lineWidth=1.9;ctx.lineJoin='round';ctx.beginPath();
+    for(let x=0;x<Math.floor(plotW);x++){
+      const t=(x/plotW)*CYCLES+ph;
+      const py=mid-(getV(t)/VCC)*vscale;
+      x===0?ctx.moveTo(lbW,py):ctx.lineTo(lbW+x,py);
+    }
+    ctx.stroke();
+  });
+  ctx.restore();
+}
+
+function updateInvVout() {
+  const v = Math.abs(invGain()) * st.inv.amp;
+  byId('inv-vout-v').textContent = fmtVout(v);
+}
+
+function updateNoninvVout() {
+  const v = noninvGain() * st.noninv.amp;
+  byId('noninv-vout-v').textContent = fmtVout(v);
+}
+
+function updateInvGain() {
+  const r1 = +byId('inv-r1').value, r2 = +byId('inv-r2').value;
+  st.inv.r1 = r1; st.inv.r2 = r2;
+  byId('inv-r1-v').textContent   = fmtR(r1);
+  byId('inv-r2-v').textContent   = fmtR(r2);
+  byId('inv-r1-lbl').textContent = fmtR(r1);
+  byId('inv-r2-lbl').textContent = fmtR(r2);
+  const g = -(r2/r1);
+  byId('inv-gain-num').textContent = g.toFixed(2) + '×';
+  byId('inv-gain-fml').textContent = `−R2/R1 = −${r2}/${r1}`;
+  updateInvVout();
+}
+
+function updateNoninvGain() {
+  const r1 = +byId('noninv-r1').value, r2 = +byId('noninv-r2').value;
+  st.noninv.r1 = r1; st.noninv.r2 = r2;
+  byId('noninv-r1-v').textContent   = fmtR(r1);
+  byId('noninv-r2-v').textContent   = fmtR(r2);
+  byId('noninv-r1-lbl').textContent = fmtR(r1);
+  byId('noninv-r2-lbl').textContent = fmtR(r2);
+  const g = 1 + r2/r1;
+  byId('noninv-gain-num').textContent = '+' + g.toFixed(2) + '×';
+  byId('noninv-gain-fml').textContent = `1 + R2/R1 = 1 + ${r2}/${r1}`;
+  updateNoninvVout();
+}
+
+function updateSupply(v) {
+  VCC = v;
+  byId('supply-v').textContent = v;
+  byId('cmp-vout-v').textContent = '±' + v.toFixed(2) + ' V';
+  ['buf-amp','cmp-amp','inv-amp','noninv-amp','sum-v1','sum-v2','pot-amp'].forEach(sid => {
+    const el = byId(sid); if (!el) return;
+    el.max = VCC;
+    if (+el.value > VCC) { el.value = VCC; el.dispatchEvent(new Event('input')); }
+  });
+  updateInvVout();
+  updateNoninvVout();
+  updateSumVout();
+  const vr = byId('cmp-vref');
+  if (vr) {
+    const lim = (VCC*0.95).toFixed(1);
+    vr.max = lim; vr.min = -lim;
+    if (+vr.value > +lim)  { vr.value =  lim; vr.dispatchEvent(new Event('input')); }
+    if (+vr.value < -+lim) { vr.value = -lim; vr.dispatchEvent(new Event('input')); }
+  }
+}
+
+function sample(type, t, amp) {
+  const p = ((t%1)+1)%1;
+  if (type==='sine') return amp*Math.sin(2*Math.PI*p);
+  if (type==='tri')  return amp*(p<0.25?4*p:p<0.75?2-4*p:4*p-4);
+  if (type==='sq')   return amp*(p<0.5?1:-1);
+  return 0;
+}
+
+function drawSumCanvas() {
+  const cv = byId('cv-sum'); if (!cv) return;
+  const dpr = window.devicePixelRatio || 1;
+  const CW = cv.offsetWidth, CH = cv.offsetHeight || 200;
+  if (!CW) return;
+  if (cv.width !== CW*dpr || cv.height !== CH*dpr) { cv.width=CW*dpr; cv.height=CH*dpr; }
+
+  const ctx = cv.getContext('2d');
+  ctx.save(); ctx.scale(dpr, dpr); ctx.clearRect(0,0,CW,CH);
+
+  const dark = matchMedia('(prefers-color-scheme:dark)').matches;
+  const bgC   = dark?'rgba(255,255,255,0.02)':'rgba(0,0,0,0.018)';
+  const gridC = dark?'rgba(220,218,210,0.07)':'rgba(20,20,18,0.06)';
+  const zeroC = dark?'rgba(220,218,210,0.16)':'rgba(20,20,18,0.12)';
+  const tickC = dark?'rgba(220,218,210,0.38)':'rgba(20,20,18,0.32)';
+  const divC  = dark?'rgba(220,218,210,0.09)':'rgba(20,20,18,0.07)';
+  const blueC  = dark?'#5ba3e8':'#2272C3';
+  const greenC = dark?'#2ec090':'#0f6e56';
+  const redC   = dark?'#e86060':'#c93030';
+
+  const s = st.sum;
+  const rowH = CH/3, lbW=32, rbW=28, plotW=CW-lbW-rbW;
+  const vscale = rowH/2-8, CYCLES=2;
+
+  const rows = [
+    { label:'V1',  color:blueC,  on:()=>s.v1on, getV:(t)=> sample(s.wave1,t,s.v1) },
+    { label:'V2',  color:greenC, on:()=>s.v2on, getV:(t)=> sample(s.wave2,t,s.v2) },
+    { label:'Vout',color:redC,   on:()=>true,   getV:(t)=> {
+      const v1=s.v1on?sample(s.wave1,t,s.v1):0, v2=s.v2on?sample(s.wave2,t,s.v2):0;
+      return Math.max(-VCC,Math.min(VCC, -s.rf*(v1/s.rin1 + v2/s.rin2)));
+    }}
+  ];
+
+  // dividers
+  ctx.strokeStyle=divC; ctx.lineWidth=1;
+  [1,2].forEach(i=>{
+    ctx.beginPath(); ctx.moveTo(lbW,i*rowH); ctx.lineTo(lbW+plotW,i*rowH); ctx.stroke();
+  });
+
+  rows.forEach(({label,color,on,getV},ri)=>{
+    const active = on();
+    const y0=ri*rowH, mid=y0+rowH/2;
+    ctx.fillStyle=bgC; ctx.fillRect(lbW,y0+2,plotW,rowH-4);
+    ctx.globalAlpha = active ? 1 : 0.25;
+    ctx.strokeStyle=gridC; ctx.lineWidth=0.5;
+    [-VCC/2,VCC/2].forEach(v=>{
+      const gy=mid-(v/VCC)*vscale;
+      ctx.beginPath(); ctx.moveTo(lbW,gy); ctx.lineTo(lbW+plotW,gy); ctx.stroke();
+    });
+    ctx.strokeStyle=zeroC; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(lbW,mid); ctx.lineTo(lbW+plotW,mid); ctx.stroke();
+    ctx.fillStyle=color; ctx.font='bold 10px sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(label,lbW/2,mid);
+    ctx.fillStyle=tickC; ctx.font='9px sans-serif';
+    ctx.textAlign='left'; ctx.textBaseline='middle';
+    [VCC,0,-VCC].forEach(v=>{
+      const ty=mid-(v/VCC)*vscale;
+      if(ty>y0+3&&ty<y0+rowH-3) ctx.fillText(v===0?'0':(v>0?'+':'')+v,lbW+plotW+3,ty);
+    });
+    ctx.strokeStyle=color; ctx.lineWidth=1.9; ctx.lineJoin='round'; ctx.beginPath();
+    const N=Math.floor(plotW);
+    for(let x=0;x<N;x++){
+      const t=(x/N)*CYCLES+ph;
+      const py=mid-(getV(t)/VCC)*vscale;
+      x===0?ctx.moveTo(lbW,py):ctx.lineTo(lbW+x,py);
+    }
+    ctx.stroke();
+    ctx.globalAlpha=1;
+  });
+  ctx.restore();
+}
+
+function drawCanvas(cid) {
+  if (cid === 'sum') { drawSumCanvas(); return; }
+  if (cid === 'pot')    { drawPotCanvas();    return; }
+  if (cid === 'preamp') { drawPreampCanvas(); return; }
+  const cv = byId('cv-'+cid); if (!cv) return;
+  const dpr=window.devicePixelRatio||1, CW=cv.offsetWidth, CH=cv.offsetHeight||160;
+  if (!CW) return;
+  if (cv.width!==CW*dpr||cv.height!==CH*dpr){cv.width=CW*dpr;cv.height=CH*dpr;}
+  const ctx=cv.getContext('2d'); ctx.save(); ctx.scale(dpr,dpr); ctx.clearRect(0,0,CW,CH);
+
+  const dark=matchMedia('(prefers-color-scheme:dark)').matches;
+  const bgC  =dark?'rgba(255,255,255,0.02)' :'rgba(0,0,0,0.018)';
+  const gridC=dark?'rgba(220,218,210,0.07)' :'rgba(20,20,18,0.06)';
+  const zeroC=dark?'rgba(220,218,210,0.16)' :'rgba(20,20,18,0.12)';
+  const tickC=dark?'rgba(220,218,210,0.38)' :'rgba(20,20,18,0.32)';
+  const divC =dark?'rgba(220,218,210,0.09)' :'rgba(20,20,18,0.07)';
+  const blueC =dark?'#5ba3e8':'#2272C3';
+  const greenC=dark?'#2ec090':'#0f6e56';
+  const redC  =dark?'#e86060':'#c93030';
+
+  const s=st[cid], rowH=CH/2, lbW=32, rbW=28, plotW=CW-lbW-rbW;
+  const vscale=rowH/2-10, CYCLES=2;
+
+  ctx.strokeStyle=divC; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(lbW,rowH); ctx.lineTo(lbW+plotW,rowH); ctx.stroke();
+
+  [{label:'Vin',color:blueC,ri:0},{label:'Vout',color:greenC,ri:1}].forEach(({label,color,ri})=>{
+    const y0=ri*rowH, mid=y0+rowH/2;
+    ctx.fillStyle=bgC; ctx.fillRect(lbW,y0+3,plotW,rowH-6);
+    ctx.strokeStyle=gridC; ctx.lineWidth=0.5;
+    [-VCC/2,VCC/2].forEach(v=>{
+      const gy=mid-(v/VCC)*vscale;
+      ctx.beginPath(); ctx.moveTo(lbW,gy); ctx.lineTo(lbW+plotW,gy); ctx.stroke();
+    });
+    ctx.strokeStyle=zeroC; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(lbW,mid); ctx.lineTo(lbW+plotW,mid); ctx.stroke();
+    ctx.fillStyle=color; ctx.font='bold 11px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(label,lbW/2,mid);
+    ctx.fillStyle=tickC; ctx.font='9px sans-serif'; ctx.textAlign='left'; ctx.textBaseline='middle';
+    [VCC,0,-VCC].forEach(v=>{
+      const ty=mid-(v/VCC)*vscale;
+      if(ty>y0+4&&ty<y0+rowH-4) ctx.fillText(v===0?'0':(v>0?'+':'')+v,lbW+plotW+3,ty);
+    });
+
+    if(cid==='cmp'&&ri===0){
+      const vy=mid-(s.vref/VCC)*vscale;
+      if(vy>y0+4&&vy<y0+rowH-4){
+        ctx.save(); ctx.strokeStyle=redC; ctx.lineWidth=1; ctx.setLineDash([5,4]);
+        ctx.beginPath(); ctx.moveTo(lbW,vy); ctx.lineTo(lbW+plotW,vy); ctx.stroke();
+        ctx.setLineDash([]); ctx.fillStyle=redC; ctx.font='9px sans-serif';
+        ctx.textAlign='left'; ctx.textBaseline='bottom';
+        ctx.fillText('Vref '+(s.vref>=0?'+':'')+s.vref.toFixed(1)+'V',lbW+5,vy-1);
+        ctx.restore();
+      }
+    }
+
+    ctx.strokeStyle=color; ctx.lineWidth=1.9; ctx.lineJoin='round'; ctx.beginPath();
+    const N=Math.floor(plotW); let prevVout=null;
+    for(let x=0;x<N;x++){
+      const t=(x/N)*CYCLES+ph;
+      let v;
+      if(ri===0){
+        v=sample(s.wave,t,s.amp);
+      } else if(cid==='buf'){
+        v=sample(s.wave,t,s.amp);
+      } else if(cid==='inv'){
+        v=Math.max(-VCC,Math.min(VCC,invGain()*sample(s.wave,t,s.amp)));
+      } else if(cid==='noninv'){
+        v=Math.max(-VCC,Math.min(VCC,noninvGain()*sample(s.wave,t,s.amp)));
+      } else {
+        const vin=sample(s.wave,t,s.amp), vout=vin>s.vref?VCC:-VCC;
+        if(prevVout!==null&&prevVout!==vout){
+          ctx.lineTo(lbW+x,mid-(prevVout/VCC)*vscale);
+          ctx.lineTo(lbW+x,mid-(vout/VCC)*vscale);
+        }
+        prevVout=vout; v=vout;
+      }
+      const py=mid-(v/VCC)*vscale;
+      x===0?ctx.moveTo(lbW,py):ctx.lineTo(lbW+x,py);
+    }
+    ctx.stroke();
+  });
+  ctx.restore();
+}
+
+function togglePause(){
+  paused=!paused;
+  ['buf','cmp','inv','noninv','sum','pot','preamp'].forEach(cid=>{
+    const b=byId('pbtn-'+cid); if(!b) return;
+    b.textContent=paused?'▶︎':'⏸';
+    b.classList.toggle('paused',paused);
+    b.title=paused?'המשך':'פאוז';
+  });
+}
+
+function showTab(cid){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>
+    b.classList.toggle('active',['buf','cmp','inv','noninv','sum','pot','preamp'][i]===cid));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  byId('tab-'+cid).classList.add('active');
+}
+
+function setWave(cid,type,btn){
+  st[cid].wave=type;
+  btn.closest('.wave-row').querySelectorAll('.wbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+(function loop(){
+  ['buf','cmp','inv','noninv','sum','pot','preamp'].forEach(cid=>{
+    const p=byId('tab-'+cid);
+    if(p&&p.classList.contains('active')) drawCanvas(cid);
+  });
+  if(!paused) ph+=0.003;
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
