@@ -40,6 +40,9 @@
   .tab-btn{padding:11px 16px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .14s,border-color .14s;font-family:inherit;white-space:nowrap}
   .tab-btn.active{color:var(--text);background:var(--surface);border-bottom:2px solid var(--accent)}
   .tab-btn:hover:not(.active){color:var(--text)}
+  .tab-btn.drag-over{border-bottom:2px solid var(--accent);opacity:0.5}
+  .tab-btn[draggable]{cursor:grab}
+  .tab-btn[draggable]:active{cursor:grabbing}
   .supply-bar{display:flex;align-items:center;gap:10px;padding:8px 20px;border-bottom:1px solid var(--border);background:var(--sf2)}
   .supply-label{font-size:12px;color:var(--text2);min-width:100px;text-align:right}
   .supply-val{font-family:'Courier New',monospace;font-size:12px;font-weight:600;color:var(--text);min-width:46px}
@@ -88,17 +91,17 @@
   </header>
 
   <div class="card">
-    <div class="tabs">
-      <button class="tab-btn active" onclick="showTab('overview')">מבוא</button>
-      <button class="tab-btn" onclick="showTab('buf')">Buffer</button>
-      <button class="tab-btn"        onclick="showTab('rules')">Golden Rules</button>
-      <button class="tab-btn"        onclick="showTab('cmp')">Comparator</button>
-      <button class="tab-btn"        onclick="showTab('inv')">Inverting Amp</button>
-      <button class="tab-btn"        onclick="showTab('noninv')">Non-Inverting Amp</button>
-      <button class="tab-btn"        onclick="showTab('sum')">Summing Amp</button>
-      <button class="tab-btn"        onclick="showTab('pot')">Volume / Pot</button>
-      <button class="tab-btn" onclick="showTab('preamp')">Phase Flip</button>
-      <!-- <button class="tab-btn" onclick="showTab('filter')">Filters</button> -->
+    <div class="tabs" id="tabs-bar">
+      <button class="tab-btn active" draggable="true" onclick="showTab('overview')">מבוא</button>
+      <button class="tab-btn" draggable="true" onclick="showTab('buf')">Buffer</button>
+      <button class="tab-btn" draggable="true" onclick="showTab('rules')">Golden Rules</button>
+      <button class="tab-btn" draggable="true" onclick="showTab('cmp')">Comparator</button>
+      <button class="tab-btn" draggable="true" onclick="showTab('inv')">Inverting Amp</button>
+      <button class="tab-btn" draggable="true" onclick="showTab('noninv')">Non-Inverting Amp</button>
+      <button class="tab-btn" draggable="true" onclick="showTab('sum')">Summing Amp</button>
+      <button class="tab-btn" draggable="true" onclick="showTab('pot')">Volume / Pot</button>
+      <button class="tab-btn" draggable="true" onclick="showTab('preamp')">Phase Flip</button>
+      <!-- <button class="tab-btn" draggable="true" onclick="showTab('filter')">Filters</button> -->
     </div>
     <div class="supply-bar">
       <span class="supply-label">Supply voltage</span>
@@ -215,6 +218,103 @@
         <div class="formula-cell">
           <span class="fc-label">Buffer · Gain = 1</span>
           <span class="fc-formula">Vout = Vin</span>
+        </div>
+      </div>
+
+      <!-- Interactive without/with buffer demo -->
+      <div style="margin-top:14px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+        <button onclick="toggleBufExample(this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--sf2);border:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase">
+          <span>מה קורה בלי באפר?</span>
+          <span id="buf-example-arrow" style="font-size:14px;transition:transform .2s">▾</span>
+        </button>
+        <div id="buf-example-body" style="display:none;flex-direction:column;padding:14px;gap:10px">
+
+          <!-- schematics side by side -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div style="border:1px solid var(--border);border-top:3px solid var(--red);border-radius:var(--r);padding:10px 12px">
+              <div style="font-size:11px;font-weight:600;color:var(--red);margin-bottom:6px;letter-spacing:.05em">בלי באפר</div>
+              <svg width="100%" viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="30" cy="75" r="15" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"/>
+                <text x="30" y="79" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.5">~</text>
+                <line x1="30" y1="60" x2="30" y2="28" stroke="currentColor" stroke-width="1.3" opacity="0.55"/>
+                <line x1="30" y1="28" x2="60" y2="28" stroke="currentColor" stroke-width="1.3" opacity="0.55"/>
+                <polyline points="60,28 64,20 70,36 76,20 82,36 88,20 92,28" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.75"/>
+                <text x="76" y="14" text-anchor="middle" font-size="8" fill="currentColor" opacity="0.55">Rsrc</text>
+                <line x1="92" y1="28" x2="130" y2="28" stroke="currentColor" stroke-width="1.3" opacity="0.55"/>
+                <circle cx="130" cy="28" r="3" fill="currentColor" opacity="0.6"/>
+                <line x1="130" y1="28" x2="162" y2="28" stroke="currentColor" stroke-width="1.3" opacity="0.55"/>
+                <text x="168" y="32" font-size="8" fill="var(--red)" opacity="0.9" text-anchor="middle">out</text>
+                <line x1="130" y1="28" x2="130" y2="46" stroke="currentColor" stroke-width="1.3" opacity="0.55"/>
+                <polyline points="130,46 122,50 138,56 122,62 138,68 122,74 130,78" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.75"/>
+                <text x="148" y="64" font-size="8" fill="currentColor" opacity="0.55">Rload</text>
+                <line x1="130" y1="78" x2="130" y2="96" stroke="currentColor" stroke-width="1.3" opacity="0.55"/>
+                <line x1="118" y1="96" x2="142" y2="96" stroke="currentColor" stroke-width="1.6" opacity="0.6"/>
+                <line x1="122" y1="101" x2="138" y2="101" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+                <line x1="30" y1="90" x2="30" y2="104" stroke="currentColor" stroke-width="1.3" opacity="0.55"/>
+                <line x1="18" y1="104" x2="42" y2="104" stroke="currentColor" stroke-width="1.6" opacity="0.6"/>
+                <line x1="22" y1="109" x2="38" y2="109" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+                <text x="90" y="122" text-anchor="middle" font-size="8" fill="var(--red)" opacity="0.85">Vout = Vin × Rload/(Rsrc+Rload)</text>
+              </svg>
+            </div>
+            <div style="border:1px solid var(--border);border-top:3px solid var(--green);border-radius:var(--r);padding:10px 12px">
+              <div style="font-size:11px;font-weight:600;color:var(--green);margin-bottom:6px;letter-spacing:.05em">עם באפר</div>
+              <svg width="100%" viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="22" cy="75" r="13" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"/>
+                <text x="22" y="79" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.5">~</text>
+                <line x1="22" y1="62" x2="22" y2="28" stroke="currentColor" stroke-width="1.3" opacity="0.55"/>
+                <line x1="22" y1="28" x2="48" y2="28" stroke="currentColor" stroke-width="1.3" opacity="0.55"/>
+                <polyline points="48,28 52,20 58,36 64,20 70,36 76,20 80,28" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.75"/>
+                <text x="64" y="14" text-anchor="middle" font-size="8" fill="currentColor" opacity="0.55">Rsrc</text>
+                <line x1="80" y1="28" x2="94" y2="28" stroke="currentColor" stroke-width="1.3" opacity="0.55"/>
+                <polygon points="94,14 94,42 122,28" fill="var(--sf2)" stroke="currentColor" stroke-width="1.4" opacity="0.8"/>
+                <text x="99" y="24" font-size="9" fill="currentColor" opacity="0.7">+</text>
+                <text x="99" y="36" font-size="9" fill="currentColor" opacity="0.7">−</text>
+                <line x1="122" y1="28" x2="138" y2="28" stroke="currentColor" stroke-width="1.3" opacity="0.55"/>
+                <line x1="138" y1="28" x2="138" y2="46" stroke="currentColor" stroke-width="1.3" opacity="0.55"/>
+                <line x1="138" y1="46" x2="94" y2="46" stroke="currentColor" stroke-width="1.3" opacity="0.55"/>
+                <line x1="94" y1="46" x2="94" y2="36" stroke="currentColor" stroke-width="1.3" opacity="0.55"/>
+                <circle cx="138" cy="28" r="3" fill="currentColor" opacity="0.6"/>
+                <line x1="138" y1="28" x2="162" y2="28" stroke="currentColor" stroke-width="1.3" opacity="0.55"/>
+                <line x1="162" y1="28" x2="162" y2="46" stroke="currentColor" stroke-width="1.3" opacity="0.55"/>
+                <polyline points="162,46 154,50 170,56 154,62 170,68 154,74 162,78" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.75"/>
+                <text x="178" y="64" font-size="8" fill="currentColor" opacity="0.55">Rload</text>
+                <line x1="162" y1="78" x2="162" y2="96" stroke="currentColor" stroke-width="1.3" opacity="0.55"/>
+                <text x="172" y="23" font-size="8" fill="var(--green)" opacity="0.9">out</text>
+                <line x1="150" y1="96" x2="174" y2="96" stroke="currentColor" stroke-width="1.6" opacity="0.6"/>
+                <line x1="154" y1="101" x2="170" y2="101" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+                <line x1="22" y1="88" x2="22" y2="104" stroke="currentColor" stroke-width="1.3" opacity="0.55"/>
+                <line x1="10" y1="104" x2="34" y2="104" stroke="currentColor" stroke-width="1.6" opacity="0.6"/>
+                <line x1="14" y1="109" x2="30" y2="109" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+                <text x="100" y="122" text-anchor="middle" font-size="8" fill="var(--green)" opacity="0.85">Vout = Vin תמיד ✓</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- canvas with pause + overlay -->
+          <div class="canvas-wrap">
+            <canvas id="cv-bufex" style="height:200px"></canvas>
+            <button class="pause-btn" id="pbtn-bufex" onclick="toggleBufExPause()" title="פאוז">⏸</button>
+            <button class="pause-btn" id="overlay-bufex" onclick="toggleBufExOverlay()"
+              style="left:46px;font-size:10px;width:36px;border-radius:var(--r)" title="Overlay">⊕</button>
+          </div>
+
+          <!-- fixed values note -->
+          <div style="font-size:12px;color:var(--text2);padding:4px 2px">
+            מקור: <strong style="color:var(--red)">Rsrc = 10 kΩ</strong> &nbsp;|&nbsp; עומס: <strong style="color:var(--blue)">Rload = 1 kΩ</strong>
+          </div>
+
+          <!-- live values -->
+          <div style="display:flex;gap:16px;font-size:12px;padding:8px 10px;background:var(--sf2);border-radius:var(--r);flex-wrap:wrap">
+            <span style="color:var(--blue)">Vin: <strong id="bufex-vin-v" style="color:var(--blue)">5.00 V</strong></span>
+            <span>בלי באפר: <strong id="bufex-no-v" style="color:var(--red)">2.50 V</strong></span>
+            <span>עם באפר: <strong id="bufex-yes-v" style="color:var(--green)">5.00 V</strong></span>
+            <span style="color:var(--text2)">אובדן: <strong id="bufex-loss" style="color:var(--red)">50%</strong></span>
+          </div>
+
+          <div style="font-size:11px;color:var(--text2);line-height:1.6">
+            ללא באפר נוצר מחלק מתח — ככל שהתנגדות העומס קטנה יותר מהתנגדות האות, יותר מתח נופל על התנגדות האות ופחות מגיע לעומס.<br>
+            עם באפר: כניסה אינסופית — לא מעמיסה על המקור — ולכן המתח המלא מגיע תמיד לפלט.
+          </div>
         </div>
       </div>
     </div>
@@ -1454,6 +1554,167 @@ function drawPreampCanvas() {
   ctx.restore();
 }
 
+function toggleBufExample(btn) {
+  const body = byId('buf-example-body');
+  const arrow = byId('buf-example-arrow');
+  const open = body.style.display === 'flex';
+  body.style.display = open ? 'none' : 'flex';
+  arrow.style.transform = open ? '' : 'rotate(180deg)';
+}
+
+let bufExOverlay = false;
+let bufExPaused = false;
+
+function toggleBufExPause() {
+  bufExPaused = !bufExPaused;
+  const btn = byId('pbtn-bufex');
+  if (btn) { btn.textContent = bufExPaused ? '▶︎' : '⏸'; btn.classList.toggle('paused', bufExPaused); }
+}
+
+function toggleBufExOverlay() {
+  bufExOverlay = !bufExOverlay;
+  const btn = byId('overlay-bufex');
+  if (btn) btn.classList.toggle('paused', bufExOverlay);
+}
+
+function updateBufEx() {
+  /* force redraw even when paused */
+  const wasPaused = bufExPaused;
+  bufExPaused = false;
+  drawBufExCanvas();
+  bufExPaused = wasPaused;
+}
+
+function drawBufExCanvas() {
+  const cv = byId('cv-bufex'); if (!cv) return;
+  const body = byId('buf-example-body');
+  if (!body || body.style.display === 'none') return;
+  if (bufExPaused) return;   /* skip animation — but slider changes call drawBufExCanvas directly */
+  const dpr = window.devicePixelRatio || 1;
+  const CW = cv.offsetWidth, CH = cv.offsetHeight || 200;
+  if (!CW) return;
+  if (cv.width !== CW*dpr || cv.height !== CH*dpr) { cv.width=CW*dpr; cv.height=CH*dpr; }
+  const ctx = cv.getContext('2d');
+  ctx.save(); ctx.scale(dpr,dpr); ctx.clearRect(0,0,CW,CH);
+
+  const dark   = matchMedia('(prefers-color-scheme:dark)').matches;
+  const bgC    = dark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.018)';
+  const gridC  = dark ? 'rgba(220,218,210,0.07)'  : 'rgba(20,20,18,0.06)';
+  const zeroC  = dark ? 'rgba(220,218,210,0.16)'  : 'rgba(20,20,18,0.12)';
+  const tickC  = dark ? 'rgba(220,218,210,0.38)'  : 'rgba(20,20,18,0.32)';
+  const divC   = dark ? 'rgba(220,218,210,0.09)'  : 'rgba(20,20,18,0.07)';
+  const blueC  = dark ? '#5ba3e8' : '#2272C3';
+  const redC   = dark ? '#e86060' : '#c93030';
+  const greenC = dark ? '#2ec090' : '#0f6e56';
+
+  const rsrc  = 10;   /* fixed 10 kΩ */
+  const rload = 1;    /* fixed 1 kΩ */
+  const ratio = rload / (rsrc + rload);   /* 1/11 ≈ 0.091 */
+  const amp   = st.buf.amp;
+  const CYCLES = 2;
+  const lbW=32, rbW=28, plotW=CW-lbW-rbW;
+
+  const rows = [
+    { label:'Vin',      color:blueC,  fn:(t)=> sample(st.buf.wave, t, amp) },
+    { label:'בלי באפר', color:redC,   fn:(t)=> sample(st.buf.wave, t, amp * ratio) },
+    { label:'עם באפר',  color:greenC, fn:(t)=> sample(st.buf.wave, t, amp) },
+  ];
+
+  /* static peak values in bottom bar */
+  byId('bufex-vin-v').textContent = fmtVout(amp);
+  byId('bufex-no-v').textContent  = fmtVout(amp * ratio);
+  byId('bufex-yes-v').textContent = fmtVout(amp);
+  const loss = (100*(1-ratio)).toFixed(0);
+  byId('bufex-loss').textContent = loss + '%';
+  byId('bufex-loss').style.color = +loss > 20 ? 'var(--red)' : 'var(--green)';
+
+  /* cursor x position — at 1/4 of the plot width, following phase */
+  const cursorX = lbW + (((ph * plotW / CYCLES) % plotW) + plotW) % plotW;
+
+  if (bufExOverlay) {
+    /* ── OVERLAY MODE ── */
+    const mid = CH/2, ovScale = CH/2-14;
+    ctx.fillStyle=bgC; ctx.fillRect(lbW,3,plotW,CH-6);
+    ctx.strokeStyle=gridC; ctx.lineWidth=0.5;
+    [-VCC/2,VCC/2].forEach(v=>{const gy=mid-(v/VCC)*ovScale;ctx.beginPath();ctx.moveTo(lbW,gy);ctx.lineTo(lbW+plotW,gy);ctx.stroke();});
+    ctx.strokeStyle=zeroC; ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(lbW,mid);ctx.lineTo(lbW+plotW,mid);ctx.stroke();
+    ctx.fillStyle=tickC; ctx.font='9px sans-serif'; ctx.textAlign='left'; ctx.textBaseline='middle';
+    [VCC,0,-VCC].forEach(v=>{const ty=mid-(v/VCC)*ovScale;if(ty>4&&ty<CH-4)ctx.fillText(v===0?'0':(v>0?'+':'')+v,lbW+plotW+3,ty);});
+    rows.forEach(({label,color,fn})=>{
+      ctx.strokeStyle=color; ctx.lineWidth=1.9; ctx.lineJoin='round'; ctx.beginPath();
+      for(let x=0;x<Math.floor(plotW);x++){
+        const py=mid-(fn((x/plotW)*CYCLES+ph)/VCC)*ovScale;
+        x===0?ctx.moveTo(lbW,py):ctx.lineTo(lbW+x,py);
+      }
+      ctx.stroke();
+      const lastV=fn((Math.floor(plotW)-1)/Math.floor(plotW)*CYCLES+ph);
+      ctx.fillStyle=color; ctx.font='bold 10px sans-serif'; ctx.textAlign='left'; ctx.textBaseline='middle';
+      ctx.fillText(label, lbW+plotW+3, Math.max(8,Math.min(CH-8,mid-(lastV/VCC)*ovScale)));
+    });
+  } else {
+    /* ── SPLIT MODE ── */
+    const rowH  = CH / 3;
+    const vscale = rowH/2 - 8;
+    ctx.strokeStyle=divC; ctx.lineWidth=1;
+    [1,2].forEach(i=>{ctx.beginPath();ctx.moveTo(lbW,i*rowH);ctx.lineTo(lbW+plotW,i*rowH);ctx.stroke();});
+    rows.forEach(({label, color, fn}, ri) => {
+      const y0=ri*rowH, mid=y0+rowH/2;
+      ctx.fillStyle=bgC; ctx.fillRect(lbW,y0+3,plotW,rowH-6);
+      ctx.strokeStyle=gridC; ctx.lineWidth=0.5;
+      [-VCC/2,VCC/2].forEach(v=>{
+        const gy=mid-(v/VCC)*vscale;
+        ctx.beginPath();ctx.moveTo(lbW,gy);ctx.lineTo(lbW+plotW,gy);ctx.stroke();
+      });
+      ctx.strokeStyle=zeroC; ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(lbW,mid);ctx.lineTo(lbW+plotW,mid);ctx.stroke();
+      ctx.fillStyle=color; ctx.font='bold 11px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(label, lbW/2, mid);
+      ctx.fillStyle=tickC; ctx.font='9px sans-serif'; ctx.textAlign='left'; ctx.textBaseline='middle';
+      [VCC,0,-VCC].forEach(v=>{
+        const ty=mid-(v/VCC)*vscale;
+        if(ty>y0+4&&ty<y0+rowH-4) ctx.fillText(v===0?'0':(v>0?'+':'')+v, lbW+plotW+3, ty);
+      });
+      ctx.strokeStyle=color; ctx.lineWidth=1.9; ctx.lineJoin='round'; ctx.beginPath();
+      for(let x=0;x<Math.floor(plotW);x++){
+        const t=(x/plotW)*CYCLES+ph;
+        const py=mid-(fn(t)/VCC)*vscale;
+        x===0?ctx.moveTo(lbW,py):ctx.lineTo(lbW+x,py);
+      }
+      ctx.stroke();
+    });
+  }
+
+  /* ── moving cursor line + voltage labels ── */
+  const dark2 = matchMedia('(prefers-color-scheme:dark)').matches;
+  const cursorC = dark2 ? 'rgba(220,218,210,0.25)' : 'rgba(20,20,18,0.18)';
+  ctx.strokeStyle = cursorC; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(cursorX, 4); ctx.lineTo(cursorX, CH-4); ctx.stroke();
+  ctx.setLineDash([]);
+
+  /* dot + voltage label on each wave at cursor */
+  const cursorT = ((cursorX - lbW) / plotW) * CYCLES + ph;
+  const rowCount = bufExOverlay ? 1 : 3;
+  const rowHc = CH / rowCount;
+  rows.forEach(({color, fn}, ri) => {
+    const v = fn(cursorT);
+    const mid = bufExOverlay ? CH/2 : ri*rowHc + rowHc/2;
+    const scale = bufExOverlay ? CH/2-14 : rowHc/2-8;
+    const py = mid - (v / VCC) * scale;
+    /* dot */
+    ctx.beginPath(); ctx.arc(cursorX, py, 4, 0, Math.PI*2);
+    ctx.fillStyle = color; ctx.fill();
+    /* label */
+    const label = fmtVout(v);
+    const lx = cursorX + 7 < lbW + plotW - 30 ? cursorX + 7 : cursorX - 35;
+    ctx.fillStyle = color; ctx.font = 'bold 9px sans-serif';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText(label, lx, Math.max(8, Math.min(CH-8, py)));
+  });
+
+  ctx.restore();
+}
+
 function togglePins(btn) {
   const body = byId('pins-body');
   const arrow = byId('pins-arrow');
@@ -2185,6 +2446,57 @@ function togglePause(){
   });
 }
 
+/* ── Tab drag-and-drop reordering ── */
+(function(){
+  let dragSrc = null;
+  function onDragStart(e) {
+    dragSrc = this;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', '');
+    setTimeout(()=> this.style.opacity='0.4', 0);
+  }
+  function onDragEnd(e) {
+    this.style.opacity='';
+    byId('tabs-bar').querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('drag-over'));
+  }
+  function onDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect='move';
+    byId('tabs-bar').querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('drag-over'));
+    if (this !== dragSrc) this.classList.add('drag-over');
+    return false;
+  }
+  function onDrop(e) {
+    e.stopPropagation();
+    if (dragSrc && this !== dragSrc) {
+      const bar = byId('tabs-bar');
+      const btns = [...bar.querySelectorAll('.tab-btn')];
+      const srcIdx  = btns.indexOf(dragSrc);
+      const destIdx = btns.indexOf(this);
+      if (destIdx < srcIdx) bar.insertBefore(dragSrc, this);
+      else bar.insertBefore(dragSrc, this.nextSibling);
+    }
+    return false;
+  }
+  function attachDrag() {
+    byId('tabs-bar').querySelectorAll('.tab-btn').forEach(btn=>{
+      btn.removeEventListener('dragstart', onDragStart);
+      btn.removeEventListener('dragend',   onDragEnd);
+      btn.removeEventListener('dragover',  onDragOver);
+      btn.removeEventListener('drop',      onDrop);
+      btn.addEventListener('dragstart', onDragStart);
+      btn.addEventListener('dragend',   onDragEnd);
+      btn.addEventListener('dragover',  onDragOver);
+      btn.addEventListener('drop',      onDrop);
+    });
+  }
+  /* observe bar for new buttons added dynamically */
+  document.addEventListener('DOMContentLoaded', ()=>{
+    attachDrag();
+    new MutationObserver(attachDrag).observe(byId('tabs-bar'),{childList:true});
+  });
+})();
+
 function showTab(cid){
   document.querySelectorAll('.tab-btn').forEach((b,i)=>
     b.classList.toggle('active',['overview','buf','rules','cmp','inv','noninv','sum','pot','preamp','filter'][i]===cid));
@@ -2205,6 +2517,7 @@ function setWave(cid,type,btn){
     const p=byId('tab-'+cid);
     if(p&&p.classList.contains('active')) drawCanvas(cid);
   });
+  drawBufExCanvas();
   if(!paused) ph+=0.003;
   requestAnimationFrame(loop);
 })();
