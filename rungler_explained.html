@@ -156,33 +156,33 @@
   <div class="dhandle" title="גרור">⠿</div>
   <div class="reg-row">
     <div class="cell">
-      <div class="lbl">DATA IN</div>
-      <div id="din" class="bit">0</div>
-      <div class="sub2">סומפל ב-↑ clock</div>
+      <div class="lbl">DAC OUT</div>
+      <div id="dv" style="font-size:26px;font-weight:700;font-family:var(--mono);color:var(--text);padding:10px 0;line-height:1">0.00V</div>
+      <div id="df" class="sub2">0 / 7 × 5V</div>
     </div>
-    <div class="arrow w" id="arr">→</div>
+    <div class="arrow w">←</div>
     <div class="cell">
-      <div class="lbl a">Q4 &nbsp;×1</div>
-      <div id="ba" class="bit">0</div>
-      <div class="sub2">LSB</div>
+      <div class="lbl c">Q6 &nbsp;×4</div>
+      <div id="bc" class="bit">0</div>
+      <div class="sub2">MSB</div>
     </div>
-    <div class="arrow n">→</div>
+    <div class="arrow n">←</div>
     <div class="cell">
       <div class="lbl b">Q5 &nbsp;×2</div>
       <div id="bb" class="bit">0</div>
       <div class="sub2">&nbsp;</div>
     </div>
-    <div class="arrow n">→</div>
+    <div class="arrow n">←</div>
     <div class="cell">
-      <div class="lbl c">Q6 &nbsp;×4</div>
-      <div id="bc" class="bit">0</div>
-      <div class="sub2">MSB + feedback</div>
+      <div class="lbl a">Q4 &nbsp;×1</div>
+      <div id="ba" class="bit">0</div>
+      <div class="sub2">LSB</div>
     </div>
-    <div class="arrow w">→</div>
+    <div class="arrow w" id="arr">←</div>
     <div class="cell">
-      <div class="lbl">DAC OUT</div>
-      <div id="dv" style="font-size:26px;font-weight:700;font-family:var(--mono);color:var(--text);padding:10px 0;line-height:1">0.00V</div>
-      <div id="df" class="sub2">0 / 7 × 5V</div>
+      <div class="lbl">DATA IN</div>
+      <div id="din" class="bit">0</div>
+      <div class="sub2">סומפל ב-↑ clock</div>
     </div>
   </div>
   </div>
@@ -247,19 +247,38 @@
           <canvas id="xc1" height="36" style="width:100%;height:36px;display:block;border-radius:4px;border:.5px solid var(--border)"></canvas>
           <div style="font-size:10px;font-family:var(--mono);color:var(--blue);text-align:right;padding-right:6px;margin-top:2px">Q6</div>
           <canvas id="xc2" height="36" style="width:100%;height:36px;display:block;border-radius:4px;border:.5px solid var(--border);margin-top:2px"></canvas>
-          <div style="font-size:10px;font-family:var(--mono);color:var(--red);text-align:right;padding-right:6px;margin-top:2px;font-weight:500">DATA</div>
+          <div style="font-size:10px;font-family:var(--mono);color:var(--red);text-align:right;padding-right:6px;margin-top:2px;font-weight:500">DATA<br><span style="font-weight:400;color:var(--text3)">= XOR</span></div>
           <canvas id="xc3" height="36" style="width:100%;height:36px;display:block;border-radius:4px;border:.5px solid var(--border);margin-top:2px"></canvas>
         </div>
 
-        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-          <div id="xbit-v2" class="xgbit" style="width:28px;height:28px;font-size:14px">0</div>
-          <div style="font-size:13px;color:var(--text3);font-family:var(--mono)">⊕</div>
-          <div id="xbit-q6" class="xgbit" style="width:28px;height:28px;font-size:14px">0</div>
-          <div style="font-size:13px;color:var(--text3);font-family:var(--mono)">=</div>
-          <div id="xbit-out" class="xgbit xgout" style="width:28px;height:28px;font-size:14px">0</div>
+        <!-- live bits -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">
+          <div style="display:flex;align-items:center;gap:5px">
+            <div id="xbit-v2" class="xgbit" style="width:28px;height:28px;font-size:14px">0</div>
+            <div style="font-size:13px;color:var(--text3);font-family:var(--mono)">⊕</div>
+            <div id="xbit-q6" class="xgbit" style="width:28px;height:28px;font-size:14px">0</div>
+            <div style="font-size:13px;color:var(--text3);font-family:var(--mono)">=</div>
+            <div id="xbit-out" class="xgbit xgout" style="width:28px;height:28px;font-size:14px">0</div>
+          </div>
+          <!-- manual buttons — shown only when paused -->
+          <div id="xmanual" style="display:none;flex-direction:column;gap:4px;margin-top:4px">
+            <div style="font-size:10px;font-family:var(--mono);color:var(--text3);text-align:center">ידני</div>
+            <div style="display:flex;gap:4px;align-items:center">
+              <span style="font-size:10px;font-family:var(--mono);color:var(--amber)">V2</span>
+              <button onclick="xManualSet('v2',0)" id="xmv2-0" style="width:26px;height:24px;font-size:12px;font-family:var(--mono);cursor:pointer;border-radius:4px;padding:0">0</button>
+              <button onclick="xManualSet('v2',1)" id="xmv2-1" style="width:26px;height:24px;font-size:12px;font-family:var(--mono);cursor:pointer;border-radius:4px;padding:0">1</button>
+            </div>
+            <div style="display:flex;gap:4px;align-items:center">
+              <span style="font-size:10px;font-family:var(--mono);color:var(--blue)">Q6</span>
+              <button onclick="xManualSet('q6',0)" id="xmq6-0" style="width:26px;height:24px;font-size:12px;font-family:var(--mono);cursor:pointer;border-radius:4px;padding:0">0</button>
+              <button onclick="xManualSet('q6',1)" id="xmq6-1" style="width:26px;height:24px;font-size:12px;font-family:var(--mono);cursor:pointer;border-radius:4px;padding:0">1</button>
+            </div>
+          </div>
         </div>
 
+        <!-- controls -->
         <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+          <button id="xpause-btn" onclick="toggleXPause()" style="font-size:10px;padding:4px 8px;font-family:var(--mono);border-radius:var(--rs);cursor:pointer;white-space:nowrap">⏸ פאוז</button>
           <button id="xlink-btn" onclick="toggleXLink()" style="font-size:10px;padding:4px 8px;font-family:var(--mono);border-radius:var(--rs);cursor:pointer;white-space:nowrap">⛓ עצמאי</button>
           <div id="xsliders" style="display:flex;flex-direction:column;gap:3px">
             <span style="font-size:10px;font-family:var(--mono);color:var(--text2)">VCO2 <span id="xv2l" style="color:var(--text);font-weight:500">2.0</span>Hz</span>
@@ -620,7 +639,65 @@ function drawR2R(){
 })();
 
 /* ── XOR wave visualizer ── */
-var xf2=2,xfq6=0.7,xph2=0,xphq6=0,xLinked=false;
+var xf2=2,xfq6=0.7,xph2=0,xphq6=0,xLinked=false,xPaused=false;
+var xManualV2=0,xManualQ6=0;
+var XBUF=300,XRATE=200;
+var xb1=new Uint8Array(XBUF),xb2=new Uint8Array(XBUF),xb3=new Uint8Array(XBUF);
+var xbh=0,xlastTs=null;
+
+function toggleXPause(){
+  xPaused=!xPaused;
+  var btn=document.getElementById('xpause-btn');
+  var manual=document.getElementById('xmanual');
+  if(xPaused){
+    btn.textContent='▶ המשך';
+    btn.style.background='var(--amber-bg)';
+    btn.style.color='var(--amber)';
+    manual.style.display='flex';
+    xManualV2=xb1[(xbh+XBUF-1)%XBUF];
+    xManualQ6=xb2[(xbh+XBUF-1)%XBUF];
+    updateXManualButtons();
+  } else {
+    btn.textContent='⏸ פאוז';
+    btn.style.background='';
+    btn.style.color='';
+    manual.style.display='none';
+  }
+}
+
+function xManualSet(which,val){
+  if(!xPaused) return;
+  if(which==='v2') xManualV2=val;
+  else xManualQ6=val;
+  var v1=xManualV2,v2=xManualQ6;
+  /* write to current head and advance so it shows as latest */
+  xb1[xbh]=v1;xb2[xbh]=v2;xb3[xbh]=v1^v2;
+  xbh=(xbh+1)%XBUF;
+  xb1[xbh]=v1;xb2[xbh]=v2;xb3[xbh]=v1^v2;
+  var dk=window.matchMedia('(prefers-color-scheme:dark)').matches;
+  xdrawWave(document.getElementById('xc1'),xb1,dk?'#EF9F27':'#854F0B');
+  xdrawWave(document.getElementById('xc2'),xb2,dk?'#85B7EB':'#185FA5');
+  xdrawWave(document.getElementById('xc3'),xb3,dk?'#F09595':'#A32D2D');
+  updateXBits(v1,v2,v1^v2);
+  updateXManualButtons();
+}
+
+function updateXManualButtons(){
+  ['xmv2-0','xmv2-1','xmq6-0','xmq6-1'].forEach(function(id){
+    document.getElementById(id).style.background='';
+    document.getElementById(id).style.fontWeight='400';
+  });
+  document.getElementById('xmv2-'+xManualV2).style.background='var(--amber-bg)';
+  document.getElementById('xmv2-'+xManualV2).style.fontWeight='600';
+  document.getElementById('xmq6-'+xManualQ6).style.background='var(--blue-bg)';
+  document.getElementById('xmq6-'+xManualQ6).style.fontWeight='600';
+}
+
+function updateXBits(cv1,cv2,cv3){
+  var bv2=document.getElementById('xbit-v2');bv2.textContent=cv1;cv1?bv2.classList.add('hi'):bv2.classList.remove('hi');
+  var bq6=document.getElementById('xbit-q6');bq6.textContent=cv2;cv2?bq6.classList.add('hi'):bq6.classList.remove('hi');
+  var bo=document.getElementById('xbit-out');bo.textContent=cv3;cv3?bo.classList.add('hi'):bo.classList.remove('hi');
+}
 var XBUF=300,XRATE=200;
 var xb1=new Uint8Array(XBUF),xb2=new Uint8Array(XBUF),xb3=new Uint8Array(XBUF);
 var xbh=0,xlastTs=null;
@@ -654,14 +731,42 @@ function xdrawWave(cvs,buf,col){
   var dk=window.matchMedia('(prefers-color-scheme:dark)').matches;
   ctx.fillStyle=dk?'#12121a':'#f5f4f0';ctx.fillRect(0,0,w,h);
   var HI=h*.1,LO=h*.9;
+
+  if(xPaused){
+    /* show current state as solid filled block */
+    var curVal=buf[(xbh+XBUF-1)%XBUF];
+    var y=curVal?HI:LO;
+    /* dim background wave */
+    ctx.strokeStyle=col;ctx.lineWidth=1;ctx.globalAlpha=0.25;
+    ctx.beginPath();var pY=null;
+    for(var i=0;i<XBUF;i++){
+      var x=i/(XBUF-1)*w,v=buf[(xbh+i)%XBUF],yy=v?HI:LO;
+      if(pY===null)ctx.moveTo(x,yy);
+      else if(yy!==pY){ctx.lineTo(x,pY);ctx.lineTo(x,yy);}
+      else ctx.lineTo(x,yy);
+      pY=yy;
+    }
+    ctx.stroke();ctx.globalAlpha=1;
+    /* bright horizontal line for current value */
+    ctx.strokeStyle=col;ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();
+    /* filled band */
+    ctx.fillStyle=col;ctx.globalAlpha=0.12;
+    ctx.fillRect(0,curVal?0:h*.5,w,h*.5);ctx.globalAlpha=1;
+    /* label */
+    ctx.fillStyle=col;ctx.font='bold 13px Courier New,monospace';
+    ctx.fillText(curVal,w/2-5,h/2+5);
+    return;
+  }
+
   ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.beginPath();
-  var pY=null;
-  for(var i=0;i<XBUF;i++){
-    var x=i/(XBUF-1)*w,v=buf[(xbh+i)%XBUF],y=v?HI:LO;
-    if(pY===null)ctx.moveTo(x,y);
-    else if(y!==pY){ctx.lineTo(x,pY);ctx.lineTo(x,y);}
-    else ctx.lineTo(x,y);
-    pY=y;
+  var pY2=null;
+  for(var i2=0;i2<XBUF;i2++){
+    var x2=i2/(XBUF-1)*w,v2=buf[(xbh+i2)%XBUF],y2=v2?HI:LO;
+    if(pY2===null)ctx.moveTo(x2,y2);
+    else if(y2!==pY2){ctx.lineTo(x2,pY2);ctx.lineTo(x2,y2);}
+    else ctx.lineTo(x2,y2);
+    pY2=y2;
   }
   ctx.stroke();
 }
@@ -669,29 +774,29 @@ function xdrawWave(cvs,buf,col){
 function xtick(ts){
   if(!xlastTs)xlastTs=ts;
   var dt=(ts-xlastTs)/1000;xlastTs=ts;
-  var steps=Math.max(1,Math.round(dt*XRATE));
-  for(var s=0;s<steps;s++){
-    var v1,v2;
-    if(xLinked){
-      /* use real simulation values */
-      v1=vco2Out;
-      v2=bC; /* Q6 from shift register */
-    } else {
-      xph2=(xph2+xf2/XRATE)%1;xphq6=(xphq6+xfq6/XRATE)%1;
-      v1=xph2>=.5?1:0; v2=xphq6>=.5?1:0;
+  if(!xPaused){
+    var steps=Math.max(1,Math.round(dt*XRATE));
+    for(var s=0;s<steps;s++){
+      var v1,v2;
+      if(xLinked){
+        v1=vco2Out; v2=bC;
+      } else {
+        xph2=(xph2+xf2/XRATE)%1;xphq6=(xphq6+xfq6/XRATE)%1;
+        v1=xph2>=.5?1:0; v2=xphq6>=.5?1:0;
+      }
+      xb1[xbh]=v1;xb2[xbh]=v2;xb3[xbh]=v1^v2;
+      xbh=(xbh+1)%XBUF;
     }
-    xb1[xbh]=v1;xb2[xbh]=v2;xb3[xbh]=v1^v2;
-    xbh=(xbh+1)%XBUF;
   }
   if(document.getElementById('xor-body').classList.contains('open')){
     var dk=window.matchMedia('(prefers-color-scheme:dark)').matches;
     xdrawWave(document.getElementById('xc1'),xb1,dk?'#EF9F27':'#854F0B');
     xdrawWave(document.getElementById('xc2'),xb2,dk?'#85B7EB':'#185FA5');
     xdrawWave(document.getElementById('xc3'),xb3,dk?'#F09595':'#A32D2D');
-    var cv1=xb1[(xbh+XBUF-1)%XBUF],cv2=xb2[(xbh+XBUF-1)%XBUF],cv3=xb3[(xbh+XBUF-1)%XBUF];
-    var bv2=document.getElementById('xbit-v2');bv2.textContent=cv1;cv1?bv2.classList.add('hi'):bv2.classList.remove('hi');
-    var bq6=document.getElementById('xbit-q6');bq6.textContent=cv2;cv2?bq6.classList.add('hi'):bq6.classList.remove('hi');
-    var bo=document.getElementById('xbit-out');bo.textContent=cv3;cv3?bo.classList.add('hi'):bo.classList.remove('hi');
+    if(!xPaused){
+      var cv1=xb1[(xbh+XBUF-1)%XBUF],cv2=xb2[(xbh+XBUF-1)%XBUF],cv3=xb3[(xbh+XBUF-1)%XBUF];
+      updateXBits(cv1,cv2,cv3);
+    }
   }
   requestAnimationFrame(xtick);
 }
