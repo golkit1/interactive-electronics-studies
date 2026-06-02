@@ -94,6 +94,10 @@
     .xgbit{width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;font-family:var(--mono);border:.5px solid var(--border);background:var(--bg);color:var(--text2);transition:background .08s,color .08s}
     .xgbit.hi{background:var(--green-bg);color:var(--green);border-color:var(--green)}
     .xgbit.xgout.hi{background:var(--red-bg);color:var(--red);border-color:var(--red)}
+    .ex-cell{width:52px;height:48px;border-radius:var(--rs);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;font-family:var(--mono);border:.5px solid var(--border);background:var(--bg);color:var(--text2)}
+    .ex-c6{background:var(--amber-bg);color:var(--amber);border-color:var(--amber);border-style:dashed}
+    .ex-c7{background:var(--green-bg);color:var(--green);border-color:var(--green);border-style:dashed}
+    .ex-c8{background:var(--blue-bg);color:var(--blue);border-color:var(--blue);border-style:dashed}
     .xor-op{ font-size:18px; color:var(--text3); font-family:var(--mono); }
     .xor-lbl{ font-size:10px; font-family:var(--mono); color:var(--text3); text-align:center; margin-bottom:3px; }
     .xor-table{ font-size:11px; font-family:var(--mono); color:var(--text3); line-height:1.9; margin-left:auto; }
@@ -129,8 +133,77 @@
 <div class="wrap">
 
   <h1>Benjolin — Rungler</h1>
-  <p class="sub">3-bit shift register · LSB first · R-2R DAC</p>
 
+  <!-- TABS -->
+  <div style="display:flex;gap:0;margin-bottom:1.5rem;border-bottom:.5px solid var(--border);justify-content:flex-end">
+    <button id="tab-sim" onclick="switchTab('sim')" style="padding:10px 22px;font-size:14px;font-family:var(--mono);cursor:pointer;border-radius:var(--r) var(--r) 0 0;border:.5px solid var(--border);border-bottom:none;margin-bottom:-1px;background:var(--bg2);color:var(--text2)">הדמיה</button>
+    <button id="tab-explain" onclick="switchTab('explain')" style="padding:10px 22px;font-size:14px;font-family:var(--mono);cursor:pointer;border-radius:var(--r) var(--r) 0 0;border:.5px solid var(--border);border-bottom:none;margin-bottom:-1px;font-weight:600;background:var(--bg);color:var(--text)">הסבר</button>
+  </div>
+
+  <!-- EXPLAIN TAB -->
+  <div id="tab-content-explain" dir="rtl" style="text-align:right">
+    <div style="line-height:2;font-size:15px;color:var(--text)">
+
+      <p style="margin-bottom:1rem">
+        ה<strong>ראנגלר</strong> הוא הלב הפועם של הבנג׳ולין. הוא מבוסס על מעגל חשמלי הנקרא <strong>אוגר הזזה</strong> — מעגל עם זיכרון של 8 תאים. הבנג׳ולין עושה שימוש בשלושה מהם.
+      </p>
+
+      <!-- 8-cell register illustration -->
+      <div style="background:var(--bg2);border-radius:var(--r);border:.5px solid var(--border);padding:1rem 1.25rem;margin-bottom:1.25rem">
+        <div style="font-size:11px;font-family:var(--mono);color:var(--text2);margin-bottom:8px">אוגר ההזזה — 8 תאים (דוגמא)</div>
+        <div style="display:flex;gap:4px;justify-content:center;margin-bottom:6px">
+          <div class="ex-cell">0</div>
+          <div class="ex-cell">0</div>
+          <div class="ex-cell">1</div>
+          <div class="ex-cell">0</div>
+          <div class="ex-cell">0</div>
+          <div class="ex-cell ex-c6">1</div>
+          <div class="ex-cell ex-c7">0</div>
+          <div class="ex-cell ex-c8">1</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;font-family:var(--mono);color:var(--text3);padding:0 2px">
+          <span>← תא 1 (חדש ביותר)</span>
+          <span style="color:var(--amber)">3 תאים אלו יוצרים את המתח ←</span>
+          <span>תא 8 →</span>
+        </div>
+      </div>
+
+      <div style="background:var(--bg2);border-radius:var(--r);border:.5px solid var(--border);padding:1.25rem 1.5rem;margin-bottom:1.25rem" dir="rtl">
+        <div style="font-size:13px;font-family:var(--mono);color:var(--text2);margin-bottom:10px">כניסות המעגל</div>
+        <p>למעגל שתי כניסות — <strong>שעון</strong> (אוסילטור א׳) ו<strong>מידע</strong> (אוסילטור ב׳).</p>
+        <p style="margin-top:8px">בכל פולס של השעון, הערך הנוכחי של המידע (0 או 1) נכנס לתא הראשון — וכל הביטים זזים תא אחד ימינה.</p>
+      </div>
+
+      <div style="background:var(--bg2);border-radius:var(--r);border:.5px solid var(--border);padding:1.25rem 1.5rem;margin-bottom:1.25rem" dir="rtl">
+        <div style="font-size:13px;font-family:var(--mono);color:var(--text2);margin-bottom:10px">יציאה</div>
+        <p>ביציאה של המעגל יש ערך של שלושה ביטים שזזים בהתאם לנ"ל.</p>
+        <p style="margin-top:8px">אותו ערך של שלושה ביטים מומר לערך וולטאז׳ ביציאה של הראנגלר על ידי ממיר דיגיטלי-אנלוגי (Digital to Analog Converter).</p>
+      </div>
+
+      <div style="background:var(--bg2);border-radius:var(--r);border:.5px solid var(--border);padding:1.25rem 1.5rem;margin-bottom:1.25rem">
+        <div style="font-size:13px;font-family:var(--mono);color:var(--text2);margin-bottom:10px">יציאה — ממיר דיגיטלי-אנלוגי</div>
+        <p>
+          קוד שלושת הביטים מומר למתח חשמלי על ידי <strong>ממיר דיגיטלי-אנלוגי</strong> (DAC). יש בדיוק <strong>8 ערכי מתח אפשריים</strong> — מ-0 וולט עד 5 וולט.
+        </p>
+        <div style="font-family:var(--mono);font-size:13px;margin-top:10px;line-height:2;color:var(--text2)">
+          000 → 0.00V &nbsp;|&nbsp; 001 → 0.71V &nbsp;|&nbsp; 010 → 1.43V &nbsp;|&nbsp; 011 → 2.14V<br>
+          100 → 2.86V &nbsp;|&nbsp; 101 → 3.57V &nbsp;|&nbsp; 110 → 4.29V &nbsp;|&nbsp; 111 → 5.00V
+        </div>
+      </div>
+
+      <p style="margin-bottom:1.25rem">
+        מתח הפלט חוזר לאוסילטורים ומשפיע על התדר שלהם — מה שמשנה את הביטים הבאים — מה שמשנה שוב את המתח.
+      </p>
+
+      <div style="background:var(--bg2);border-radius:var(--r);border:.5px solid var(--border);padding:1rem 1.25rem;font-size:13px;font-family:var(--mono);color:var(--text2);line-height:1.9">
+        עבור ללשונית <strong>הדמיה</strong> כדי לראות את כל זה בפעולה ולהתנסות ידנית.
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SIM TAB -->
+  <div id="tab-content-sim" style="display:none">
   <div id="drag-container">
 
   <div class="dsec" id="sec-vco2" draggable="true">
@@ -183,6 +256,26 @@
       <div class="lbl">DATA IN</div>
       <div id="din" class="bit">0</div>
       <div class="sub2">סומפל ב-↑ clock</div>
+    </div>
+  </div>
+
+  <!-- VCO1 auto speed -->
+  <div id="vco1-panel" style="display:none;background:var(--bg2);border-radius:var(--r);border:.5px solid var(--border);padding:0.875rem 1rem;margin-top:0.75rem;">
+    <div class="sl-lbl" style="margin-bottom:6px">VCO1 — מהירות אוטומטי &nbsp;<span id="v1l" style="color:var(--text);font-weight:500">1.4</span> צעד/שנייה</div>
+    <input type="range" min="0.2" max="8" value="1.4" step="0.1" style="width:100%;accent-color:var(--text);cursor:pointer"
+      oninput="setAutoSpeed(+this.value);document.getElementById('v1l').textContent=(+this.value).toFixed(1)">
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:3px"><span>איטי</span><span>מהיר</span></div>
+  </div>
+
+  <div class="ctrl-row" style="margin-top:0.75rem;margin-bottom:0">
+    <button class="pri" onclick="doStep()">→ צעד</button>
+    <button id="btna" onclick="toggleAuto()">▶ אוטומטי</button>
+    <button onclick="resetAll()">↺ איפוס</button>
+    <span class="step-ct" id="sc">צעד 0</span>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+      <span style="font-size:12px;font-family:var(--mono);color:var(--text2)">VCO2 <span id="v2l" style="color:var(--text);font-weight:500">0.7</span> Hz</span>
+      <input type="range" min="0.1" max="10" value="0.7" step="0.1" style="width:120px;accent-color:var(--text)" autocomplete="off"
+        oninput="f2=+this.value;document.getElementById('v2l').textContent=(+this.value).toFixed(1)">
     </div>
   </div>
   </div>
@@ -293,6 +386,63 @@
   </div>
   </div>
 
+  <div class="dsec" id="sec-loop" draggable="true">
+  <div class="dhandle" title="גרור">⠿</div>
+  <div class="collapsible">
+    <div class="coll-header" onclick="tog('loop-body','loop-arr')">
+      <span class="coll-title">מצב לולאה — סיבוב 8 הביטים</span>
+      <span class="coll-arrow" id="loop-arr">▶</span>
+    </div>
+    <div class="coll-body" id="loop-body">
+      <div style="padding-top:0.875rem" dir="rtl">
+
+        <!-- register display -->
+        <div style="font-size:11px;font-family:var(--mono);color:var(--text2);margin-bottom:8px">
+          רגיסטר — 8 ביטים. הביט שיוצא מהימין חוזר לשמאל.
+        </div>
+
+        <div style="display:flex;gap:3px;justify-content:center;margin-bottom:10px" id="lp-reg"></div>
+
+        <!-- DAC bits highlight -->
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+          <span style="font-size:11px;font-family:var(--mono);color:var(--text2)">ממיר:</span>
+          <div style="display:flex;align-items:center;gap:4px">
+            <div id="lp-b6" class="xgbit" style="width:30px;height:30px;font-size:14px;border-color:var(--amber)">0</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <div id="lp-b7" class="xgbit" style="width:30px;height:30px;font-size:14px;border-color:var(--green)">0</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <div id="lp-b8" class="xgbit" style="width:30px;height:30px;font-size:14px;border-color:var(--blue)">0</div>
+          </div>
+          <div style="font-size:13px;color:var(--text3);font-family:var(--mono)">=</div>
+          <div id="lp-dac" style="font-size:18px;font-weight:700;font-family:var(--mono);color:var(--text);min-width:24px">0</div>
+          <div id="lp-volts" style="font-size:12px;font-family:var(--mono);color:var(--text2)">(0/7 × 5V = 0.00V)</div>
+        </div>
+
+        <!-- history table -->
+        <div style="font-size:11px;font-family:var(--mono);color:var(--text2);margin-bottom:4px">היסטוריית פעימות:</div>
+        <div id="lp-history" style="font-size:11px;font-family:var(--mono);color:var(--text3);line-height:2;max-height:160px;overflow-y:auto;background:var(--bg);border-radius:var(--rs);padding:6px 10px;border:.5px solid var(--border)"></div>
+
+        <!-- controls -->
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">
+          <button onclick="lpStep()" class="pri" style="padding:7px 18px;font-size:13px;font-family:var(--mono)">→ צעד</button>
+          <button id="lp-auto-btn" onclick="lpToggleAuto()" style="padding:7px 14px;font-size:13px;font-family:var(--mono)">▶ אוטומטי</button>
+          <button onclick="lpReset()" style="padding:7px 14px;font-size:13px;font-family:var(--mono)">↺ איפוס</button>
+          <span style="font-size:11px;font-family:var(--mono);color:var(--text3)" id="lp-step-lbl">צעד 0</span>
+        </div>
+
+        <!-- manual init -->
+        <div style="margin-top:10px;background:var(--bg2);border-radius:var(--rs);padding:8px 10px">
+          <div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:6px">הגדר מצב התחלתי — לחץ על ביט כדי לשנות:</div>
+          <div style="display:flex;gap:3px" id="lp-init"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  </div>
+
   <div class="dsec" id="sec-r2r" draggable="true">
   <div class="dhandle" title="גרור">⠿</div>
   <div class="collapsible">
@@ -311,44 +461,27 @@
 
   </div><!-- end drag-container -->
 
-  <!-- VCO1 auto speed -->
-  <div id="vco1-panel" style="display:none;background:var(--bg2);border-radius:var(--r);border:.5px solid var(--border);padding:1rem 1.25rem;margin-bottom:1rem;">
-    <div class="sl-lbl" style="margin-bottom:6px">VCO1 — מהירות אוטומטי &nbsp;<span id="v1l" style="color:var(--text);font-weight:500">1.4</span> צעד/שנייה</div>
-    <input type="range" min="0.2" max="8" value="1.4" step="0.1" style="width:100%;accent-color:var(--text);cursor:pointer"
-      oninput="setAutoSpeed(+this.value);document.getElementById('v1l').textContent=(+this.value).toFixed(1)">
-    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:3px"><span>איטי</span><span>מהיר</span></div>
-  </div>
-
-  <div class="ctrl-row">
-    <button class="pri" onclick="doStep()">→ צעד</button>
-    <button id="btna" onclick="toggleAuto()">▶ אוטומטי</button>
-    <button onclick="resetAll()">↺ איפוס</button>
-    <span class="step-ct" id="sc">צעד 0</span>
-  </div>
-
-  <div class="sliders">
-    <div class="sg" style="grid-template-columns:1fr 1fr">
-      <div>
-        <div class="sl-lbl">VCO2 — <span id="v2l">1.9</span> Hz</div>
-        <input type="range" min="0.1" max="10" value="1.9" step="0.1"
-          oninput="f2=+this.value;document.getElementById('v2l').textContent=(+this.value).toFixed(1)">
-      </div>
-      <div>
-        <div class="sl-lbl">Vcc — <span id="vccl">5</span> V</div>
-        <input type="range" min="1" max="15" value="5" step="1"
-          oninput="vcc=+this.value;document.getElementById('vccl').textContent=this.value;renderDac();drawR2R()">
-      </div>
-    </div>
-  </div>
-
   <div class="note">
     Benjolin by Rob Hordijk · VCO2 רץ תמיד — לחיצה מסמפלת את ערכו באותו רגע<br>
     DATA IN = XOR(VCO2, Q6) · Q6(×4, MSB) → Q5(×2) → Q4(×1, LSB)
   </div>
+  </div><!-- end sim tab -->
 </div>
 
 <script>
-var f2=1.9, vcc=5, jitter=0.4;
+function switchTab(tab){
+  var isExplain=tab==='explain';
+  document.getElementById('tab-content-explain').style.display=isExplain?'block':'none';
+  document.getElementById('tab-content-sim').style.display=isExplain?'none':'block';
+  document.getElementById('tab-explain').style.background=isExplain?'var(--bg)':'var(--bg2)';
+  document.getElementById('tab-explain').style.color=isExplain?'var(--text)':'var(--text2)';
+  document.getElementById('tab-explain').style.fontWeight=isExplain?'600':'400';
+  document.getElementById('tab-sim').style.background=isExplain?'var(--bg2)':'var(--bg)';
+  document.getElementById('tab-sim').style.color=isExplain?'var(--text2)':'var(--text)';
+  document.getElementById('tab-sim').style.fontWeight=isExplain?'400':'600';
+}
+
+var f2=0.7, vcc=5, jitter=0.4;
 var ph2=0, vco2Out=0;
 var bC=0, bB=0, bA=0;
 var pending=0, steps=0, autoTimer=null;
@@ -801,6 +934,138 @@ function xtick(ts){
   requestAnimationFrame(xtick);
 }
 requestAnimationFrame(xtick);
+
+/* ── LOOP SECTION ─────────────────────────────── */
+var lpReg=[0,0,0,0,0,1,0,1]; /* 8 bits, index 0=stage1 */
+var lpSteps=0, lpAutoTimer=null;
+var lpVcc=5;
+var lpHistory=[];
+
+function lpInitUI(){
+  /* register display */
+  var reg=document.getElementById('lp-reg');
+  reg.innerHTML='';
+  for(var i=0;i<8;i++){
+    var d=document.createElement('div');
+    d.style.cssText='width:44px;height:44px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;font-family:var(--mono);border:.5px solid var(--border);transition:background .1s,color .1s;cursor:default;position:relative';
+    d.id='lp-s'+(i+1);
+    /* DAC stages colored */
+    if(i===5||i===6||i===7){
+      d.style.borderStyle='dashed';
+    }
+    reg.appendChild(d);
+  }
+  /* init buttons */
+  var init=document.getElementById('lp-init');
+  init.innerHTML='';
+  for(var j=0;j<8;j++){
+    (function(idx){
+      var b=document.createElement('button');
+      b.id='lp-init-'+idx;
+      b.style.cssText='width:44px;height:32px;font-size:14px;font-family:var(--mono);cursor:pointer;border-radius:4px;font-weight:600';
+      b.textContent=lpReg[idx];
+      b.onclick=function(){
+        lpReg[idx]=lpReg[idx]?0:1;
+        lpHistory=[];
+        lpSteps=0;
+        lpUpdate();
+      };
+      init.appendChild(b);
+    })(j);
+  }
+  lpUpdate();
+}
+
+function lpUpdate(){
+  /* update register display */
+  for(var i=0;i<8;i++){
+    var el=document.getElementById('lp-s'+(i+1));
+    if(!el) return;
+    el.textContent=lpReg[i];
+    var isDac=(i>=5);
+    if(lpReg[i]===1){
+      if(i===5) el.style.background='var(--amber-bg)',el.style.color='var(--amber)',el.style.borderColor='var(--amber)';
+      else if(i===6) el.style.background='var(--green-bg)',el.style.color='var(--green)',el.style.borderColor='var(--green)';
+      else if(i===7) el.style.background='var(--blue-bg)',el.style.color='var(--blue)',el.style.borderColor='var(--blue)';
+      else el.style.background='var(--bg3)',el.style.color='var(--text)',el.style.borderColor='var(--border2)';
+    } else {
+      el.style.background='var(--bg)';
+      el.style.color='var(--text3)';
+      el.style.borderColor=isDac?'var(--border2)':'var(--border)';
+    }
+    /* update init buttons */
+    var ib=document.getElementById('lp-init-'+i);
+    if(ib){ib.textContent=lpReg[i];ib.style.background=lpReg[i]?'var(--bg3)':'var(--bg)';ib.style.fontWeight=lpReg[i]?'700':'400';}
+  }
+  /* DAC */
+  var b6=lpReg[5],b7=lpReg[6],b8=lpReg[7];
+  var num=b6*4+b7*2+b8*1;
+  var volts=num/7*lpVcc;
+  document.getElementById('lp-b6').textContent=b6; b6?document.getElementById('lp-b6').classList.add('hi'):document.getElementById('lp-b6').classList.remove('hi');
+  document.getElementById('lp-b7').textContent=b7; b7?document.getElementById('lp-b7').classList.add('hi'):document.getElementById('lp-b7').classList.remove('hi');
+  document.getElementById('lp-b8').textContent=b8; b8?document.getElementById('lp-b8').classList.add('hi'):document.getElementById('lp-b8').classList.remove('hi');
+  document.getElementById('lp-dac').textContent=num;
+  document.getElementById('lp-volts').textContent='('+num+'/7 × '+lpVcc+'V = '+volts.toFixed(2)+'V)';
+  document.getElementById('lp-step-lbl').textContent='צעד '+lpSteps;
+  /* history */
+  var h=document.getElementById('lp-history');
+  var html='';
+  for(var k=lpHistory.length-1;k>=0;k--){
+    var row=lpHistory[k];
+    var isCycle=row.step>0&&row.step%8===0;
+    var rowBg=isCycle?'background:var(--green-bg);border-radius:4px;padding:0 4px;margin:1px 0;':'';
+    html+='<div style="display:flex;gap:8px;align-items:center;'+rowBg+'">';
+    html+='<span style="color:var(--text3);min-width:52px">פעימה '+row.step+'</span>';
+    html+='<span style="letter-spacing:4px">';
+    for(var m=0;m<8;m++){
+      var col=m>=5?['var(--amber)','var(--green)','var(--blue)'][m-5]:'var(--text2)';
+      html+='<span style="color:'+col+'">'+(row.reg[m])+'</span>';
+    }
+    html+='</span>';
+    html+='<span style="color:var(--text);font-weight:'+(isCycle?'700':'500')+';min-width:16px">'+row.dac+'</span>';
+    html+='<span style="color:var(--text2)">'+row.volts+'V</span>';
+    if(isCycle) html+='<span style="font-size:10px;color:var(--green);margin-right:4px">↺ מחזור</span>';
+    html+='</div>';
+  }
+  h.innerHTML=html||'<span style="color:var(--text3)">עדיין אין היסטוריה — לחץ על צעד</span>';
+}
+
+function lpStep(){
+  /* record current state */
+  var b6=lpReg[5],b7=lpReg[6],b8=lpReg[7];
+  var num=b6*4+b7*2+b8;
+  var volts=(num/7*lpVcc).toFixed(2);
+  lpHistory.push({step:lpSteps,reg:lpReg.slice(),dac:num,volts:volts});
+  if(lpHistory.length>20) lpHistory.shift();
+  /* rotate: bit from stage 8 enters stage 1 */
+  var newBit=lpReg[7];
+  for(var i=7;i>0;i--) lpReg[i]=lpReg[i-1];
+  lpReg[0]=newBit;
+  lpSteps++;
+  lpUpdate();
+}
+
+function lpToggleAuto(){
+  var b=document.getElementById('lp-auto-btn');
+  if(lpAutoTimer){clearInterval(lpAutoTimer);lpAutoTimer=null;b.textContent='▶ אוטומטי';}
+  else{b.textContent='⏸ עצור';lpAutoTimer=setInterval(lpStep,600);}
+}
+
+function lpReset(){
+  if(lpAutoTimer){clearInterval(lpAutoTimer);lpAutoTimer=null;document.getElementById('lp-auto-btn').textContent='▶ אוטומטי';}
+  lpReg=[0,0,0,0,0,1,0,1];
+  lpSteps=0;lpHistory=[];
+  lpUpdate();
+}
+
+/* init when section is opened */
+var _lpInited=false;
+var _origTog=tog;
+tog=function(bodyId,arrId){
+  _origTog(bodyId,arrId);
+  if(bodyId==='loop-body'&&!_lpInited){_lpInited=true;lpInitUI();}
+  else if(bodyId==='loop-body'&&_lpInited){lpUpdate();}
+};
 
 renderBits(); renderDac();
 requestAnimationFrame(loop);
