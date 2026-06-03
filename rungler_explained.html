@@ -429,7 +429,7 @@
 
         <!-- register display -->
         <div style="font-size:11px;font-family:var(--mono);color:var(--text2);margin-bottom:8px">
-          רגיסטר — 8 ביטים. הביט שיוצא משמאל חוזר לימין.
+          רגיסטר — 8 ביטים. הביט שיוצא מהימין חוזר לשמאל.
         </div>
 
         <div style="display:flex;gap:3px;justify-content:center;margin-bottom:10px" id="lp-reg"></div>
@@ -463,6 +463,14 @@
           <button id="lp-auto-btn" onclick="lpToggleAuto()" style="padding:7px 14px;font-size:13px;font-family:var(--mono)">▶ אוטומטי</button>
           <button onclick="lpReset()" style="padding:7px 14px;font-size:13px;font-family:var(--mono)">↺ איפוס</button>
           <span style="font-size:11px;font-family:var(--mono);color:var(--text3)" id="lp-step-lbl">צעד 0</span>
+        </div>
+
+        <!-- CV staircase graph -->
+        <div style="margin-bottom:8px">
+          <div style="font-size:11px;font-family:var(--mono);color:var(--text2);margin-bottom:4px">גל מדרגות — CV:</div>
+          <div style="position:relative;height:80px;border-radius:var(--rs);overflow:hidden;border:.5px solid var(--border);background:var(--bg)">
+            <canvas id="lp-cv-canvas" style="display:block;width:100%;height:100%"></canvas>
+          </div>
         </div>
 
         <!-- history table -->
@@ -1041,6 +1049,44 @@ function lpInitUI(){
   lpUpdate();
 }
 
+var lpCvBuf=[];
+var LP_CVBUF=64;
+
+function lpDrawCv(){
+  var cvs=document.getElementById('lp-cv-canvas');
+  if(!cvs) return;
+  var w=cvs.offsetWidth, h=80;
+  cvs.width=w; cvs.height=h;
+  var ctx=cvs.getContext('2d');
+  var dk=window.matchMedia('(prefers-color-scheme:dark)').matches;
+  var PAD=0.08;
+  ctx.fillStyle=dk?'#13131a':'#f6f5f0'; ctx.fillRect(0,0,w,h);
+  /* grid lines */
+  for(var lv=0;lv<=7;lv++){
+    var y=h*(1-PAD)-(lv/7)*h*(1-2*PAD);
+    ctx.strokeStyle=dk?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)';
+    ctx.lineWidth=.5; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke();
+    ctx.fillStyle=dk?'rgba(255,255,255,0.25)':'rgba(0,0,0,0.3)';
+    ctx.font='9px Courier New,monospace'; ctx.fillText(lv,3,y-2);
+  }
+  if(lpCvBuf.length===0) return;
+  var n=lpCvBuf.length, sw=w/n;
+  var col=dk?'#85B7EB':'#185FA5';
+  var fillCol=dk?'rgba(133,183,235,0.12)':'rgba(24,95,165,0.08)';
+  ctx.strokeStyle=col; ctx.lineWidth=2; ctx.fillStyle=fillCol;
+  ctx.beginPath();
+  for(var i=0;i<n;i++){
+    var x=i*sw, yy=h*(1-PAD)-(lpCvBuf[i]/7)*h*(1-2*PAD);
+    if(i===0) ctx.moveTo(x,yy); else ctx.lineTo(x,yy);
+    if(i<n-1) ctx.lineTo((i+1)*sw,yy);
+  }
+  ctx.stroke();
+  ctx.lineTo(w,h); ctx.lineTo(0,h); ctx.closePath(); ctx.fill();
+  /* dot on last */
+  var lastY=h*(1-PAD)-(lpCvBuf[n-1]/7)*h*(1-2*PAD);
+  ctx.fillStyle=col; ctx.beginPath(); ctx.arc(w-sw/2,lastY,4,0,Math.PI*2); ctx.fill();
+}
+
 function lpUpdate(){
   /* update register display */
   for(var i=0;i<8;i++){
@@ -1072,6 +1118,7 @@ function lpUpdate(){
   document.getElementById('lp-dac').textContent=num;
   document.getElementById('lp-volts').textContent='('+num+'/7 × '+lpVcc+'V = '+volts.toFixed(2)+'V)';
   document.getElementById('lp-step-lbl').textContent='צעד '+lpSteps;
+  lpDrawCv();
   /* history */
   var h=document.getElementById('lp-history');
   var html='';
@@ -1102,6 +1149,8 @@ function lpStep(){
   var volts=(num/7*lpVcc).toFixed(2);
   lpHistory.push({step:lpSteps,reg:lpReg.slice(),dac:num,volts:volts});
   if(lpHistory.length>20) lpHistory.shift();
+  lpCvBuf.push(num);
+  if(lpCvBuf.length>LP_CVBUF) lpCvBuf.shift();
   /* rotate: bit from stage 8 enters stage 1 */
   var newBit=lpReg[7];
   for(var i=7;i>0;i--) lpReg[i]=lpReg[i-1];
@@ -1119,7 +1168,7 @@ function lpToggleAuto(){
 function lpReset(){
   if(lpAutoTimer){clearInterval(lpAutoTimer);lpAutoTimer=null;document.getElementById('lp-auto-btn').textContent='▶ אוטומטי';}
   lpReg=[0,0,0,0,0,1,0,1];
-  lpSteps=0;lpHistory=[];
+  lpSteps=0;lpHistory=[];lpCvBuf=[];
   lpUpdate();
 }
 
