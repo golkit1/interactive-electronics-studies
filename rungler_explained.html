@@ -56,7 +56,7 @@
     .lbl{ font-size:11px; font-family:var(--mono); color:var(--text2); }
     .lbl.c{ color:var(--blue); } .lbl.b{ color:var(--green); } .lbl.a{ color:var(--amber); }
     .sub2{ font-size:10px; font-family:var(--mono); color:var(--text3); text-align:center; }
-    .bit{ width:72px; height:72px; border-radius:var(--rs); display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:600; font-family:var(--mono); border:.5px solid var(--border); background:var(--bg); color:var(--text2); transition:background .08s,color .08s,transform .12s,border-color .08s; }
+    .bit{ width:60px; height:60px; border-radius:var(--rs); display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:600; font-family:var(--mono); border:.5px solid var(--border); background:var(--bg); color:var(--text2); transition:background .08s,color .08s,transform .12s,border-color .08s; }
     .bit.flash{ transform:scale(1.1); }
     .bit.din-on{ background:var(--red-bg); color:var(--red); border-color:var(--red); }
     .bit.on-c{ background:var(--blue-bg); color:var(--blue); border-color:var(--blue); }
@@ -176,7 +176,7 @@
 
       <div style="background:var(--bg2);border-radius:var(--r);border:.5px solid var(--border);padding:1.25rem 1.5rem;margin-bottom:1.25rem" dir="rtl">
         <div style="font-size:13px;font-family:var(--mono);color:var(--text2);margin-bottom:10px">יציאה — ממיר דיגיטלי-אנלוגי</div>
-        <p>ביציאה של המעגל יש ערך של שלושה ביטים שזזים בהתאם לנ"ל. ערך זה מומר לוולטאז׳ על ידי ממיר דיגיטלי-אנלוגי (Digital to Analog Converter). ישנם 8 ערכי מתח אפשריים — מ-0 וולט עד 5 וולט.</p>
+        <p>ביציאה של המעגל יש ערך של שלושה ביטים שזזים בהתאם לנ"ל. ערך זה מומר לוולטאז׳ על ידי ממיר דיגיטלי-אנלוגי (Digital to Analog Converter). יש בדיוק 8 ערכי מתח אפשריים — מ-0 וולט עד 5 וולט.</p>
         <div style="font-family:var(--mono);font-size:13px;margin-top:10px;line-height:2;color:var(--text2)">
           000 → 0.00V &nbsp;|&nbsp; 001 → 0.71V &nbsp;|&nbsp; 010 → 1.43V &nbsp;|&nbsp; 011 → 2.14V<br>
           100 → 2.86V &nbsp;|&nbsp; 101 → 3.57V &nbsp;|&nbsp; 110 → 4.29V &nbsp;|&nbsp; 111 → 5.00V
@@ -243,6 +243,16 @@
       <div id="ba" class="bit">0</div>
       <div class="sub2">LSB</div>
     </div>
+    <div class="arrow n">←</div>
+    <div id="hb4" class="bit" style="width:52px;height:52px;font-size:20px;margin-bottom:38px;border-style:dashed;opacity:0.6">0</div>
+    <div class="arrow n" style="width:18px">←</div>
+    <div id="hb3" class="bit" style="width:52px;height:52px;font-size:20px;margin-bottom:38px;border-style:dashed;opacity:0.6">0</div>
+    <div class="arrow n" style="width:18px">←</div>
+    <div id="hb2" class="bit" style="width:52px;height:52px;font-size:20px;margin-bottom:38px;border-style:dashed;opacity:0.6">0</div>
+    <div class="arrow n" style="width:18px">←</div>
+    <div id="hb1" class="bit" style="width:52px;height:52px;font-size:20px;margin-bottom:38px;border-style:dashed;opacity:0.6">0</div>
+    <div class="arrow n" style="width:18px">←</div>
+    <div id="hb0" class="bit" style="width:52px;height:52px;font-size:20px;margin-bottom:38px;border-style:dashed;opacity:0.6">0</div>
     <div class="arrow w" id="arr">←</div>
     <div class="cell">
       <div class="lbl">DATA IN</div>
@@ -272,15 +282,44 @@
   </div>
   </div>
 
+  <div class="dsec" id="sec-full-reg" draggable="true">
+  <div class="dhandle" title="גרור">⠿</div>
+  <div class="collapsible">
+    <div class="coll-header" onclick="tog('fullreg-body','fullreg-arr')">
+      <span class="coll-title">כל 8 הביטים — רגיסטר מלא</span>
+      <span class="coll-arrow" id="fullreg-arr">▶</span>
+    </div>
+    <div class="coll-body" id="fullreg-body">
+      <div style="padding-top:0.875rem">
+        <div style="display:flex;gap:4px;justify-content:center;margin-bottom:6px">
+          <div id="fr0" class="bit" style="width:52px;height:52px;font-size:22px;border-style:dashed;border-color:var(--amber)">0</div>
+          <div id="fr1" class="bit" style="width:52px;height:52px;font-size:22px;border-style:dashed;border-color:var(--green)">0</div>
+          <div id="fr2" class="bit" style="width:52px;height:52px;font-size:22px;border-style:dashed;border-color:var(--blue)">0</div>
+          <div id="fr3" class="bit" style="width:52px;height:52px;font-size:22px;border-style:solid">0</div>
+          <div id="fr4" class="bit" style="width:52px;height:52px;font-size:22px;border-style:solid">0</div>
+          <div id="fr5" class="bit" style="width:52px;height:52px;font-size:22px;border-style:solid">0</div>
+          <div id="fr6" class="bit" style="width:52px;height:52px;font-size:22px;border-style:solid">0</div>
+          <div id="fr7" class="bit" style="width:52px;height:52px;font-size:22px;border-style:solid">0</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;font-family:var(--mono);color:var(--text3);padding:0 2px;margin-bottom:6px">
+          <span style="color:var(--amber)">DAC (3 ביטים) →</span>
+          <span>← DATA IN (חדש)</span>
+        </div>
+        <div style="font-size:11px;font-family:var(--mono);color:var(--text3);line-height:1.7">5 הביטים השמאליים לא מגיעים לממיר — הם "בדרך" ואחרי 5 פעימות נוספות יגיעו לתאים הצבעוניים.</div>
+      </div>
+    </div>
+  </div>
+  </div>
+
   <div class="dsec" id="sec-dac" draggable="true">
   <div class="dhandle" title="גרור">⠿</div>
   <div class="panel">
     <div class="dac-simple">
-      <div class="dac-bit"><div class="dac-bit-name">Q4 ×1</div><div id="fba" class="dac-bit-val a">0</div></div>
+      <div class="dac-bit"><div class="dac-bit-name">Q6 ×4</div><div id="fbc" class="dac-bit-val c">0</div></div>
       <div class="dac-sep">+</div>
       <div class="dac-bit"><div class="dac-bit-name">Q5 ×2</div><div id="fbb" class="dac-bit-val b">0</div></div>
       <div class="dac-sep">+</div>
-      <div class="dac-bit"><div class="dac-bit-name">Q6 ×4</div><div id="fbc" class="dac-bit-val c">0</div></div>
+      <div class="dac-bit"><div class="dac-bit-name">Q4 ×1</div><div id="fba" class="dac-bit-val a">0</div></div>
       <div class="dac-sep">=</div>
       <div id="fres" class="dac-result">0 / 7 × 5V = 0.00V</div>
     </div>
@@ -412,23 +451,23 @@
           <div id="lp-volts" style="font-size:12px;font-family:var(--mono);color:var(--text2)">(0/7 × 5V = 0.00V)</div>
         </div>
 
-        <!-- history table -->
-        <div style="font-size:11px;font-family:var(--mono);color:var(--text2);margin-bottom:4px">היסטוריית פעימות:</div>
-        <div id="lp-history" style="font-size:11px;font-family:var(--mono);color:var(--text3);line-height:2;max-height:160px;overflow-y:auto;background:var(--bg);border-radius:var(--rs);padding:6px 10px;border:.5px solid var(--border)"></div>
+        <!-- manual init -->
+        <div style="margin-bottom:10px;background:var(--bg2);border-radius:var(--rs);padding:8px 10px">
+          <div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:6px">הגדר מצב התחלתי — לחץ על ביט כדי לשנות:</div>
+          <div style="display:flex;gap:3px" id="lp-init"></div>
+        </div>
 
         <!-- controls -->
-        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">
+        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
           <button onclick="lpStep()" class="pri" style="padding:7px 18px;font-size:13px;font-family:var(--mono)">→ צעד</button>
           <button id="lp-auto-btn" onclick="lpToggleAuto()" style="padding:7px 14px;font-size:13px;font-family:var(--mono)">▶ אוטומטי</button>
           <button onclick="lpReset()" style="padding:7px 14px;font-size:13px;font-family:var(--mono)">↺ איפוס</button>
           <span style="font-size:11px;font-family:var(--mono);color:var(--text3)" id="lp-step-lbl">צעד 0</span>
         </div>
 
-        <!-- manual init -->
-        <div style="margin-top:10px;background:var(--bg2);border-radius:var(--rs);padding:8px 10px">
-          <div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:6px">הגדר מצב התחלתי — לחץ על ביט כדי לשנות:</div>
-          <div style="display:flex;gap:3px" id="lp-init"></div>
-        </div>
+        <!-- history table -->
+        <div style="font-size:11px;font-family:var(--mono);color:var(--text2);margin-bottom:4px">היסטוריית פעימות:</div>
+        <div id="lp-history" style="font-size:11px;font-family:var(--mono);color:var(--text3);line-height:2;max-height:160px;overflow-y:auto;background:var(--bg);border-radius:var(--rs);padding:6px 10px;border:.5px solid var(--border)"></div>
 
       </div>
     </div>
@@ -474,7 +513,8 @@ function switchTab(tab){
 
 var f2=0.7, vcc=5, jitter=0.4;
 var ph2=0, vco2Out=0;
-var bC=0, bB=0, bA=0;
+var bC=0, bB=0, bA=0; /* Q6, Q5, Q4 — DAC bits */
+var bReg=[0,0,0,0,0,0,0,0]; /* full 8-bit register, index 0=newest (stage1), 7=oldest (Q6) */
 var pending=0, steps=0, autoTimer=null;
 var lastTs=null;
 var autoSpeed=1.4;
@@ -559,7 +599,11 @@ function doStep(){
   var sf=document.getElementById('sflash');
   sf.classList.add('fire');
   setTimeout(function(){sf.classList.remove('fire');},120);
-  bC=bB; bB=bA; bA=pending;
+  /* shift full 8-bit register */
+  for(var i=7;i>0;i--) bReg[i]=bReg[i-1];
+  bReg[0]=pending;
+  /* DAC bits are the last 3 (oldest) */
+  bA=bReg[5]; bB=bReg[6]; bC=bReg[7];
   renderBits(); renderDac();
   if(document.getElementById('r2r-body').classList.contains('open')) drawR2R();
   steps++;
@@ -594,7 +638,7 @@ function toggleAuto(){
 
 function resetAll(){
   if(autoTimer){clearInterval(autoTimer);autoTimer=null;document.getElementById('btna').textContent='▶ אוטומטי';document.getElementById('vco1-panel').style.display='none';}
-  ph2=0;bC=0;bB=0;bA=0;steps=0;
+  ph2=0;bC=0;bB=0;bA=0;bReg=[0,0,0,0,0,0,0,0];steps=0;
   waveBuf=new Uint8Array(WBUF);
   cvBuf=new Float32Array(CVBUF); cvHead=0; cvCount=0;
   renderBits();renderDac();
@@ -651,6 +695,36 @@ function renderBits(){
   var ec=document.getElementById('bc'); ec.textContent=bC; ec.className='bit'+(bC?' on-c':'');
   var eb=document.getElementById('bb'); eb.textContent=bB; eb.className='bit'+(bB?' on-b':'');
   var ea=document.getElementById('ba'); ea.textContent=bA; ea.className='bit'+(bA?' on-a':'');
+  /* hidden bits in main row (hb0=newest stage1, hb4=stage5) */
+  for(var j=0;j<5;j++){
+    var hel=document.getElementById('hb'+j);
+    if(!hel) continue;
+    var hval=bReg[j];
+    hel.textContent=hval;
+    hel.style.background=hval?'var(--bg3)':'var(--bg)';
+    hel.style.color=hval?'var(--text)':'var(--text3)';
+  }
+  if(document.getElementById('fullreg-body').classList.contains('open')){
+    for(var i=0;i<8;i++){
+      var el=document.getElementById('fr'+i);
+      if(!el) continue;
+      var val=bReg[7-i]; /* fr0=bReg[7]=Q6, fr7=bReg[0]=newest */
+      el.textContent=val;
+      if(i===0){ /* Q6 ×4 amber */
+        el.style.background=val?'var(--amber-bg)':'var(--bg)';
+        el.style.color=val?'var(--amber)':'var(--text3)';
+      } else if(i===1){ /* Q5 ×2 green */
+        el.style.background=val?'var(--green-bg)':'var(--bg)';
+        el.style.color=val?'var(--green)':'var(--text3)';
+      } else if(i===2){ /* Q4 ×1 blue */
+        el.style.background=val?'var(--blue-bg)':'var(--bg)';
+        el.style.color=val?'var(--blue)':'var(--text3)';
+      } else {
+        el.style.background=val?'var(--bg3)':'var(--bg)';
+        el.style.color=val?'var(--text)':'var(--text3)';
+      }
+    }
+  }
 }
 
 function renderDac(){
