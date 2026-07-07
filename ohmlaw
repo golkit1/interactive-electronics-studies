@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>הקשר בין מתח, זרם והתנגדות</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f4f6f8;
+    color: #222;
+    margin: 0;
+    padding: 24px;
+    direction: rtl;
+  }
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px 32px 32px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  }
+  h1 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  .sliders {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .slider-block {
+    flex: 1;
+    min-width: 220px;
+  }
+  .slider-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 6px;
+  }
+  .slider-label .value {
+    font-weight: 600;
+    color: #222;
+  }
+  input[type="range"] {
+    width: 100%;
+  }
+  .voltage-accent .value { color: #b3261e; }
+  .resistance-accent .value { color: #8a5a00; }
+
+  .result-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 18px;
+  }
+  .formula-general {
+    font-size: 16px;
+    color: #888;
+    letter-spacing: 0.5px;
+  }
+  .formula-general .v-letter { color: #b3261e; font-weight: 700; }
+  .formula-general .r-letter { color: #8a5a00; font-weight: 700; }
+  .formula-substituted {
+    font-size: 22px;
+    color: #333;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .formula-substituted .v-part { color: #b3261e; font-weight: 600; }
+  .formula-substituted .r-part { color: #8a5a00; font-weight: 600; }
+  .formula-substituted .current-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e5fa8;
+  }
+
+  #pipe-canvas {
+    display: block;
+    width: 100%;
+    height: 200px;
+    background: #fafbfc;
+    border-radius: 10px;
+    border: 1px solid #e2e5e9;
+  }
+
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    font-size: 13px;
+    color: #555;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    background: #1e5fa8;
+  }
+  .explanation {
+    background: #f8f9fb;
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #333;
+    margin-top: 16px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>הקשר בין מתח, זרם והתנגדות</h1>
+  <div class="subtitle">הזיזו את המחוונים כדי לראות איך המתח וההתנגדות משפיעים על הזרם</div>
+
+  <div class="sliders">
+    <div class="slider-block voltage-accent">
+      <div class="slider-label">
+        <label for="voltage">מתח (V) - כוח המשאבה</label>
+        <span class="value" id="voltage-out">10 V</span>
+      </div>
+      <input type="range" id="voltage" min="1" max="20" value="10" step="1">
+    </div>
+    <div class="slider-block resistance-accent">
+      <div class="slider-label">
+        <label for="resistance">התנגדות (R) - צרות הצינור</label>
+        <span class="value" id="resistance-out">5 Ω</span>
+      </div>
+      <input type="range" id="resistance" min="1" max="20" value="5" step="1">
+    </div>
+  </div>
+
+  <div class="result-row">
+    <div class="formula-general">זרם I = <span class="v-letter">V</span> ÷ <span class="r-letter">R</span></div>
+    <div class="formula-substituted">
+      <span id="formula-substituted-text"><span class="v-part">10 V</span> ÷ <span class="r-part">5 Ω</span> =</span>
+      <span class="current-value" id="current-out">2.00 A</span>
+    </div>
+  </div>
+
+  <canvas id="pipe-canvas"></canvas>
+
+  <div class="legend">
+    <span><span class="dot"></span> חלקיק זרם</span>
+    <span>הצרות בצינור = ההתנגדות (מסומנת במספר האוהם)</span>
+  </div>
+
+  <div class="explanation" id="explanation-box"></div>
+</div>
+
+<script>
+// ---------- Element references ----------
+var voltageSlider = document.getElementById('voltage');
+var resistanceSlider = document.getElementById('resistance');
+var voltageOut = document.getElementById('voltage-out');
+var resistanceOut = document.getElementById('resistance-out');
+var currentOut = document.getElementById('current-out');
+var formulaSubstitutedText = document.getElementById('formula-substituted-text');
+var explanationBox = document.getElementById('explanation-box');
+var canvas = document.getElementById('pipe-canvas');
+var ctx = canvas.getContext('2d');
+
+function formatResistance() {
+  var sliderValue = parseFloat(resistanceSlider.value);
+  return sliderValue + ' \u03A9';
+}
+
+function formatCurrent(currentAmps) {
+  if (Math.abs(currentAmps) < 1) {
+    return (currentAmps * 1000).toFixed(2) + ' mA';
+  }
+  return currentAmps.toFixed(2) + ' A';
+}
+
+// ---------- Canvas sizing ----------
+var width = 0, height = 0;
+function resizeCanvas() {
+  var rect = canvas.getBoundingClientRect();
+  width = rect.width;
+  height = rect.height;
+  canvas.width = width * window.devicePixelRatio;
+  canvas.height = height * window.devicePixelRatio;
+  ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// ---------- Particles ----------
+var particleCount = 18;
+var particles = [];
+function initParticles() {
+  particles = [];
+  for (var i = 0; i < particleCount; i++) {
+    particles.push({ t: i / particleCount });
+  }
+}
+initParticles();
+
+// ---------- Pipe shape ----------
+// The pipe narrows in the middle. The narrowness (minHalf) is driven directly
+// by the resistance value, so a higher resistance visibly makes a tighter pipe.
+function pipeHalfWidth(x, resistanceValue) {
+  var centerX = width / 2;
+  var narrowZoneHalf = width * 0.12;
+  var transitionWidth = width * 0.16;
+  var maxHalf = height * 0.34;
+  var minHalf = maxHalf * (1 - (resistanceValue / 22));
+  minHalf = Math.max(minHalf, height * 0.03);
+
+  var dist = Math.abs(x - centerX);
+  if (dist <= narrowZoneHalf) {
+    return minHalf;
+  }
+  var edgeDist = dist - narrowZoneHalf;
+  var t = Math.min(edgeDist / transitionWidth, 1);
+  return minHalf + (maxHalf - minHalf) * t;
+}
+
+// ---------- Drawing ----------
+function draw() {
+  var voltageValue = parseFloat(voltageSlider.value);
+  var sliderValue = parseFloat(resistanceSlider.value);
+  var current = voltageValue / sliderValue;
+
+  voltageOut.textContent = voltageValue + ' V';
+  resistanceOut.textContent = formatResistance();
+  currentOut.textContent = formatCurrent(current);
+
+  formulaSubstitutedText.innerHTML =
+    '<span class="v-part">' + voltageValue + ' V</span> \u00F7 <span class="r-part">' + formatResistance() + '</span> =';
+
+  ctx.clearRect(0, 0, width, height);
+  var midY = height / 2;
+
+  // Pipe outline and fill (the narrowing is relative to the slider position,
+  // 1-20, regardless of which unit it currently represents)
+  ctx.beginPath();
+  for (var x = 0; x <= width; x += 4) {
+    var halfW = pipeHalfWidth(x, sliderValue);
+    var y = midY - halfW;
+    if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  for (var x2 = width; x2 >= 0; x2 -= 4) {
+    var halfW2 = pipeHalfWidth(x2, sliderValue);
+    ctx.lineTo(x2, midY + halfW2);
+  }
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(30, 95, 168, 0.10)';
+  ctx.fill();
+  ctx.strokeStyle = '#1e5fa8';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Resistance label at the narrowest point of the pipe
+  var centerX = width / 2;
+  var narrowHalf = pipeHalfWidth(centerX, sliderValue);
+  ctx.fillStyle = '#8a5a00';
+  ctx.font = 'bold 14px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('R = ' + formatResistance(), centerX, midY - narrowHalf - 12);
+
+  // Dashed guide lines marking the narrow section width
+  ctx.strokeStyle = '#c99b3c';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(centerX, midY - narrowHalf);
+  ctx.lineTo(centerX, midY - narrowHalf - 6);
+  ctx.moveTo(centerX, midY + narrowHalf);
+  ctx.lineTo(centerX, midY + narrowHalf + 6);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Particles flowing left to right. Overall pace reflects total current
+  // (lower current = slower everywhere), and on top of that, each particle
+  // physically slows down while passing through the narrow section itself -
+  // otherwise a narrow neck combined with constant pixel speed creates an
+  // illusion that particles speed up there, which is backwards.
+  //
+  // A single square-root scale is used (rather than a linear one) because
+  // current can range from a fraction of a milliamp up to tens of amps
+  // depending on the sliders and unit toggle - a plain linear speed would
+  // make small currents invisible. Crucially this is ONE continuous formula
+  // with no branching by magnitude, so speed always increases monotonically
+  // with current (2 A always visibly faster than 500 mA, etc).
+  var baseSpeed = Math.min(0.018 * Math.sqrt(Math.abs(current)), 0.09);
+  var maxHalf = height * 0.34;
+  ctx.fillStyle = '#1e5fa8';
+  for (var i = 0; i < particles.length; i++) {
+    var px = particles[i].t * width;
+    var localHalf = pipeHalfWidth(px, sliderValue);
+    var localFactor = localHalf / maxHalf; // 1 = full width, smaller = squeezed
+    particles[i].t += baseSpeed * localFactor;
+    if (particles[i].t > 1) particles[i].t -= 1;
+    var drawX = particles[i].t * width;
+    var drawY = midY;
+    ctx.beginPath();
+    ctx.arc(drawX, drawY, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  updateExplanation(voltageValue, current);
+}
+
+function updateExplanation(voltageValue, current) {
+  explanationBox.innerHTML =
+    '<p style="margin: 0 0 10px;">עם מתח של <b>' + voltageValue + ' V</b> (כוח הדחיפה) ועם התנגדות של <b>' + formatResistance() + '</b> ' +
+    '(צרות הצינור), הזרם שמתקבל הוא <b>' + formatCurrent(current) + '</b>.</p>' +
+    '<p style="margin: 0;">ככל שהצינור צר יותר (התנגדות גבוהה יותר), פחות חלקיקים מצליחים לעבור בכל שנייה - גם אם המשאבה דוחפת באותו כוח.</p>';
+}
+
+function animate() {
+  draw();
+  requestAnimationFrame(animate);
+}
+
+voltageSlider.addEventListener('input', draw);
+resistanceSlider.addEventListener('input', draw);
+animate();
+</script>
+</body>
+</html>
