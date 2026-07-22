@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מעגל סגור — למה הוא חייב להיות סגור?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1C2B3A;
+    --navy-soft:#425065;
+    --teal:#2A9D8F;
+    --teal-light:#E8F8F5;
+    --blue:#2E7DC7;
+    --blue-light:#E9F3FC;
+    --gold:#E9C46A;
+    --gold-deep:#B4842E;
+    --red:#C0392B;
+    --red-light:#FBEAE8;
+    --green:#27AE60;
+    --green-light:#EAF7EF;
+    --bg:#F6F7F9;
+    --card:#FFFFFF;
+    --line:#E3E6EA;
+    --shadow: 0 1px 2px rgba(28,43,58,.04), 0 8px 24px rgba(28,43,58,.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--navy);
+    font-family:'Heebo',Arial,sans-serif;
+    padding:28px 16px 60px;
+    min-height:100vh;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+
+  header{text-align:center;margin-bottom:26px;}
+  header .eyebrow{
+    display:inline-block;
+    font-size:.8rem;
+    font-weight:700;
+    color:var(--teal);
+    background:var(--teal-light);
+    padding:5px 14px;
+    border-radius:100px;
+    margin-bottom:14px;
+    letter-spacing:.02em;
+  }
+  h1{
+    font-size:clamp(1.6rem,4vw,2.35rem);
+    font-weight:800;
+    margin:0 0 10px;
+    line-height:1.25;
+  }
+  header p{
+    font-size:1.02rem;
+    color:var(--navy-soft);
+    max-width:620px;
+    margin:0 auto;
+    line-height:1.6;
+  }
+
+  /* ---- master switch ---- */
+  .switch-zone{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    margin:30px 0 6px;
+  }
+  .state-label{
+    font-weight:800;
+    font-size:1.15rem;
+    padding:7px 20px;
+    border-radius:100px;
+    transition:background .25s, color .25s;
+  }
+  .state-label.closed{background:var(--green-light);color:var(--green);}
+  .state-label.open{background:var(--red-light);color:var(--red);}
+
+  .switch-btn{
+    position:relative;
+    width:120px;
+    height:56px;
+    border-radius:100px;
+    border:none;
+    cursor:pointer;
+    background:var(--green);
+    transition:background .25s;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,.15);
+    padding:0;
+  }
+  .switch-btn.open{background:var(--red);}
+  .switch-knob{
+    position:absolute;
+    top:4px;
+    right:4px;
+    width:48px;
+    height:48px;
+    border-radius:50%;
+    background:#fff;
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    transition:right .25s cubic-bezier(.4,0,.2,1), background .25s;
+  }
+  .switch-btn.open .switch-knob{ right:68px; }
+  .switch-hint{font-size:.85rem;color:var(--navy-soft);opacity:.8;}
+
+  /* ---- panels ---- */
+  .panels{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+    margin-top:26px;
+  }
+  @media (max-width:760px){ .panels{grid-template-columns:1fr;} }
+
+  .panel{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:20px 18px 18px;
+    box-shadow:var(--shadow);
+  }
+  .panel h2{
+    font-size:1.05rem;
+    font-weight:700;
+    margin:0 0 4px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .panel h2 .dot{width:10px;height:10px;border-radius:50%;flex:none;}
+  .panel .sub{font-size:.85rem;color:var(--navy-soft);margin:0 0 14px;}
+  .panel svg{width:100%;height:auto;display:block;}
+  .panel .caption{
+    margin-top:12px;
+    font-size:.92rem;
+    line-height:1.55;
+    min-height:2.6em;
+    color:var(--navy-soft);
+  }
+  .panel .caption b{color:var(--navy);}
+
+  /* electric */
+  .wire{fill:none;stroke:var(--teal);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;}
+  .wire.broken{stroke:var(--line);}
+  .battery-body{fill:var(--navy);}
+  .battery-term{fill:var(--gold);}
+  .resistor-body{fill:var(--teal-light);stroke:var(--teal);stroke-width:3;}
+  .led-glow{fill:var(--gold);opacity:0;transition:opacity .18s;}
+  .led-glow.on{opacity:.9;}
+  .led-body{fill:#fff;stroke:var(--navy-soft);stroke-width:3;}
+  .electron{fill:var(--teal);}
+  .gap-jaw{fill:var(--navy-soft);}
+
+  /* water */
+  .pipe{fill:none;stroke:var(--blue);stroke-width:9;stroke-linecap:round;stroke-linejoin:round;opacity:.28;}
+  .pipe-core{fill:none;stroke:var(--blue);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;}
+  .pipe-core.broken{stroke:var(--line);}
+  .pump-body{fill:var(--navy);}
+  .pump-blade{fill:var(--blue-light);}
+  .valve-body{fill:var(--blue-light);stroke:var(--blue);stroke-width:3;}
+  .basin{fill:var(--blue-light);stroke:var(--blue);stroke-width:3;}
+  .droplet{fill:var(--blue);}
+  .spray{stroke:var(--blue);stroke-width:3;stroke-linecap:round;opacity:0;transition:opacity .15s;}
+  .spray.on{opacity:.85;}
+
+  .valve-gap{fill:var(--navy-soft);}
+
+  /* callout that appears briefly when opened, showing the timing gap */
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="eyebrow">אלקטרוניקה למתחילים</span>
+    <h1>למה מעגל חשמלי חייב להיות <u>סגור</u>?</h1>
+    <p>הדימוי הכי טוב: מזרקה עם משאבה. לחצו על המתג ותראו את שתי המערכות — מעגל חשמלי ומעגל מים — מגיבות יחד, בזמן אמת.</p>
+  </header>
+
+  <div class="switch-zone">
+    <div id="stateLabel" class="state-label closed">המעגל סגור — הכול זורם</div>
+    <button id="switchBtn" class="switch-btn" aria-pressed="false" aria-label="פתח או סגור את המעגל">
+      <span class="switch-knob">🔌</span>
+    </button>
+    <div class="switch-hint">לחצו כדי לפתוח / לסגור את המעגל</div>
+  </div>
+
+  <div class="panels">
+
+    <!-- ELECTRIC PANEL -->
+    <section class="panel">
+      <h2><span class="dot" style="background:var(--teal)"></span> מעגל חשמלי</h2>
+      <p class="sub">סוללה דוחפת אלקטרונים בלולאה דרך נגד ועד לנורה</p>
+      <svg viewBox="0 0 400 240">
+        <!-- loop wire -->
+        <path id="ePathVisible" class="wire" d="M70,190 L70,60 L200,60 L200,60 L330,60 L330,190 L235,190" />
+        <path class="wire" d="M70,190 L165,190" />
+        <!-- gap for switch will overlay -->
+
+        <!-- battery -->
+        <rect class="battery-body" x="46" y="95" width="48" height="60" rx="6"/>
+        <rect class="battery-term" x="60" y="86" width="20" height="12" rx="2"/>
+        <text x="70" y="132" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">9V</text>
+
+        <!-- resistor -->
+        <rect class="resistor-body" x="160" y="42" width="80" height="34" rx="6"/>
+        <text x="200" y="64" text-anchor="middle" font-size="14" fill="#1C2B3A" font-weight="700">נגד</text>
+
+        <!-- LED -->
+        <circle id="eLedGlow" class="led-glow" cx="330" cy="190" r="34"/>
+        <circle class="led-body" cx="330" cy="190" r="20"/>
+        <text x="330" y="195" text-anchor="middle" font-size="16">💡</text>
+
+        <!-- switch gap on bottom wire -->
+        <g id="eSwitch">
+          <rect class="gap-jaw" x="163" y="187" width="10" height="6" rx="2"/>
+          <rect class="gap-jaw" x="192" y="187" width="10" height="6" rx="2"/>
+          <line id="eLever" x1="168" y1="190" x2="197" y2="190" stroke="#8C97A6" stroke-width="5" stroke-linecap="round"/>
+        </g>
+
+        <!-- electrons -->
+        <g id="eDots"></g>
+      </svg>
+      <p class="caption" id="eCaption"></p>
+    </section>
+
+    <!-- WATER PANEL -->
+    <section class="panel">
+      <h2><span class="dot" style="background:var(--blue)"></span> מעגל מים (מזרקה)</h2>
+      <p class="sub">משאבה דוחפת מים בלולאה דרך ברז ועד לפיית המזרקה</p>
+      <svg viewBox="0 0 400 240">
+        <path class="pipe" d="M70,190 L70,60 L200,60 L330,60 L330,190 L235,190" />
+        <path class="pipe" d="M70,190 L165,190" />
+        <path id="wPathVisible" class="pipe-core" d="M70,190 L70,60 L200,60 L330,60 L330,190 L235,190" />
+        <path class="pipe-core" d="M70,190 L165,190" />
+
+        <!-- pump -->
+        <circle class="pump-body" cx="70" cy="125" r="30"/>
+        <path id="pumpBlade" class="pump-blade" d="M70,105 L78,125 L70,145 L62,125 Z" />
+        <text x="70" y="130" text-anchor="middle" font-size="15">⚙️</text>
+
+        <!-- valve -->
+        <rect class="valve-body" x="160" y="42" width="80" height="34" rx="6"/>
+        <text x="200" y="64" text-anchor="middle" font-size="14" fill="#1C2B3A" font-weight="700">ברז</text>
+
+        <!-- fountain / basin -->
+        <path id="spray1" class="spray" d="M330,175 Q318,150 330,130"/>
+        <path id="spray2" class="spray" d="M330,175 Q342,150 330,130"/>
+        <path id="spray3" class="spray" d="M330,178 Q330,148 330,126"/>
+        <circle class="basin" cx="330" cy="190" r="20"/>
+        <text x="330" y="195" text-anchor="middle" font-size="15">⛲</text>
+
+        <!-- switch gap (valve) on bottom pipe -->
+        <g id="wSwitch">
+          <rect class="valve-gap" x="163" y="187" width="10" height="6" rx="2"/>
+          <rect class="valve-gap" x="192" y="187" width="10" height="6" rx="2"/>
+          <line id="wLever" x1="168" y1="190" x2="197" y2="190" stroke="#8C97A6" stroke-width="5" stroke-linecap="round"/>
+        </g>
+
+        <g id="wDots"></g>
+      </svg>
+      <p class="caption" id="wCaption"></p>
+    </section>
+
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const svgNS = "http://www.w3.org/2000/svg";
+  const eSwitchBtn = document.getElementById('switchBtn');
+  const stateLabel = document.getElementById('stateLabel');
+  const eLedGlow = document.getElementById('eLedGlow');
+  const eLever = document.getElementById('eLever');
+  const wLever = document.getElementById('wLever');
+  const eCaption = document.getElementById('eCaption');
+  const wCaption = document.getElementById('wCaption');
+  const sprays = [document.getElementById('spray1'), document.getElementById('spray2'), document.getElementById('spray3')];
+  const pumpBlade = document.getElementById('pumpBlade');
+
+  let closed = true; // circuit state
+
+  // Explicit polyline points define the loop path for particle motion (shared shape for both loops)
+  const loopPoints = [
+    {x:70,y:190},{x:70,y:60},{x:200,y:60},{x:330,y:60},{x:330,y:190},{x:235,y:190},
+    {x:202,y:190}, /* gap start */ {x:168,y:190}, /* gap end */ {x:70,y:190}
+  ];
+  // total length helper
+  function segLen(a,b){ return Math.hypot(b.x-a.x, b.y-a.y); }
+  const segLens = [];
+  let totalLen = 0;
+  for(let i=0;i<loopPoints.length-1;i++){
+    const L = segLen(loopPoints[i], loopPoints[i+1]);
+    segLens.push(L);
+    totalLen += L;
+  }
+  function pointAt(t){ // t in [0,1)
+    let d = ((t % 1) + 1) % 1 * totalLen;
+    for(let i=0;i<segLens.length;i++){
+      if(d <= segLens[i]){
+        const a = loopPoints[i], b = loopPoints[i+1];
+        const f = segLens[i] === 0 ? 0 : d/segLens[i];
+        return { x:a.x+(b.x-a.x)*f, y:a.y+(b.y-a.y)*f };
+      }
+      d -= segLens[i];
+    }
+    return loopPoints[0];
+  }
+  // gap region as fraction range (between point index 6 and 7)
+  let gapStartLen = 0;
+  for(let i=0;i<6;i++) gapStartLen += segLens[i];
+  const gapFracStart = gapStartLen/totalLen;
+  const gapFracEnd = (gapStartLen+segLens[6])/totalLen;
+
+  function makeDots(containerId, color, count){
+    const g = document.getElementById(containerId);
+    const dots = [];
+    for(let i=0;i<count;i++){
+      const c = document.createElementNS(svgNS,'circle');
+      c.setAttribute('r', containerId==='eDots' ? 4.5 : 5);
+      c.setAttribute('class', containerId==='eDots' ? 'electron' : 'droplet');
+      g.appendChild(c);
+      dots.push({el:c, phase:i/count});
+    }
+    return dots;
+  }
+  const eDots = makeDots('eDots','teal',10);
+  const wDots = makeDots('wDots','blue',10);
+
+  let t = 0; // shared time param 0..1 loop position — freezes instantly when open (both electrons & water)
+  let lastTs = null;
+  const BASE_SPEED = 0.14; // loops per second
+
+  function frame(ts){
+    if(lastTs===null) lastTs = ts;
+    const dt = Math.min(.05,(ts-lastTs)/1000);
+    lastTs = ts;
+
+    if(closed){
+      t += BASE_SPEED*dt;
+    }
+
+    eDots.forEach(d=>{
+      const frac = d.phase + t;
+      const p = pointAt(frac);
+      d.el.setAttribute('cx',p.x);
+      d.el.setAttribute('cy',p.y);
+      d.el.style.opacity = visibleOpacity(frac, closed);
+    });
+    wDots.forEach(d=>{
+      const frac = d.phase + t;
+      const p = pointAt(frac);
+      d.el.setAttribute('cx',p.x);
+      d.el.setAttribute('cy',p.y);
+      d.el.style.opacity = visibleOpacity(frac, closed);
+    });
+
+    if (closed){
+      pumpBlade.setAttribute('transform', `rotate(${(t*360*6)%360} 70 125)`);
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  function isInGap(frac){
+    const f = ((frac%1)+1)%1;
+    return f>gapFracStart && f<gapFracEnd;
+  }
+  function visibleOpacity(frac, flowing){
+    if(!flowing) return 0;
+    return isInGap(frac) ? 0 : 1;
+  }
+
+  requestAnimationFrame(frame);
+
+  function setEWireBroken(broken){
+    document.querySelectorAll('.wire').forEach(el=>el.classList.toggle('broken', broken));
+    eLever.setAttribute('x2', broken ? '188' : '197');
+    eLever.setAttribute('y2', broken ? '178' : '190');
+  }
+  function setWPipeBroken(broken){
+    document.querySelectorAll('.pipe-core').forEach(el=>el.classList.toggle('broken', broken));
+    wLever.setAttribute('x2', broken ? '188' : '197');
+    wLever.setAttribute('y2', broken ? '178' : '190');
+  }
+
+  function updateCaptions(){
+    if(closed){
+      eCaption.innerHTML = '<b>המעגל סגור.</b> האלקטרונים זזים בלולאה שלמה, הנורה דולקת ברציפות.';
+      wCaption.innerHTML = 'המים זורמים בלולאה, המזרקה עובדת.';
+    } else {
+      eCaption.innerHTML = '<b>המעגל פתוח.</b> אין נתיב חזרה לסוללה — הזרם נעצר <b>מיד</b> בכל החוט, הנורה כבתה.';
+      wCaption.innerHTML = '<b>הצינור מנותק.</b> אין נתיב חזרה למשאבה — המים מפסיקים לזרום, המזרקה כבתה.';
+    }
+  }
+
+  eSwitchBtn.addEventListener('click', function(){
+    closed = !closed;
+    eSwitchBtn.classList.toggle('open', !closed);
+    eSwitchBtn.setAttribute('aria-pressed', String(!closed));
+    stateLabel.textContent = closed ? 'המעגל סגור — הכול זורם' : 'המעגל פתוח — הכול נעצר';
+    stateLabel.classList.toggle('closed', closed);
+    stateLabel.classList.toggle('open', !closed);
+
+    setEWireBroken(!closed);
+    setWPipeBroken(!closed);
+    eLedGlow.classList.toggle('on', closed);
+    sprays.forEach(s=>s.classList.toggle('on', closed));
+
+    updateCaptions();
+  });
+
+  updateCaptions();
+  eLedGlow.classList.add('on');
+  sprays.forEach(s=>s.classList.add('on'));
+})();
+</script>
+</body>
+</html>
