@@ -182,11 +182,10 @@
   <header>
     <span class="eyebrow">אלקטרוניקה למתחילים</span>
     <h1>למה מעגל חשמלי חייב להיות <u>סגור</u>?</h1>
-    <p>הדימוי הכי טוב: מזרקה עם משאבה. לחצו על המתג ותראו את שתי המערכות — מעגל חשמלי ומעגל מים — מגיבות יחד, בזמן אמת.</p>
   </header>
 
   <div class="switch-zone">
-    <div id="stateLabel" class="state-label closed">המעגל סגור — הכול זורם</div>
+    <div id="stateLabel" class="state-label closed">המעגל סגור - זרימה של אלקטרונים</div>
     <button id="switchBtn" class="switch-btn" aria-pressed="false" aria-label="פתח או סגור את המעגל">
       <span class="switch-knob">🔌</span>
     </button>
@@ -407,7 +406,7 @@
     closed = !closed;
     eSwitchBtn.classList.toggle('open', !closed);
     eSwitchBtn.setAttribute('aria-pressed', String(!closed));
-    stateLabel.textContent = closed ? 'המעגל סגור — הכול זורם' : 'המעגל פתוח — הכול נעצר';
+    stateLabel.textContent = closed ? 'המעגל סגור - זרימה של אלקטרונים' : 'המעגל פתוח — הכול נעצר';
     stateLabel.classList.toggle('closed', closed);
     stateLabel.classList.toggle('open', !closed);
 
