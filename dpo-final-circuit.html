@@ -49,7 +49,9 @@
   .master-row .lab b{font-family:'Rubik',sans-serif;color:var(--blue);}
   .master-row .lab span{direction:ltr;}
   input[type=range]{width:100%;direction:ltr;accent-color:var(--blue);height:14px;}
-  input[type=range].local{accent-color:var(--amber);}
+  input[type=range].local{accent-color:#fff;}
+  input[type=range].local::-webkit-slider-thumb{border:1.5px solid var(--ink-soft);}
+  input[type=range].local::-moz-range-thumb{border:1.5px solid var(--ink-soft);}
   input[type=range].ext{accent-color:var(--teal);}
   input[type=range]:disabled{opacity:.3;}
 
@@ -147,7 +149,7 @@
     <div class="grid-wrap">
 
       <div class="wave-box">
-        <div class="wave-head"><b>המקור · VCO A Sine</b><span>±5V — תמיד רוטט</span></div>
+        <div class="wave-head"><b>המקור · VCO A Sine</b><span>±5V</span></div>
         <svg viewBox="0 0 300 50"><path id="srcWavePath" fill="none" stroke="var(--amber)" stroke-width="2.5"/></svg>
       </div>
 
@@ -158,7 +160,7 @@
             <label class="switch"><input type="checkbox" id="toggleS"><span class="sw-track"></span></label>
           </div>
         </div>
-        <div class="ctrl-row"><span class="clab">מתח (0–5V)</span><input type="range" class="ext" id="voltS" min="0" max="5" step="0.1" value="2.5" disabled></div>
+        <div class="ctrl-row" id="voltRowS"><span class="clab">מתח (0–5V)</span><input type="range" class="ext" id="voltS" min="0" max="5" step="0.1" value="2.5" disabled></div>
         <div class="ctrl-row"><span class="clab">ברז מקומי</span><input type="range" class="local" id="localS" min="0" max="100" value="60"></div>
         <div class="bar-track"><div class="bar-fill" id="barS"></div></div>
         <div class="readout" id="readS"></div>
@@ -172,7 +174,7 @@
             <label class="switch"><input type="checkbox" id="toggleA"><span class="sw-track"></span></label>
           </div>
         </div>
-        <div class="ctrl-row"><span class="clab">מתח (-4–4V)</span><input type="range" class="ext" id="voltA" min="-4" max="4" step="0.1" value="0" disabled></div>
+        <div class="ctrl-row" id="voltRowA"><span class="clab">מתח (-4–4V)</span><input type="range" class="ext" id="voltA" min="-4" max="4" step="0.1" value="0" disabled></div>
         <div class="ctrl-row"><span class="clab">ברז מקומי</span><input type="range" class="local" id="localA" min="0" max="100" value="45"></div>
         <div class="bar-track"><div class="bar-fill" id="barA"></div></div>
         <div class="readout" id="readA"></div>
@@ -186,7 +188,7 @@
             <label class="switch"><input type="checkbox" id="toggleF"><span class="sw-track"></span></label>
           </div>
         </div>
-        <div class="ctrl-row"><span class="clab">מתח (0–8V)</span><input type="range" class="ext" id="voltF" min="0" max="8" step="0.1" value="4" disabled></div>
+        <div class="ctrl-row" id="voltRowF"><span class="clab">מתח (0–8V)</span><input type="range" class="ext" id="voltF" min="0" max="8" step="0.1" value="4" disabled></div>
         <div class="ctrl-row"><span class="clab">ברז מקומי</span><input type="range" class="local" id="localF" min="0" max="100" value="55"></div>
         <div class="bar-track"><div class="bar-fill" id="barF"></div></div>
         <div class="readout" id="readF"></div>
@@ -221,6 +223,7 @@ updateMasterPct();
 function wireJack(letter, maxVoltFor100){
   const toggle = document.getElementById('toggle'+letter);
   const volt = document.getElementById('volt'+letter);
+  const voltRow = document.getElementById('voltRow'+letter);
   const local = document.getElementById('local'+letter);
   const segTop = document.getElementById('segTop'+letter);
   const segOut = document.getElementById('segOut'+letter);
@@ -236,6 +239,7 @@ function wireJack(letter, maxVoltFor100){
     const localFrac = parseFloat(local.value)/100;
     const ext = toggle.checked;
     volt.disabled = !ext;
+    voltRow.style.display = ext ? 'flex' : 'none';
 
     trunk.setAttribute('stroke-width', (3 + master*7).toFixed(1));
     trunk.style.animationDuration = Math.max(0.35, 1.3 - master*0.95) + 's';
