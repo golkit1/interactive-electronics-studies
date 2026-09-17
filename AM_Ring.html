@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>אפנון משרעת מול אפנון טבעות</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f4ef;
+    --surface: #ffffff;
+    --surface-2: #eceae2;
+    --ink: #1c2420;
+    --muted: #5b6a63;
+    --line: #dcdcd0;
+    --carrier: #2e6f95;
+    --carrier-soft: rgba(46,111,149,.16);
+    --modulator: #c06a1f;
+    --modulator-soft: rgba(192,106,31,.16);
+    --output: #6b3f96;
+    --output-soft: rgba(107,63,150,.12);
+    --accent-line: #b8b2a0;
+    --trace: #3a4440;
+    --trace-fill: rgba(58,68,64,.10);
+    --focus: #2e6f95;
+    --shadow: 0 1px 2px rgba(28,36,32,.06), 0 8px 24px -12px rgba(28,36,32,.18);
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --bg: #14180f;
+      --surface: #1c2118;
+      --surface-2: #262c20;
+      --ink: #ece8dc;
+      --muted: #a3ab9c;
+      --line: #38402f;
+      --carrier: #7cb8dd;
+      --carrier-soft: rgba(124,184,221,.16);
+      --modulator: #e2a05c;
+      --modulator-soft: rgba(226,160,92,.18);
+      --output: #b79ad6;
+      --output-soft: rgba(183,154,214,.16);
+      --accent-line: #4a5240;
+      --trace: #d7d2c2;
+      --trace-fill: rgba(215,210,194,.10);
+      --focus: #7cb8dd;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14180f;
+    --surface: #1c2118;
+    --surface-2: #262c20;
+    --ink: #ece8dc;
+    --muted: #a3ab9c;
+    --line: #38402f;
+    --carrier: #7cb8dd;
+    --carrier-soft: rgba(124,184,221,.16);
+    --modulator: #e2a05c;
+    --modulator-soft: rgba(226,160,92,.18);
+    --output: #b79ad6;
+    --output-soft: rgba(183,154,214,.16);
+    --accent-line: #4a5240;
+    --trace: #d7d2c2;
+    --trace-fill: rgba(215,210,194,.10);
+    --focus: #7cb8dd;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    margin: 0;
+    font-family: "Heebo", system-ui, sans-serif;
+  }
+  body {
+    padding: 28px 18px 60px;
+    min-height: 100vh;
+  }
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  header.top {
+    margin-bottom: 22px;
+  }
+  header.top h1 {
+    font-size: clamp(26px, 4.4vw, 36px);
+    font-weight: 800;
+    line-height: 1.25;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+  header.top p {
+    color: var(--muted);
+    font-size: 15.5px;
+    line-height: 1.7;
+    max-width: 62ch;
+    margin: 0;
+  }
+
+  nav.tabs {
+    display: flex;
+    gap: 8px;
+    margin: 26px 0 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  nav.tabs button {
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    padding: 10px 4px 12px;
+    margin-inline-end: 22px;
+    cursor: pointer;
+    position: relative;
+    transition: color .15s ease;
+  }
+  nav.tabs button:hover { color: var(--ink); }
+  nav.tabs button[aria-selected="true"] {
+    color: var(--ink);
+  }
+  nav.tabs button[aria-selected="true"]::after {
+    content: "";
+    position: absolute;
+    right: 0; left: 0; bottom: -1px;
+    height: 2px;
+    background: var(--ink);
+  }
+  nav.tabs button:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .lede {
+    font-size: 15.5px;
+    line-height: 1.75;
+    color: var(--ink);
+    margin: 4px 0 22px;
+    max-width: 64ch;
+  }
+  .lede b { font-weight: 700; }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 18px 18px 20px;
+    margin-bottom: 18px;
+  }
+  .panel h2 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    margin: 0 0 12px;
+  }
+
+  .legend {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .swatch { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+  .swatch.dash { background: repeating-linear-gradient(90deg, currentColor 0 5px, transparent 5px 9px); height: 2px; }
+  button.mini-btn {
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 5px 14px;
+    cursor: pointer;
+    margin-inline-start: auto;
+  }
+  button.mini-btn:hover { background: var(--line); }
+  button.mini-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .scope-wrap { direction: ltr; }
+  canvas#scope {
+    width: 100%;
+    height: 190px;
+    display: block;
+    border-radius: 8px;
+    background: var(--surface-2);
+  }
+  .zoom-row { margin-top: 14px; }
+  .zoom-label {
+    direction: rtl;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .zoom-label span { font-weight: 500; font-variant-numeric: tabular-nums; }
+  canvas#scope-zoom {
+    width: 100%;
+    height: 90px;
+    display: block;
+    border-radius: 8px;
+    background: var(--surface-2);
+  }
+
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 22px;
+    margin-top: 16px;
+  }
+  @media (max-width: 520px) {
+    .controls { grid-template-columns: 1fr; }
+  }
+  .field label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .field label .val {
+    color: var(--muted);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border-radius: 3px;
+    background: var(--line);
+    outline-offset: 4px;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 17px; height: 17px;
+    border-radius: 50%;
+    background: var(--carrier);
+    border: 2px solid var(--surface);
+    box-shadow: 0 0 0 1px var(--carrier);
+    cursor: pointer;
+  }
+  .field.fc input[type="range"]::-webkit-slider-thumb { background: var(--carrier); box-shadow: 0 0 0 1px var(--carrier); }
+  .field.fm input[type="range"]::-webkit-slider-thumb { background: var(--modulator); box-shadow: 0 0 0 1px var(--modulator); }
+  .field.depth input[type="range"]::-webkit-slider-thumb { background: var(--output); box-shadow: 0 0 0 1px var(--output); }
+  input[type="range"]::-moz-range-thumb {
+    width: 15px; height: 15px; border-radius: 50%;
+    background: var(--carrier); border: 2px solid var(--surface);
+    cursor: pointer;
+  }
+  .field.fm input[type="range"]::-moz-range-thumb { background: var(--modulator); }
+  .field.depth input[type="range"]::-moz-range-thumb { background: var(--output); }
+
+  .playbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+  button.play {
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--ink);
+    border: none;
+    border-radius: 999px;
+    padding: 10px 22px;
+    cursor: pointer;
+  }
+  button.play:hover { opacity: .88; }
+  button.play:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+  .vol { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); flex: 1; min-width: 160px; }
+  .vol input[type="range"] { max-width: 140px; }
+  .audio-note { font-size: 12.5px; color: var(--muted); margin-inline-start: auto; }
+
+  .spectrum { direction: ltr; }
+  canvas#spec { width: 100%; height: 190px; display: block; border-radius: 8px; background: var(--surface-2); }
+  .spec-labels { direction: rtl; display: flex; flex-wrap: wrap; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 6px; font-variant-numeric: tabular-nums; }
+
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 560px) {
+    .compare { grid-template-columns: 1fr; }
+  }
+  .compare .col {
+    background: var(--surface-2);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .compare .col h3 {
+    font-size: 14px;
+    margin: 0 0 8px;
+  }
+  .compare .col.am h3 { color: var(--carrier); }
+  .compare .col.ring h3 { color: var(--output); }
+  .compare ul {
+    margin: 0;
+    padding-inline-start: 18px;
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: var(--ink);
+  }
+
+  footer.note {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 10px;
+    line-height: 1.6;
+  }
+
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="top">
+    <h1>אפנון משרעת מול אפנון טבעות</h1>
+    <p>שתי דרכים לקחת שני אותות חשמליים — נשא (תדר גבוה) ומאפנן (תדר נמוך יותר) — ולמזג ביניהם לאות אחד. ההבדל היחיד בין שתי השיטות הוא נוסחת המכפלה, אבל התוצאה נשמעת אחרת לגמרי.</p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="tab-am" aria-selected="true" aria-controls="panel-am">אפנון משרעת (AM)</button>
+    <button role="tab" id="tab-ring" aria-selected="false" aria-controls="panel-ring">אפנון טבעות (Ring Mod)</button>
+  </nav>
+
+  <div id="panel-am" role="tabpanel" aria-labelledby="tab-am">
+    <p class="lede" id="lede-am"></p>
+  </div>
+
+  <div id="panel-ring" role="tabpanel" aria-labelledby="tab-ring" hidden>
+    <p class="lede" id="lede-ring"></p>
+  </div>
+
+  <section class="panel">
+    <h2>מסך תצוגה</h2>
+    <div class="legend">
+      <span><span class="swatch dash" style="color:var(--modulator)"></span>מעטפת האפנון</span>
+      <span><span class="swatch" style="background:var(--output)"></span>האות היוצא</span>
+      <button class="mini-btn" id="scope-freeze-btn" type="button">⏸ עצור תצוגה</button>
+    </div>
+    <div class="scope-wrap"><canvas id="scope" width="1400" height="380"></canvas></div>
+
+    <div class="zoom-row">
+      <div class="zoom-label">תדר הנשא בהגדלה <span id="zoom-info"></span></div>
+      <div class="scope-wrap"><canvas id="scope-zoom" width="1200" height="170"></canvas></div>
+    </div>
+
+    <div class="controls">
+      <div class="field fc">
+        <label for="fc">תדר הנשא (f<sub>c</sub>) <span class="val" id="fc-val">220 Hz</span></label>
+        <input type="range" id="fc" min="0" max="1000" step="1">
+      </div>
+      <div class="field fm">
+        <label for="fm">תדר המאפנן (f<sub>m</sub>) <span class="val" id="fm-val">4 Hz</span></label>
+        <input type="range" id="fm" min="0" max="1000" step="1">
+      </div>
+      <div class="field depth" id="depth-field">
+        <label for="depth">עומק אפנון (m) <span class="val" id="depth-val">70%</span></label>
+        <input type="range" id="depth" min="0" max="100" step="1" value="70">
+      </div>
+    </div>
+
+    <div class="playbar">
+      <button class="play" id="play-btn">▶ השמע צליל</button>
+      <label class="isolate" id="isolate-wrap" style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted);cursor:pointer;">
+        <input type="checkbox" id="isolate" style="width:16px;height:16px;">
+        השתקת הנשא — השמע רק את תדרי הצד
+      </label>
+      <div class="vol">
+        <span>עוצמה</span>
+        <input type="range" id="vol" min="0" max="100" step="1" value="25">
+      </div>
+      <span class="audio-note">ההשמעה משתמשת בתדרים האמיתיים; מסך התצוגה תמיד מציג כמה מחזורים לקריאות.</span>
+    </div>
+    <p class="hint" id="am-hint" style="font-size:12.5px;color:var(--muted);margin:10px 0 0;line-height:1.6;">
+      הנשא חזק בהרבה מתדרי הצד — ככה AM אמור להישמע. סמנו את "השתקת הנשא" כדי לשמוע את תדרי הצד בבידוד, והשוו. שימו לב גם: מתחת ל־20Hz בערך תדר המאפנן נשמע כרטט (טרמולו) ולא כתדר נפרד — כדי לשמוע שני תדרים ברורים העלו את תדר המאפנן.
+    </p>
+  </section>
+
+  <section class="panel">
+    <h2>ספקטרום — חיזוי מול מדידה בפועל</h2>
+    <div class="spectrum"><canvas id="spec" width="1400" height="380"></canvas></div>
+    <div class="spec-labels" id="spec-labels"></div>
+  </section>
+
+  <section class="panel">
+    <h2>מה ההבדל?</h2>
+    <div class="compare">
+      <div class="col am">
+        <h3>אפנון משרעת</h3>
+        <ul>
+          <li>הנשא נשאר קיים באות היוצא — רק העוצמה שלו נעה מעלה ומטה.</li>
+          <li>הספקטרום מכיל שלושה רכיבים: הנשא במרכז, ושני תדרי צד בהפרש f<sub>m</sub>.</li>
+          <li>בעומק אפנון 0% האות היוצא הוא פשוט הנשא ללא שינוי.</li>
+        </ul>
+      </div>
+      <div class="col ring">
+        <h3>אפנון טבעות</h3>
+        <ul>
+          <li>הנשא נעלם לחלוטין מהאות היוצא — נשארים רק שני תדרי הצד.</li>
+          <li>אין "עומק אפנון" לכוונן — שני האותות פשוט מוכפלים זה בזה במלואם.</li>
+          <li>כשהמאפנן עולה לתחום השמיע, נוצר הצליל המתכתי־פעמוני האופייני לאפקט.</li>
+        </ul>
+      </div>
+    </div>
+    <footer class="note">בשתי השיטות: תדרי הצד ממוקמים ב־f<sub>c</sub> − f<sub>m</sub> וב־f<sub>c</sub> + f<sub>m</sub>. זה מה שמאפשר לשני האפקטים ליצור צלילים חדשים שלא היו קיימים באף אחד מהאותות המקוריים.</footer>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var state = { mode: "am", fc: 220, fm: 4, depth: 0.7, playing: false, volume: 0.25, isolate: false, scopeFrozen: false };
+
+  var FC_MIN = 40, FC_MAX = 2000;
+  var FM_MIN = 0.2, FM_MAX = 500;
+
+  function toLog(raw, min, max) { return min * Math.pow(max / min, raw / 1000); }
+  function fromLog(freq, min, max) { return 1000 * Math.log(freq / min) / Math.log(max / min); }
+  function fmtHz(v) {
+    if (v >= 100) return Math.round(v) + " Hz";
+    if (v >= 10) return v.toFixed(1) + " Hz";
+    return v.toFixed(2) + " Hz";
+  }
+
+  var texts = {
+    am: {
+      lede: "עוצמת הנשא משתנה מעלה ומטה בקצב המאפנן — אבל היא תמיד נשארת חיובית, כך שהנשא עצמו אף פעם לא נעלם מהאות היוצא. רק ה\"עוצמה\" (המשרעת) שלו נעה בהתאם למאפנן."
+    },
+    ring: {
+      lede: "שני האותות מוכפלים זה בזה במלואם, בלי שום תוספת קבועה. בגלל זה המכפלה יכולה לצאת גם שלילית, והנשא עצמו נעלם לגמרי מהאות היוצא — נשארים רק תדרי הצד."
+    }
+  };
+
+  var els = {
+    tabAm: document.getElementById("tab-am"),
+    tabRing: document.getElementById("tab-ring"),
+    panelAm: document.getElementById("panel-am"),
+    panelRing: document.getElementById("panel-ring"),
+    ledeAm: document.getElementById("lede-am"),
+    ledeRing: document.getElementById("lede-ring"),
+    fc: document.getElementById("fc"),
+    fm: document.getElementById("fm"),
+    depth: document.getElementById("depth"),
+    depthField: document.getElementById("depth-field"),
+    fcVal: document.getElementById("fc-val"),
+    fmVal: document.getElementById("fm-val"),
+    depthVal: document.getElementById("depth-val"),
+    playBtn: document.getElementById("play-btn"),
+    isolate: document.getElementById("isolate"),
+    isolateWrap: document.getElementById("isolate-wrap"),
+    amHint: document.getElementById("am-hint"),
+    vol: document.getElementById("vol"),
+    canvas: document.getElementById("scope"),
+    scopeFreezeBtn: document.getElementById("scope-freeze-btn"),
+    canvasZoom: document.getElementById("scope-zoom"),
+    zoomInfo: document.getElementById("zoom-info"),
+    spec: document.getElementById("spec"),
+    specLabels: document.getElementById("spec-labels")
+  };
+
+  els.ledeAm.textContent = texts.am.lede;
+  els.ledeRing.textContent = texts.ring.lede;
+
+  els.fc.min = 0; els.fc.max = 1000;
+  els.fm.min = 0; els.fm.max = 1000;
+  els.fc.value = Math.round(fromLog(state.fc, FC_MIN, FC_MAX));
+  els.fm.value = Math.round(fromLog(state.fm, FM_MIN, FM_MAX));
+
+  function setMode(mode) {
+    state.mode = mode;
+    var isAm = mode === "am";
+    els.tabAm.setAttribute("aria-selected", String(isAm));
+    els.tabRing.setAttribute("aria-selected", String(!isAm));
+    els.panelAm.hidden = !isAm;
+    els.panelRing.hidden = isAm;
+    els.depthField.style.visibility = isAm ? "visible" : "hidden";
+    els.isolateWrap.style.display = isAm ? "flex" : "none";
+    els.amHint.style.display = isAm ? "block" : "none";
+    if (!isAm && state.isolate) {
+      state.isolate = false;
+      els.isolate.checked = false;
+    }
+    updateAudioGraph();
+    drawSpectrum();
+  }
+  els.tabAm.addEventListener("click", function () { setMode("am"); });
+  els.tabRing.addEventListener("click", function () { setMode("ring"); });
+
+  function updateReadouts() {
+    els.fcVal.textContent = fmtHz(state.fc);
+    els.fmVal.textContent = fmtHz(state.fm);
+    els.depthVal.textContent = Math.round(state.depth * 100) + "%";
+  }
+
+  els.fc.addEventListener("input", function () {
+    state.fc = toLog(+els.fc.value, FC_MIN, FC_MAX);
+    updateReadouts(); drawSpectrum(); updateAudioParams();
+  });
+  els.fm.addEventListener("input", function () {
+    state.fm = toLog(+els.fm.value, FM_MIN, FM_MAX);
+    updateReadouts(); drawSpectrum(); updateAudioParams();
+  });
+  els.depth.addEventListener("input", function () {
+    state.depth = (+els.depth.value) / 100;
+    updateReadouts(); drawSpectrum(); updateAudioParams();
+  });
+  els.vol.addEventListener("input", function () {
+    state.volume = (+els.vol.value) / 100;
+    updateAudioParams();
+  });
+  els.isolate.addEventListener("change", function () {
+    state.isolate = els.isolate.checked;
+    updateAudioGraph();
+  });
+  updateReadouts();
+
+  /* ---------- Scope (time domain) ---------- */
+  var ctx = els.canvas.getContext("2d");
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function cssVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  function drawScope(t0) {
+    var W = els.canvas.width, H = els.canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    var fc = state.fc, fm = state.fm, mode = state.mode, depth = state.depth;
+    var dur = Math.min(1.5, Math.max(0.02, 2.5 / fm));
+    var mid = H / 2;
+    var amp = H * 0.42;
+
+    var carrierColor = cssVar('--carrier');
+    var modColor = cssVar('--modulator');
+    var outColor = cssVar('--output');
+    var lineColor = cssVar('--accent-line');
+
+    // zero line
+    ctx.strokeStyle = lineColor;
+    ctx.globalAlpha = 0.5;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, mid); ctx.lineTo(W, mid);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // Per-column min/max ("audio waveform style") rendering: when many carrier
+    // cycles fall inside one pixel column, plotting individual points aliases
+    // into visual noise. Instead, for each column we sample several points
+    // across its time slice and stroke a vertical segment from the lowest to
+    // the highest value found — the classic technique waveform editors use
+    // when zoomed out. This makes the AM/RM envelope readable even when the
+    // modulator is slow and the carrier is fast relative to it.
+    function drawWaveform(valueFn, color, alpha, lineWidth) {
+      var colDur = dur / W;
+      var subSamples = Math.max(1, Math.min(16, Math.round(fc * colDur * 4)));
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = alpha;
+      ctx.lineWidth = lineWidth;
+      ctx.beginPath();
+      for (var x = 0; x < W; x++) {
+        var colStart = t0 + (x / W) * dur;
+        var minV = Infinity, maxV = -Infinity;
+        for (var s = 0; s < subSamples; s++) {
+          var t = colStart + ((s + 0.5) / subSamples) * colDur;
+          var v = valueFn(t);
+          if (v < minV) minV = v;
+          if (v > maxV) maxV = v;
+        }
+        if (minV === maxV) { minV -= 0.002; maxV += 0.002; }
+        ctx.moveTo(x, mid - maxV * amp);
+        ctx.lineTo(x, mid - minV * amp);
+      }
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    // envelope (dashed reference curve — the modulator itself is always slow
+    // enough relative to the window that a direct sample per column is exact)
+    ctx.strokeStyle = modColor;
+    ctx.setLineDash([6, 5]);
+    ctx.lineWidth = 1.6;
+    ctx.globalAlpha = 0.85;
+    [1, -1].forEach(function (sign) {
+      ctx.beginPath();
+      for (var i = 0; i < W; i++) {
+        var t = t0 + (i / (W - 1)) * dur;
+        var m = Math.sin(2 * Math.PI * fm * t);
+        var env = mode === "am" ? (1 + depth * m) : m;
+        var y = mid - sign * env * amp;
+        if (i === 0) ctx.moveTo(i, y); else ctx.lineTo(i, y);
+      }
+      ctx.stroke();
+    });
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 1;
+
+    // output
+    drawWaveform(function (t) {
+      var c = Math.sin(2 * Math.PI * fc * t);
+      var m = Math.sin(2 * Math.PI * fm * t);
+      return mode === "am" ? (1 + depth * m) * c : m * c;
+    }, outColor, 0.95, 2.2);
+  }
+
+  var ctxZoom = els.canvasZoom.getContext("2d");
+  function drawCarrierZoom(t0) {
+    var W = els.canvasZoom.width, H = els.canvasZoom.height;
+    ctxZoom.clearRect(0, 0, W, H);
+    var fc = state.fc;
+    var cycles = 4;
+    var dur = cycles / fc;
+    var mid = H / 2, amp = H * 0.4;
+
+    ctxZoom.strokeStyle = cssVar('--accent-line');
+    ctxZoom.globalAlpha = 0.5;
+    ctxZoom.lineWidth = 1;
+    ctxZoom.beginPath();
+    ctxZoom.moveTo(0, mid); ctxZoom.lineTo(W, mid);
+    ctxZoom.stroke();
+    ctxZoom.globalAlpha = 1;
+
+    var N = 400;
+    ctxZoom.strokeStyle = cssVar('--carrier');
+    ctxZoom.lineWidth = 2.2;
+    ctxZoom.beginPath();
+    for (var i = 0; i < N; i++) {
+      var t = t0 + (i / (N - 1)) * dur;
+      var y = mid - Math.sin(2 * Math.PI * fc * t) * amp;
+      if (i === 0) ctxZoom.moveTo((i / (N - 1)) * W, y);
+      else ctxZoom.lineTo((i / (N - 1)) * W, y);
+    }
+    ctxZoom.stroke();
+
+    els.zoomInfo.textContent = "(" + fmtHz(fc) + " · מחזור " + (1000 / fc).toFixed(fc >= 100 ? 1 : 2) + " מ\"ש)";
+  }
+
+  var animStart = null;
+  var scopeFrozenAt = null;
+  function frame(ts) {
+    if (animStart === null) animStart = ts;
+    var elapsed = (ts - animStart) / 1000;
+    var t;
+    if (state.scopeFrozen) {
+      if (scopeFrozenAt === null) scopeFrozenAt = elapsed;
+      t = scopeFrozenAt;
+    } else {
+      scopeFrozenAt = null;
+      t = elapsed;
+    }
+    drawScope(t % 100000);
+    drawCarrierZoom(t % 100000);
+    if (state.playing && analyser) {
+      analyser.getFloatFrequencyData(analyserData);
+      drawSpectrum(analyserData, audioCtx.sampleRate, analyser.fftSize);
+    }
+    if (!reduceMotion || state.playing) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  if (reduceMotion) { drawScope(0); drawCarrierZoom(0); }
+
+  els.scopeFreezeBtn.addEventListener("click", function () {
+    state.scopeFrozen = !state.scopeFrozen;
+    els.scopeFreezeBtn.textContent = state.scopeFrozen ? "▶ המשך תצוגה" : "⏸ עצור תצוגה";
+    if (!state.scopeFrozen && reduceMotion) requestAnimationFrame(frame);
+  });
+
+  window.addEventListener("resize", function () {
+    var rect = els.canvas.getBoundingClientRect();
+    els.canvas.width = Math.min(1700, Math.max(600, Math.round(rect.width * 2)));
+  });
+  setTimeout(function () {
+    var rect = els.canvas.getBoundingClientRect();
+    if (rect.width) els.canvas.width = Math.min(1700, Math.max(600, Math.round(rect.width * 2)));
+  }, 50);
+
+  /* ---------- Spectrum: predicted bars + live measured trace ---------- */
+  var specCtx = els.spec.getContext("2d");
+  var specAxisMax = 500; // updated each draw, read by the FFT overlay
+
+  function drawSpectrum(liveData, sampleRate, fftSize) {
+    var W = els.spec.width, H = els.spec.height, baseY = H - 46;
+    specCtx.clearRect(0, 0, W, H);
+    var fc = state.fc, fm = state.fm, mode = state.mode, depth = state.depth;
+
+    var lower = Math.abs(fc - fm);
+    var upper = fc + fm;
+    var axisMax = Math.max(upper * 1.18, fc * 1.15, 60);
+    specAxisMax = axisMax;
+
+    function xFor(f) { return 40 + (f / axisMax) * (W - 80); }
+
+    // axis
+    specCtx.strokeStyle = cssVar('--accent-line');
+    specCtx.lineWidth = 1.5;
+    specCtx.beginPath();
+    specCtx.moveTo(20, baseY); specCtx.lineTo(W - 20, baseY);
+    specCtx.stroke();
+
+    // live measured trace (drawn first, sits behind the predicted bars)
+    if (liveData && sampleRate && fftSize) {
+      var binHz = sampleRate / fftSize;
+      var floor = -110, ceil = -35;
+      specCtx.strokeStyle = cssVar('--trace');
+      specCtx.fillStyle = cssVar('--trace-fill');
+      specCtx.lineWidth = 2;
+      specCtx.beginPath();
+      var started = false;
+      var maxBin = Math.min(liveData.length - 1, Math.ceil(axisMax / binHz) + 2);
+      var firstX = 40, lastX = 40;
+      for (var b = 0; b <= maxBin; b++) {
+        var freq = b * binHz;
+        var x = xFor(freq);
+        var db = liveData[b];
+        var norm = Math.min(1, Math.max(0, (db - floor) / (ceil - floor)));
+        var y = baseY - norm * (baseY - 24);
+        if (!started) { specCtx.moveTo(x, y); firstX = x; started = true; }
+        else specCtx.lineTo(x, y);
+        lastX = x;
+      }
+      specCtx.lineTo(lastX, baseY);
+      specCtx.lineTo(firstX, baseY);
+      specCtx.closePath();
+      specCtx.fill();
+      specCtx.beginPath();
+      started = false;
+      for (var b2 = 0; b2 <= maxBin; b2++) {
+        var freq2 = b2 * binHz;
+        var x2 = xFor(freq2);
+        var db2 = liveData[b2];
+        var norm2 = Math.min(1, Math.max(0, (db2 - floor) / (ceil - floor)));
+        var y2 = baseY - norm2 * (baseY - 24);
+        if (!started) { specCtx.moveTo(x2, y2); started = true; }
+        else specCtx.lineTo(x2, y2);
+      }
+      specCtx.stroke();
+    }
+
+    // predicted bars (semi-transparent so the measured trace stays visible under them)
+    function bar(freq, heightFrac, color) {
+      var x = xFor(freq);
+      var h = heightFrac * (baseY - 24);
+      specCtx.fillStyle = color;
+      specCtx.globalAlpha = 0.55;
+      specCtx.beginPath();
+      specCtx.roundRect ? specCtx.roundRect(x - 5, baseY - h, 10, h, 3) : specCtx.rect(x - 5, baseY - h, 10, h);
+      specCtx.fill();
+      specCtx.globalAlpha = 1;
+      specCtx.fillStyle = cssVar('--muted');
+      specCtx.font = "22px Heebo, sans-serif";
+      specCtx.textAlign = "center";
+      specCtx.fillText(fmtHz(freq), x, baseY - h - 12);
+    }
+
+    bar(lower, mode === "am" ? 0.28 + 0.32 * depth : 0.75, cssVar('--output'));
+    bar(upper, mode === "am" ? 0.28 + 0.32 * depth : 0.75, cssVar('--output'));
+    if (mode === "am") {
+      bar(fc, 0.92, cssVar('--carrier'));
+    }
+
+    els.specLabels.innerHTML =
+      '<span>f<sub>c</sub> − f<sub>m</sub> = ' + fmtHz(lower) + '</span>' +
+      (mode === "am" ? '<span>f<sub>c</sub> = ' + fmtHz(fc) + '</span>' : '<span style="opacity:.55">אין נשא</span>') +
+      '<span>f<sub>c</sub> + f<sub>m</sub> = ' + fmtHz(upper) + '</span>' +
+      (state.playing ? '' : '<span style="opacity:.55; flex-basis:100%; margin-top:4px">לחצו \u25B6 השמע כדי לראות את המדידה בפועל על החיזוי</span>');
+  }
+  drawSpectrum();
+
+  /* ---------- Audio ---------- */
+  var audioCtx = null, carrierOsc = null, modOsc = null, offset = null, depthScale = null, modGain = null, masterGain = null;
+  var analyser = null, analyserData = null;
+
+  function buildAudioGraph() {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    carrierOsc = audioCtx.createOscillator();
+    carrierOsc.type = "sine";
+    modOsc = audioCtx.createOscillator();
+    modOsc.type = "sine";
+
+    modGain = audioCtx.createGain(); // the AM/ring "multiplier" gain on the carrier path
+    modGain.gain.value = (state.mode === "am" && !state.isolate) ? 1 : 0;
+
+    depthScale = audioCtx.createGain(); // scales modulator before it drives modGain.gain
+    depthScale.gain.value = state.mode === "am" ? state.depth : 1;
+
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = state.volume * 0.5;
+
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 16384;
+    analyser.smoothingTimeConstant = 0.75;
+    analyserData = new Float32Array(analyser.frequencyBinCount);
+
+    modOsc.connect(depthScale);
+    depthScale.connect(modGain.gain);
+
+    carrierOsc.connect(modGain);
+    modGain.connect(masterGain);
+    masterGain.connect(audioCtx.destination);
+    masterGain.connect(analyser);
+
+    carrierOsc.frequency.value = state.fc;
+    modOsc.frequency.value = state.fm;
+
+    carrierOsc.start();
+    modOsc.start();
+  }
+
+  function updateAudioGraph() {
+    if (!audioCtx) return;
+    var now = audioCtx.currentTime;
+    if (state.mode === "am") {
+      var base = state.isolate ? 0 : 1;
+      modGain.gain.setTargetAtTime(base, now, 0.01);
+      depthScale.gain.setTargetAtTime(state.depth, now, 0.01);
+    } else {
+      modGain.gain.setTargetAtTime(0, now, 0.01);
+      depthScale.gain.setTargetAtTime(1, now, 0.01);
+    }
+  }
+
+  function updateAudioParams() {
+    if (!audioCtx) return;
+    var now = audioCtx.currentTime;
+    carrierOsc.frequency.setTargetAtTime(state.fc, now, 0.01);
+    modOsc.frequency.setTargetAtTime(state.fm, now, 0.01);
+    masterGain.gain.setTargetAtTime(state.volume * 0.5, now, 0.01);
+    if (state.mode === "am") {
+      depthScale.gain.setTargetAtTime(state.depth, now, 0.01);
+    }
+  }
+
+  els.playBtn.addEventListener("click", function () {
+    try {
+      if (!audioCtx) buildAudioGraph();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      if (!state.playing) {
+        state.playing = true;
+        els.playBtn.textContent = "⏸ עצור צליל";
+        if (reduceMotion) requestAnimationFrame(frame);
+      } else {
+        state.playing = false;
+        els.playBtn.textContent = "▶ השמע צליל";
+        masterGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.02);
+        setTimeout(function () {
+          if (!state.playing) masterGain.gain.value = 0;
+        }, 120);
+        drawSpectrum();
+        return;
+      }
+      updateAudioGraph();
+      updateAudioParams();
+    } catch (e) {
+      els.playBtn.textContent = "אין תמיכה בדפדפן זה";
+      els.playBtn.disabled = true;
+    }
+  });
+
+})();
+</script>
+</body>
+</html>
