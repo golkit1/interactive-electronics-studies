@@ -120,8 +120,6 @@
   .btn:hover{ border-color: var(--copper); }
   .btn.primary{ background: linear-gradient(180deg, var(--copper-bright), var(--copper)); color:#1a1008; border-color: transparent; font-weight:700; }
   .btn.primary:hover{ filter: brightness(1.06); }
-  .btn.sound-on{ background: linear-gradient(180deg, #5fe3d1, var(--ideal)); color:#04211d; border-color: transparent; font-weight:700; }
-  .btn.sound-on:hover{ filter: brightness(1.06); }
 
   .footnote{ margin-top: 16px; font-size: 12.5px; color: var(--text-faint); line-height: 1.7; text-align:center; padding: 0 6px; }
 
@@ -164,14 +162,8 @@
         <input type="range" id="harmSlider" min="1" max="5" value="1" step="1">
         <span class="count" id="harmCount">1</span>
       </div>
-      <div class="slider-row">
-        <label for="volSlider">עוצמת שמע</label>
-        <input type="range" id="volSlider" min="0" max="100" value="45" step="1">
-        <span class="count" id="volVal">45%</span>
-      </div>
       <div class="buttons-row">
         <button class="btn primary" id="playBtn">▶ הפעל בנייה אוטומטית</button>
-        <button class="btn" id="soundBtn">🔊 השמע צליל</button>
         <button class="btn" id="resetBtn">איפוס</button>
       </div>
     </div>
@@ -247,69 +239,6 @@
     return '1/' + den;
   }
 
-  // --- sound ---
-  let audioCtx = null, osc = null, gainNode = null, soundOn = false;
-  const FUND_FREQ = 220; // A3, fixed so timbre (not pitch) is what's compared
-
-  function ensureAudio(){
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-  }
-
-  function buildPeriodicWave(w, count){
-    const maxN = Math.max(...w.harmonics.map(h => h.n));
-    const real = new Float32Array(maxN+1);
-    const imag = new Float32Array(maxN+1);
-    for (let i=0;i<count;i++){
-      const h = w.harmonics[i];
-      real[h.n] = h.a;
-      imag[h.n] = h.b;
-    }
-    return audioCtx.createPeriodicWave(real, imag, { disableNormalization: false });
-  }
-
-  function updateAudioWave(){
-    if (!soundOn || !osc) return;
-    const w = WAVES[currentType];
-    osc.setPeriodicWave(buildPeriodicWave(w, harmCount));
-  }
-
-  function startSound(){
-    ensureAudio();
-    const w = WAVES[currentType];
-    osc = audioCtx.createOscillator();
-    gainNode = audioCtx.createGain();
-    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-    osc.setPeriodicWave(buildPeriodicWave(w, harmCount));
-    osc.frequency.value = FUND_FREQ;
-    osc.connect(gainNode).connect(audioCtx.destination);
-    osc.start();
-    const target = (parseInt(volSlider.value,10)/100) * 0.35; // headroom, avoid clipping
-    gainNode.gain.linearRampToValueAtTime(target, audioCtx.currentTime + 0.04);
-    soundOn = true;
-    soundBtn.textContent = '🔇 עצור צליל';
-    soundBtn.classList.add('sound-on');
-  }
-
-  function stopSound(){
-    if (osc && gainNode && audioCtx){
-      const now = audioCtx.currentTime;
-      gainNode.gain.cancelScheduledValues(now);
-      gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-      gainNode.gain.linearRampToValueAtTime(0, now + 0.05);
-      const o = osc;
-      setTimeout(() => { try{ o.stop(); }catch(e){} }, 80);
-    }
-    osc = null; gainNode = null;
-    soundOn = false;
-    soundBtn.textContent = '🔊 השמע צליל';
-    soundBtn.classList.remove('sound-on');
-  }
-
-  function toggleSound(){
-    if (soundOn) stopSound(); else startSound();
-  }
-
   let currentType = 'square';
   let harmCount = 1;
   let playing = false;
@@ -332,9 +261,6 @@
   const partialToggle = document.getElementById('partialToggle');
   const overtoneToggle = document.getElementById('overtoneToggle');
   const playBtn = document.getElementById('playBtn');
-  const soundBtn = document.getElementById('soundBtn');
-  const volSlider = document.getElementById('volSlider');
-  const volVal = document.getElementById('volVal');
   const resetBtn = document.getElementById('resetBtn');
 
   function buildWaveButtons(){
@@ -424,7 +350,6 @@
     drawScope(thetas, ideal, partial, peak);
     updateSpectrumHighlight();
     updateReadout(w);
-    updateAudioWave();
   }
 
   function drawScope(thetas, ideal, partial, peak){
@@ -545,14 +470,6 @@
   }
 
   playBtn.addEventListener('click', togglePlay);
-  soundBtn.addEventListener('click', toggleSound);
-  volSlider.addEventListener('input', () => {
-    volVal.textContent = volSlider.value + '%';
-    if (soundOn && gainNode && audioCtx){
-      const target = (parseInt(volSlider.value,10)/100) * 0.35;
-      gainNode.gain.linearRampToValueAtTime(target, audioCtx.currentTime + 0.05);
-    }
-  });
   resetBtn.addEventListener('click', () => { stopPlaying(); setCount(1); });
 
   buildWaveButtons();
