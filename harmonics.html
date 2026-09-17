@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>בניית צורות גל מהרמוניות</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-outer: #0d1613;
+    --bezel: #16221d;
+    --bezel-edge: #223028;
+    --screen: #081310;
+    --trace: #ffb02e;
+    --trace-glow: rgba(255,176,46,0.35);
+    --ideal: #4fd3c4;
+    --ideal-fill: rgba(79,211,196,0.09);
+    --copper: #c97d4a;
+    --copper-bright: #e69a63;
+    --text: #eef2ee;
+    --text-dim: #9db3a8;
+    --text-faint: #6b8177;
+  }
+  :root{ color-scheme: dark; }
+
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: radial-gradient(ellipse at 50% -10%, #16241e 0%, var(--bg-outer) 55%);
+    color: var(--text);
+    font-family: 'Heebo', 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    display:flex;
+    justify-content:center;
+    padding: 28px 14px 40px;
+  }
+
+  .device{ width: 100%; max-width: 880px; }
+
+  .masthead{ text-align:center; margin-bottom: 20px; }
+  .masthead h1{ font-size: clamp(22px, 4vw, 32px); font-weight: 900; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .masthead p{ color: var(--text-dim); font-size: 14.5px; margin: 0; max-width: 580px; margin-inline: auto; line-height: 1.6; }
+
+  .panel{
+    background: linear-gradient(180deg, var(--bezel) 0%, #101b16 100%);
+    border: 1px solid var(--bezel-edge);
+    border-radius: 22px;
+    padding: 18px;
+    box-shadow: 0 30px 60px -30px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.03);
+  }
+
+  .waves{ display:grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+  .wave-btn{
+    background: #0f1a15; border: 1px solid var(--bezel-edge); border-radius: 10px;
+    color: var(--text-dim); font-family: 'Heebo', sans-serif; font-size: 13.5px; font-weight: 500;
+    padding: 10px 4px; cursor: pointer; display:flex; flex-direction:column; align-items:center; gap: 6px;
+    transition: border-color .15s ease, color .15s ease, background .15s ease;
+  }
+  .wave-btn svg{ width: 34px; height: 18px; opacity: .55; transition: opacity .15s ease; }
+  .wave-btn:hover{ border-color: var(--copper); color: var(--text); }
+  .wave-btn.active{ background: #14241c; border-color: var(--copper-bright); color: var(--text); }
+  .wave-btn.active svg{ opacity: 1; }
+  .wave-btn.active svg path{ stroke: var(--copper-bright); }
+
+  .screen-wrap{
+    position: relative; background: var(--screen); border-radius: 12px; border: 1px solid #0a1712;
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.6), inset 0 0 2px rgba(255,176,46,0.15); overflow: hidden;
+  }
+  canvas{ display:block; width:100%; height: auto; }
+
+  .duty-note{
+    position:absolute; top:8px; right:14px;
+    font-family:'Space Mono', monospace; font-size: 11px; color: var(--ideal);
+    background: rgba(8,19,16,0.7); padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(79,211,196,0.25);
+  }
+
+  .readout{
+    display:flex; justify-content:space-between; align-items:center; gap: 10px; padding: 10px 14px;
+    font-family: 'Space Mono', monospace; font-size: 12.5px; color: var(--trace);
+    border-top: 1px solid #0a1712; flex-wrap: wrap;
+  }
+  .readout .dim{ color: var(--text-faint); }
+  .readout .val{ color: var(--text); }
+  .readout .row{ display:flex; gap: 6px; align-items:baseline; }
+
+  .spectrum{ display:flex; gap: 6px; padding: 14px 4px 4px; }
+  .bar-slot{ flex:1; display:flex; flex-direction:column; align-items:center; gap: 6px; cursor: pointer; background: none; border: none; padding: 0; color: inherit; }
+  .bar-track{ width: 100%; height: 54px; display:flex; align-items:flex-end; justify-content:center; }
+  .bar{ width: 60%; background: #1a2b22; border: 1px solid var(--bezel-edge); border-radius: 3px 3px 0 0; transition: height .25s ease, background .2s ease, border-color .2s ease; }
+  .bar-slot.included .bar{ background: var(--copper); border-color: var(--copper-bright); }
+  .bar-slot.current .bar{ background: var(--trace); border-color: var(--trace); box-shadow: 0 0 10px var(--trace-glow); }
+  .bar-label{ font-family: 'Space Mono', monospace; font-size: 10.5px; color: var(--text-faint); }
+  .bar-slot.included .bar-label{ color: var(--text-dim); }
+  .bar-slot.current .bar-label{ color: var(--trace); }
+
+  .po-labels{ display:flex; flex-direction:column; align-items:center; gap: 1px; height: 28px; justify-content:flex-end; }
+  .po-labels .po{ font-family:'Space Mono', monospace; font-size: 10px; line-height:1.3; color: var(--text-faint); }
+  .po-labels .po.partial{ color: var(--copper-bright); }
+  .po-labels .po.overtone{ color: var(--ideal); }
+  .bar-slot.current .po-labels .po.partial{ color: var(--trace); }
+  .spectrum.hide-partial .po.partial{ display:none; }
+  .spectrum.hide-overtone .po.overtone{ display:none; }
+
+  .spectrum-head{ display:flex; justify-content:flex-end; gap: 16px; padding: 0 4px; }
+  .po-toggle{ display:flex; align-items:center; gap: 6px; font-size: 12px; color: var(--text-faint); cursor:pointer; user-select:none; }
+  .po-toggle input{ accent-color: var(--copper-bright); width:14px; height:14px; cursor:pointer; }
+
+  .controls{ margin-top: 16px; display:flex; flex-direction:column; gap: 12px; }
+  .slider-row{ display:flex; align-items:center; gap: 12px; }
+  .slider-row label{ font-size: 13px; color: var(--text-dim); white-space:nowrap; min-width: 128px; }
+  input[type=range]{ flex:1; -webkit-appearance: none; appearance: none; height: 4px; background: var(--bezel-edge); border-radius: 2px; outline: none; }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width: 18px; height: 18px; border-radius: 50%; background: var(--copper-bright); border: 2px solid #0f1a15; cursor:pointer; box-shadow: 0 0 0 3px rgba(230,154,99,0.18); }
+  input[type=range]::-moz-range-thumb{ width: 18px; height: 18px; border-radius: 50%; background: var(--copper-bright); border: 2px solid #0f1a15; cursor:pointer; }
+  .slider-row .count{ font-family:'Space Mono', monospace; font-size: 13px; color: var(--text); min-width: 44px; text-align:center; }
+
+  .buttons-row{ display:flex; gap: 8px; }
+  .btn{ flex:1; background: #14241c; border: 1px solid var(--bezel-edge); color: var(--text); font-family:'Heebo', sans-serif; font-size: 14px; font-weight: 500; padding: 11px 10px; border-radius: 10px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap: 8px; transition: border-color .15s ease, background .15s ease; }
+  .btn:hover{ border-color: var(--copper); }
+  .btn.primary{ background: linear-gradient(180deg, var(--copper-bright), var(--copper)); color:#1a1008; border-color: transparent; font-weight:700; }
+  .btn.primary:hover{ filter: brightness(1.06); }
+  .btn.sound-on{ background: linear-gradient(180deg, #5fe3d1, var(--ideal)); color:#04211d; border-color: transparent; font-weight:700; }
+  .btn.sound-on:hover{ filter: brightness(1.06); }
+
+  .footnote{ margin-top: 16px; font-size: 12.5px; color: var(--text-faint); line-height: 1.7; text-align:center; padding: 0 6px; }
+
+  @media (max-width: 520px){
+    .waves{ grid-template-columns: repeat(2,1fr); }
+    .slider-row label{ min-width: 100px; font-size: 12px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .wave-btn, .bar, input[type=range]::-webkit-slider-thumb{ transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="device">
+
+  <div class="masthead">
+    <h1>מהרמוניות בודדות לצורת גל שלמה</h1>
+    <p>כל צורת גל מורכבת מסכום של גלי סינוס בתדרים ועוצמות שונות.</p>
+  </div>
+
+  <div class="panel">
+
+    <div class="waves" id="waveButtons"></div>
+
+    <div class="screen-wrap">
+      <div class="duty-note" id="dutyNote"></div>
+      <canvas id="scope" width="800" height="380"></canvas>
+      <div class="readout" id="readout"></div>
+    </div>
+
+    <div class="spectrum-head">
+      <label class="po-toggle"><input type="checkbox" id="partialToggle" checked> Partial</label>
+      <label class="po-toggle"><input type="checkbox" id="overtoneToggle" checked> Overtone</label>
+    </div>
+    <div class="spectrum" id="spectrum"></div>
+
+    <div class="controls">
+      <div class="slider-row">
+        <label for="harmSlider">מספר הרמוניות</label>
+        <input type="range" id="harmSlider" min="1" max="5" value="1" step="1">
+        <span class="count" id="harmCount">1</span>
+      </div>
+      <div class="slider-row">
+        <label for="volSlider">עוצמת שמע</label>
+        <input type="range" id="volSlider" min="0" max="100" value="45" step="1">
+        <span class="count" id="volVal">45%</span>
+      </div>
+      <div class="buttons-row">
+        <button class="btn primary" id="playBtn">▶ הפעל בנייה אוטומטית</button>
+        <button class="btn" id="soundBtn">🔊 השמע צליל</button>
+        <button class="btn" id="resetBtn">איפוס</button>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const TWO_PI = Math.PI * 2;
+
+  function mod2pi(t){
+    let x = t % TWO_PI;
+    if (x < 0) x += TWO_PI;
+    return x;
+  }
+  function wrapPi(t){
+    let x = mod2pi(t);
+    if (x > Math.PI) x -= TWO_PI;
+    return x;
+  }
+
+  // Every harmonic is represented as a*cos(n*theta) + b*sin(n*theta).
+  // magnitude = sqrt(a^2+b^2) always matches the table's 1/n (or 1/n^2) values.
+  function sineHarm(n, coef){ return { n, a: 0, b: coef }; }
+
+  // Rectangular pulse, duty 1/3, phase-shifted so the "on" region is [0, 2*PI/3)
+  // -- same start point as the square wave, for direct visual comparison.
+  const rectBase = [1,2,4,5,7,8,10,11,13].map(n => {
+    const s = Math.sin(n*Math.PI/3);
+    const sign = s > 1e-9 ? 1 : (s < -1e-9 ? -1 : 0);
+    const A = sign / n; // matches table magnitude 1/n, zero at multiples of 3
+    const shift = n*Math.PI/3;
+    return { n, a: A*Math.cos(shift), b: A*Math.sin(shift) };
+  });
+
+  const WAVES = {
+    square: {
+      label: 'ריבועי', duty: '50%',
+      harmonics: [1,3,5,7,9,11,13,15].map(n => sineHarm(n, 1/n)),
+      ideal: t => (mod2pi(t) < Math.PI) ? 1 : -1,
+      icon: sqIcon
+    },
+    triangle: {
+      label: 'משולש', duty: null,
+      harmonics: [1,3,5,7,9,11,13,15].map(n => sineHarm(n, Math.pow(-1,(n-1)/2) / (n*n))),
+      ideal: t => (2/Math.PI) * Math.asin(Math.sin(t)),
+      icon: triIcon
+    },
+    saw: {
+      label: 'שן מסור', duty: null,
+      harmonics: [1,2,3,4,5,6,7,8,9].map(n => sineHarm(n, Math.pow(-1,(n+1)) / n)),
+      ideal: t => wrapPi(t) / Math.PI,
+      icon: sawIcon
+    },
+    rect13: {
+      label: 'מלבני 1/3', duty: '33%',
+      harmonics: rectBase,
+      ideal: t => (mod2pi(t) < (2*Math.PI/3)) ? 1 : -1,
+      icon: rectIcon
+    }
+  };
+
+  function sqIcon(){ return '<svg viewBox="0 0 40 20"><path d="M2 15 L2 5 L12 5 L12 15 L22 15 L22 5 L32 5 L32 15 L38 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>'; }
+  function triIcon(){ return '<svg viewBox="0 0 40 20"><path d="M2 15 L10 5 L18 15 L26 5 L34 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>'; }
+  function sawIcon(){ return '<svg viewBox="0 0 40 20"><path d="M2 15 L10 5 L10 15 L18 5 L18 15 L26 5 L26 15 L34 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>'; }
+  function rectIcon(){ return '<svg viewBox="0 0 40 20"><path d="M2 12 L4 12 L4 5 L14 5 L14 12 L24 12 L24 5 L34 5 L34 12 L38 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>'; }
+
+  function fracLabel(mag){
+    if (Math.abs(mag-1) < 1e-9) return '1';
+    const den = Math.round(1/mag);
+    return '1/' + den;
+  }
+
+  // --- sound ---
+  let audioCtx = null, osc = null, gainNode = null, soundOn = false;
+  const FUND_FREQ = 220; // A3, fixed so timbre (not pitch) is what's compared
+
+  function ensureAudio(){
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
+  function buildPeriodicWave(w, count){
+    const maxN = Math.max(...w.harmonics.map(h => h.n));
+    const real = new Float32Array(maxN+1);
+    const imag = new Float32Array(maxN+1);
+    for (let i=0;i<count;i++){
+      const h = w.harmonics[i];
+      real[h.n] = h.a;
+      imag[h.n] = h.b;
+    }
+    return audioCtx.createPeriodicWave(real, imag, { disableNormalization: false });
+  }
+
+  function updateAudioWave(){
+    if (!soundOn || !osc) return;
+    const w = WAVES[currentType];
+    osc.setPeriodicWave(buildPeriodicWave(w, harmCount));
+  }
+
+  function startSound(){
+    ensureAudio();
+    const w = WAVES[currentType];
+    osc = audioCtx.createOscillator();
+    gainNode = audioCtx.createGain();
+    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+    osc.setPeriodicWave(buildPeriodicWave(w, harmCount));
+    osc.frequency.value = FUND_FREQ;
+    osc.connect(gainNode).connect(audioCtx.destination);
+    osc.start();
+    const target = (parseInt(volSlider.value,10)/100) * 0.35; // headroom, avoid clipping
+    gainNode.gain.linearRampToValueAtTime(target, audioCtx.currentTime + 0.04);
+    soundOn = true;
+    soundBtn.textContent = '🔇 עצור צליל';
+    soundBtn.classList.add('sound-on');
+  }
+
+  function stopSound(){
+    if (osc && gainNode && audioCtx){
+      const now = audioCtx.currentTime;
+      gainNode.gain.cancelScheduledValues(now);
+      gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+      gainNode.gain.linearRampToValueAtTime(0, now + 0.05);
+      const o = osc;
+      setTimeout(() => { try{ o.stop(); }catch(e){} }, 80);
+    }
+    osc = null; gainNode = null;
+    soundOn = false;
+    soundBtn.textContent = '🔊 השמע צליל';
+    soundBtn.classList.remove('sound-on');
+  }
+
+  function toggleSound(){
+    if (soundOn) stopSound(); else startSound();
+  }
+
+  let currentType = 'square';
+  let harmCount = 1;
+  let playing = false;
+  let playTimer = null;
+
+  const canvas = document.getElementById('scope');
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  const CSS_W = 800, CSS_H = 380;
+  canvas.width = CSS_W * dpr;
+  canvas.height = CSS_H * dpr;
+  ctx.scale(dpr, dpr);
+
+  const waveButtonsEl = document.getElementById('waveButtons');
+  const spectrumEl = document.getElementById('spectrum');
+  const slider = document.getElementById('harmSlider');
+  const harmCountEl = document.getElementById('harmCount');
+  const readoutEl = document.getElementById('readout');
+  const dutyNoteEl = document.getElementById('dutyNote');
+  const partialToggle = document.getElementById('partialToggle');
+  const overtoneToggle = document.getElementById('overtoneToggle');
+  const playBtn = document.getElementById('playBtn');
+  const soundBtn = document.getElementById('soundBtn');
+  const volSlider = document.getElementById('volSlider');
+  const volVal = document.getElementById('volVal');
+  const resetBtn = document.getElementById('resetBtn');
+
+  function buildWaveButtons(){
+    waveButtonsEl.innerHTML = '';
+    Object.keys(WAVES).forEach(key => {
+      const w = WAVES[key];
+      const btn = document.createElement('button');
+      btn.className = 'wave-btn' + (key===currentType ? ' active' : '');
+      btn.innerHTML = w.icon() + '<span>' + w.label + '</span>';
+      btn.addEventListener('click', () => selectType(key));
+      btn.dataset.key = key;
+      waveButtonsEl.appendChild(btn);
+    });
+  }
+
+  function buildSpectrum(){
+    spectrumEl.innerHTML = '';
+    const w = WAVES[currentType];
+    const mags = w.harmonics.map(h => Math.sqrt(h.a*h.a + h.b*h.b));
+    const maxAbs = Math.max(...mags);
+    w.harmonics.forEach((h, idx) => {
+      const partial = idx + 1;
+      const overtoneLabel = idx === 0 ? 'יסוד' : ('O' + idx);
+      const slot = document.createElement('button');
+      slot.className = 'bar-slot';
+      slot.innerHTML =
+        '<div class="po-labels"><div class="po partial">P' + partial + '</div><div class="po overtone">' + overtoneLabel + '</div></div>' +
+        '<div class="bar-track"><div class="bar" style="height:' + Math.max(6, (mags[idx]/maxAbs)*54) + 'px"></div></div>' +
+        '<div class="bar-label">n=' + h.n + '</div>';
+      slot.addEventListener('click', () => { stopPlaying(); setCount(idx+1); });
+      spectrumEl.appendChild(slot);
+    });
+    spectrumEl.classList.toggle('hide-partial', !partialToggle.checked);
+    spectrumEl.classList.toggle('hide-overtone', !overtoneToggle.checked);
+  }
+
+  function selectType(key){
+    stopPlaying();
+    currentType = key;
+    const w = WAVES[key];
+    harmCount = 1; // start minimal, build up with the slider or play button
+    document.querySelectorAll('.wave-btn').forEach(b => b.classList.toggle('active', b.dataset.key === key));
+    slider.max = w.harmonics.length;
+    slider.value = harmCount;
+    harmCountEl.textContent = harmCount;
+    dutyNoteEl.textContent = w.duty ? ('מילוי מחזור: ' + w.duty) : '';
+    dutyNoteEl.style.display = w.duty ? 'block' : 'none';
+    buildSpectrum();
+    render();
+  }
+
+  function setCount(n){
+    const w = WAVES[currentType];
+    harmCount = Math.max(1, Math.min(w.harmonics.length, n));
+    slider.value = harmCount;
+    harmCountEl.textContent = harmCount;
+    render();
+  }
+
+  slider.addEventListener('input', () => { stopPlaying(); setCount(parseInt(slider.value,10)); });
+  partialToggle.addEventListener('change', () => { spectrumEl.classList.toggle('hide-partial', !partialToggle.checked); });
+  overtoneToggle.addEventListener('change', () => { spectrumEl.classList.toggle('hide-overtone', !overtoneToggle.checked); });
+
+  function computeSeries(samples, w, count){
+    const partial = new Array(samples.length).fill(0);
+    for (let i=0;i<count;i++){
+      const h = w.harmonics[i];
+      for (let s=0; s<samples.length; s++){
+        const th = h.n * samples[s];
+        partial[s] += h.a*Math.cos(th) + h.b*Math.sin(th);
+      }
+    }
+    return partial;
+  }
+
+  function render(){
+    const w = WAVES[currentType];
+    const N = 500;
+    const thetaMax = 4 * Math.PI; // two full periods
+    const thetas = [];
+    for (let i=0;i<=N;i++) thetas.push((i/N) * thetaMax);
+
+    const ideal = thetas.map(t => w.ideal(t));
+    const partial = computeSeries(thetas, w, harmCount);
+    const peak = Math.max(1e-6, ...ideal.map(Math.abs), ...partial.map(Math.abs));
+
+    drawScope(thetas, ideal, partial, peak);
+    updateSpectrumHighlight();
+    updateReadout(w);
+    updateAudioWave();
+  }
+
+  function drawScope(thetas, ideal, partial, peak){
+    ctx.clearRect(0,0,CSS_W,CSS_H);
+
+    const padX = 18, padY = 24;
+    const plotW = CSS_W - padX*2;
+    const plotH = CSS_H - padY*2;
+    const midY = padY + plotH/2;
+    const scaleY = (plotH/2) / (peak*1.15);
+    const thetaMax = thetas[thetas.length-1];
+
+    function xOf(i){ return padX + (thetas[i]/thetaMax)*plotW; }
+    function yOf(v){ return midY - v*scaleY; }
+
+    // duty-cycle background shading (where ideal > 0)
+    ctx.fillStyle = 'rgba(79,211,196,0.09)';
+    let runStart = null;
+    for (let i=0;i<thetas.length;i++){
+      const on = ideal[i] > 0;
+      if (on && runStart === null) runStart = i;
+      if ((!on || i===thetas.length-1) && runStart !== null){
+        const endIdx = on ? i : i-1;
+        ctx.fillRect(xOf(runStart), padY, xOf(endIdx)-xOf(runStart), plotH);
+        runStart = null;
+      }
+    }
+
+    // grid
+    ctx.strokeStyle = '#1c3229';
+    ctx.lineWidth = 1;
+    const cols = 8;
+    for (let c=0;c<=cols;c++){
+      const x = padX + (c/cols)*plotW;
+      ctx.beginPath(); ctx.moveTo(x, padY); ctx.lineTo(x, padY+plotH); ctx.stroke();
+    }
+    const rows = 6;
+    for (let r=0;r<=rows;r++){
+      const y = padY + (r/rows)*plotH;
+      ctx.beginPath(); ctx.moveTo(padX, y); ctx.lineTo(padX+plotW, y); ctx.stroke();
+    }
+    ctx.strokeStyle = '#2a4a3b';
+    ctx.beginPath(); ctx.moveTo(padX, midY); ctx.lineTo(padX+plotW, midY); ctx.stroke();
+
+    // ideal (dashed teal)
+    ctx.setLineDash([5,5]);
+    ctx.strokeStyle = '#4fd3c4';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    for (let i=0;i<thetas.length;i++){
+      const x = xOf(i), y = yOf(ideal[i]);
+      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // partial sum (glowing amber)
+    ctx.shadowColor = 'rgba(255,176,46,0.55)';
+    ctx.shadowBlur = 8;
+    ctx.strokeStyle = '#ffb02e';
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    for (let i=0;i<thetas.length;i++){
+      const x = xOf(i), y = yOf(partial[i]);
+      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+
+  function updateSpectrumHighlight(){
+    const slots = spectrumEl.querySelectorAll('.bar-slot');
+    slots.forEach((slot, idx) => {
+      slot.classList.toggle('included', idx < harmCount);
+      slot.classList.toggle('current', idx === harmCount-1);
+    });
+  }
+
+  function updateReadout(w){
+    const h = w.harmonics[harmCount-1];
+    const mag = Math.sqrt(h.a*h.a + h.b*h.b);
+    const partial = harmCount;
+    const overtone = harmCount === 1 ? 'יסוד' : harmCount - 1;
+    readoutEl.innerHTML =
+      '<div class="row"><span class="dim">הרמוניה נוכחית</span><span class="val">n = ' + h.n + '</span></div>' +
+      '<div class="row"><span class="dim">Partial</span><span class="val">' + partial + '</span></div>' +
+      '<div class="row"><span class="dim">Overtone</span><span class="val">' + overtone + '</span></div>' +
+      '<div class="row"><span class="dim">אמפליטודה</span><span class="val">' + fracLabel(mag) + '</span></div>' +
+      '<div class="row"><span class="dim">מרכיבים בסכום</span><span class="val">' + harmCount + ' / ' + w.harmonics.length + '</span></div>';
+  }
+
+  function stopPlaying(){
+    playing = false;
+    if (playTimer) { clearInterval(playTimer); playTimer = null; }
+    playBtn.textContent = '▶ הפעל בנייה אוטומטית';
+  }
+
+  function togglePlay(){
+    if (playing){ stopPlaying(); return; }
+    playing = true;
+    playBtn.textContent = '⏸ עצור';
+    harmCount = 0;
+    playTimer = setInterval(() => {
+      const w2 = WAVES[currentType];
+      harmCount++;
+      if (harmCount > w2.harmonics.length){
+        stopPlaying();
+        harmCount = w2.harmonics.length;
+        slider.value = harmCount;
+        harmCountEl.textContent = harmCount;
+        render();
+        return;
+      }
+      slider.value = harmCount;
+      harmCountEl.textContent = harmCount;
+      render();
+    }, 750);
+  }
+
+  playBtn.addEventListener('click', togglePlay);
+  soundBtn.addEventListener('click', toggleSound);
+  volSlider.addEventListener('input', () => {
+    volVal.textContent = volSlider.value + '%';
+    if (soundOn && gainNode && audioCtx){
+      const target = (parseInt(volSlider.value,10)/100) * 0.35;
+      gainNode.gain.linearRampToValueAtTime(target, audioCtx.currentTime + 0.05);
+    }
+  });
+  resetBtn.addEventListener('click', () => { stopPlaying(); setCount(1); });
+
+  buildWaveButtons();
+  slider.max = WAVES[currentType].harmonics.length;
+  harmCount = 1;
+  slider.value = harmCount;
+  harmCountEl.textContent = harmCount;
+  dutyNoteEl.textContent = WAVES[currentType].duty ? ('מילוי מחזור: ' + WAVES[currentType].duty) : '';
+  buildSpectrum();
+  render();
+})();
+</script>
+</body>
+</html>
