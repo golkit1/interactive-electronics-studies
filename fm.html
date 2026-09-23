@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>אפנון תדר – FM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #EEF3F2;
+    --bg-panel: #FFFFFF;
+    --bezel: #1E3B3A;
+    --bezel-dark: #142826;
+    --ink: #16302E;
+    --ink-soft: #4C6664;
+    --line: #CBDAD8;
+    --carrier: #2F6F6B;
+    --modulator: #D98E32;
+    --fm: #C15A4E;
+    --accent: #C15A4E;
+    --focus: #2F6F6B;
+    --track: #D8E4E2;
+  }
+  :root:not([data-theme="light"]){
+    @media (prefers-color-scheme: dark){
+      --bg: #0F1E1D;
+      --bg-panel: #14302E;
+      --bezel: #0B1918;
+      --bezel-dark: #060F0E;
+      --ink: #E7F1EF;
+      --ink-soft: #9FBAB7;
+      --line: #244543;
+      --carrier: #6FC7C1;
+      --modulator: #F0B35F;
+      --fm: #E28579;
+      --accent: #E28579;
+      --focus: #6FC7C1;
+      --track: #1D3E3B;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #0F1E1D;
+    --bg-panel: #14302E;
+    --bezel: #0B1918;
+    --bezel-dark: #060F0E;
+    --ink: #E7F1EF;
+    --ink-soft: #9FBAB7;
+    --line: #244543;
+    --carrier: #6FC7C1;
+    --modulator: #F0B35F;
+    --fm: #E28579;
+    --accent: #E28579;
+    --focus: #6FC7C1;
+    --track: #1D3E3B;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-padding-top: env(safe-area-inset-top, 0px);}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Heebo', 'Segoe UI', sans-serif;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    line-height:1.65;
+  }
+  h1,h2,h3{
+    font-family:'Frank Ruhl Libre', serif;
+    font-weight:700;
+    margin:0 0 .3em 0;
+    color:var(--ink);
+  }
+  p{margin:0 0 1em 0; color:var(--ink-soft); max-width:62ch;}
+  .wrap{max-width:920px; margin:0 auto; padding:0 20px 60px;}
+
+  /* ---------- HERO ---------- */
+  header.hero{
+    position:relative;
+    background:var(--bezel);
+    color:#F3EFE6;
+    overflow:hidden;
+    padding:56px 0 0;
+  }
+  header.hero .wrap{padding-bottom:0;}
+  header.hero h1{color:#F3EFE6; font-size:clamp(28px,5vw,42px); letter-spacing:.2px;}
+  header.hero p{color:#C9DAD7; max-width:56ch; font-size:16px;}
+  header.hero .kicker{
+    color:#8FB8B3; font-size:14px; margin-bottom:10px; font-weight:500;
+  }
+  canvas#heroWave{
+    display:block; width:100%; height:110px; margin-top:28px;
+  }
+
+  /* ---------- SECTIONS ---------- */
+  section{padding:42px 0;}
+  section.explain{padding-bottom:10px;}
+  .lede{font-size:17px;}
+
+  .analogy{
+    border-right:3px solid var(--carrier);
+    padding:2px 18px 2px 4px;
+    margin:22px 0;
+  }
+  .analogy p{margin-bottom:0; font-size:15px;}
+  .analogy strong{color:var(--ink);}
+
+  /* ---------- PANEL / BEZEL ---------- */
+  .panel{
+    background:var(--bezel);
+    border-radius:14px;
+    padding:14px;
+    box-shadow: 0 18px 40px -18px rgba(10,25,24,.45);
+  }
+  .panel-inner{
+    background:var(--bg-panel);
+    border-radius:9px;
+    padding:22px 20px 24px;
+  }
+  .panel-label{
+    display:flex; align-items:center; justify-content:space-between;
+    color:#C9DAD7; font-size:13px; padding:2px 8px 12px;
+    font-family:'Heebo',sans-serif;
+  }
+  .panel-label .dial-dot{ display:none; }
+  .view-pane[hidden]{ display:none; }
+  .dual-view{
+    display:grid; gap:14px; grid-template-columns:1fr;
+  }
+  .view-col{
+    background:var(--bg); border:1px solid var(--line); border-radius:10px;
+    padding:12px 14px 14px;
+  }
+  .col-head{
+    font-size:13px; font-weight:600; color:var(--ink); margin-bottom:8px;
+    display:flex; align-items:center; justify-content:space-between; gap:6px;
+  }
+  .expand-btn{
+    background:transparent; border:1px solid var(--line); border-radius:6px;
+    color:var(--ink-soft); font-size:14px; line-height:1; cursor:pointer;
+    padding:3px 7px; font-family:inherit; flex:0 0 auto;
+    transition: background .15s ease, color .15s ease;
+  }
+  .expand-btn:hover{ background:var(--bg-panel); color:var(--ink); }
+  .expand-btn:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+
+  .view-col.in-lightbox{
+    width:100%; max-width:1100px; border:none; padding:0; background:transparent;
+  }
+  .view-col.in-lightbox canvas#spectrum,
+  .view-col.in-lightbox canvas#spectrogram{ height:440px; }
+  .view-col.in-lightbox .col-head{ font-size:16px; }
+
+  .lightbox{
+    position:fixed; inset:0; background:rgba(6,15,14,.78);
+    display:flex; align-items:center; justify-content:center;
+    padding:26px; z-index:1000;
+  }
+  .lightbox[hidden]{ display:none; }
+  .lightbox-body{
+    width:100%; max-width:1100px; max-height:90vh; overflow:auto;
+  }
+  .lightbox-close{
+    position:absolute; top:18px; left:18px;
+    width:36px; height:36px; border-radius:50%;
+    background:rgba(255,255,255,.12); color:#F3EFE6; border:none;
+    font-size:16px; cursor:pointer;
+  }
+  .lightbox-close:hover{ background:rgba(255,255,255,.22); }
+  .mini-toggle{
+    display:flex; align-items:center; gap:6px; font-size:12px;
+    color:var(--ink-soft); margin-top:8px; cursor:pointer; user-select:none;
+  }
+  .mini-toggle input{ accent-color:var(--accent); width:14px; height:14px; }
+  .mini-caption{
+    font-size:12px; color:var(--ink-soft); margin:12px 0 0; line-height:1.5;
+  }
+
+  .controls{
+    display:grid; gap:10px; margin-top:14px;
+    grid-template-columns: 1fr 1fr;
+  }
+  @media (min-width:640px){
+    .controls{grid-template-columns: repeat(4, 1fr);}
+  }
+  .control{
+    background:var(--bg);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:8px 10px 9px;
+  }
+  .control-head{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:4px; font-size:12px;
+  }
+  .control-head .name{color:var(--ink); font-weight:600;}
+  .val-wrap{
+    display:flex; align-items:center; gap:3px;
+    font-variant-numeric: tabular-nums;
+  }
+  .val-wrap .unit{ color:var(--ink-soft); font-size:11px; }
+  input.val-input{
+    -moz-appearance:textfield; appearance:textfield;
+    width:3.6em; text-align:center;
+    font-family:'Heebo',sans-serif; font-size:12.5px; font-weight:600;
+    color:var(--accent); background:var(--bg-panel);
+    border:1px solid var(--line); border-radius:5px;
+    padding:2px 3px;
+  }
+  input.val-input::-webkit-outer-spin-button,
+  input.val-input::-webkit-inner-spin-button{
+    -webkit-appearance:none; margin:0;
+  }
+  input.val-input:focus-visible{
+    outline:2px solid var(--focus); outline-offset:1px; border-color:var(--focus);
+  }
+  input[type=range]{
+    -webkit-appearance:none; appearance:none;
+    width:100%; height:3px; border-radius:2px;
+    background:var(--track); outline:none; margin:5px 0 3px;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none;
+    width:13px; height:13px; border-radius:50%;
+    background:var(--bg-panel); border:2.5px solid var(--focus);
+    cursor:pointer; margin-top:-1px;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:13px; height:13px; border-radius:50%;
+    background:var(--bg-panel); border:2.5px solid var(--focus); cursor:pointer;
+  }
+  input[type=range]:focus-visible::-webkit-slider-thumb{ outline:2px solid var(--focus); outline-offset:2px;}
+  .ticks{
+    display:flex; justify-content:space-between;
+    font-size:9.5px; color:var(--ink-soft); opacity:.7;
+  }
+  .control .hint{font-size:12px; color:var(--ink-soft); margin-top:8px; opacity:.85;}
+
+  .readouts{
+    display:flex; flex-wrap:wrap; gap:10px 26px;
+    margin-top:22px; padding-top:18px; border-top:1px solid var(--line);
+    font-size:14px;
+  }
+  .readouts .item b{
+    display:block; font-size:18px; font-family:'Frank Ruhl Libre',serif; color:var(--ink);
+  }
+  .readouts .item span{color:var(--ink-soft); font-size:12.5px;}
+
+  .play-row{
+    display:flex; align-items:center; gap:14px; margin-top:24px; flex-wrap:wrap;
+  }
+  button#playBtn{
+    background:var(--accent); color:#fff; border:none;
+    padding:11px 26px; border-radius:999px; font-size:15px; font-weight:600;
+    cursor:pointer; font-family:'Heebo',sans-serif;
+    display:inline-flex; align-items:center; gap:8px;
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  button#playBtn:hover{ box-shadow:0 6px 18px -6px rgba(193,90,78,.55);}
+  button#playBtn:active{ transform:scale(.97); }
+  button#playBtn:focus-visible{ outline:2px solid var(--focus); outline-offset:3px; }
+  .play-note{font-size:12.5px; color:var(--ink-soft); max-width:38ch; margin:0;}
+
+  canvas#spectrum{
+    width:100%; height:230px; display:block; margin:0 0 6px;
+    border:1px solid var(--line); border-radius:6px; background:var(--bg-panel);
+  }
+  .live-dot{
+    width:8px; height:8px; border-radius:50%; background:var(--line);
+    display:inline-block; flex:0 0 auto;
+  }
+  .live-dot.on{
+    background:var(--fm);
+    box-shadow:0 0 0 0 rgba(193,90,78,.55);
+    animation: pulseDot 1.4s ease-out infinite;
+  }
+  @keyframes pulseDot{
+    0%{ box-shadow:0 0 0 0 rgba(193,90,78,.5); }
+    70%{ box-shadow:0 0 0 7px rgba(193,90,78,0); }
+    100%{ box-shadow:0 0 0 0 rgba(193,90,78,0); }
+  }
+  .spectro-wrap{
+    display:flex; gap:10px; align-items:stretch;
+  }
+  .spectro-axis{
+    display:flex; flex-direction:column; justify-content:space-between;
+    font-size:10.5px; color:var(--ink-soft); padding:3px 0;
+    font-variant-numeric:tabular-nums; flex:0 0 auto;
+  }
+  .spectro-canvas-wrap{
+    position:relative; flex:1 1 auto; border:1px solid var(--line);
+    border-radius:4px; overflow:hidden; background:var(--bg-panel);
+  }
+  canvas#spectrogram{
+    width:100%; height:230px; display:block;
+    image-rendering: pixelated; image-rendering: -moz-crisp-edges;
+  }
+  .fc-line{
+    position:absolute; right:0; left:0; height:1px;
+    background:rgba(255,255,255,.5); pointer-events:none;
+  }
+  .fc-line::after{
+    content:'fc'; position:absolute; left:4px; top:-13px;
+    font-size:10px; color:#fff; opacity:.75; font-family:'Heebo',sans-serif;
+  }
+  .spectro-hint{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    text-align:center; padding:10px; font-size:12.5px; color:var(--ink-soft);
+    background:color-mix(in srgb, var(--bg-panel) 82%, transparent);
+    transition:opacity .2s ease;
+  }
+  .spectro-hint.hidden{ opacity:0; pointer-events:none; }
+
+  footer{
+    padding:30px 0 10px; border-top:1px solid var(--line); margin-top:30px;
+  }
+  footer p{font-size:13px; color:var(--ink-soft); margin:0;}
+
+  @media (prefers-reduced-motion: reduce){
+    canvas#heroWave{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">מעגלים • צליל • גלים</div>
+    <h1>אפנון תדר (FM)</h1>
+  </div>
+  <canvas id="heroWave" aria-hidden="true"></canvas>
+</header>
+
+<div class="wrap">
+
+  <section class="explain">
+    <p>בסינתזת FM יש לנו שני גלים:</p>
+    <ul style="margin:0 0 1em; padding-inline-start:20px; color:var(--ink-soft);">
+      <li style="margin-bottom:8px;"><strong style="color:var(--ink)">גל נושא (Carrier)</strong> — גל סינוס בתדר קבוע. למשל, 440Hz. זהו הצליל שאותו אנחנו רוצים לשנות.</li>
+      <li><strong style="color:var(--ink)">גל מאפנן (Modulator)</strong> — גל סינוס נוסף, בדרך כלל בתדר נמוך יותר. הוא לא מתווסף לנושא, אלא משנה את התדר שלו.</li>
+    </ul>
+    <p>כלומר, במקום שהנושא יישאר כל הזמן ב־440Hz, המאפנן גורם לו לנוע הלוך ושוב סביב 440Hz:</p>
+    <p style="direction:ltr; text-align:left; font-family:ui-monospace, Consolas, monospace; color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:8px 14px; display:inline-block; margin:0 0 1em;">440 → 450 → 440 → 430 → 440 → 450 → …</p>
+    <p>קצב התנועה הזו נקבע על ידי תדר המאפנן. למשל, אם המאפנן הוא 5Hz, התדר של הנושא ישתנה הלוך ושוב 5 פעמים בשנייה.</p>
+    <p><strong style="color:var(--ink)">ומה קובע עד כמה התדר משתנה?</strong> כאן נכנס עומק האפנון (β). ככל שעומק האפנון גדול יותר, התדר של הנושא מתרחק יותר מהתדר המקורי שלו.</p>
+  </section>
+
+  <section class="demo">
+    <div class="panel">
+      <div class="panel-label">
+        <span><span class="live-dot" id="liveDot"></span>ניתוח ספקטרלי</span>
+        <span id="clock" style="font-variant-numeric:tabular-nums; opacity:.7;">00:00</span>
+      </div>
+      <div class="panel-inner">
+
+        <div class="dual-view">
+          <div class="view-col" id="specroCol">
+            <div class="col-head">
+              <span>ספקטרוגרמה — בפועל</span>
+              <button type="button" class="expand-btn" data-target="specroCol" aria-label="הגדל לתצוגה מלאה" title="הגדל">⤢</button>
+            </div>
+            <div class="spectro-wrap">
+              <div class="spectro-axis" id="spectroAxis">
+                <span id="axT4">4000</span><span id="axT3">3000</span><span id="axT2">2000</span><span id="axT1">1000</span><span id="axT0">0 Hz</span>
+              </div>
+              <div class="spectro-canvas-wrap">
+                <canvas id="spectrogram" width="640" height="230"></canvas>
+                <div class="fc-line" id="fcLine" style="top:50%;"></div>
+                <div class="spectro-hint" id="spectroHint">לחצו "השמע צליל"</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="view-col" id="theoryCol">
+            <div class="col-head">
+              <span>פילוג תיאורטי — רצועות צד</span>
+              <button type="button" class="expand-btn" data-target="theoryCol" aria-label="הגדל לתצוגה מלאה" title="הגדל">⤢</button>
+            </div>
+            <canvas id="spectrum" width="1600" height="360"></canvas>
+            <label class="mini-toggle">
+              <input type="checkbox" id="includeReflected" checked>
+              כלול רצועות מוחזרות
+            </label>
+          </div>
+        </div>
+
+
+        <div class="controls">
+          <div class="control">
+            <div class="control-head"><span class="name">f carrier</span><span class="val-wrap"><input type="number" class="val-input" id="fcNum" min="100" max="800" step="1" value="220"><span class="unit">Hz</span></span></div>
+            <input type="range" id="fc" min="100" max="800" step="1" value="220">
+            <div class="ticks"><span>100</span><span>800 Hz</span></div>
+          </div>
+          <div class="control">
+            <div class="control-head"><span class="name">f modulator</span><span class="val-wrap"><input type="number" class="val-input" id="fmNum" min="1" max="400" step="1" value="5"><span class="unit">Hz</span></span></div>
+            <input type="range" id="fm" min="1" max="400" step="1" value="5">
+            <div class="ticks"><span>1</span><span>400 Hz</span></div>
+          </div>
+          <div class="control">
+            <div class="control-head"><span class="name">עומק אפנון</span><span class="val-wrap"><input type="number" class="val-input" id="betaNum" min="0" max="30" step="0.1" value="2"><span class="unit pct" id="betaPct">(7%)</span></span></div>
+            <input type="range" id="beta" min="0" max="30" step="0.1" value="2">
+            <div class="ticks"><span>0</span><span>30</span></div>
+          </div>
+          <div class="control">
+            <div class="control-head"><span class="name">עוצמת השמעה</span><span class="val-wrap"><input type="number" class="val-input" id="volNum" min="0" max="60" step="1" value="20"><span class="unit">%</span></span></div>
+            <input type="range" id="vol" min="0" max="60" step="1" value="20">
+            <div class="ticks"><span>שקט</span><span>חזק</span></div>
+          </div>
+        </div>
+
+        <div class="play-row">
+          <button id="playBtn" type="button">▶ השמע צליל</button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>כלי אינטראקטיבי ללימוד אפנון תדר — חלק מסדרת "יצירתיות צלילית".</p>
+    <p style="margin-top:6px;">להעמקה: <a href="https://cmtext.com/synthesis/chapter4_fm3.php" target="_blank" rel="noopener" style="color:var(--carrier);">cmtext.com — Principles of Audio-rate FM Synthesis</a></p>
+  </footer>
+
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button type="button" class="lightbox-close" id="lightboxClose" aria-label="סגור">✕</button>
+  <div class="lightbox-body" id="lightboxBody"></div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  // ---------- state ----------
+  var els = {
+    fc: document.getElementById('fc'),
+    fm: document.getElementById('fm'),
+    beta: document.getElementById('beta'),
+    vol: document.getElementById('vol'),
+    fcNum: document.getElementById('fcNum'),
+    fmNum: document.getElementById('fmNum'),
+    betaNum: document.getElementById('betaNum'),
+    volNum: document.getElementById('volNum'),
+    playBtn: document.getElementById('playBtn'),
+    clock: document.getElementById('clock'),
+  };
+
+  function state(){
+    return {
+      fc: parseFloat(els.fc.value),
+      fm: parseFloat(els.fm.value),
+      beta: parseFloat(els.beta.value),
+      vol: parseFloat(els.vol.value)/100
+    };
+  }
+
+  function updateDerived(){
+    var s = state();
+    var betaPctEl = document.getElementById('betaPct');
+    if(betaPctEl) betaPctEl.textContent = '(' + Math.round((s.beta/30)*100) + '%)';
+  }
+
+  var pairs = [
+    { range: els.fc,   num: els.fcNum,   min:100, max:800, step:1   },
+    { range: els.fm,   num: els.fmNum,   min:1,   max:400, step:1   },
+    { range: els.beta, num: els.betaNum, min:0,   max:30,  step:0.1 },
+    { range: els.vol,  num: els.volNum,  min:0,   max:60,  step:1   }
+  ];
+  pairs.forEach(function(p){
+    p.range.addEventListener('input', function(){
+      p.num.value = p.range.value;
+      updateDerived(); syncAudio(); drawSpectrum();
+    });
+    p.num.addEventListener('input', function(){
+      var v = parseFloat(p.num.value);
+      if(!isNaN(v)){
+        p.range.value = Math.min(p.max, Math.max(p.min, v));
+        updateDerived(); syncAudio(); drawSpectrum();
+      }
+    });
+    p.num.addEventListener('change', function(){
+      var v = parseFloat(p.num.value);
+      if(isNaN(v)) v = parseFloat(p.range.value);
+      v = Math.min(p.max, Math.max(p.min, v));
+      p.num.value = v;
+      p.range.value = v;
+      updateDerived(); syncAudio(); drawSpectrum();
+    });
+  });
+  updateDerived();
+
+  var startTs = performance.now();
+
+  function cssVar(name){
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  function updateClock(now){
+    var secs = (now-startTs)/1000;
+    var mm = Math.floor(secs/60), ss = Math.floor(secs%60);
+    els.clock.textContent = (mm<10?'0':'')+mm+':'+(ss<10?'0':'')+ss;
+  }
+
+  // ---------- hero decorative wave ----------
+  var hero = document.getElementById('heroWave');
+  var hctx = hero ? hero.getContext('2d') : null;
+  function sizeHero(){
+    if(!hero) return;
+    var rect = hero.getBoundingClientRect();
+    hero.width = Math.max(600, rect.width) * (window.devicePixelRatio||1);
+    hero.height = rect.height * (window.devicePixelRatio||1);
+  }
+  function drawHero(now){
+    if(!hctx) return;
+    var w = hero.width, h = hero.height;
+    hctx.clearRect(0,0,w,h);
+    var t0 = (now-startTs)/1000;
+    var mid = h*0.62;
+    hctx.beginPath();
+    var N = 400;
+    for(var i=0;i<=N;i++){
+      var t = t0 + (i/N)*0.9;
+      var x = (i/N)*w;
+      var y = mid - Math.sin(2*Math.PI*3*t + 3*Math.sin(2*Math.PI*0.6*t))*h*0.30;
+      if(i===0) hctx.moveTo(x,y); else hctx.lineTo(x,y);
+    }
+    hctx.strokeStyle = 'rgba(243,239,230,0.55)';
+    hctx.lineWidth = 2*(window.devicePixelRatio||1);
+    hctx.stroke();
+  }
+
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function loop(now){
+    updateClock(now);
+    if(!reduceMotion) drawHero(now);
+    requestAnimationFrame(loop);
+  }
+  window.addEventListener('resize', sizeHero);
+  sizeHero();
+  requestAnimationFrame(loop);
+
+  // ---------- audio (real FM synthesis, mirrors the math above) ----------
+  var audioCtx = null, carrierOsc = null, modOsc = null, modGain = null, outGain = null, analyser = null, freqData = null, playing = false;
+
+  function startAudio(){
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC){ return; }
+    audioCtx = new AC();
+    var s = state();
+
+    carrierOsc = audioCtx.createOscillator();
+    carrierOsc.type = 'sine';
+    carrierOsc.frequency.value = s.fc;
+
+    modOsc = audioCtx.createOscillator();
+    modOsc.type = 'sine';
+    modOsc.frequency.value = s.fm;
+
+    modGain = audioCtx.createGain();
+    modGain.gain.value = s.beta * s.fm; // frequency deviation in Hz
+
+    outGain = audioCtx.createGain();
+    outGain.gain.value = s.vol;
+
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 2048;
+    analyser.smoothingTimeConstant = 0.55;
+    freqData = new Uint8Array(analyser.frequencyBinCount);
+
+    modOsc.connect(modGain);
+    modGain.connect(carrierOsc.frequency);
+    carrierOsc.connect(outGain);
+    outGain.connect(analyser);
+    analyser.connect(audioCtx.destination);
+
+    carrierOsc.start();
+    modOsc.start();
+    playing = true;
+    els.playBtn.textContent = '■ עצור';
+
+    liveMaxFreq = computeDynamicMaxFreq(s, true);
+    updateSpectroAxisLabels();
+
+    var sgEl = document.getElementById('spectrogram');
+    var sgc = sgEl.getContext('2d');
+    sgc.fillStyle = cssVar('--bg');
+    sgc.fillRect(0,0,sgEl.width,sgEl.height);
+    document.getElementById('liveDot').classList.add('on');
+    document.getElementById('spectroHint').classList.add('hidden');
+    updateFcLine();
+    maybeStartSpectrogram();
+  }
+
+  function stopAudio(){
+    if(carrierOsc){ try{carrierOsc.stop();}catch(e){} carrierOsc.disconnect(); }
+    if(modOsc){ try{modOsc.stop();}catch(e){} modOsc.disconnect(); }
+    if(modGain) modGain.disconnect();
+    if(outGain) outGain.disconnect();
+    if(analyser) analyser.disconnect();
+    if(audioCtx) audioCtx.close();
+    carrierOsc = modOsc = modGain = outGain = analyser = audioCtx = null;
+    playing = false;
+    els.playBtn.textContent = '▶ השמע צליל';
+    document.getElementById('liveDot').classList.remove('on');
+    document.getElementById('spectroHint').classList.remove('hidden');
+  }
+
+  function syncAudio(){
+    var s = state();
+    liveMaxFreq = computeDynamicMaxFreq(s, true);
+    updateSpectroAxisLabels();
+    updateFcLine();
+    if(!playing || !audioCtx) return;
+    var now = audioCtx.currentTime;
+    carrierOsc.frequency.setTargetAtTime(s.fc, now, 0.01);
+    modOsc.frequency.setTargetAtTime(s.fm, now, 0.01);
+    modGain.gain.setTargetAtTime(s.beta*s.fm, now, 0.01);
+    outGain.gain.setTargetAtTime(s.vol, now, 0.01);
+  }
+
+  var GLOBAL_MAX_FREQ = 8000;
+  var liveMaxFreq = 4000; // current live-spectrogram scale; recomputed each time playback starts
+
+  function niceCeil(rough){
+    if(rough <= 0) return 1;
+    var exp = Math.floor(Math.log10(rough));
+    var base = Math.pow(10, exp);
+    var f = rough/base;
+    var niceF = f<=1 ? 1 : f<=2 ? 2 : f<=5 ? 5 : 10;
+    return niceF*base;
+  }
+  function snapMaxFreq(x){
+    var step = niceCeil(x/4);
+    return step*4;
+  }
+  function computeDynamicMaxFreq(s, includeRefl){
+    var maxN = 60, peakAmp = 0.0001, highest = s.fc;
+    var freqs = [];
+    for(var n=-maxN; n<=maxN; n++){
+      var rawFreq = s.fc + n*s.fm;
+      var signed = besselJ(Math.abs(n), s.beta) * ((n<0 && (Math.abs(n)%2===1)) ? -1 : 1);
+      var freq;
+      if(rawFreq < 0){
+        if(!includeRefl) continue;
+        freq = -rawFreq;
+      } else {
+        freq = rawFreq;
+      }
+      if(Math.abs(signed) > peakAmp) peakAmp = Math.abs(signed);
+      freqs.push({freq:freq, amp:Math.abs(signed)});
+    }
+    freqs.forEach(function(r){ if(r.amp > peakAmp*0.02 && r.freq > highest) highest = r.freq; });
+    var raw = Math.min(GLOBAL_MAX_FREQ, Math.max(s.fc*1.15, highest*1.15, s.fm*4));
+    return snapMaxFreq(raw);
+  }
+  function updateSpectroAxisLabels(){
+    var step = liveMaxFreq/4;
+    var ids = ['axT4','axT3','axT2','axT1'];
+    var mults = [4,3,2,1];
+    ids.forEach(function(id, i){
+      var el = document.getElementById(id);
+      if(el) el.textContent = Math.round(step*mults[i]);
+    });
+  }
+  function updateFcLine(){
+    var s = state();
+    var pct = Math.max(0, Math.min(1, s.fc / liveMaxFreq));
+    var line = document.getElementById('fcLine');
+    if(line) line.style.top = ((1-pct)*100) + '%';
+  }
+  liveMaxFreq = computeDynamicMaxFreq(state(), true);
+  updateSpectroAxisLabels();
+  updateFcLine();
+
+  els.playBtn.addEventListener('click', function(){
+    if(playing){ stopAudio(); } else { startAudio(); }
+  });
+
+  // ---------- theoretical sideband chart ----------
+  var specCanvas = document.getElementById('spectrum');
+  var spctx = specCanvas.getContext('2d');
+
+  function besselJ(n, x){
+    n = Math.abs(n);
+    if(x===0) return n===0?1:0;
+    var term = Math.pow(x/2, n);
+    var factN = 1;
+    for(var i=2;i<=n;i++) factN *= i;
+    term = term / factN;
+    var sum = term;
+    var k = 0;
+    while(k < 60){
+      k++;
+      term *= -(x*x/4) / (k*(n+k));
+      sum += term;
+      if(Math.abs(term) < 1e-10*Math.abs(sum) && k>3) break;
+    }
+    return sum;
+  }
+
+  function niceStep(rough){
+    if(rough <= 0) return 1;
+    var exp = Math.floor(Math.log10(rough));
+    var base = Math.pow(10, exp);
+    var f = rough/base;
+    var niceF = f<1.5 ? 1 : f<3 ? 2 : f<7 ? 5 : 10;
+    return niceF*base;
+  }
+
+  function drawSpectrum(){
+    if(specCanvas.width !== specCanvas.clientWidth*2){
+      specCanvas.width = specCanvas.clientWidth*2;
+      specCanvas.height = specCanvas.clientHeight*2;
+    }
+    var s = state();
+    var w = specCanvas.width, h = specCanvas.height;
+    spctx.clearRect(0,0,w,h);
+
+    var maxN = 60;
+    var reflEl = document.getElementById('includeReflected');
+    var includeRefl = reflEl ? reflEl.checked : true;
+
+    // pass 1: gather raw (freq, contrib) pairs and find the highest freq worth showing
+    var raws = [];
+    var peakAmp = 0.0001;
+    for(var n=-maxN; n<=maxN; n++){
+      var rawFreq = s.fc + n*s.fm;
+      var signed = besselJ(Math.abs(n), s.beta) * ((n<0 && (Math.abs(n)%2===1)) ? -1 : 1);
+      var freq, contrib;
+      if(rawFreq < 0){
+        if(!includeRefl) continue;
+        freq = -rawFreq;
+        contrib = -signed;
+      } else {
+        freq = rawFreq;
+        contrib = signed;
+      }
+      if(Math.abs(signed) > peakAmp) peakAmp = Math.abs(signed);
+      raws.push({freq:freq, contrib:contrib, amp:Math.abs(signed)});
+    }
+    var highestSignificant = s.fc;
+    raws.forEach(function(r){
+      if(r.amp > peakAmp*0.02 && r.freq > highestSignificant) highestSignificant = r.freq;
+    });
+    var maxFreq = Math.min(GLOBAL_MAX_FREQ, Math.max(s.fc*1.15, highestSignificant*1.15, s.fm*4));
+
+    var buckets = 220;
+    var bucketWidth = maxFreq/buckets;
+    var sums = new Array(buckets).fill(0);
+    var bucketFreq = new Array(buckets).fill(null);
+    var bucketFreqAmp = new Array(buckets).fill(0);
+    raws.forEach(function(r){
+      if(r.freq > maxFreq) return;
+      var bi = Math.min(buckets-1, Math.floor(r.freq/bucketWidth));
+      sums[bi] += r.contrib;
+      if(Math.abs(r.contrib) > bucketFreqAmp[bi]){
+        bucketFreqAmp[bi] = Math.abs(r.contrib);
+        bucketFreq[bi] = r.freq;
+      }
+    });
+    var maxMag = 0.001;
+    for(var i=0;i<buckets;i++){ var m=Math.abs(sums[i]); if(m>maxMag) maxMag=m; }
+
+    var baseY = h*0.78, top = h*0.20;
+    var barW = Math.max(1, (w/buckets)*0.8);
+    var dpr = window.devicePixelRatio||1;
+    var barLabelFontPx = Math.max(13, h*0.036);
+    var axisFontPx = Math.max(14, h*0.040);
+
+    var labelCandidates = [];
+    for(var b=0;b<buckets;b++){
+      var mag = Math.abs(sums[b]);
+      if(mag < maxMag*0.01) continue;
+      var x = (b+0.5)*(w/buckets);
+      var barH = (mag/maxMag) * (baseY-top);
+      var trueFreq = bucketFreq[b] !== null ? bucketFreq[b] : (b+0.5)*bucketWidth;
+      var nearCarrier = Math.abs(trueFreq - s.fc) < bucketWidth*1.5;
+      spctx.fillStyle = nearCarrier ? cssVar('--fm') : cssVar('--carrier');
+      spctx.globalAlpha = 0.35 + 0.65*(mag/maxMag);
+      spctx.fillRect(x-barW/2, baseY-barH, barW, barH);
+      if(mag > maxMag*0.06){ labelCandidates.push({x:x, top:baseY-barH, freq:trueFreq}); }
+    }
+    spctx.globalAlpha = 1;
+
+    // frequency labels above significant bars (vertical, spaced to avoid overlap)
+    spctx.font = barLabelFontPx + 'px Heebo, sans-serif';
+    spctx.fillStyle = cssVar('--ink-soft');
+    var minGap = barLabelFontPx*1.4, lastX = -Infinity;
+    labelCandidates.forEach(function(c){
+      if(c.x - lastX < minGap) return;
+      lastX = c.x;
+      spctx.save();
+      spctx.translate(c.x, c.top - 6*dpr);
+      spctx.rotate(-Math.PI/2);
+      spctx.textAlign = 'left';
+      spctx.fillText(Math.round(c.freq), 0, 0);
+      spctx.restore();
+    });
+
+    // carrier reference line
+    var fcX = Math.min(w-1, (s.fc/maxFreq)*w);
+    spctx.strokeStyle = cssVar('--ink-soft');
+    spctx.globalAlpha = 0.55;
+    spctx.lineWidth = 1.5*dpr;
+    spctx.setLineDash([4*dpr,4*dpr]);
+    spctx.beginPath(); spctx.moveTo(fcX, top); spctx.lineTo(fcX, baseY); spctx.stroke();
+    spctx.setLineDash([]);
+    spctx.globalAlpha = 1;
+
+    spctx.font = axisFontPx + 'px Heebo, sans-serif';
+    spctx.fillStyle = cssVar('--ink-soft');
+    spctx.textAlign = 'center';
+    spctx.fillText('fc', fcX, top-8*dpr);
+
+    var step = niceStep(maxFreq/5);
+    for(var t=0; t<=maxFreq+step*0.4; t+=step){
+      var x = Math.min(w-2, Math.max(2, (t/maxFreq)*w));
+      spctx.fillText(Math.round(t), x, baseY+24*dpr);
+    }
+
+    spctx.direction = 'rtl';
+    spctx.textAlign = 'right';
+    spctx.fillText('תדר (Hz) →', w-8, top-4);
+  }
+
+  var reflCheckbox = document.getElementById('includeReflected');
+  if(reflCheckbox) reflCheckbox.addEventListener('change', drawSpectrum);
+  window.addEventListener('resize', drawSpectrum);
+  drawSpectrum();
+
+  // ---------- live spectrogram ----------
+  function hexToRgb(hex){
+    hex = hex.trim().replace('#','');
+    if(hex.length===3){ hex = hex.split('').map(function(c){return c+c;}).join(''); }
+    var num = parseInt(hex,16);
+    return [ (num>>16)&255, (num>>8)&255, num&255 ];
+  }
+  var colorStops = null;
+  function getColorStops(){
+    return [
+      {t:0.00, c:hexToRgb(cssVar('--bg'))},
+      {t:0.35, c:hexToRgb(cssVar('--carrier'))},
+      {t:0.68, c:hexToRgb(cssVar('--modulator'))},
+      {t:1.00, c:hexToRgb(cssVar('--fm'))}
+    ];
+  }
+  function colorForMag(t){
+    if(!colorStops) colorStops = getColorStops();
+    t = Math.max(0, Math.min(1,t));
+    var stops = colorStops;
+    for(var i=0;i<stops.length-1;i++){
+      var a = stops[i], b = stops[i+1];
+      if(t>=a.t && t<=b.t){
+        var f = (b.t===a.t) ? 0 : (t-a.t)/(b.t-a.t);
+        var r = Math.round(a.c[0]+(b.c[0]-a.c[0])*f);
+        var g = Math.round(a.c[1]+(b.c[1]-a.c[1])*f);
+        var bl = Math.round(a.c[2]+(b.c[2]-a.c[2])*f);
+        return 'rgb('+r+','+g+','+bl+')';
+      }
+    }
+    var last = stops[stops.length-1].c;
+    return 'rgb('+last[0]+','+last[1]+','+last[2]+')';
+  }
+
+  var sg = document.getElementById('spectrogram');
+  var sgCtx = sg.getContext('2d');
+
+  function drawSpectrogramFrame(){
+    if(!analyser || !audioCtx) return;
+    analyser.getByteFrequencyData(freqData);
+    var w = sg.width, h = sg.height;
+    var imgData = sgCtx.getImageData(1,0,w-1,h);
+    sgCtx.putImageData(imgData,0,0);
+    var binHz = audioCtx.sampleRate/analyser.fftSize;
+    for(var y=0;y<h;y++){
+      var freq = (1 - y/h) * liveMaxFreq;
+      var bin = Math.round(freq/binHz);
+      var mag = (bin>=0 && bin<freqData.length) ? freqData[bin] : 0;
+      sgCtx.fillStyle = colorForMag(mag/255);
+      sgCtx.fillRect(w-1, y, 1, 1);
+    }
+  }
+
+  var sgAnimating = false;
+  function spectrogramLoop(){
+    if(playing && analyser){
+      drawSpectrogramFrame();
+      requestAnimationFrame(spectrogramLoop);
+    } else {
+      sgAnimating = false;
+    }
+  }
+  function maybeStartSpectrogram(){
+    if(!sgAnimating && playing && analyser){
+      sgAnimating = true;
+      requestAnimationFrame(spectrogramLoop);
+    }
+  }
+
+  // ---------- fullscreen lightbox ----------
+  var lightbox = document.getElementById('lightbox');
+  var lightboxBody = document.getElementById('lightboxBody');
+  var lightboxClose = document.getElementById('lightboxClose');
+  var lbActiveCol = null, lbPlaceholder = null;
+
+  function redrawAfterResize(){
+    requestAnimationFrame(function(){ requestAnimationFrame(drawSpectrum); });
+  }
+
+  function openLightbox(colId){
+    var col = document.getElementById(colId);
+    if(!col || lbActiveCol) return;
+    lbPlaceholder = document.createComment('view-col-placeholder');
+    col.parentNode.insertBefore(lbPlaceholder, col);
+    lightboxBody.appendChild(col);
+    col.classList.add('in-lightbox');
+    lbActiveCol = col;
+    lightbox.hidden = false;
+    document.body.style.overflow = 'hidden';
+    redrawAfterResize();
+  }
+  function closeLightbox(){
+    if(!lbActiveCol) return;
+    lbPlaceholder.parentNode.insertBefore(lbActiveCol, lbPlaceholder);
+    lbPlaceholder.remove();
+    lbActiveCol.classList.remove('in-lightbox');
+    lbActiveCol = null; lbPlaceholder = null;
+    lightbox.hidden = true;
+    document.body.style.overflow = '';
+    redrawAfterResize();
+  }
+  document.querySelectorAll('.expand-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){ openLightbox(btn.getAttribute('data-target')); });
+  });
+  lightboxClose.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', function(e){ if(e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeLightbox(); });
+
+})();
+</script>
+</body>
+</html>
