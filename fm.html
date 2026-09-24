@@ -338,19 +338,19 @@
     <p>בסינתזת FM יש לנו שני גלים:</p>
     <ul style="margin:0 0 1em; padding-inline-start:20px; color:var(--ink-soft);">
       <li style="margin-bottom:8px;"><strong style="color:var(--ink)">גל נושא (Carrier)</strong> — גל בתדר קבוע. למשל, 440Hz. זהו הצליל שאותו אנחנו רוצים לשנות.</li>
-      <li><strong style="color:var(--ink)">גל מאפנן (Modulator)</strong> — גל נוסף, בדרך כלל בתדר נמוך יותר. הוא לא מתווסף לנושא, אלא משנה את התדר שלו.</li>
+      <li><strong style="color:var(--ink)">גל מאפנן (Modulator)</strong> — הגל שמשנה את התדר של גל הנושא (Carrier).</li>
     </ul>
     <p>כלומר, במקום שהנושא יישאר כל הזמן ב־440Hz, המאפנן גורם לו לנוע הלוך ושוב סביב 440Hz:</p>
     <p style="direction:ltr; text-align:left; font-family:ui-monospace, Consolas, monospace; color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:8px 14px; display:inline-block; margin:0 0 1em;">440 → 450 → 440 → 430 → 440 → 450 → …</p>
     <p>קצב התנועה הזו נקבע על ידי תדר המאפנן. למשל, אם המאפנן הוא 5Hz, התדר של הנושא ישתנה הלוך ושוב 5 פעמים בשנייה.</p>
-    <p><strong style="color:var(--ink)">ומה קובע עד כמה התדר משתנה?</strong> כאן נכנס עומק האפנון (β). ככל שעומק האפנון גדול יותר, התדר של הנושא מתרחק יותר מהתדר המקורי שלו.</p>
+    <p><strong style="color:var(--ink)">ומה קובע עד כמה התדר משתנה?</strong> כאן נכנס עומק האפנון. ככל שעומק האפנון גדול יותר, התדר של הנושא מתרחק יותר מהתדר המקורי שלו.</p>
+    <p><strong style="color:var(--ink)">מתחת ל-20Hz בערך</strong> — האוזן עוקבת אחרי כל תנודה בנפרד כשינוי בגובה הצליל.<br><strong style="color:var(--ink)">מעל 20Hz</strong> — התנודות מהירות מכדי שנשמע אותן כתנועה. במקום זאת, האוזן שומעת אותן כגוון (Timbre) חדש.</p>
   </section>
 
   <section class="demo">
     <div class="panel">
       <div class="panel-label">
         <span><span class="live-dot" id="liveDot"></span>ניתוח ספקטרלי</span>
-        <span id="clock" style="font-variant-numeric:tabular-nums; opacity:.7;">00:00</span>
       </div>
       <div class="panel-inner">
 
@@ -444,7 +444,6 @@
     betaNum: document.getElementById('betaNum'),
     volNum: document.getElementById('volNum'),
     playBtn: document.getElementById('playBtn'),
-    clock: document.getElementById('clock'),
   };
 
   function state(){
@@ -497,12 +496,6 @@
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   }
 
-  function updateClock(now){
-    var secs = (now-startTs)/1000;
-    var mm = Math.floor(secs/60), ss = Math.floor(secs%60);
-    els.clock.textContent = (mm<10?'0':'')+mm+':'+(ss<10?'0':'')+ss;
-  }
-
   // ---------- hero decorative wave ----------
   var hero = document.getElementById('heroWave');
   var hctx = hero ? hero.getContext('2d') : null;
@@ -534,7 +527,6 @@
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function loop(now){
-    updateClock(now);
     if(!reduceMotion) drawHero(now);
     requestAnimationFrame(loop);
   }
