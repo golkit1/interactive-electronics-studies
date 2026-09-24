@@ -242,11 +242,52 @@
   .field.fm input[type="range"]::-moz-range-thumb { background: var(--modulator); }
   .field.depth input[type="range"]::-moz-range-thumb { background: var(--output); }
 
+  .mode-toggle {
+    display: inline-flex;
+    gap: 4px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 3px;
+    margin-top: 18px;
+  }
+  button.mode-btn {
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    border-radius: 999px;
+    padding: 6px 14px;
+    cursor: pointer;
+  }
+  button.mode-btn[aria-pressed="true"] {
+    color: #fff;
+    background: var(--ink);
+  }
+  button.mode-btn:hover:not([aria-pressed="true"]) { background: var(--line); }
+  button.mode-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  button.mini-btn {
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 9px 16px;
+    cursor: pointer;
+  }
+  button.mini-btn:hover { background: var(--line); }
+  button.mini-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
   .playbar {
     display: flex;
     align-items: center;
     gap: 16px;
-    margin-top: 18px;
+    margin-top: 14px;
     padding-top: 16px;
     border-top: 1px solid var(--line);
     flex-wrap: wrap;
@@ -345,13 +386,21 @@
         <input type="range" id="fm" min="0" max="1000" step="1">
       </div>
       <div class="field depth" id="depth-field">
-        <label for="depth">עומק אפנון (m) <span class="val" id="depth-val">70%</span></label>
+        <label for="depth">עומק אפנון (m)
+          <span class="num-wrap"><input type="number" id="depth-num" class="num-input" dir="ltr" min="0" max="100" step="1" value="70">%</span>
+        </label>
         <input type="range" id="depth" min="0" max="100" step="1" value="70">
       </div>
     </div>
 
+    <div class="mode-toggle" role="radiogroup" aria-label="מצב השמעה">
+      <button type="button" class="mode-btn" id="mode-continuous-btn" data-mode="continuous" aria-pressed="true">רציף</button>
+      <button type="button" class="mode-btn" id="mode-envelope-btn" data-mode="envelope" aria-pressed="false">מעטפת (Attack/Decay)</button>
+    </div>
+
     <div class="playbar">
       <button class="play" id="play-btn">▶ השמע צליל</button>
+      <button class="mini-btn" id="env-stop-btn" type="button" hidden>⏹ עצור</button>
       <label class="isolate" id="isolate-wrap" style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted);cursor:pointer;">
         <input type="checkbox" id="isolate" style="width:16px;height:16px;">
         השתקת הנשא — השמע רק את תדרי הצד
@@ -400,7 +449,7 @@
 (function () {
   "use strict";
 
-  var state = { mode: "am", fc: 220, fm: 4, depth: 0.7, playing: false, volume: 0.25, isolate: false };
+  var state = { mode: "am", fc: 220, fm: 4, depth: 0.7, playing: false, volume: 0.25, isolate: false, playMode: "continuous" };
 
   var FC_MIN = 40, FC_MAX = 2000;
   var FM_MIN = 0.2, FM_MAX = 500;
@@ -415,7 +464,7 @@
 
   var texts = {
     am: {
-      lede: "עוצמת הנשא משתנה מעלה ומטה בקצב המאפנן — אבל היא תמיד נשארת חיובית, כך שהנשא עצמו אף פעם לא נעלם מהאות היוצא. רק ה\"עוצמה\" (המשרעת) שלו נעה בהתאם למאפנן."
+      lede: "עוצמת הנשא משתנה מעלה ומטה בקצב המאפנן — אבל היא תמיד נשארת חיובית, כך שתדר הנשא לא נעלם מהאות היוצא. רק ה\"עוצמה\" (המשרעת) שלו נעה בהתאם למאפנן."
     },
     ring: {
       lede: "שני האותות מוכפלים זה בזה במלואם, בלי שום תוספת קבועה. בגלל זה המכפלה יכולה לצאת גם שלילית, והנשא עצמו נעלם לגמרי מהאות היוצא — נשארים רק תדרי הצד."
@@ -435,8 +484,11 @@
     depthField: document.getElementById("depth-field"),
     fcNum: document.getElementById("fc-num"),
     fmNum: document.getElementById("fm-num"),
-    depthVal: document.getElementById("depth-val"),
+    depthNum: document.getElementById("depth-num"),
     playBtn: document.getElementById("play-btn"),
+    modeContinuousBtn: document.getElementById("mode-continuous-btn"),
+    modeEnvelopeBtn: document.getElementById("mode-envelope-btn"),
+    envStopBtn: document.getElementById("env-stop-btn"),
     isolate: document.getElementById("isolate"),
     isolateWrap: document.getElementById("isolate-wrap"),
     vol: document.getElementById("vol"),
@@ -474,7 +526,7 @@
   function updateReadouts() {
     if (document.activeElement !== els.fcNum) els.fcNum.value = round(state.fc, state.fc < 10 ? 2 : (state.fc < 100 ? 1 : 0));
     if (document.activeElement !== els.fmNum) els.fmNum.value = round(state.fm, state.fm < 10 ? 2 : (state.fm < 100 ? 1 : 0));
-    els.depthVal.textContent = Math.round(state.depth * 100) + "%";
+    if (document.activeElement !== els.depthNum) els.depthNum.value = Math.round(state.depth * 100);
   }
   function round(v, digits) { var f = Math.pow(10, digits); return Math.round(v * f) / f; }
 
@@ -517,16 +569,32 @@
   els.fcNum.addEventListener("blur", updateReadouts);
   els.fmNum.addEventListener("blur", updateReadouts);
 
+  els.depthNum.addEventListener("input", function () {
+    var v = parseFloat(els.depthNum.value);
+    if (isNaN(v)) return;
+    v = Math.min(100, Math.max(0, v));
+    state.depth = v / 100;
+    els.depth.value = Math.round(v);
+    updateReadouts(); drawSpectrum(); updateAudioParams();
+  });
+  els.depthNum.addEventListener("blur", updateReadouts);
+
   updateReadouts();
 
   function cssVar(name) {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   }
 
-  // Live spectrum trace only needs to keep redrawing while audio is playing;
-  // slider/tab changes already trigger their own drawSpectrum() call.
+  function isAudioAudible() {
+    return state.playMode === "envelope" ? !!audioCtx : state.playing;
+  }
+
+  // Live spectrum trace only needs to keep redrawing while audio is playing
+  // (continuous mode) or once the graph exists (envelope mode, where notes
+  // can be triggered at any time); slider/tab changes trigger their own
+  // drawSpectrum() call regardless.
   function frame() {
-    if (state.playing && analyser) {
+    if (isAudioAudible() && analyser) {
       analyser.getFloatFrequencyData(analyserData);
       drawSpectrum(analyserData, audioCtx.sampleRate, analyser.fftSize);
     }
@@ -637,13 +705,14 @@
       '<span' + (mode === "ring" ? ' style="color:' + cssVar('--ring-upper') + '"' : '') + '>f<sub>c</sub> + f<sub>m</sub> = ' + fmtHz(upper) + '</span>' +
       (mode === "am" ? '<span>f<sub>c</sub> = ' + fmtHz(fc) + '</span>' : '<span style="opacity:.55">אין נשא</span>') +
       '<span' + (mode === "ring" ? ' style="color:' + cssVar('--ring-lower') + '"' : '') + '>f<sub>c</sub> − f<sub>m</sub> = ' + fmtHz(lower) + '</span>' +
-      (state.playing ? '' : '<span style="opacity:.55; flex-basis:100%; margin-top:4px">לחצו \u25B6 השמע כדי לראות את המדידה בפועל על החיזוי</span>');
+      (isAudioAudible() ? '' : '<span style="opacity:.55; flex-basis:100%; margin-top:4px">לחצו \u25B6 השמע כדי לראות את המדידה בפועל על החיזוי</span>');
   }
   drawSpectrum();
 
   /* ---------- Audio ---------- */
-  var audioCtx = null, carrierOsc = null, modOsc = null, offset = null, depthScale = null, modGain = null, masterGain = null;
+  var audioCtx = null, carrierOsc = null, modOsc = null, offset = null, depthScale = null, modGain = null, envGain = null, masterGain = null;
   var analyser = null, analyserData = null;
+  var ENV_ATTACK = 0.008, ENV_DECAY = 1.1;
 
   function buildAudioGraph() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -658,6 +727,9 @@
     depthScale = audioCtx.createGain(); // scales modulator before it drives modGain.gain
     depthScale.gain.value = state.mode === "am" ? state.depth : 1;
 
+    envGain = audioCtx.createGain(); // attack/decay gate for envelope mode; pass-through (1) in continuous mode
+    envGain.gain.value = state.playMode === "envelope" ? 0.0001 : 1;
+
     masterGain = audioCtx.createGain();
     masterGain.gain.value = state.volume * 0.5;
 
@@ -670,7 +742,8 @@
     depthScale.connect(modGain.gain);
 
     carrierOsc.connect(modGain);
-    modGain.connect(masterGain);
+    modGain.connect(envGain);
+    envGain.connect(masterGain);
     masterGain.connect(audioCtx.destination);
     masterGain.connect(analyser);
 
@@ -705,10 +778,69 @@
     }
   }
 
+  function triggerEnvelope() {
+    var now = audioCtx.currentTime;
+    var cur = Math.max(envGain.gain.value, 0.0001);
+    envGain.gain.cancelScheduledValues(now);
+    envGain.gain.setValueAtTime(cur, now);
+    envGain.gain.linearRampToValueAtTime(1, now + ENV_ATTACK);
+    envGain.gain.exponentialRampToValueAtTime(0.0001, now + ENV_ATTACK + ENV_DECAY);
+  }
+
+  function stopEnvelope() {
+    if (!audioCtx) return;
+    var now = audioCtx.currentTime;
+    envGain.gain.cancelScheduledValues(now);
+    envGain.gain.setValueAtTime(Math.max(envGain.gain.value, 0.0001), now);
+    envGain.gain.linearRampToValueAtTime(0.0001, now + 0.03);
+  }
+
+  function setPlayMode(newMode) {
+    var toEnvelope = newMode === "envelope";
+    state.playMode = newMode;
+    els.modeContinuousBtn.setAttribute("aria-pressed", String(!toEnvelope));
+    els.modeEnvelopeBtn.setAttribute("aria-pressed", String(toEnvelope));
+    els.envStopBtn.hidden = !toEnvelope;
+
+    if (toEnvelope) {
+      els.playBtn.textContent = "🎹 הפעל תו";
+      state.playing = false;
+      if (audioCtx) {
+        var now = audioCtx.currentTime;
+        envGain.gain.cancelScheduledValues(now);
+        envGain.gain.setValueAtTime(Math.max(envGain.gain.value, 0.0001), now);
+        envGain.gain.linearRampToValueAtTime(0.0001, now + 0.03);
+        masterGain.gain.setTargetAtTime(state.volume * 0.5, now, 0.01);
+      }
+    } else {
+      els.playBtn.textContent = "▶ השמע צליל";
+      state.playing = false;
+      if (audioCtx) {
+        var now2 = audioCtx.currentTime;
+        envGain.gain.cancelScheduledValues(now2);
+        envGain.gain.setValueAtTime(Math.max(envGain.gain.value, 0.0001), now2);
+        envGain.gain.linearRampToValueAtTime(1, now2 + 0.03);
+        masterGain.gain.setTargetAtTime(0, now2, 0.01);
+      }
+    }
+  }
+  els.modeContinuousBtn.addEventListener("click", function () { setPlayMode("continuous"); });
+  els.modeEnvelopeBtn.addEventListener("click", function () { setPlayMode("envelope"); });
+  els.envStopBtn.addEventListener("click", stopEnvelope);
+
   els.playBtn.addEventListener("click", function () {
     try {
       if (!audioCtx) buildAudioGraph();
       if (audioCtx.state === "suspended") audioCtx.resume();
+
+      if (state.playMode === "envelope") {
+        masterGain.gain.setTargetAtTime(state.volume * 0.5, audioCtx.currentTime, 0.01);
+        updateAudioGraph();
+        updateAudioParams();
+        triggerEnvelope();
+        return;
+      }
+
       if (!state.playing) {
         state.playing = true;
         els.playBtn.textContent = "⏸ עצור צליל";
