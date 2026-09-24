@@ -248,8 +248,23 @@
   }
   .readouts .item span{color:var(--ink-soft); font-size:12.5px;}
 
+  .mode-tabs{
+    display:flex; gap:6px; margin-top:22px; padding-top:18px; border-top:1px solid var(--line);
+  }
+  .mode-btn{
+    background:var(--bg); border:1px solid var(--line); border-radius:999px;
+    color:var(--ink-soft); font-family:'Heebo',sans-serif; font-size:13px;
+    padding:6px 14px; cursor:pointer;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .mode-btn:hover{ border-color:var(--focus); }
+  .mode-btn.active{
+    background:var(--accent); color:#fff; border-color:transparent; font-weight:600;
+  }
+  .mode-btn:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+
   .play-row{
-    display:flex; align-items:center; gap:14px; margin-top:24px; flex-wrap:wrap;
+    display:flex; align-items:center; gap:14px; margin-top:14px; flex-wrap:wrap;
   }
   button#playBtn{
     background:var(--accent); color:#fff; border:none;
@@ -261,6 +276,12 @@
   button#playBtn:hover{ box-shadow:0 6px 18px -6px rgba(193,90,78,.55);}
   button#playBtn:active{ transform:scale(.97); }
   button#playBtn:focus-visible{ outline:2px solid var(--focus); outline-offset:3px; }
+  .stop-env-btn{
+    background:transparent; border:1px solid var(--line); border-radius:999px;
+    color:var(--ink-soft); font-family:'Heebo',sans-serif; font-size:13px;
+    padding:8px 16px; cursor:pointer;
+  }
+  .stop-env-btn:hover{ border-color:var(--focus); color:var(--ink); }
   .play-note{font-size:12.5px; color:var(--ink-soft); max-width:38ch; margin:0;}
 
   canvas#spectrum{
@@ -409,8 +430,14 @@
           </div>
         </div>
 
+        <div class="mode-tabs">
+          <button type="button" class="mode-btn active" id="modeContinuous">רציף</button>
+          <button type="button" class="mode-btn" id="modeEnvelope">מעטפת (Attack/Decay)</button>
+        </div>
+
         <div class="play-row">
           <button id="playBtn" type="button">▶ השמע צליל</button>
+          <button id="stopEnvBtn" type="button" class="stop-env-btn" hidden>⏹ עצור</button>
         </div>
 
       </div>
@@ -535,7 +562,8 @@
   requestAnimationFrame(loop);
 
   // ---------- audio (real FM synthesis, mirrors the math above) ----------
-  var audioCtx = null, carrierOsc = null, modOsc = null, modGain = null, outGain = null, analyser = null, freqData = null, playing = false;
+  var audioCtx = null, carrierOsc = null, modOsc = null, modGain = null, outGain = null, envGain = null, analyser = null, freqData = null, playing = false;
+  var envMode = false;
 
   function startAudio(){
     var AC = window.AudioContext || window.webkitAudioContext;
@@ -554,6 +582,9 @@
     modGain = audioCtx.createGain();
     modGain.gain.value = s.beta * s.fm; // frequency deviation in Hz
 
+    envGain = audioCtx.createGain();
+    envGain.gain.value = envMode ? 0 : 1; // envelope mode starts silent until triggered
+
     outGain = audioCtx.createGain();
     outGain.gain.value = s.vol;
 
@@ -564,14 +595,16 @@
 
     modOsc.connect(modGain);
     modGain.connect(carrierOsc.frequency);
-    carrierOsc.connect(outGain);
+    carrierOsc.connect(envGain);
+    envGain.connect(outGain);
     outGain.connect(analyser);
     analyser.connect(audioCtx.destination);
 
     carrierOsc.start();
     modOsc.start();
     playing = true;
-    els.playBtn.textContent = '■ עצור';
+    els.playBtn.textContent = envMode ? '🎹 הפעל תו' : '■ עצור';
+    document.getElementById('stopEnvBtn').hidden = !envMode;
 
     liveMaxFreq = computeDynamicMaxFreq(s, true);
     updateSpectroAxisLabels();
@@ -590,14 +623,28 @@
     if(carrierOsc){ try{carrierOsc.stop();}catch(e){} carrierOsc.disconnect(); }
     if(modOsc){ try{modOsc.stop();}catch(e){} modOsc.disconnect(); }
     if(modGain) modGain.disconnect();
+    if(envGain) envGain.disconnect();
     if(outGain) outGain.disconnect();
     if(analyser) analyser.disconnect();
     if(audioCtx) audioCtx.close();
-    carrierOsc = modOsc = modGain = outGain = analyser = audioCtx = null;
+    carrierOsc = modOsc = modGain = envGain = outGain = analyser = audioCtx = null;
     playing = false;
-    els.playBtn.textContent = '▶ השמע צליל';
+    els.playBtn.textContent = envMode ? '🎹 הפעל תו' : '▶ השמע צליל';
+    document.getElementById('stopEnvBtn').hidden = true;
     document.getElementById('liveDot').classList.remove('on');
     document.getElementById('spectroHint').classList.remove('hidden');
+  }
+
+  function triggerEnvelope(){
+    if(!audioCtx || !envGain) return;
+    var now = audioCtx.currentTime;
+    var attack = 0.008, decay = 1.1;
+    var g = envGain.gain;
+    g.cancelScheduledValues(now);
+    g.setValueAtTime(g.value, now);
+    g.linearRampToValueAtTime(1, now+attack);
+    g.exponentialRampToValueAtTime(0.001, now+attack+decay);
+    g.linearRampToValueAtTime(0, now+attack+decay+0.05);
   }
 
   function syncAudio(){
@@ -668,8 +715,35 @@
   updateFcLine();
 
   els.playBtn.addEventListener('click', function(){
-    if(playing){ stopAudio(); } else { startAudio(); }
+    if(envMode){
+      if(!playing) startAudio();
+      triggerEnvelope();
+    } else {
+      if(playing){ stopAudio(); } else { startAudio(); }
+    }
   });
+
+  var modeContinuousBtn = document.getElementById('modeContinuous');
+  var modeEnvelopeBtn = document.getElementById('modeEnvelope');
+  var stopEnvBtn = document.getElementById('stopEnvBtn');
+  function setMode(toEnvelope){
+    envMode = toEnvelope;
+    modeContinuousBtn.classList.toggle('active', !envMode);
+    modeEnvelopeBtn.classList.toggle('active', envMode);
+    if(playing && audioCtx && envGain){
+      var now = audioCtx.currentTime;
+      envGain.gain.cancelScheduledValues(now);
+      envGain.gain.setValueAtTime(envMode ? 0 : 1, now);
+      els.playBtn.textContent = envMode ? '🎹 הפעל תו' : '■ עצור';
+      stopEnvBtn.hidden = !envMode;
+    } else {
+      els.playBtn.textContent = envMode ? '🎹 הפעל תו' : '▶ השמע צליל';
+      stopEnvBtn.hidden = true;
+    }
+  }
+  modeContinuousBtn.addEventListener('click', function(){ setMode(false); });
+  modeEnvelopeBtn.addEventListener('click', function(){ setMode(true); });
+  stopEnvBtn.addEventListener('click', stopAudio);
 
   // ---------- theoretical sideband chart ----------
   var specCanvas = document.getElementById('spectrum');
