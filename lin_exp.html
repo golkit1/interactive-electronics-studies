@@ -178,7 +178,8 @@
 
   <section class="demo">
     <div class="panel">
-      <div class="panel-label" style="justify-content:flex-end;">
+      <div class="panel-label" style="justify-content:space-between;">
+        <span style="font-size:12.5px;">f(t) — התדר הרגעי בזמן, לא צורת הגל עצמה</span>
         <button type="button" id="pauseBtn" class="expand-btn-sm">⏸ הקפא</button>
       </div>
       <div class="panel-inner">
@@ -219,7 +220,7 @@
             <div class="ticks"><span>0.25</span><span>2 oct/V</span></div>
           </div>
         </div>
-        <p class="play-note" style="margin-top:8px;">שתי הרגישויות האלה משותפות לכל הדף — הן גם קובעות את המעטפת שרואים כאן, וגם את התוצאה בקטע ה-CV למטה. הגל המאפנן כאן מניחים שהוא בדיוק ±1V.</p>
+        <p class="play-note" style="margin-top:8px;">הגל המאפנן כאן מניחים שהוא בדיוק ±1V.</p>
 
         <div class="mode-tabs">
           <button type="button" class="mode-btn linear active" id="engLinear">🔊 Linear</button>
@@ -229,44 +230,6 @@
         <div class="play-row">
           <button id="playBtn" type="button">▶ השמע</button>
         </div>
-
-      </div>
-    </div>
-  </section>
-
-  <section class="demo">
-    <div class="panel">
-      <div class="panel-label"><span>כניסת CV — מתח קבוע (DC) → תדר</span></div>
-      <div class="panel-inner">
-
-        <p style="margin:0 0 14px;">כניסה ליניארית מגיבה ל-CV בהרץ-לוולט חופשי — פרמטר עיצוב שניתן לקבוע. כניסת 1V/oct מגיבה באוקטבה-לוולט <strong style="color:var(--ink)">קבועה ומכוילת</strong>: ‎+1V תמיד מכפיל את התדר פי 2, ‎-1V תמיד מחצה אותו — בלי קשר ל-fc.</p>
-
-        <div class="controls" style="grid-template-columns:1fr;">
-          <div class="control">
-            <div class="control-head"><span class="name">CV נוכחי</span><span class="val-wrap"><input type="number" class="val-input" id="cvNum" min="-5" max="5" step="0.1" value="1"><span class="unit">V</span></span></div>
-            <input type="range" id="cv" min="-5" max="5" step="0.1" value="1">
-            <div class="ticks"><span>-5V</span><span>-1V</span><span>0</span><span>+1V</span><span>+5V</span></div>
-          </div>
-        </div>
-
-        <p class="play-note" style="margin-top:8px;">משתמש באותם שני עומקי אפנון שנקבעו למעלה (Hz/V ל-Linear, oct/V ל-Exponential).</p>
-        <p id="scaleWarning" class="play-note" style="margin-top:4px; display:none;">⚠ עומק האפנון של ה-Exponential שונה מ-1 oct/V — כבר לא מכויל ל-1V/oct; מעקב עם קלידה כרומטית ישבר.</p>
-
-        <div class="readouts" id="cvReadouts">
-          <div class="item linear"><b id="cvLinNow">320 Hz</b><span>Linear ב-CV הנוכחי</span></div>
-          <div class="item expo"><b id="cvExpNow">440 Hz</b><span>Exponential ב-CV הנוכחי</span></div>
-        </div>
-
-        <table style="width:100%; border-collapse:collapse; margin-top:18px; font-size:13.5px;">
-          <thead>
-            <tr style="border-bottom:1px solid var(--line);">
-              <th style="text-align:right; padding:6px 4px; color:var(--ink-soft); font-weight:600;">CV</th>
-              <th style="text-align:right; padding:6px 4px; color:var(--linear); font-weight:600;">Linear</th>
-              <th style="text-align:right; padding:6px 4px; color:var(--expo); font-weight:600;">Exponential</th>
-            </tr>
-          </thead>
-          <tbody id="cvTableBody"></tbody>
-        </table>
 
       </div>
     </div>
@@ -330,11 +293,10 @@
       p.num.value = p.range.value;
       updateReadouts();
       redrawIfPaused();
-      updateCvSection();
     });
     p.num.addEventListener('input', function(){
       var v = parseFloat(p.num.value);
-      if(!isNaN(v)){ p.range.value = Math.min(p.max, Math.max(p.min, v)); updateReadouts(); redrawIfPaused(); updateCvSection(); }
+      if(!isNaN(v)){ p.range.value = Math.min(p.max, Math.max(p.min, v)); updateReadouts(); redrawIfPaused(); }
     });
     p.num.addEventListener('change', function(){
       var v = parseFloat(p.num.value);
@@ -342,7 +304,6 @@
       v = Math.min(p.max, Math.max(p.min, v));
       p.num.value = v; p.range.value = v; updateReadouts();
       redrawIfPaused();
-      updateCvSection();
     });
   });
   updateReadouts();
@@ -413,8 +374,10 @@
 
     // y-axis labels (denser grid)
     var dpr = window.devicePixelRatio||1;
-    var step = niceStep((yMax-yMin)/8);
-    gctx.font = (11*dpr)+'px Heebo, sans-serif';
+    var axisFontPx = Math.max(14, h*0.032);
+    var peakFontPx = Math.max(16, h*0.038);
+    var step = niceStep((yMax-yMin)/5);
+    gctx.font = axisFontPx+'px Heebo, sans-serif';
     gctx.fillStyle = cssVar('--ink-soft');
     gctx.textAlign = 'right';
     gctx.direction = 'rtl';
@@ -426,20 +389,20 @@
       gctx.lineWidth = 1;
       gctx.beginPath(); gctx.moveTo(0,y); gctx.lineTo(w,y); gctx.stroke();
       gctx.globalAlpha = 0.9;
-      gctx.fillText(Math.round(v), w-8, y-3);
+      gctx.fillText(Math.round(v), w-8, y-4);
     }
     gctx.globalAlpha = 1;
 
     // explicit peak/trough labels per engine, in their own color
-    gctx.font = (12*dpr)+'px Heebo, sans-serif';
+    gctx.font = 'bold ' + peakFontPx + 'px Heebo, sans-serif';
     var linHi = s.fc+dfLin, linLo = s.fc-dfLin;
     var expHi = s.fc*Math.pow(2,oct), expLo = s.fc/Math.pow(2,oct);
     gctx.fillStyle = cssVar('--linear');
-    gctx.fillText(Math.round(linHi), w-70, yPix(linHi)-4);
-    gctx.fillText(Math.round(linLo), w-70, yPix(linLo)+16*dpr);
+    gctx.fillText(Math.round(linHi), w-90, yPix(linHi)-6);
+    gctx.fillText(Math.round(linLo), w-90, yPix(linLo)+peakFontPx+4);
     gctx.fillStyle = cssVar('--expo');
-    gctx.fillText(Math.round(expHi), w-70, yPix(expHi)-4);
-    gctx.fillText(Math.round(expLo), w-70, yPix(expLo)+16*dpr);
+    gctx.fillText(Math.round(expHi), w-90, yPix(expHi)-6);
+    gctx.fillText(Math.round(expLo), w-90, yPix(expLo)+peakFontPx+4);
   }
 
   var paused = false, pausedAt = null;
@@ -521,77 +484,6 @@
   }
   engLinearBtn.addEventListener('click', function(){ setEngine('linear'); });
   engExpoBtn.addEventListener('click', function(){ setEngine('expo'); });
-
-  // ---------- static CV section ----------
-  var cvEls = {
-    cv: document.getElementById('cv'),
-    cvNum: document.getElementById('cvNum'),
-  };
-  function cvLinearFreq(fc, cv, sensHzPerV){ return fc + cv*sensHzPerV; }
-  function cvExpFreq(fc, cv, octPerV){ return fc * Math.pow(2, cv*octPerV); }
-
-  function fmtHz(x){ return Math.round(x).toLocaleString('en-US') + ' Hz'; }
-
-  function updateCvSection(){
-    var fc = parseFloat(els.fc.value);
-    var cv = parseFloat(cvEls.cv.value);
-    var sensLin = parseFloat(els.sensLin.value);
-    var sensExp = parseFloat(els.sensExp.value);
-
-    document.getElementById('cvLinNow').textContent = fmtHz(cvLinearFreq(fc, cv, sensLin));
-    document.getElementById('cvExpNow').textContent = fmtHz(cvExpFreq(fc, cv, sensExp));
-
-    var warn = document.getElementById('scaleWarning');
-    warn.style.display = (Math.abs(sensExp-1) > 0.001) ? 'block' : 'none';
-
-    var rows = [
-      {v:-1, fixed:true},
-      {v:cv, fixed:false},
-      {v:1, fixed:true}
-    ];
-    var body = document.getElementById('cvTableBody');
-    body.innerHTML = '';
-    rows.forEach(function(row){
-      var v = row.v;
-      var tr = document.createElement('tr');
-      tr.style.borderBottom = '1px solid var(--line)';
-      if(!row.fixed){ tr.style.background = 'var(--bg)'; }
-      var tdCv = document.createElement('td');
-      tdCv.style.padding = '6px 4px';
-      tdCv.style.color = row.fixed ? 'var(--ink)' : 'var(--accent)';
-      tdCv.style.fontWeight = '600';
-      var vLabel = (v>0?'+':'') + (Math.round(v*100)/100) + 'V';
-      tdCv.textContent = vLabel + (row.fixed ? '' : ' (נוכחי)');
-      var tdLin = document.createElement('td');
-      tdLin.style.padding = '6px 4px';
-      tdLin.style.color = 'var(--ink-soft)';
-      tdLin.textContent = fmtHz(cvLinearFreq(fc, v, sensLin));
-      var tdExp = document.createElement('td');
-      tdExp.style.padding = '6px 4px';
-      tdExp.style.color = 'var(--ink-soft)';
-      var expF = cvExpFreq(fc, v, sensExp);
-      var octNote = (row.fixed && Math.abs(sensExp-1)<0.001) ? '  (× ' + (v>0?'2':'0.5') + ')' : '';
-      tdExp.textContent = fmtHz(expF) + octNote;
-      tr.appendChild(tdCv); tr.appendChild(tdLin); tr.appendChild(tdExp);
-      body.appendChild(tr);
-    });
-  }
-
-  cvEls.cv.addEventListener('input', function(){
-    cvEls.cvNum.value = cvEls.cv.value;
-    updateCvSection();
-  });
-  cvEls.cvNum.addEventListener('input', function(){
-    var v = parseFloat(cvEls.cvNum.value);
-    if(!isNaN(v)){ cvEls.cv.value = Math.min(5, Math.max(-5, v)); updateCvSection(); }
-  });
-  cvEls.cvNum.addEventListener('change', function(){
-    var v = parseFloat(cvEls.cvNum.value);
-    if(isNaN(v)) v = parseFloat(cvEls.cv.value);
-    v = Math.min(5, Math.max(-5, v));
-    cvEls.cvNum.value = v; cvEls.cv.value = v; updateCvSection();
-  });
-  updateCvSection();
 
 })();
 </script>
