@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ליניארי מול אקספוננציאלי — אפנון תדר</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #EEF3F2;
+    --bg-panel: #FFFFFF;
+    --bezel: #1E3B3A;
+    --bezel-dark: #142826;
+    --ink: #16302E;
+    --ink-soft: #4C6664;
+    --line: #CBDAD8;
+    --linear: #2F6F6B;
+    --expo: #C15A4E;
+    --accent: #C15A4E;
+    --focus: #2F6F6B;
+    --track: #D8E4E2;
+  }
+  :root:not([data-theme="light"]){
+    @media (prefers-color-scheme: dark){
+      --bg: #0F1E1D; --bg-panel: #14302E; --bezel: #0B1918; --bezel-dark: #060F0E;
+      --ink: #E7F1EF; --ink-soft: #9FBAB7; --line: #244543;
+      --linear: #6FC7C1; --expo: #E28579; --accent: #E28579; --focus: #6FC7C1; --track: #1D3E3B;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #0F1E1D; --bg-panel: #14302E; --bezel: #0B1918; --bezel-dark: #060F0E;
+    --ink: #E7F1EF; --ink-soft: #9FBAB7; --line: #244543;
+    --linear: #6FC7C1; --expo: #E28579; --accent: #E28579; --focus: #6FC7C1; --track: #1D3E3B;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-padding-top: env(safe-area-inset-top, 0px);}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Heebo','Segoe UI',sans-serif;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    line-height:1.65;
+  }
+  h1,h2{ font-family:'Frank Ruhl Libre', serif; font-weight:700; margin:0 0 .3em 0; color:var(--ink); }
+  p{ margin:0 0 1em 0; color:var(--ink-soft); max-width:64ch; }
+  .wrap{ max-width:920px; margin:0 auto; padding:0 20px 60px; }
+
+  header.hero{
+    background:var(--bezel); color:#F3EFE6; padding:44px 0 30px;
+  }
+  header.hero h1{ color:#F3EFE6; font-size:clamp(24px,4.5vw,36px); }
+  header.hero p{ color:#C9DAD7; max-width:58ch; font-size:15.5px; margin:0; }
+
+  section{ padding:34px 0; }
+  section.explain{ padding-bottom:8px; }
+
+  .formula-row{
+    display:flex; gap:14px; flex-wrap:wrap; margin:16px 0 4px;
+  }
+  .formula-card{
+    flex:1 1 260px; border:1px solid var(--line); border-radius:10px;
+    padding:12px 16px; background:var(--bg-panel);
+  }
+  .formula-card .tag{
+    display:inline-flex; align-items:center; gap:6px; font-weight:600; font-size:13px; margin-bottom:6px;
+  }
+  .formula-card .swatch{ width:11px; height:11px; border-radius:50%; display:inline-block; }
+  .formula-card.linear .tag{ color:var(--linear); }
+  .formula-card.linear .swatch{ background:var(--linear); }
+  .formula-card.expo .tag{ color:var(--expo); }
+  .formula-card.expo .swatch{ background:var(--expo); }
+  .formula-card code{
+    display:block; direction:ltr; text-align:left; unicode-bidi:isolate;
+    font-family:ui-monospace, Consolas, monospace; font-size:13px; color:var(--ink);
+  }
+
+  .panel{ background:var(--bezel); border-radius:14px; padding:14px; box-shadow:0 18px 40px -18px rgba(10,25,24,.45); }
+  .panel-inner{ background:var(--bg-panel); border-radius:9px; padding:22px 20px 24px; }
+  .panel-label{ display:flex; align-items:center; gap:8px; color:#C9DAD7; font-size:13px; padding:2px 8px 12px; }
+  .expand-btn-sm{
+    background:transparent; border:1px solid rgba(255,255,255,.25); border-radius:6px;
+    color:#C9DAD7; font-size:12px; padding:4px 10px; cursor:pointer; font-family:'Heebo',sans-serif;
+  }
+  .expand-btn-sm:hover{ background:rgba(255,255,255,.1); color:#fff; }
+
+  .graph-wrap{ position:relative; }
+  canvas#trajGraph{
+    width:100%; height:280px; display:block;
+    border:1px solid var(--line); border-radius:6px; background:var(--bg);
+  }
+  .legend{ display:flex; flex-wrap:wrap; gap:16px 22px; margin:12px 2px 4px; font-size:13.5px; }
+  .legend span{ display:flex; align-items:center; gap:7px; color:var(--ink-soft); }
+  .legend .swatch{ width:14px; height:3px; border-radius:2px; display:inline-block; }
+  .legend .swatch.linear{ background:var(--linear); }
+  .legend .swatch.expo{ background:var(--expo); }
+
+  .readouts{
+    display:flex; flex-wrap:wrap; gap:10px 26px;
+    margin-top:18px; padding-top:16px; border-top:1px solid var(--line); font-size:14px;
+  }
+  .readouts .item b{ display:block; font-size:17px; font-family:'Frank Ruhl Libre',serif; color:var(--ink); }
+  .readouts .item span{ color:var(--ink-soft); font-size:12.5px; }
+  .readouts .item.linear b{ color:var(--linear); }
+  .readouts .item.expo b{ color:var(--expo); }
+
+  .controls{
+    display:grid; gap:10px; margin-top:18px;
+    grid-template-columns: 1fr 1fr;
+  }
+  @media (min-width:640px){ .controls{ grid-template-columns: repeat(4, 1fr); } }
+  .control{ background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:8px 10px 9px; }
+  .control-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px; font-size:12px; }
+  .control-head .name{ color:var(--ink); font-weight:600; }
+  .val-wrap{ display:flex; align-items:center; gap:3px; font-variant-numeric:tabular-nums; }
+  .val-wrap .unit{ color:var(--ink-soft); font-size:11px; }
+  input.val-input{
+    -moz-appearance:textfield; appearance:textfield; width:3.8em; text-align:center;
+    font-family:'Heebo',sans-serif; font-size:12.5px; font-weight:600; color:var(--accent);
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:5px; padding:2px 3px;
+  }
+  input.val-input::-webkit-outer-spin-button, input.val-input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  input.val-input:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; border-color:var(--focus); }
+  input[type=range]{
+    -webkit-appearance:none; appearance:none; width:100%; height:3px; border-radius:2px;
+    background:var(--track); outline:none; margin:5px 0 3px;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none; width:13px; height:13px; border-radius:50%;
+    background:var(--bg-panel); border:2.5px solid var(--focus); cursor:pointer; margin-top:-1px;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:13px; height:13px; border-radius:50%; background:var(--bg-panel); border:2.5px solid var(--focus); cursor:pointer;
+  }
+  .ticks{ display:flex; justify-content:space-between; font-size:9.5px; color:var(--ink-soft); opacity:.7; }
+
+  .mode-tabs{ display:flex; gap:6px; margin-top:18px; padding-top:16px; border-top:1px solid var(--line); }
+  .mode-btn{
+    background:var(--bg); border:1px solid var(--line); border-radius:999px; color:var(--ink-soft);
+    font-family:'Heebo',sans-serif; font-size:13px; padding:6px 14px; cursor:pointer;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .mode-btn:hover{ border-color:var(--focus); }
+  .mode-btn.linear.active{ background:var(--linear); color:#fff; border-color:transparent; font-weight:600; }
+  .mode-btn.expo.active{ background:var(--expo); color:#fff; border-color:transparent; font-weight:600; }
+
+  .play-row{ display:flex; align-items:center; gap:14px; margin-top:14px; flex-wrap:wrap; }
+  button#playBtn{
+    background:var(--accent); color:#fff; border:none; padding:11px 26px; border-radius:999px;
+    font-size:15px; font-weight:600; cursor:pointer; font-family:'Heebo',sans-serif;
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  button#playBtn:hover{ box-shadow:0 6px 18px -6px rgba(193,90,78,.55); }
+  button#playBtn:active{ transform:scale(.97); }
+  button#playBtn:focus-visible{ outline:2px solid var(--focus); outline-offset:3px; }
+  .play-note{ font-size:12.5px; color:var(--ink-soft); max-width:40ch; margin:0; }
+
+  footer{ padding:26px 0 10px; border-top:1px solid var(--line); margin-top:26px; }
+  footer p{ font-size:13px; color:var(--ink-soft); margin:0; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>ליניארי מול אקספוננציאלי</h1>
+    <p>שתי דרכים שונות לאפנון תדר של אוסילטור</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="explain">
+    <p><strong style="color:var(--linear)">ליניארי</strong> — כל שינוי קבוע במתח (נגיד, כל 1V) מוסיף או מחסיר אותה כמות הרץ. לדוגמה, אם 1V = 100Hz: מ-400Hz, שינוי של ‎+1V לוקח ל-500Hz, ושינוי של ‎-1V לוקח ל-300Hz — תמיד בדיוק 100Hz, לא משנה תדר הבסיס.</p>
+    <p><strong style="color:var(--expo)">אקספוננציאלי (1V/oct)</strong> — כל שינוי קבוע במתח (‎1V) מכפיל או מחלק את התדר באותו יחס — תמיד פי 2 לכל 1V. מ-400Hz: ‎+1V לוקח ל-800Hz (הכפלה), ‎-1V לוקח ל-200Hz (חלוקה).</p>
+  </section>
+
+  <section class="demo">
+    <div class="panel">
+      <div class="panel-label" style="justify-content:flex-end;">
+        <button type="button" id="pauseBtn" class="expand-btn-sm">⏸ הקפא</button>
+      </div>
+      <div class="panel-inner">
+
+        <div class="graph-wrap">
+          <canvas id="trajGraph" width="1600" height="440"></canvas>
+        </div>
+        <div class="legend">
+          <span><span class="swatch linear"></span>Linear</span>
+          <span><span class="swatch expo"></span>Exponential</span>
+        </div>
+
+        <div class="readouts">
+          <div class="item linear"><b id="linRangeVal">220–420 Hz</b><span>טווח Linear</span></div>
+          <div class="item expo"><b id="expRangeVal">156–311 Hz</b><span>טווח Exponential</span></div>
+          <div class="item"><b id="octVal">±1.0</b><span>סטייה באוקטבות</span></div>
+        </div>
+
+        <div class="controls">
+          <div class="control">
+            <div class="control-head"><span class="name">fc</span><span class="val-wrap"><input type="number" class="val-input" id="fcNum" min="55" max="880" step="1" value="220"><span class="unit">Hz</span></span></div>
+            <input type="range" id="fc" min="55" max="880" step="1" value="220">
+            <div class="ticks"><span>55</span><span>880 Hz</span></div>
+          </div>
+          <div class="control">
+            <div class="control-head"><span class="name">קצב (fm)</span><span class="val-wrap"><input type="number" class="val-input" id="fmNum" min="0.2" max="8" step="0.1" value="2"><span class="unit">Hz</span></span></div>
+            <input type="range" id="fm" min="0.2" max="8" step="0.1" value="2">
+            <div class="ticks"><span>0.2</span><span>8 Hz</span></div>
+          </div>
+          <div class="control">
+            <div class="control-head"><span class="name" style="color:var(--linear);">עומק אפנון Linear</span><span class="val-wrap"><input type="number" class="val-input" id="sensLinNum" min="0" max="300" step="1" value="100"><span class="unit">Hz/V</span></span></div>
+            <input type="range" id="sensLin" min="0" max="300" step="1" value="100">
+            <div class="ticks"><span>0</span><span>300 Hz/V</span></div>
+          </div>
+          <div class="control">
+            <div class="control-head"><span class="name" style="color:var(--expo);">עומק אפנון Exponential</span><span class="val-wrap"><input type="number" class="val-input" id="sensExpNum" min="0.25" max="2" step="0.05" value="1"><span class="unit">oct/V</span></span></div>
+            <input type="range" id="sensExp" min="0.25" max="2" step="0.05" value="1">
+            <div class="ticks"><span>0.25</span><span>2 oct/V</span></div>
+          </div>
+        </div>
+        <p class="play-note" style="margin-top:8px;">שתי הרגישויות האלה משותפות לכל הדף — הן גם קובעות את המעטפת שרואים כאן, וגם את התוצאה בקטע ה-CV למטה. הגל המאפנן כאן מניחים שהוא בדיוק ±1V.</p>
+
+        <div class="mode-tabs">
+          <button type="button" class="mode-btn linear active" id="engLinear">🔊 Linear</button>
+          <button type="button" class="mode-btn expo" id="engExpo">🔊 Exponential</button>
+        </div>
+
+        <div class="play-row">
+          <button id="playBtn" type="button">▶ השמע</button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="demo">
+    <div class="panel">
+      <div class="panel-label"><span>כניסת CV — מתח קבוע (DC) → תדר</span></div>
+      <div class="panel-inner">
+
+        <p style="margin:0 0 14px;">כניסה ליניארית מגיבה ל-CV בהרץ-לוולט חופשי — פרמטר עיצוב שניתן לקבוע. כניסת 1V/oct מגיבה באוקטבה-לוולט <strong style="color:var(--ink)">קבועה ומכוילת</strong>: ‎+1V תמיד מכפיל את התדר פי 2, ‎-1V תמיד מחצה אותו — בלי קשר ל-fc.</p>
+
+        <div class="controls" style="grid-template-columns:1fr;">
+          <div class="control">
+            <div class="control-head"><span class="name">CV נוכחי</span><span class="val-wrap"><input type="number" class="val-input" id="cvNum" min="-5" max="5" step="0.1" value="1"><span class="unit">V</span></span></div>
+            <input type="range" id="cv" min="-5" max="5" step="0.1" value="1">
+            <div class="ticks"><span>-5V</span><span>-1V</span><span>0</span><span>+1V</span><span>+5V</span></div>
+          </div>
+        </div>
+
+        <p class="play-note" style="margin-top:8px;">משתמש באותם שני עומקי אפנון שנקבעו למעלה (Hz/V ל-Linear, oct/V ל-Exponential).</p>
+        <p id="scaleWarning" class="play-note" style="margin-top:4px; display:none;">⚠ עומק האפנון של ה-Exponential שונה מ-1 oct/V — כבר לא מכויל ל-1V/oct; מעקב עם קלידה כרומטית ישבר.</p>
+
+        <div class="readouts" id="cvReadouts">
+          <div class="item linear"><b id="cvLinNow">320 Hz</b><span>Linear ב-CV הנוכחי</span></div>
+          <div class="item expo"><b id="cvExpNow">440 Hz</b><span>Exponential ב-CV הנוכחי</span></div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; margin-top:18px; font-size:13.5px;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--line);">
+              <th style="text-align:right; padding:6px 4px; color:var(--ink-soft); font-weight:600;">CV</th>
+              <th style="text-align:right; padding:6px 4px; color:var(--linear); font-weight:600;">Linear</th>
+              <th style="text-align:right; padding:6px 4px; color:var(--expo); font-weight:600;">Exponential</th>
+            </tr>
+          </thead>
+          <tbody id="cvTableBody"></tbody>
+        </table>
+
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>כלי אינטראקטיבי משלים לכלי אפנון תדר (FM) — חלק מסדרת "יצירתיות צלילית".</p>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  var els = {
+    fc: document.getElementById('fc'),
+    fm: document.getElementById('fm'),
+    sensLin: document.getElementById('sensLin'),
+    sensExp: document.getElementById('sensExp'),
+    fcNum: document.getElementById('fcNum'),
+    fmNum: document.getElementById('fmNum'),
+    sensLinNum: document.getElementById('sensLinNum'),
+    sensExpNum: document.getElementById('sensExpNum'),
+    playBtn: document.getElementById('playBtn'),
+  };
+
+  function state(){
+    return {
+      fc: parseFloat(els.fc.value),
+      fm: parseFloat(els.fm.value),
+      sensLin: parseFloat(els.sensLin.value),   // Hz/V
+      sensExp: parseFloat(els.sensExp.value)    // oct/V
+    };
+  }
+
+  // modulator assumed to swing ±1V, so deviation = sensitivity itself
+  function linearFreq(s, t){ return s.fc + s.sensLin*Math.sin(2*Math.PI*s.fm*t); }
+  function expFreq(s, t){ return s.fc * Math.pow(2, s.sensExp*Math.sin(2*Math.PI*s.fm*t)); }
+
+  function updateReadouts(){
+    var s = state();
+    var dfLin = s.sensLin;
+    var linLo = Math.round(s.fc-dfLin), linHi = Math.round(s.fc+dfLin);
+    var oct = s.sensExp;
+    var expLo = Math.round(s.fc/Math.pow(2,oct)), expHi = Math.round(s.fc*Math.pow(2,oct));
+    document.getElementById('linRangeVal').textContent = linLo+'–'+linHi+' Hz';
+    document.getElementById('expRangeVal').textContent = expLo+'–'+expHi+' Hz';
+    document.getElementById('octVal').textContent = '±'+oct.toFixed(2);
+  }
+
+  var pairs = [
+    { range: els.fc,      num: els.fcNum,      min:55,   max:880, step:1    },
+    { range: els.fm,      num: els.fmNum,      min:0.2,  max:8,   step:0.1  },
+    { range: els.sensLin, num: els.sensLinNum, min:0,    max:300, step:1    },
+    { range: els.sensExp, num: els.sensExpNum, min:0.25, max:2,   step:0.05 }
+  ];
+  function redrawIfPaused(){ if(paused) drawGraph(pausedAt); }
+  pairs.forEach(function(p){
+    p.range.addEventListener('input', function(){
+      p.num.value = p.range.value;
+      updateReadouts();
+      redrawIfPaused();
+      updateCvSection();
+    });
+    p.num.addEventListener('input', function(){
+      var v = parseFloat(p.num.value);
+      if(!isNaN(v)){ p.range.value = Math.min(p.max, Math.max(p.min, v)); updateReadouts(); redrawIfPaused(); updateCvSection(); }
+    });
+    p.num.addEventListener('change', function(){
+      var v = parseFloat(p.num.value);
+      if(isNaN(v)) v = parseFloat(p.range.value);
+      v = Math.min(p.max, Math.max(p.min, v));
+      p.num.value = v; p.range.value = v; updateReadouts();
+      redrawIfPaused();
+      updateCvSection();
+    });
+  });
+  updateReadouts();
+
+  // ---------- graph ----------
+  var graph = document.getElementById('trajGraph');
+  var gctx = graph.getContext('2d');
+  var startTs = performance.now();
+
+  function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  function niceStep(rough){
+    if(rough<=0) return 1;
+    var exp = Math.floor(Math.log10(rough));
+    var base = Math.pow(10, exp);
+    var f = rough/base;
+    var niceF = f<1.5?1: f<3?2: f<7?5:10;
+    return niceF*base;
+  }
+
+  function drawGraph(now){
+    if(graph.width !== graph.clientWidth*2){
+      graph.width = graph.clientWidth*2;
+      graph.height = graph.clientHeight*2;
+    }
+    var s = state();
+    var w = graph.width, h = graph.height;
+    gctx.clearRect(0,0,w,h);
+
+    var win = Math.max(2/s.fm, 0.3);
+    win = Math.min(win, 6);
+    var t0 = (now-startTs)/1000;
+    var N = 500;
+
+    var dfLin = s.sensLin;
+    var oct = s.sensExp;
+    var yMin = Math.min(s.fc-dfLin, s.fc/Math.pow(2,oct)) * 0.92;
+    var yMax = Math.max(s.fc+dfLin, s.fc*Math.pow(2,oct)) * 1.08;
+    yMin = Math.max(0, yMin);
+
+    var top = h*0.08, bottom = h*0.86;
+    function yPix(freq){ return bottom - ((freq-yMin)/(yMax-yMin))*(bottom-top); }
+
+    // fc reference line
+    gctx.strokeStyle = cssVar('--ink-soft');
+    gctx.globalAlpha = 0.35;
+    gctx.setLineDash([4,4]);
+    gctx.lineWidth = 1.2;
+    gctx.beginPath(); gctx.moveTo(0, yPix(s.fc)); gctx.lineTo(w, yPix(s.fc)); gctx.stroke();
+    gctx.setLineDash([]);
+    gctx.globalAlpha = 1;
+
+    function plot(fn, color){
+      gctx.beginPath();
+      for(var i=0;i<=N;i++){
+        var t = t0 + (i/N)*win;
+        var x = (i/N)*w;
+        var y = yPix(fn(s,t));
+        if(i===0) gctx.moveTo(x,y); else gctx.lineTo(x,y);
+      }
+      gctx.strokeStyle = color;
+      gctx.lineWidth = 2.4;
+      gctx.lineJoin = 'round';
+      gctx.stroke();
+    }
+    plot(linearFreq, cssVar('--linear'));
+    plot(expFreq, cssVar('--expo'));
+
+    // y-axis labels (denser grid)
+    var dpr = window.devicePixelRatio||1;
+    var step = niceStep((yMax-yMin)/8);
+    gctx.font = (11*dpr)+'px Heebo, sans-serif';
+    gctx.fillStyle = cssVar('--ink-soft');
+    gctx.textAlign = 'right';
+    gctx.direction = 'rtl';
+    gctx.globalAlpha = 0.9;
+    for(var v = Math.ceil(yMin/step)*step; v<=yMax; v+=step){
+      var y = yPix(v);
+      gctx.strokeStyle = cssVar('--line');
+      gctx.globalAlpha = 0.5;
+      gctx.lineWidth = 1;
+      gctx.beginPath(); gctx.moveTo(0,y); gctx.lineTo(w,y); gctx.stroke();
+      gctx.globalAlpha = 0.9;
+      gctx.fillText(Math.round(v), w-8, y-3);
+    }
+    gctx.globalAlpha = 1;
+
+    // explicit peak/trough labels per engine, in their own color
+    gctx.font = (12*dpr)+'px Heebo, sans-serif';
+    var linHi = s.fc+dfLin, linLo = s.fc-dfLin;
+    var expHi = s.fc*Math.pow(2,oct), expLo = s.fc/Math.pow(2,oct);
+    gctx.fillStyle = cssVar('--linear');
+    gctx.fillText(Math.round(linHi), w-70, yPix(linHi)-4);
+    gctx.fillText(Math.round(linLo), w-70, yPix(linLo)+16*dpr);
+    gctx.fillStyle = cssVar('--expo');
+    gctx.fillText(Math.round(expHi), w-70, yPix(expHi)-4);
+    gctx.fillText(Math.round(expLo), w-70, yPix(expLo)+16*dpr);
+  }
+
+  var paused = false, pausedAt = null;
+  function loop(now){
+    if(!paused) drawGraph(now);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  var pauseBtn = document.getElementById('pauseBtn');
+  pauseBtn.addEventListener('click', function(){
+    if(!paused){
+      paused = true;
+      pausedAt = performance.now();
+      drawGraph(pausedAt);
+      pauseBtn.textContent = '▶ המשך';
+    } else {
+      var resumedAt = performance.now();
+      startTs += (resumedAt - pausedAt);
+      paused = false;
+      pauseBtn.textContent = '⏸ הקפא';
+    }
+  });
+
+  // ---------- audio ----------
+  var audioCtx = null, osc = null, gainNode = null, playing = false, engine = 'linear';
+  var rafId = null;
+
+  function engineFreq(t){
+    var s = state();
+    return engine==='linear' ? linearFreq(s,t) : expFreq(s,t);
+  }
+
+  function audioLoop(){
+    if(!playing || !osc) return;
+    var t = audioCtx.currentTime - audioStartTs;
+    osc.frequency.setTargetAtTime(engineFreq(t), audioCtx.currentTime, 0.01);
+    rafId = requestAnimationFrame(audioLoop);
+  }
+  var audioStartTs = 0;
+
+  function startAudio(){
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return;
+    audioCtx = new AC();
+    osc = audioCtx.createOscillator();
+    osc.type = 'sine';
+    var s = state();
+    osc.frequency.value = s.fc;
+    gainNode = audioCtx.createGain();
+    gainNode.gain.value = 0.18;
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    osc.start();
+    audioStartTs = audioCtx.currentTime;
+    playing = true;
+    els.playBtn.textContent = '■ עצור';
+    rafId = requestAnimationFrame(audioLoop);
+  }
+  function stopAudio(){
+    if(rafId) cancelAnimationFrame(rafId);
+    if(osc){ try{osc.stop();}catch(e){} osc.disconnect(); }
+    if(gainNode) gainNode.disconnect();
+    if(audioCtx) audioCtx.close();
+    osc = gainNode = audioCtx = null;
+    playing = false;
+    els.playBtn.textContent = '▶ השמע';
+  }
+  els.playBtn.addEventListener('click', function(){
+    if(playing){ stopAudio(); } else { startAudio(); }
+  });
+
+  var engLinearBtn = document.getElementById('engLinear');
+  var engExpoBtn = document.getElementById('engExpo');
+  function setEngine(e){
+    engine = e;
+    engLinearBtn.classList.toggle('active', e==='linear');
+    engExpoBtn.classList.toggle('active', e==='expo');
+  }
+  engLinearBtn.addEventListener('click', function(){ setEngine('linear'); });
+  engExpoBtn.addEventListener('click', function(){ setEngine('expo'); });
+
+  // ---------- static CV section ----------
+  var cvEls = {
+    cv: document.getElementById('cv'),
+    cvNum: document.getElementById('cvNum'),
+  };
+  function cvLinearFreq(fc, cv, sensHzPerV){ return fc + cv*sensHzPerV; }
+  function cvExpFreq(fc, cv, octPerV){ return fc * Math.pow(2, cv*octPerV); }
+
+  function fmtHz(x){ return Math.round(x).toLocaleString('en-US') + ' Hz'; }
+
+  function updateCvSection(){
+    var fc = parseFloat(els.fc.value);
+    var cv = parseFloat(cvEls.cv.value);
+    var sensLin = parseFloat(els.sensLin.value);
+    var sensExp = parseFloat(els.sensExp.value);
+
+    document.getElementById('cvLinNow').textContent = fmtHz(cvLinearFreq(fc, cv, sensLin));
+    document.getElementById('cvExpNow').textContent = fmtHz(cvExpFreq(fc, cv, sensExp));
+
+    var warn = document.getElementById('scaleWarning');
+    warn.style.display = (Math.abs(sensExp-1) > 0.001) ? 'block' : 'none';
+
+    var rows = [
+      {v:-1, fixed:true},
+      {v:cv, fixed:false},
+      {v:1, fixed:true}
+    ];
+    var body = document.getElementById('cvTableBody');
+    body.innerHTML = '';
+    rows.forEach(function(row){
+      var v = row.v;
+      var tr = document.createElement('tr');
+      tr.style.borderBottom = '1px solid var(--line)';
+      if(!row.fixed){ tr.style.background = 'var(--bg)'; }
+      var tdCv = document.createElement('td');
+      tdCv.style.padding = '6px 4px';
+      tdCv.style.color = row.fixed ? 'var(--ink)' : 'var(--accent)';
+      tdCv.style.fontWeight = '600';
+      var vLabel = (v>0?'+':'') + (Math.round(v*100)/100) + 'V';
+      tdCv.textContent = vLabel + (row.fixed ? '' : ' (נוכחי)');
+      var tdLin = document.createElement('td');
+      tdLin.style.padding = '6px 4px';
+      tdLin.style.color = 'var(--ink-soft)';
+      tdLin.textContent = fmtHz(cvLinearFreq(fc, v, sensLin));
+      var tdExp = document.createElement('td');
+      tdExp.style.padding = '6px 4px';
+      tdExp.style.color = 'var(--ink-soft)';
+      var expF = cvExpFreq(fc, v, sensExp);
+      var octNote = (row.fixed && Math.abs(sensExp-1)<0.001) ? '  (× ' + (v>0?'2':'0.5') + ')' : '';
+      tdExp.textContent = fmtHz(expF) + octNote;
+      tr.appendChild(tdCv); tr.appendChild(tdLin); tr.appendChild(tdExp);
+      body.appendChild(tr);
+    });
+  }
+
+  cvEls.cv.addEventListener('input', function(){
+    cvEls.cvNum.value = cvEls.cv.value;
+    updateCvSection();
+  });
+  cvEls.cvNum.addEventListener('input', function(){
+    var v = parseFloat(cvEls.cvNum.value);
+    if(!isNaN(v)){ cvEls.cv.value = Math.min(5, Math.max(-5, v)); updateCvSection(); }
+  });
+  cvEls.cvNum.addEventListener('change', function(){
+    var v = parseFloat(cvEls.cvNum.value);
+    if(isNaN(v)) v = parseFloat(cvEls.cv.value);
+    v = Math.min(5, Math.max(-5, v));
+    cvEls.cvNum.value = v; cvEls.cv.value = v; updateCvSection();
+  });
+  updateCvSection();
+
+})();
+</script>
+</body>
+</html>
