@@ -152,6 +152,27 @@
   }
   .lede b { font-weight: 700; }
 
+  .harmonics-ref {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  @media (max-width: 560px) {
+    .harmonics-ref { grid-template-columns: 1fr; }
+  }
+  .harm-card {
+    background: var(--surface-2);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .harm-card h3 { font-size: 14px; margin: 0 0 6px; }
+  .harm-card p { font-size: 12.5px; color: var(--muted); margin: 0 0 12px; line-height: 1.5; }
+  .harm-bars { display: flex; align-items: flex-end; gap: 6px; height: 70px; direction: ltr; }
+  .harm-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; flex: 1; }
+  .harm-bar { width: 100%; max-width: 14px; background: var(--output); border-radius: 3px 3px 0 0; min-height: 2px; }
+  .harm-n { font-size: 10px; color: var(--muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+
   .panel {
     background: var(--surface);
     border: 1px solid var(--line);
@@ -213,6 +234,23 @@
     outline: 2px solid var(--focus);
     outline-offset: 1px;
   }
+  select.wave-select {
+    width: 100%;
+    font-family: inherit;
+    font-size: 13.5px;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+  }
+  select.wave-select:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+  }
+  .field.wave { display: flex; flex-direction: column; justify-content: flex-end; }
+  .field.wave label { margin-bottom: 6px; }
   input[type="range"] {
     width: 100%;
     -webkit-appearance: none;
@@ -360,6 +398,7 @@
   <nav class="tabs" role="tablist">
     <button role="tab" id="tab-am" aria-selected="true" aria-controls="panel-am">AM</button>
     <button role="tab" id="tab-ring" aria-selected="false" aria-controls="panel-ring">Ring Mod</button>
+    <button role="tab" id="tab-harmonics" aria-selected="false" aria-controls="panel-harmonics">סדרות הרמוניות</button>
   </nav>
 
   <div id="panel-am" role="tabpanel" aria-labelledby="tab-am">
@@ -368,6 +407,11 @@
 
   <div id="panel-ring" role="tabpanel" aria-labelledby="tab-ring" hidden>
     <p class="lede" id="lede-ring"></p>
+  </div>
+
+  <div id="panel-harmonics" role="tabpanel" aria-labelledby="tab-harmonics" hidden>
+    <p class="lede">כל צורת גל (מלבד סינוס) מורכבת מכמה תדרים בו-זמנית — "הרמוניות" בכפולות של התדר הבסיסי, כל אחת בעוצמה משלה. זה בדיוק מה שקובע אילו תדרי צד יופיעו סביב הנשא בפאנל הספקטרום.</p>
+    <div class="harmonics-ref" id="harmonics-ref"></div>
   </div>
 
   <section class="panel">
@@ -390,6 +434,15 @@
           <span class="num-wrap"><input type="number" id="depth-num" class="num-input" dir="ltr" min="0" max="100" step="1" value="70">%</span>
         </label>
         <input type="range" id="depth" min="0" max="100" step="1" value="70">
+      </div>
+      <div class="field wave">
+        <label for="mod-wave">צורת גל המאפנן</label>
+        <select id="mod-wave" class="wave-select">
+          <option value="sine">סינוס</option>
+          <option value="triangle">משולש</option>
+          <option value="sawtooth">שן-מסור</option>
+          <option value="square">ריבועי</option>
+        </select>
       </div>
     </div>
 
@@ -437,7 +490,7 @@
         <ul>
           <li>הנשא נעלם מאות היציאה.</li>
           <li>נוצרים תדרי צד בהתאם לתדרי הנשא והמאפנן.</li>
-          <li>במקרה של שני גלי סינוס, מתקבלים  סכום והפרש התדרים:</li>
+          <li>כששני האותות הם סינוסים, מתקבלים תדרי סכום והפרש.</li>
         </ul>
       </div>
     </div>
@@ -449,7 +502,7 @@
 (function () {
   "use strict";
 
-  var state = { mode: "am", fc: 220, fm: 4, depth: 0.7, playing: false, volume: 0.25, isolate: false, playMode: "continuous" };
+  var state = { mode: "am", fc: 220, fm: 4, depth: 0.7, playing: false, volume: 0.25, isolate: false, playMode: "continuous", modWave: "sine" };
 
   var FC_MIN = 40, FC_MAX = 2000;
   var FM_MIN = 0.2, FM_MAX = 500;
@@ -462,20 +515,43 @@
     return v.toFixed(2) + " Hz";
   }
 
+  // A non-sine modulator has its own harmonics (n=2,3,4…), each with a
+  // known relative amplitude from its Fourier series. Amplitudes below are
+  // relative to the fundamental (n=1 → 1). Shared by the spectrum panel and
+  // the harmonic-series reference panel.
+  function harmonicAmp(type, n) {
+    if (type === "sine") return n === 1 ? 1 : 0;
+    if (type === "square") return n % 2 === 1 ? 1 / n : 0;
+    if (type === "sawtooth") return 1 / n;
+    if (type === "triangle") return n % 2 === 1 ? 1 / (n * n) : 0;
+    return 0;
+  }
+  function modulatorHarmonics(type) {
+    var maxN = 9, list = [];
+    for (var n = 1; n <= maxN; n++) {
+      var amp = harmonicAmp(type, n);
+      if (amp > 0) list.push({ n: n, amp: amp });
+    }
+    return list;
+  }
+
   var texts = {
     am: {
       lede: "עוצמת הנשא משתנה מעלה ומטה בקצב המאפנן — אבל היא תמיד נשארת חיובית, כך שתדר הנשא לא נעלם מהאות היוצא. רק ה\"עוצמה\" (המשרעת) שלו נעה בהתאם למאפנן."
     },
     ring: {
-      lede: "שני האותות מוכפלים זה בזה. הנשא עצמו נעלם לגמרי מהאות היוצא — נשארים רק תדרי הצד."
+      lede: "שני האותות מוכפלים זה בזה במלואם, בלי שום תוספת קבועה. בגלל זה המכפלה יכולה לצאת גם שלילית, והנשא עצמו נעלם לגמרי מהאות היוצא — נשארים רק תדרי הצד."
     }
   };
 
   var els = {
     tabAm: document.getElementById("tab-am"),
     tabRing: document.getElementById("tab-ring"),
+    tabHarmonics: document.getElementById("tab-harmonics"),
     panelAm: document.getElementById("panel-am"),
     panelRing: document.getElementById("panel-ring"),
+    panelHarmonics: document.getElementById("panel-harmonics"),
+    harmonicsRef: document.getElementById("harmonics-ref"),
     ledeAm: document.getElementById("lede-am"),
     ledeRing: document.getElementById("lede-ring"),
     fc: document.getElementById("fc"),
@@ -485,6 +561,7 @@
     fcNum: document.getElementById("fc-num"),
     fmNum: document.getElementById("fm-num"),
     depthNum: document.getElementById("depth-num"),
+    modWave: document.getElementById("mod-wave"),
     playBtn: document.getElementById("play-btn"),
     modeContinuousBtn: document.getElementById("mode-continuous-btn"),
     modeEnvelopeBtn: document.getElementById("mode-envelope-btn"),
@@ -509,8 +586,10 @@
     var isAm = mode === "am";
     els.tabAm.setAttribute("aria-selected", String(isAm));
     els.tabRing.setAttribute("aria-selected", String(!isAm));
+    els.tabHarmonics.setAttribute("aria-selected", "false");
     els.panelAm.hidden = !isAm;
     els.panelRing.hidden = isAm;
+    els.panelHarmonics.hidden = true;
     els.depthField.style.visibility = isAm ? "visible" : "hidden";
     els.isolateWrap.style.display = isAm ? "flex" : "none";
     if (!isAm && state.isolate) {
@@ -522,6 +601,17 @@
   }
   els.tabAm.addEventListener("click", function () { setMode("am"); });
   els.tabRing.addEventListener("click", function () { setMode("ring"); });
+
+  // The harmonics-reference tab is a static explainer, unrelated to AM/Ring
+  // audio state — it only swaps which panel is visible.
+  els.tabHarmonics.addEventListener("click", function () {
+    els.tabAm.setAttribute("aria-selected", "false");
+    els.tabRing.setAttribute("aria-selected", "false");
+    els.tabHarmonics.setAttribute("aria-selected", "true");
+    els.panelAm.hidden = true;
+    els.panelRing.hidden = true;
+    els.panelHarmonics.hidden = false;
+  });
 
   function updateReadouts() {
     if (document.activeElement !== els.fcNum) els.fcNum.value = round(state.fc, state.fc < 10 ? 2 : (state.fc < 100 ? 1 : 0));
@@ -579,7 +669,60 @@
   });
   els.depthNum.addEventListener("blur", updateReadouts);
 
+  els.modWave.addEventListener("change", function () {
+    state.modWave = els.modWave.value;
+    if (modOsc) modOsc.type = state.modWave;
+    drawSpectrum();
+  });
+
   updateReadouts();
+
+  // Static reference chart: for each waveform, a bar per harmonic (1..9)
+  // sized to its relative amplitude, with missing harmonics shown as a
+  // faint placeholder so the "which harmonics are absent" pattern is visible.
+  var HARMONIC_INFO = [
+    { type: "sine", name: "סינוס", desc: "הרמוניה אחת בלבד — n=1. אין הרמוניות נוספות כלל." },
+    { type: "square", name: "ריבועי", desc: "רק הרמוניות אי-זוגיות (1, 3, 5, 7, 9…), בעוצמה 1/n." },
+    { type: "sawtooth", name: "שן-מסור", desc: "כל ההרמוניות (1, 2, 3, 4, 5…), בעוצמה 1/n." },
+    { type: "triangle", name: "משולש", desc: "רק הרמוניות אי-זוגיות (1, 3, 5, 7, 9…), בעוצמה 1/n² — דועכות הרבה יותר מהר." }
+  ];
+  function buildHarmonicsRef() {
+    var container = els.harmonicsRef;
+    container.innerHTML = "";
+    HARMONIC_INFO.forEach(function (info) {
+      var card = document.createElement("div");
+      card.className = "harm-card";
+
+      var title = document.createElement("h3");
+      title.textContent = info.name;
+      card.appendChild(title);
+
+      var desc = document.createElement("p");
+      desc.textContent = info.desc;
+      card.appendChild(desc);
+
+      var barsWrap = document.createElement("div");
+      barsWrap.className = "harm-bars";
+      for (var n = 1; n <= 9; n++) {
+        var amp = harmonicAmp(info.type, n);
+        var col = document.createElement("div");
+        col.className = "harm-col";
+        var bar = document.createElement("div");
+        bar.className = "harm-bar";
+        bar.style.height = Math.max(2, Math.round(amp * 100)) + "%";
+        bar.style.opacity = amp > 0 ? "1" : ".15";
+        var lbl = document.createElement("span");
+        lbl.className = "harm-n";
+        lbl.textContent = n;
+        col.appendChild(bar);
+        col.appendChild(lbl);
+        barsWrap.appendChild(col);
+      }
+      card.appendChild(barsWrap);
+      container.appendChild(card);
+    });
+  }
+  buildHarmonicsRef();
 
   function cssVar(name) {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -675,7 +818,8 @@
     }
 
     // predicted bars (semi-transparent so the measured trace stays visible under them)
-    function bar(freq, heightFrac, color) {
+    function bar(freq, heightFrac, color, showLabel, fontSize) {
+      if (freq > SPEC_AXIS_MAX || heightFrac <= 0.004) return;
       var x = xFor(freq);
       var h = heightFrac * (baseY - 24);
       specCtx.fillStyle = color;
@@ -684,19 +828,43 @@
       specCtx.roundRect ? specCtx.roundRect(x - 5, baseY - h, 10, h, 3) : specCtx.rect(x - 5, baseY - h, 10, h);
       specCtx.fill();
       specCtx.globalAlpha = 1;
+      if (showLabel === false) return;
       specCtx.fillStyle = cssVar('--muted');
-      specCtx.font = "22px Heebo, sans-serif";
+      specCtx.font = (fontSize || 22) + "px Heebo, sans-serif";
       specCtx.textAlign = "center";
-      specCtx.fillText(fmtHz(freq), x, baseY - h - 12);
+      specCtx.fillText(fmtHz(freq), x, baseY - h - (fontSize ? 8 : 12));
     }
 
-    // Physically: y(t) = sin(2π f_c t) + (m/2)·cos(2π(f_c−f_m)t) − (m/2)·cos(2π(f_c+f_m)t).
-    // The carrier's amplitude is always 1 regardless of m; each sideband's
-    // amplitude is exactly m/2 of that. So the carrier bar height never
-    // changes with depth, and the sideband bars scale linearly with depth,
-    // vanishing completely at m = 0.
-    bar(lower, mode === "am" ? depth * 0.46 : 0.75, mode === "am" ? cssVar('--output') : cssVar('--ring-lower'));
-    bar(upper, mode === "am" ? depth * 0.46 : 0.75, mode === "am" ? cssVar('--output') : cssVar('--ring-upper'));
+    // Each modulator harmonic (see modulatorHarmonics() above) creates its
+    // own pair of sidebands at f_c ± n·f_m, exactly like the fundamental
+    // (n=1) does — just progressively weaker and farther out.
+    // Physically: y(t) = sin(2π f_c t) + (m/2)·cos(2π(f_c−f_m)t) − (m/2)·cos(2π(f_c+f_m)t)
+    // for a sine modulator. The carrier's amplitude is always 1 regardless of
+    // m, so its bar height never changes with depth. Each modulator harmonic
+    // contributes its own sideband pair at f_c ± n·f_m, scaled by both the
+    // modulation depth and that harmonic's relative strength — vanishing
+    // completely at m = 0 either way. Harmonics beyond the fundamental use a
+    // square-root visual scale (not their literal linear amplitude) so their
+    // bars stay tall enough to actually see depth changes on — the true
+    // linear amplitudes shrink so fast (1/n, 1/n²) that by the 4th or 5th
+    // harmonic a few pixels' difference would be imperceptible either way.
+    var baseSidebandHeight = mode === "am" ? depth * 0.46 : 0.75;
+    var lastLoLabelX = -Infinity, lastHiLabelX = -Infinity;
+    var LABEL_MIN_GAP = 30;
+    modulatorHarmonics(state.modWave).forEach(function (h) {
+      var loN = Math.abs(fc - h.n * fm);
+      var hiN = fc + h.n * fm;
+      var visualAmp = h.n === 1 ? h.amp : Math.sqrt(h.amp);
+      var hgt = baseSidebandHeight * visualAmp;
+      var xLo = xFor(loN), xHi = xFor(hiN);
+      var showLo = h.n === 1 || Math.abs(xLo - lastLoLabelX) >= LABEL_MIN_GAP;
+      var showHi = h.n === 1 || Math.abs(xHi - lastHiLabelX) >= LABEL_MIN_GAP;
+      if (showLo) lastLoLabelX = xLo;
+      if (showHi) lastHiLabelX = xHi;
+      var fontSize = h.n === 1 ? null : 15;
+      bar(loN, hgt, mode === "am" ? cssVar('--output') : cssVar('--ring-lower'), showLo, fontSize);
+      bar(hiN, hgt, mode === "am" ? cssVar('--output') : cssVar('--ring-upper'), showHi, fontSize);
+    });
     if (mode === "am") {
       bar(fc, 0.92, cssVar('--carrier'));
     }
@@ -719,7 +887,7 @@
     carrierOsc = audioCtx.createOscillator();
     carrierOsc.type = "sine";
     modOsc = audioCtx.createOscillator();
-    modOsc.type = "sine";
+    modOsc.type = state.modWave;
 
     modGain = audioCtx.createGain(); // the AM/ring "multiplier" gain on the carrier path
     modGain.gain.value = (state.mode === "am" && !state.isolate) ? 1 : 0;
