@@ -164,6 +164,11 @@
 
   .spectrum-head{ display:flex; justify-content:flex-end; gap: 16px; padding: 0 4px; }
   .po-toggle{ display:flex; align-items:center; gap: 6px; font-size: 12px; color: var(--text-faint); cursor:pointer; user-select:none; }
+  .po-toggle{ font-size: 14px; font-weight: 700; }
+  .po-toggle.po-partial{ color: var(--copper-bright); }
+  .po-toggle.po-partial input{ accent-color: var(--copper-bright); }
+  .po-toggle.po-overtone{ color: var(--ideal); }
+  .po-toggle.po-overtone input{ accent-color: var(--ideal); }
   .po-toggle input{ accent-color: var(--copper-bright); width:14px; height:14px; cursor:pointer; }
 
   .controls{ margin-top: 16px; display:flex; flex-direction:column; gap: 12px; }
@@ -249,8 +254,8 @@
     </div>
 
     <div class="spectrum-head">
-      <label class="po-toggle"><input type="checkbox" id="partialToggle" checked> Partial</label>
-      <label class="po-toggle"><input type="checkbox" id="overtoneToggle" checked> Overtone</label>
+      <label class="po-toggle po-partial"><input type="checkbox" id="partialToggle" checked> Partial</label>
+      <label class="po-toggle po-overtone"><input type="checkbox" id="overtoneToggle" checked> Overtone</label>
     </div>
     <div class="spectrum" id="spectrum"></div>
 
