@@ -199,6 +199,9 @@
   .defs b{ color: var(--text); }
   .defs b.c-partial{ color: var(--copper-bright); }
   .defs b.c-overtone{ color: var(--ideal); }
+  .duty-explain{ text-align:center; font-size:13px; line-height:1.7; color: var(--text-dim); margin: -6px 0 14px; }
+  .duty-explain[hidden]{ display:none; }
+  .duty-explain b{ color: var(--ideal); }
   .topbar{ display:flex; justify-content:flex-end; margin-bottom: 6px; }
   .theme-btn{ background: var(--surface); border:1px solid var(--bezel-edge); color: var(--text-dim); font-family:'Heebo',sans-serif; font-size:12.5px; padding:6px 14px; border-radius:999px; cursor:pointer; }
   .theme-btn:hover{ border-color: var(--copper); color: var(--text); }
@@ -253,6 +256,7 @@
       <button type="button" class="duty-btn" data-k="4">1/4</button>
       <button type="button" class="duty-btn" data-k="5">1/5</button>
     </div>
+    <div class="duty-explain" id="dutyExplain" hidden></div>
 
     <div class="screen-wrap">
       <div class="duty-note" id="dutyNote"></div>
@@ -393,6 +397,7 @@
   const readoutEl = document.getElementById('readout');
   const dutyNoteEl = document.getElementById('dutyNote');
   const dutyRow = document.getElementById('dutyRow');
+  const dutyExplain = document.getElementById('dutyExplain');
   const partialToggle = document.getElementById('partialToggle');
   const overtoneToggle = document.getElementById('overtoneToggle');
   const playBtn = document.getElementById('playBtn');
@@ -451,6 +456,16 @@
     dutyNoteEl.textContent = w.duty ? ('מילוי מחזור: ' + w.duty) : '';
     dutyNoteEl.style.display = w.duty ? 'block' : 'none';
     dutyRow.hidden = currentType !== 'rect';
+    dutyExplain.hidden = currentType !== 'rect';
+    if (currentType === 'rect'){
+      const on = parseInt(w.duty, 10);
+      const k = document.querySelector('.duty-btn.active').textContent;
+      dutyExplain.innerHTML =
+        'יחס מילוי (Duty Cycle) הוא האחוז מתוך כל מחזור שבו האות נמצא במצב <b>ON</b>.<br>' +
+        'במלבן עם יחס מילוי של ' + k + ', האות נמצא ב־<b>ON</b> במשך ' + on + '% מהמחזור וב־<b>OFF</b> במשך ' + (100-on) + '%.<br><br>' +
+        '<b>ON</b> — הזמן שבו האות נמצא במצב הגבוה.<br>' +
+        '<b>OFF</b> — הזמן שבו האות נמצא במצב הנמוך.';
+    }
   }
 
   document.querySelectorAll('.duty-btn').forEach(btn => {
