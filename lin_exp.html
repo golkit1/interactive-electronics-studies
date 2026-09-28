@@ -206,7 +206,7 @@
         <div class="readouts">
           <div class="item linear"><b id="linRangeVal">220–420 Hz</b><span>טווח Linear</span></div>
           <div class="item expo"><b id="expRangeVal">156–311 Hz</b><span>טווח Exponential</span></div>
-          <div class="item"><b id="octVal">±1.0</b><span>סטייה באוקטבות</span></div>
+          <div class="item"><b id="octVal">±1.0</b><span>סטייה</span></div>
         </div>
 
         <div class="controls">
@@ -264,7 +264,7 @@
 
         <div class="readouts">
           <div class="item"><b id="ivVolt">7/12 V ≈ 0.583 V</b><span>מתח נדרש</span></div>
-          <div class="item expo"><b id="ivExp">599 Hz</b><span id="ivExpSub">Exponential — מרווח: 7.0 חצאי טון</span></div>
+          <div class="item expo"><b id="ivExp">599 Hz</b><span id="ivExpSub">Exponential — מרווח: קווינטה (7 חצאי טון)</span></div>
         </div>
 
       </div>
@@ -306,15 +306,29 @@
   function linearFreq(s, t){ return s.fc + s.sensLin*Math.sin(2*Math.PI*s.fm*t); }
   function expFreq(s, t){ return s.fc * Math.pow(2, s.sensExp*Math.sin(2*Math.PI*s.fm*t)); }
 
+  function intervalName(n){
+    var names = {1:'חצי-טון',2:'טון שלם',3:'טרצה קטנה',4:'טרצה גדולה',5:'קווארטה',6:'טריטון',
+                 7:'קווינטה',8:'סקסטה קטנה',9:'סקסטה גדולה',10:'ספטימה קטנה',11:'ספטימה גדולה',12:'אוקטבה'};
+    if(n < 1) return '';
+    if(n <= 12) return names[n];
+    if(n === 24) return 'שתי אוקטבות';
+    if(n < 24) return 'אוקטבה ו' + names[n-12];
+    return '';
+  }
+
   function updateReadouts(){
     var s = state();
     var dfLin = s.sensLin;
     var linLo = Math.round(s.fc-dfLin), linHi = Math.round(s.fc+dfLin);
     var oct = s.sensExp;
     var expLo = Math.round(s.fc/Math.pow(2,oct)), expHi = Math.round(s.fc*Math.pow(2,oct));
-    document.getElementById('linRangeVal').textContent = linLo+'–'+linHi+' Hz';
-    document.getElementById('expRangeVal').textContent = expLo+'–'+expHi+' Hz';
-    document.getElementById('octVal').textContent = '±'+oct.toFixed(2);
+    document.getElementById('linRangeVal').innerHTML = ltr(linLo+'–'+linHi+' Hz');
+    document.getElementById('expRangeVal').innerHTML = ltr(expLo+'–'+expHi+' Hz');
+    var semiRaw = oct*12;
+    var isWhole = Math.abs(semiRaw - Math.round(semiRaw)) < 1e-6;
+    var semi = isWhole ? Math.round(semiRaw) : Math.round(semiRaw*10)/10;
+    var nm = isWhole ? intervalName(semi) : '';
+    document.getElementById('octVal').innerHTML = ltr('±'+oct.toFixed(2))+' אוקטבות = '+ltr(semi)+' חצאי טון'+(nm ? ' — '+nm : '');
   }
 
   var pairs = [
@@ -438,8 +452,8 @@
     gctx.fillText(Math.round(linHi), w-90, yPix(linHi)-6);
     gctx.fillText(Math.round(linLo), w-90, yPix(linLo)+peakFontPx+4);
     gctx.fillStyle = cssVar('--expo');
-    gctx.fillText(Math.round(expHi), w-90, yPix(expHi)-6);
-    gctx.fillText(Math.round(expLo), w-90, yPix(expLo)+peakFontPx+4);
+    gctx.fillText(Math.round(expHi), w-90-peakFontPx*3.4, yPix(expHi)-6);
+    gctx.fillText(Math.round(expLo), w-90-peakFontPx*3.4, yPix(expLo)+peakFontPx+4);
   }
 
   var paused = false, pausedAt = null;
@@ -574,8 +588,8 @@
   });
 
   function semis(fromHz, toHz){ return 12*Math.log(toHz/fromHz)/Math.LN2; }
-  function rHz(x){ return '\u2066' + Math.round(x).toLocaleString('en-US') + ' Hz\u2069'; }
-  function ltr(t){ return '\u2066' + t + '\u2069'; }
+  function ltr(t){ return '<span dir="ltr" style="unicode-bidi:isolate">' + t + '</span>'; }
+  function rHz(x){ return ltr(Math.round(x).toLocaleString('en-US') + ' Hz'); }
 
   function updateIntervals(){
     var fc = parseFloat(ivFc.value);
@@ -583,9 +597,9 @@
     var V = n/12;
     var expF = fc*Math.pow(2, V);
 
-    document.getElementById('ivVolt').textContent = n+'/12 V ≈ '+V.toFixed(3)+' V';
-    document.getElementById('ivExp').textContent = rHz(expF);
-    document.getElementById('ivExpSub').textContent = 'Exponential — מרווח: '+semis(fc,expF).toFixed(1)+' חצאי טון';
+    document.getElementById('ivVolt').innerHTML = ltr(n+'/12 V ≈ '+V.toFixed(3)+' V');
+    document.getElementById('ivExp').innerHTML = rHz(expF);
+    document.getElementById('ivExpSub').textContent = 'Exponential — מרווח: '+intervalName(n)+' ('+n+' חצאי טון)';
 
   }
 
