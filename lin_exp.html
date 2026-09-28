@@ -123,7 +123,7 @@
   input.val-input::-webkit-outer-spin-button, input.val-input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
   input.val-input:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; border-color:var(--focus); }
   input[type=range]{
-    -webkit-appearance:none; appearance:none; width:100%; height:3px; border-radius:2px;
+    direction:ltr; -webkit-appearance:none; appearance:none; width:100%; height:3px; border-radius:2px;
     background:var(--track); outline:none; margin:5px 0 3px;
   }
   input[type=range]::-webkit-slider-thumb{
@@ -133,7 +133,7 @@
   input[type=range]::-moz-range-thumb{
     width:13px; height:13px; border-radius:50%; background:var(--bg-panel); border:2.5px solid var(--focus); cursor:pointer;
   }
-  .ticks{ display:flex; justify-content:space-between; font-size:9.5px; color:var(--ink-soft); opacity:.7; }
+  .ticks{ direction:ltr; display:flex; justify-content:space-between; font-size:9.5px; color:var(--ink-soft); opacity:.7; }
 
   .mode-tabs{ display:flex; gap:6px; margin-top:18px; padding-top:16px; border-top:1px solid var(--line); }
   .mode-btn{
@@ -144,6 +144,12 @@
   .mode-btn:hover{ border-color:var(--focus); }
   .mode-btn.linear.active{ background:var(--linear); color:#fff; border-color:transparent; font-weight:600; }
   .mode-btn.expo.active{ background:var(--expo); color:#fff; border-color:transparent; font-weight:600; }
+  .mode-btn.plain.active{ background:var(--accent); color:#fff; border-color:transparent; font-weight:600; }
+  .view-tabs{ display:flex; gap:8px; margin:6px 0 4px; flex-wrap:wrap; }
+  .view-tabs .mode-btn{ font-size:14px; padding:8px 18px; }
+  .chips{ display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin:4px 0 14px; direction:ltr; }
+  @media (min-width:640px){ .chips{ grid-template-columns:repeat(6,1fr); } }
+  .chips .mode-btn{ direction:rtl; font-size:12px; padding:5px 4px; line-height:1.25; text-align:center; }
 
   .play-row{ display:flex; align-items:center; gap:14px; margin-top:14px; flex-wrap:wrap; }
   button#playBtn{
@@ -176,7 +182,12 @@
     <p><strong style="color:var(--expo)">אקספוננציאלי (1V/oct)</strong> — כל שינוי קבוע במתח (‎1V) מכפיל או מחלק את התדר באותו יחס — תמיד פי 2 לכל 1V. מ-400Hz: ‎+1V לוקח ל-800Hz (הכפלה), ‎-1V לוקח ל-200Hz (חלוקה).</p>
   </section>
 
-  <section class="demo">
+  <div class="view-tabs">
+    <button type="button" class="mode-btn plain active" id="tabCompare">השוואה</button>
+    <button type="button" class="mode-btn plain" id="tabIntervals">מרווחים ב-1V/oct</button>
+  </div>
+
+  <section class="demo" id="viewCompare">
     <div class="panel">
       <div class="panel-label" style="justify-content:space-between;">
         <span style="font-size:12.5px;">f(t) — התדר הרגעי בזמן, לא צורת הגל עצמה</span>
@@ -220,7 +231,6 @@
             <div class="ticks"><span>0.25</span><span>2 oct/V</span></div>
           </div>
         </div>
-        <p class="play-note" style="margin-top:8px;">הגל המאפנן כאן מניחים שהוא בדיוק ±1V.</p>
 
         <div class="mode-tabs">
           <button type="button" class="mode-btn linear active" id="engLinear">🔊 Linear</button>
@@ -229,6 +239,32 @@
 
         <div class="play-row">
           <button id="playBtn" type="button">▶ השמע</button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="demo" id="viewIntervals" hidden>
+    <div class="panel">
+      <div class="panel-label"><span>מרווחים בכניסת 1V/oct</span></div>
+      <div class="panel-inner">
+
+        <p style="margin:0 0 14px;">בכניסת 1V/oct כל חצי-טון הוא בדיוק <strong style="color:var(--ink)">1/12 וולט</strong>. לכן אותו מתח נותן את אותו מרווח מוזיקלי מכל תדר בסיס. בכניסה ליניארית זה לא עובד.</p>
+
+        <div class="chips" id="ivChips"></div>
+
+        <div class="controls" style="grid-template-columns:1fr;">
+          <div class="control">
+            <div class="control-head"><span class="name">תדר בסיס</span><span class="val-wrap"><input type="number" class="val-input" id="ivFcNum" min="55" max="880" step="1" value="400"><span class="unit">Hz</span></span></div>
+            <input type="range" id="ivFc" min="55" max="880" step="1" value="400">
+            <div class="ticks"><span>55</span><span>880 Hz</span></div>
+          </div>
+        </div>
+
+        <div class="readouts">
+          <div class="item"><b id="ivVolt">7/12 V ≈ 0.583 V</b><span>מתח נדרש</span></div>
+          <div class="item expo"><b id="ivExp">599 Hz</b><span id="ivExpSub">Exponential — מרווח: 7.0 חצאי טון</span></div>
         </div>
 
       </div>
@@ -325,6 +361,7 @@
   }
 
   function drawGraph(now){
+    if(graph.clientWidth === 0) return;
     if(graph.width !== graph.clientWidth*2){
       graph.width = graph.clientWidth*2;
       graph.height = graph.clientHeight*2;
@@ -484,6 +521,86 @@
   }
   engLinearBtn.addEventListener('click', function(){ setEngine('linear'); });
   engExpoBtn.addEventListener('click', function(){ setEngine('expo'); });
+
+  // ---------- tabs ----------
+  var tabCompare = document.getElementById('tabCompare');
+  var tabIntervals = document.getElementById('tabIntervals');
+  var viewCompare = document.getElementById('viewCompare');
+  var viewIntervals = document.getElementById('viewIntervals');
+  function setView(showIntervals){
+    viewCompare.hidden = showIntervals;
+    viewIntervals.hidden = !showIntervals;
+    tabCompare.classList.toggle('active', !showIntervals);
+    tabIntervals.classList.toggle('active', showIntervals);
+    if(showIntervals){ updateIntervals(); } else { redrawIfPaused(); }
+  }
+  tabCompare.addEventListener('click', function(){ setView(false); });
+  tabIntervals.addEventListener('click', function(){ setView(true); });
+
+  // ---------- intervals tab ----------
+  var INTERVALS = [
+    { n:1,  name:'חצי-טון' },
+    { n:2,  name:'טון שלם' },
+    { n:3,  name:'טרצה קטנה' },
+    { n:4,  name:'טרצה גדולה' },
+    { n:5,  name:'קווארטה' },
+    { n:6,  name:'טריטון' },
+    { n:7,  name:'קווינטה' },
+    { n:8,  name:'סקסטה קטנה' },
+    { n:9,  name:'סקסטה גדולה' },
+    { n:10, name:'ספטימה קטנה' },
+    { n:11, name:'ספטימה גדולה' },
+    { n:12, name:'אוקטבה' }
+  ];
+  var ivSelected = 7;
+  var ivFc = document.getElementById('ivFc');
+  var ivFcNum = document.getElementById('ivFcNum');
+  var ivChips = document.getElementById('ivChips');
+
+  INTERVALS.forEach(function(iv){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'mode-btn plain' + (iv.n===ivSelected ? ' active' : '');
+    b.textContent = iv.name + ' (' + iv.n + ')';
+    b.dataset.n = iv.n;
+    b.addEventListener('click', function(){
+      ivSelected = iv.n;
+      Array.prototype.forEach.call(ivChips.children, function(c){
+        c.classList.toggle('active', parseInt(c.dataset.n,10)===ivSelected);
+      });
+      updateIntervals();
+    });
+    ivChips.appendChild(b);
+  });
+
+  function semis(fromHz, toHz){ return 12*Math.log(toHz/fromHz)/Math.LN2; }
+  function rHz(x){ return '\u2066' + Math.round(x).toLocaleString('en-US') + ' Hz\u2069'; }
+  function ltr(t){ return '\u2066' + t + '\u2069'; }
+
+  function updateIntervals(){
+    var fc = parseFloat(ivFc.value);
+    var n = ivSelected;
+    var V = n/12;
+    var expF = fc*Math.pow(2, V);
+
+    document.getElementById('ivVolt').textContent = n+'/12 V ≈ '+V.toFixed(3)+' V';
+    document.getElementById('ivExp').textContent = rHz(expF);
+    document.getElementById('ivExpSub').textContent = 'Exponential — מרווח: '+semis(fc,expF).toFixed(1)+' חצאי טון';
+
+  }
+
+  ivFc.addEventListener('input', function(){ ivFcNum.value = ivFc.value; updateIntervals(); });
+  ivFcNum.addEventListener('input', function(){
+    var v = parseFloat(ivFcNum.value);
+    if(!isNaN(v)){ ivFc.value = Math.min(880, Math.max(55, v)); updateIntervals(); }
+  });
+  ivFcNum.addEventListener('change', function(){
+    var v = parseFloat(ivFcNum.value);
+    if(isNaN(v)) v = parseFloat(ivFc.value);
+    v = Math.min(880, Math.max(55, v));
+    ivFcNum.value = v; ivFc.value = v; updateIntervals();
+  });
+  updateIntervals();
 
 })();
 </script>
