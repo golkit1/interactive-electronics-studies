@@ -9,26 +9,85 @@
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root{
+    color-scheme: light;
+    --bg-outer: #f3f0e8;
+    --page-glow: #fcfaf5;
+    --bezel: #ece7dc;
+    --panel-end: #e5dfd2;
+    --bezel-edge: #d2cabb;
+    --screen: #fbf9f3;
+    --screen-border: #d8d0c0;
+    --surface: #f7f4ed;
+    --surface-active: #ffffff;
+    --bar-off: #ddd6c7;
+    --trace: #c26f00;
+    --trace-glow: rgba(217,130,10,0.30);
+    --ideal: #0e8f81;
+    --copper: #b25f2c;
+    --copper-bright: #c8713a;
+    --on-copper: #fffaf3;
+    --text: #23201a;
+    --text-dim: #5b5447;
+    --text-faint: #7f7767;
+    --shadow: 0 24px 50px -30px rgba(60,45,20,0.35), inset 0 1px 0 rgba(255,255,255,0.6);
+    --screen-shadow: inset 0 0 0 1px rgba(255,255,255,0.5);
+    --duty-note-bg: rgba(251,249,243,0.88);
+    --cv-duty: rgba(14,143,129,0.10);
+    --cv-grid: #e6e0d2;
+    --cv-axis: #c6bead;
+    --cv-ideal: #0e8f81;
+    --cv-trace: #d9820a;
+    --cv-glow: rgba(217,130,10,0.30);
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
     --bg-outer: #0d1613;
+    --page-glow: #16241e;
     --bezel: #16221d;
+    --panel-end: #101b16;
     --bezel-edge: #223028;
     --screen: #081310;
+    --screen-border: #0a1712;
+    --surface: #0f1a15;
+    --surface-active: #14241c;
+    --bar-off: #1a2b22;
     --trace: #ffb02e;
     --trace-glow: rgba(255,176,46,0.35);
     --ideal: #4fd3c4;
-    --ideal-fill: rgba(79,211,196,0.09);
     --copper: #c97d4a;
     --copper-bright: #e69a63;
+    --on-copper: #1a1008;
     --text: #eef2ee;
     --text-dim: #9db3a8;
     --text-faint: #6b8177;
+    --shadow: 0 30px 60px -30px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.03);
+    --screen-shadow: inset 0 0 40px rgba(0,0,0,0.6), inset 0 0 2px rgba(255,176,46,0.15);
+    --duty-note-bg: rgba(8,19,16,0.7);
+    --cv-duty: rgba(79,211,196,0.09);
+    --cv-grid: #1c3229;
+    --cv-axis: #2a4a3b;
+    --cv-ideal: #4fd3c4;
+    --cv-trace: #ffb02e;
+    --cv-glow: rgba(255,176,46,0.55);
   }
-  :root{ color-scheme: dark; }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --bg-outer: #0d1613; --page-glow: #16241e; --bezel: #16221d; --panel-end: #101b16; --bezel-edge: #223028;
+      --screen: #081310; --screen-border: #0a1712; --surface: #0f1a15; --surface-active: #14241c; --bar-off: #1a2b22;
+      --trace: #ffb02e; --trace-glow: rgba(255,176,46,0.35); --ideal: #4fd3c4; --copper: #c97d4a; --copper-bright: #e69a63;
+      --on-copper: #1a1008; --text: #eef2ee; --text-dim: #9db3a8; --text-faint: #6b8177;
+      --shadow: 0 30px 60px -30px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.03);
+      --screen-shadow: inset 0 0 40px rgba(0,0,0,0.6), inset 0 0 2px rgba(255,176,46,0.15);
+      --duty-note-bg: rgba(8,19,16,0.7);
+      --cv-duty: rgba(79,211,196,0.09); --cv-grid: #1c3229; --cv-axis: #2a4a3b; --cv-ideal: #4fd3c4; --cv-trace: #ffb02e; --cv-glow: rgba(255,176,46,0.55);
+    }
+  }
 
   *{ box-sizing: border-box; }
   html,body{ margin:0; padding:0; }
   body{
-    background: radial-gradient(ellipse at 50% -10%, #16241e 0%, var(--bg-outer) 55%);
+    background: radial-gradient(ellipse at 50% -10%, var(--page-glow) 0%, var(--bg-outer) 55%);
     color: var(--text);
     font-family: 'Heebo', 'Segoe UI', sans-serif;
     min-height: 100vh;
@@ -44,42 +103,42 @@
   .masthead p{ color: var(--text-dim); font-size: 14.5px; margin: 0; max-width: 580px; margin-inline: auto; line-height: 1.6; }
 
   .panel{
-    background: linear-gradient(180deg, var(--bezel) 0%, #101b16 100%);
+    background: linear-gradient(180deg, var(--bezel) 0%, var(--panel-end) 100%);
     border: 1px solid var(--bezel-edge);
     border-radius: 22px;
     padding: 18px;
-    box-shadow: 0 30px 60px -30px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.03);
+    box-shadow: var(--shadow);
   }
 
   .waves{ display:grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
   .wave-btn{
-    background: #0f1a15; border: 1px solid var(--bezel-edge); border-radius: 10px;
+    background: var(--surface); border: 1px solid var(--bezel-edge); border-radius: 10px;
     color: var(--text-dim); font-family: 'Heebo', sans-serif; font-size: 13.5px; font-weight: 500;
     padding: 10px 4px; cursor: pointer; display:flex; flex-direction:column; align-items:center; gap: 6px;
     transition: border-color .15s ease, color .15s ease, background .15s ease;
   }
   .wave-btn svg{ width: 34px; height: 18px; opacity: .55; transition: opacity .15s ease; }
   .wave-btn:hover{ border-color: var(--copper); color: var(--text); }
-  .wave-btn.active{ background: #14241c; border-color: var(--copper-bright); color: var(--text); }
+  .wave-btn.active{ background: var(--surface-active); border-color: var(--copper-bright); color: var(--text); }
   .wave-btn.active svg{ opacity: 1; }
   .wave-btn.active svg path{ stroke: var(--copper-bright); }
 
   .screen-wrap{
-    position: relative; background: var(--screen); border-radius: 12px; border: 1px solid #0a1712;
-    box-shadow: inset 0 0 40px rgba(0,0,0,0.6), inset 0 0 2px rgba(255,176,46,0.15); overflow: hidden;
+    position: relative; background: var(--screen); border-radius: 12px; border: 1px solid var(--screen-border);
+    box-shadow: var(--screen-shadow); overflow: hidden;
   }
   canvas{ display:block; width:100%; height: auto; }
 
   .duty-note{
     position:absolute; top:8px; right:14px;
     font-family:'Space Mono', monospace; font-size: 11px; color: var(--ideal);
-    background: rgba(8,19,16,0.7); padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(79,211,196,0.25);
+    background: var(--duty-note-bg); padding: 3px 8px; border-radius: 6px; border: 1px solid var(--bezel-edge);
   }
 
   .readout{
     display:flex; justify-content:space-between; align-items:center; gap: 10px; padding: 10px 14px;
     font-family: 'Space Mono', monospace; font-size: 12.5px; color: var(--trace);
-    border-top: 1px solid #0a1712; flex-wrap: wrap;
+    border-top: 1px solid var(--screen-border); flex-wrap: wrap;
   }
   .readout .dim{ color: var(--text-faint); }
   .readout .val{ color: var(--text); }
@@ -88,7 +147,7 @@
   .spectrum{ display:flex; gap: 6px; padding: 14px 4px 4px; }
   .bar-slot{ flex:1; display:flex; flex-direction:column; align-items:center; gap: 6px; cursor: pointer; background: none; border: none; padding: 0; color: inherit; }
   .bar-track{ width: 100%; height: 54px; display:flex; align-items:flex-end; justify-content:center; }
-  .bar{ width: 60%; background: #1a2b22; border: 1px solid var(--bezel-edge); border-radius: 3px 3px 0 0; transition: height .25s ease, background .2s ease, border-color .2s ease; }
+  .bar{ width: 60%; background: var(--bar-off); border: 1px solid var(--bezel-edge); border-radius: 3px 3px 0 0; transition: height .25s ease, background .2s ease, border-color .2s ease; }
   .bar-slot.included .bar{ background: var(--copper); border-color: var(--copper-bright); }
   .bar-slot.current .bar{ background: var(--trace); border-color: var(--trace); box-shadow: 0 0 10px var(--trace-glow); }
   .bar-label{ font-family: 'Space Mono', monospace; font-size: 10.5px; color: var(--text-faint); }
@@ -111,17 +170,37 @@
   .slider-row{ display:flex; align-items:center; gap: 12px; }
   .slider-row label{ font-size: 13px; color: var(--text-dim); white-space:nowrap; min-width: 128px; }
   input[type=range]{ flex:1; -webkit-appearance: none; appearance: none; height: 4px; background: var(--bezel-edge); border-radius: 2px; outline: none; }
-  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width: 18px; height: 18px; border-radius: 50%; background: var(--copper-bright); border: 2px solid #0f1a15; cursor:pointer; box-shadow: 0 0 0 3px rgba(230,154,99,0.18); }
-  input[type=range]::-moz-range-thumb{ width: 18px; height: 18px; border-radius: 50%; background: var(--copper-bright); border: 2px solid #0f1a15; cursor:pointer; }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width: 18px; height: 18px; border-radius: 50%; background: var(--copper-bright); border: 2px solid var(--surface); cursor:pointer; box-shadow: 0 0 0 3px var(--trace-glow); }
+  input[type=range]::-moz-range-thumb{ width: 18px; height: 18px; border-radius: 50%; background: var(--copper-bright); border: 2px solid var(--surface); cursor:pointer; }
   .slider-row .count{ font-family:'Space Mono', monospace; font-size: 13px; color: var(--text); min-width: 44px; text-align:center; }
 
   .buttons-row{ display:flex; gap: 8px; }
-  .btn{ flex:1; background: #14241c; border: 1px solid var(--bezel-edge); color: var(--text); font-family:'Heebo', sans-serif; font-size: 14px; font-weight: 500; padding: 11px 10px; border-radius: 10px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap: 8px; transition: border-color .15s ease, background .15s ease; }
+  .btn{ flex:1; background: var(--surface-active); border: 1px solid var(--bezel-edge); color: var(--text); font-family:'Heebo', sans-serif; font-size: 14px; font-weight: 500; padding: 11px 10px; border-radius: 10px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap: 8px; transition: border-color .15s ease, background .15s ease; }
   .btn:hover{ border-color: var(--copper); }
-  .btn.primary{ background: linear-gradient(180deg, var(--copper-bright), var(--copper)); color:#1a1008; border-color: transparent; font-weight:700; }
+  .btn.primary{ background: linear-gradient(180deg, var(--copper-bright), var(--copper)); color: var(--on-copper); border-color: transparent; font-weight:700; }
   .btn.primary:hover{ filter: brightness(1.06); }
 
   .footnote{ margin-top: 16px; font-size: 12.5px; color: var(--text-faint); line-height: 1.7; text-align:center; padding: 0 6px; }
+
+  .topbar{ display:flex; justify-content:flex-end; margin-bottom: 6px; }
+  .theme-btn{ background: var(--surface); border:1px solid var(--bezel-edge); color: var(--text-dim); font-family:'Heebo',sans-serif; font-size:12.5px; padding:6px 14px; border-radius:999px; cursor:pointer; }
+  .theme-btn:hover{ border-color: var(--copper); color: var(--text); }
+  .tabs{ display:flex; gap: 6px; justify-content:center; margin-bottom: 16px; }
+  .tab-btn{ background: var(--surface); border:1px solid var(--bezel-edge); color: var(--text-dim); font-family:'Heebo',sans-serif; font-size:14px; font-weight:500; padding:9px 22px; border-radius:999px; cursor:pointer; transition: border-color .15s ease, color .15s ease, background .15s ease; }
+  .tab-btn:hover{ border-color: var(--copper); color: var(--text); }
+  .tab-btn.active{ background: var(--surface-active); border-color: var(--copper-bright); color: var(--text); }
+  .tab-content[hidden]{ display:none; }
+
+  .spec-grid{ display:grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .spec-card{ background: var(--surface); border:1px solid var(--bezel-edge); border-radius: 14px; padding: 16px 16px 12px; }
+  .spec-card h3{ margin:0 0 4px; font-size:15px; font-weight:700; }
+  .spec-card p{ margin:0 0 14px; font-size:12.5px; color: var(--text-dim); line-height:1.6; min-height: 40px; }
+  .spec-bars{ direction:ltr; display:flex; align-items:flex-end; gap:6px; height: 96px; border-bottom:1px solid var(--bezel-edge); }
+  .spec-bar{ flex:1; background: var(--copper-bright); border-radius:2px 2px 0 0; min-height:2px; }
+  .spec-bar.zero{ background: var(--bezel-edge); }
+  .spec-nums{ direction:ltr; display:flex; gap:6px; margin-top:6px; }
+  .spec-nums span{ flex:1; text-align:center; font-family:'Space Mono',monospace; font-size:10.5px; color: var(--text-faint); }
+  @media (max-width: 620px){ .spec-grid{ grid-template-columns: 1fr; } }
 
   @media (max-width: 520px){
     .waves{ grid-template-columns: repeat(2,1fr); }
@@ -135,11 +214,19 @@
 <body>
 <div class="device">
 
+  <div class="topbar"><button class="theme-btn" id="themeBtn" type="button"></button></div>
+
   <div class="masthead">
     <h1>מהרמוניות בודדות לצורת גל שלמה</h1>
     <p>כל צורת גל מורכבת מסכום של גלי סינוס בתדרים ועוצמות שונות.</p>
   </div>
 
+  <div class="tabs" role="tablist">
+    <button class="tab-btn active" data-tab="tabBuild" role="tab">בניית גל</button>
+    <button class="tab-btn" data-tab="tabSpectrum" role="tab">ספקטרום</button>
+  </div>
+
+  <div class="tab-content" id="tabBuild">
   <div class="panel">
 
     <div class="waves" id="waveButtons"></div>
@@ -168,6 +255,13 @@
       </div>
     </div>
 
+  </div>
+  </div>
+
+  <div class="tab-content" id="tabSpectrum" hidden>
+    <div class="panel">
+      <div class="spec-grid" id="specGrid"></div>
+    </div>
   </div>
 
 </div>
@@ -238,6 +332,8 @@
     const den = Math.round(1/mag);
     return '1/' + den;
   }
+
+  function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 
   let currentType = 'square';
   let harmCount = 1;
@@ -366,7 +462,7 @@
     function yOf(v){ return midY - v*scaleY; }
 
     // duty-cycle background shading (where ideal > 0)
-    ctx.fillStyle = 'rgba(79,211,196,0.09)';
+    ctx.fillStyle = cssVar('--cv-duty');
     let runStart = null;
     for (let i=0;i<thetas.length;i++){
       const on = ideal[i] > 0;
@@ -379,7 +475,7 @@
     }
 
     // grid
-    ctx.strokeStyle = '#1c3229';
+    ctx.strokeStyle = cssVar('--cv-grid');
     ctx.lineWidth = 1;
     const cols = 8;
     for (let c=0;c<=cols;c++){
@@ -391,12 +487,12 @@
       const y = padY + (r/rows)*plotH;
       ctx.beginPath(); ctx.moveTo(padX, y); ctx.lineTo(padX+plotW, y); ctx.stroke();
     }
-    ctx.strokeStyle = '#2a4a3b';
+    ctx.strokeStyle = cssVar('--cv-axis');
     ctx.beginPath(); ctx.moveTo(padX, midY); ctx.lineTo(padX+plotW, midY); ctx.stroke();
 
     // ideal (dashed teal)
     ctx.setLineDash([5,5]);
-    ctx.strokeStyle = '#4fd3c4';
+    ctx.strokeStyle = cssVar('--cv-ideal');
     ctx.lineWidth = 1.6;
     ctx.beginPath();
     for (let i=0;i<thetas.length;i++){
@@ -407,9 +503,9 @@
     ctx.setLineDash([]);
 
     // partial sum (glowing amber)
-    ctx.shadowColor = 'rgba(255,176,46,0.55)';
+    ctx.shadowColor = cssVar('--cv-glow');
     ctx.shadowBlur = 8;
-    ctx.strokeStyle = '#ffb02e';
+    ctx.strokeStyle = cssVar('--cv-trace');
     ctx.lineWidth = 2.4;
     ctx.beginPath();
     for (let i=0;i<thetas.length;i++){
@@ -471,6 +567,58 @@
 
   playBtn.addEventListener('click', togglePlay);
   resetBtn.addEventListener('click', () => { stopPlaying(); setCount(1); });
+
+  // --- spectrum tab ---
+  const SPEC = [
+    { label:'סינוס',     desc:'הרמוניה אחת בלבד — n=1. אין הרמוניות נוספות כלל.', amp: n => n===1 ? 1 : 0 },
+    { label:'ריבועי',    desc:'רק הרמוניות אי-זוגיות (1, 3, 5, 7, 9…), בעוצמה 1/n.', amp: n => n%2 ? 1/n : 0 },
+    { label:'משולש',     desc:'רק הרמוניות אי-זוגיות (1, 3, 5, 7, 9…), בעוצמה 1/n² — דועכות הרבה יותר מהר.', amp: n => n%2 ? 1/(n*n) : 0 },
+    { label:'שן מסור',   desc:'כל ההרמוניות (1, 2, 3, 4, 5…), בעוצמה 1/n.', amp: n => 1/n },
+    { label:'מלבני 1/3', desc:'כל ההרמוניות חוץ מכפולות של 3 (3, 6, 9…) — הן נעלמות. בעוצמה 1/n.', amp: n => n%3 ? 1/n : 0 }
+  ];
+  const specGrid = document.getElementById('specGrid');
+  SPEC.forEach(sp => {
+    let bars = '', nums = '';
+    for (let n=1;n<=9;n++){
+      const a = sp.amp(n);
+      bars += '<div class="spec-bar' + (a===0 ? ' zero' : '') + '" style="height:' + (a===0 ? 2 : Math.max(2, a*96)) + 'px"></div>';
+      nums += '<span>' + n + '</span>';
+    }
+    const card = document.createElement('div');
+    card.className = 'spec-card';
+    card.innerHTML = '<h3>' + sp.label + '</h3><p>' + sp.desc + '</p><div class="spec-bars">' + bars + '</div><div class="spec-nums">' + nums + '</div>';
+    specGrid.appendChild(card);
+  });
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('.tab-content').forEach(c => { c.hidden = (c.id !== btn.dataset.tab); });
+    });
+  });
+
+  // --- theme ---
+  const themeBtn = document.getElementById('themeBtn');
+  const darkMQ = window.matchMedia('(prefers-color-scheme: dark)');
+  function effectiveTheme(){
+    const t = document.documentElement.getAttribute('data-theme');
+    return t || (darkMQ.matches ? 'dark' : 'light');
+  }
+  function refreshThemeBtn(){
+    themeBtn.textContent = effectiveTheme() === 'dark' ? '☀️ מצב בהיר' : '🌙 מצב כהה';
+  }
+  try {
+    const saved = localStorage.getItem('fourier-theme');
+    if (saved === 'light' || saved === 'dark') document.documentElement.setAttribute('data-theme', saved);
+  } catch(e) {}
+  themeBtn.addEventListener('click', () => {
+    const next = effectiveTheme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('fourier-theme', next); } catch(e) {}
+    refreshThemeBtn();
+    render();
+  });
+  refreshThemeBtn();
 
   buildWaveButtons();
   slider.max = WAVES[currentType].harmonics.length;
