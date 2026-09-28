@@ -217,7 +217,7 @@
     outline:2px solid var(--focus); outline-offset:1px; border-color:var(--focus);
   }
   input[type=range]{
-    -webkit-appearance:none; appearance:none;
+    direction:ltr; -webkit-appearance:none; appearance:none;
     width:100%; height:3px; border-radius:2px;
     background:var(--track); outline:none; margin:5px 0 3px;
   }
@@ -233,7 +233,7 @@
   }
   input[type=range]:focus-visible::-webkit-slider-thumb{ outline:2px solid var(--focus); outline-offset:2px;}
   .ticks{
-    display:flex; justify-content:space-between;
+    direction:ltr; display:flex; justify-content:space-between;
     font-size:9.5px; color:var(--ink-soft); opacity:.7;
   }
   .control .hint{font-size:12px; color:var(--ink-soft); margin-top:8px; opacity:.85;}
@@ -358,14 +358,15 @@
   <section class="explain">
     <p>בסינתזת FM יש לנו שני גלים:</p>
     <ul style="margin:0 0 1em; padding-inline-start:20px; color:var(--ink-soft);">
-      <li style="margin-bottom:8px;"><strong style="color:var(--ink)">גל נושא (Carrier)</strong> — גל בתדר קבוע. למשל, 440Hz. זהו הגל שאותו אנחנו רוצים לשנות.</li>
-      <li><strong style="color:var(--ink)">גל מאפנן (Modulator)</strong> — הגל שמשנה את התדר של גל הנושא (Carrier).</li>
+      <li style="margin-bottom:8px;"><strong style="color:var(--ink)">גל נושא (Carrier)</strong> — גל בתדר קבוע. למשל, 440Hz. זהו התדר שאנחנו רוצים לשנות.</li>
+      <li><strong style="color:var(--ink)">גל מאפנן (Modulator)</strong> — גל שמשנה את התדר של גל הנושא.</li>
     </ul>
-    <p>כלומר, במקום שהנושא יישאר כל הזמן ב־440Hz, המאפנן גורם לו לנוע הלוך ושוב סביב 440Hz:</p>
+    <p>כלומר, במקום שהנושא יישאר כל הזמן ב־440Hz, המאפנן גורם לתדר שלו לנוע הלוך ושוב סביב 440Hz:</p>
     <p style="direction:ltr; text-align:left; font-family:ui-monospace, Consolas, monospace; color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:8px 14px; display:inline-block; margin:0 0 1em;">440 → 450 → 440 → 430 → 440 → 450 → …</p>
-    <p>קצב התנועה הזו נקבע על ידי תדר המאפנן. למשל, אם המאפנן הוא 5Hz, התדר של הנושא ישתנה הלוך ושוב 5 פעמים בשנייה.</p>
-    <p><strong style="color:var(--ink)">ומה קובע עד כמה התדר משתנה?</strong> כאן נכנס עומק האפנון. ככל שעומק האפנון גדול יותר, התדר של הנושא מתרחק יותר מהתדר המקורי שלו.</p>
-    <p><strong style="color:var(--ink)">מתחת ל-20Hz בערך</strong> — האוזן עוקבת אחרי כל תנודה בנפרד כשינוי בגובה הצליל.<br><strong style="color:var(--ink)">מעל 20Hz</strong> — התנודות מהירות מכדי שנשמע אותן כתנועה. במקום זאת, האוזן שומעת אותן כגוון (Timbre) חדש.</p>
+    <p>קצב התנועה הזו נקבע על ידי תדר המאפנן. למשל, אם המאפנן הוא 5Hz, התדר של הנושא מתנודד סביב 440Hz בקצב של 5 פעמים בשנייה.</p>
+    <p><strong style="color:var(--ink)">ומה קובע עד כמה התדר משתנה?</strong><br>כאן נכנס עומק האפנון. ככל שעומק האפנון גדול יותר, התדר של הנושא מתרחק יותר מהתדר המקורי שלו.</p>
+    <p>כאשר המאפנן איטי מאוד (מתחת לכ־20Hz) — אפשר לשמוע את שינוי התדר כתנועה בגובה הצליל.</p>
+    <p>כאשר המאפנן מהיר יותר, בתחום השמע — אנחנו כבר לא שומעים את התנודות כתנועה נפרדת של גובה הצליל, אלא מקבלים צליל בעל גוון (Timbre) חדש.</p>
   </section>
 
   <section class="demo">
