@@ -410,7 +410,7 @@
   </div>
 
   <div id="panel-harmonics" role="tabpanel" aria-labelledby="tab-harmonics" hidden>
-    <p class="lede">כל צורת גל (מלבד סינוס) מורכבת מכמה תדרים בו-זמנית — "הרמוניות" בכפולות של התדר הבסיסי, כל אחת בעוצמה משלה. זה בדיוק מה שקובע אילו תדרי צד יופיעו סביב הנשא בפאנל הספקטרום.</p>
+    <p class="lede">כל צורת גל (מלבד סינוס) מורכבת מכמה תדרים בו-זמנית — "הרמוניות" בכפולות של התדר הבסיסי, כל אחת בעוצמה משלה. זה בדיוק מה שקובע אילו תדרי צד יופיעו סביב הנושא בפאנל הספקטרום.</p>
     <div class="harmonics-ref" id="harmonics-ref"></div>
   </div>
 
@@ -418,7 +418,7 @@
     <h2>בקרות</h2>
     <div class="controls">
       <div class="field fc">
-        <label for="fc">תדר הנשא (F carrier)
+        <label for="fc">תדר הנושא (F carrier)
           <span class="num-wrap"><input type="number" id="fc-num" class="num-input" dir="ltr" min="40" max="2000" step="1" value="220"> Hz</span>
         </label>
         <input type="range" id="fc" min="0" max="1000" step="1">
@@ -456,7 +456,7 @@
       <button class="mini-btn" id="env-stop-btn" type="button" hidden>⏹ עצור</button>
       <label class="isolate" id="isolate-wrap" style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted);cursor:pointer;">
         <input type="checkbox" id="isolate" style="width:16px;height:16px;">
-        השתקת הנשא — השמע רק את תדרי הצד
+        השתקת הנושא — השמע רק את תדרי הצד
       </label>
       <div class="vol">
         <span>עוצמה</span>
@@ -479,17 +479,17 @@
       <div class="col am">
         <h3>AM</h3>
         <ul>
-          <li>הנשא נשאר באות היציאה — העוצמה שלו משתנה בהתאם לאות המאפנן.</li>
-          <li>סביב הנשא נוצרים תדרי צד בהתאם לתדרים שמכיל המאפנן.</li>
+          <li>הנושא נשאר באות היציאה — העוצמה שלו משתנה בהתאם לאות המאפנן.</li>
+          <li>סביב הנושא נוצרים תדרי צד בהתאם לתדרים שמכיל המאפנן.</li>
           <li>ככל שעומק האפנון גבוה יותר, תדרי הצד חזקים יותר.</li>
-          <li>ללא אפנון (עומק 0%), נשמע רק הנשא.</li>
+          <li>ללא אפנון (עומק 0%), נשמע רק הנושא.</li>
         </ul>
       </div>
       <div class="col ring">
         <h3>Ring Mod</h3>
         <ul>
-          <li>הנשא נעלם מאות היציאה.</li>
-          <li>נוצרים תדרי צד בהתאם לתדרי הנשא והמאפנן.</li>
+          <li>הנושא נעלם מאות היציאה.</li>
+          <li>נוצרים תדרי צד בהתאם לתדרי הנושא והמאפנן.</li>
           <li>כששני האותות הם סינוסים, מתקבלים תדרי סכום והפרש.</li>
         </ul>
       </div>
@@ -537,10 +537,10 @@
 
   var texts = {
     am: {
-      lede: "המשרעת של הנשא משתנה בהתאם למאפנן, בעוד שתדר הנשא נשאר קבוע. כלומר, המאפנן משנה את ה\"עוצמה\" של הנשא, ולא את התדר שלו."
+      lede: "המשרעת של הנושא משתנה בהתאם למאפנן, בעוד שתדר הנושא נשאר קבוע. כלומר, המאפנן משנה את ה\"עוצמה\" של הנושא, ולא את התדר שלו."
     },
     ring: {
-      lede: "בכל רגע, מכפילים את מתח הנשא במתח המאפנן. הנשא עצמו נעלם מהאות היוצא, ובמקומו נוצרים תדרי צד."
+      lede: "בכל רגע, מכפילים את מתח הנושא במתח המאפנן. הנושא עצמו נעלם מהאות היוצא, ובמקומו נוצרים תדרי צד."
     }
   };
 
@@ -871,7 +871,7 @@
 
     els.specLabels.innerHTML =
       '<span' + (mode === "ring" ? ' style="color:' + cssVar('--ring-upper') + '"' : '') + '>f<sub>c</sub> + f<sub>m</sub> = ' + fmtHz(upper) + '</span>' +
-      (mode === "am" ? '<span>f<sub>c</sub> = ' + fmtHz(fc) + '</span>' : '<span style="opacity:.55">אין נשא</span>') +
+      (mode === "am" ? '<span>f<sub>c</sub> = ' + fmtHz(fc) + '</span>' : '<span style="opacity:.55">אין נושא</span>') +
       '<span' + (mode === "ring" ? ' style="color:' + cssVar('--ring-lower') + '"' : '') + '>f<sub>c</sub> − f<sub>m</sub> = ' + fmtHz(lower) + '</span>' +
       (isAudioAudible() ? '' : '<span style="opacity:.55; flex-basis:100%; margin-top:4px">לחצו \u25B6 השמע כדי לראות את המדידה בפועל על החיזוי</span>');
   }
