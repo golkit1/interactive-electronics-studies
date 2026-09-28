@@ -150,12 +150,12 @@
   .bar{ width: 60%; background: var(--bar-off); border: 1px solid var(--bezel-edge); border-radius: 3px 3px 0 0; transition: height .25s ease, background .2s ease, border-color .2s ease; }
   .bar-slot.included .bar{ background: var(--copper); border-color: var(--copper-bright); }
   .bar-slot.current .bar{ background: var(--trace); border-color: var(--trace); box-shadow: 0 0 10px var(--trace-glow); }
-  .bar-label{ font-family: 'Space Mono', monospace; font-size: 10.5px; color: var(--text-faint); }
+  .bar-label{ font-family: 'Heebo', sans-serif; font-size: 15px; font-weight: 700; color: var(--text-faint); }
   .bar-slot.included .bar-label{ color: var(--text-dim); }
   .bar-slot.current .bar-label{ color: var(--trace); }
 
-  .po-labels{ display:flex; flex-direction:column; align-items:center; gap: 1px; height: 28px; justify-content:flex-end; }
-  .po-labels .po{ font-family:'Space Mono', monospace; font-size: 10px; line-height:1.3; color: var(--text-faint); }
+  .po-labels{ display:flex; flex-direction:column; align-items:center; gap: 2px; height: 44px; justify-content:flex-end; }
+  .po-labels .po{ font-family:'Heebo', sans-serif; font-size: 15px; font-weight: 700; line-height:1.25; color: var(--text-faint); }
   .po-labels .po.partial{ color: var(--copper-bright); }
   .po-labels .po.overtone{ color: var(--ideal); }
   .bar-slot.current .po-labels .po.partial{ color: var(--trace); }
@@ -182,6 +182,11 @@
 
   .footnote{ margin-top: 16px; font-size: 12.5px; color: var(--text-faint); line-height: 1.7; text-align:center; padding: 0 6px; }
 
+  .duty-row{ display:flex; align-items:center; justify-content:center; gap:8px; margin: -4px 0 14px; font-size:13px; color: var(--text-dim); }
+  .duty-row[hidden]{ display:none; }
+  .duty-btn{ background: var(--surface); border:1px solid var(--bezel-edge); color: var(--text-dim); font-family:'Space Mono',monospace; font-size:13px; padding:5px 16px; border-radius:999px; cursor:pointer; }
+  .duty-btn:hover{ border-color: var(--copper); color: var(--text); }
+  .duty-btn.active{ background: var(--surface-active); border-color: var(--copper-bright); color: var(--text); }
   .topbar{ display:flex; justify-content:flex-end; margin-bottom: 6px; }
   .theme-btn{ background: var(--surface); border:1px solid var(--bezel-edge); color: var(--text-dim); font-family:'Heebo',sans-serif; font-size:12.5px; padding:6px 14px; border-radius:999px; cursor:pointer; }
   .theme-btn:hover{ border-color: var(--copper); color: var(--text); }
@@ -217,7 +222,7 @@
   <div class="topbar"><button class="theme-btn" id="themeBtn" type="button"></button></div>
 
   <div class="masthead">
-    <h1>מהרמוניות בודדות לצורת גל שלמה</h1>
+    <h1>צורות גל והרמוניות</h1>
     <p>כל צורת גל מורכבת מסכום של גלי סינוס בתדרים ועוצמות שונות.</p>
   </div>
 
@@ -230,6 +235,12 @@
   <div class="panel">
 
     <div class="waves" id="waveButtons"></div>
+    <div class="duty-row" id="dutyRow" hidden>
+      <span>יחס מילוי</span>
+      <button type="button" class="duty-btn active" data-k="3">1/3</button>
+      <button type="button" class="duty-btn" data-k="4">1/4</button>
+      <button type="button" class="duty-btn" data-k="5">1/5</button>
+    </div>
 
     <div class="screen-wrap">
       <div class="duty-note" id="dutyNote"></div>
@@ -285,41 +296,46 @@
   // magnitude = sqrt(a^2+b^2) always matches the table's 1/n (or 1/n^2) values.
   function sineHarm(n, coef){ return { n, a: 0, b: coef }; }
 
-  // Rectangular pulse, duty 1/3, phase-shifted so the "on" region is [0, 2*PI/3)
-  // -- same start point as the square wave, for direct visual comparison.
-  const rectBase = [1,2,4,5,7,8,10,11,13].map(n => {
-    const s = Math.sin(n*Math.PI/3);
-    const sign = s > 1e-9 ? 1 : (s < -1e-9 ? -1 : 0);
-    const A = sign / n; // matches table magnitude 1/n, zero at multiples of 3
-    const shift = n*Math.PI/3;
-    return { n, a: A*Math.cos(shift), b: A*Math.sin(shift) };
-  });
+  // Rectangular pulse with duty cycle 1/k, phase-shifted so the "on" region is [0, 2*PI/k).
+  // Relative amplitude of harmonic n: |sin(n*PI/k)| / (n*sin(PI/k)); multiples of k vanish.
+  function makeRect(k){
+    const D = 1/k, sD = Math.sin(Math.PI*D);
+    const ns = [];
+    for (let n=1; ns.length<9; n++) if (n % k !== 0) ns.push(n);
+    const harmonics = ns.map(n => {
+      const c = Math.sin(n*Math.PI*D) / (n*sD);
+      const shift = n*Math.PI*D;
+      return { n, a: c*Math.cos(shift), b: c*Math.sin(shift) };
+    });
+    const K = 2*sD/Math.PI;            // fundamental amplitude of a zero-mean 0/1 pulse
+    const hi = (1-D)/K, lo = -D/K;     // zero-mean levels, in the same scale as the series
+    return {
+      harmonics,
+      ideal: t => (mod2pi(t) < 2*Math.PI*D) ? hi : lo,
+      duty: Math.round(100*D) + '%'
+    };
+  }
 
   const WAVES = {
     square: {
       label: 'ריבועי', duty: '50%',
       harmonics: [1,3,5,7,9,11,13,15].map(n => sineHarm(n, 1/n)),
-      ideal: t => (mod2pi(t) < Math.PI) ? 1 : -1,
+      ideal: t => (mod2pi(t) < Math.PI) ? Math.PI/4 : -Math.PI/4, // series sum of 1/n terms converges to PI/4
       icon: sqIcon
     },
     triangle: {
       label: 'משולש', duty: null,
       harmonics: [1,3,5,7,9,11,13,15].map(n => sineHarm(n, Math.pow(-1,(n-1)/2) / (n*n))),
-      ideal: t => (2/Math.PI) * Math.asin(Math.sin(t)),
+      ideal: t => (Math.PI/4) * Math.asin(Math.sin(t)), // peak PI^2/8 for 1/n^2 series
       icon: triIcon
     },
     saw: {
       label: 'שן מסור', duty: null,
       harmonics: [1,2,3,4,5,6,7,8,9].map(n => sineHarm(n, Math.pow(-1,(n+1)) / n)),
-      ideal: t => wrapPi(t) / Math.PI,
+      ideal: t => wrapPi(t) / 2, // series of (-1)^(n+1)/n sin(n*t) equals t/2
       icon: sawIcon
     },
-    rect13: {
-      label: 'מלבני 1/3', duty: '33%',
-      harmonics: rectBase,
-      ideal: t => (mod2pi(t) < (2*Math.PI/3)) ? 1 : -1,
-      icon: rectIcon
-    }
+    rect: Object.assign({ label: 'מלבני', icon: rectIcon }, makeRect(3))
   };
 
   function sqIcon(){ return '<svg viewBox="0 0 40 20"><path d="M2 15 L2 5 L12 5 L12 15 L22 15 L22 5 L32 5 L32 15 L38 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>'; }
@@ -329,8 +345,9 @@
 
   function fracLabel(mag){
     if (Math.abs(mag-1) < 1e-9) return '1';
-    const den = Math.round(1/mag);
-    return '1/' + den;
+    const den = 1/mag;
+    if (Math.abs(den - Math.round(den)) < 1e-6) return '1/' + Math.round(den);
+    return mag.toFixed(2);
   }
 
   function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
@@ -354,6 +371,7 @@
   const harmCountEl = document.getElementById('harmCount');
   const readoutEl = document.getElementById('readout');
   const dutyNoteEl = document.getElementById('dutyNote');
+  const dutyRow = document.getElementById('dutyRow');
   const partialToggle = document.getElementById('partialToggle');
   const overtoneToggle = document.getElementById('overtoneToggle');
   const playBtn = document.getElementById('playBtn');
@@ -402,11 +420,28 @@
     slider.max = w.harmonics.length;
     slider.value = harmCount;
     harmCountEl.textContent = harmCount;
-    dutyNoteEl.textContent = w.duty ? ('מילוי מחזור: ' + w.duty) : '';
-    dutyNoteEl.style.display = w.duty ? 'block' : 'none';
+    updateDutyUI();
     buildSpectrum();
     render();
   }
+
+  function updateDutyUI(){
+    const w = WAVES[currentType];
+    dutyNoteEl.textContent = w.duty ? ('מילוי מחזור: ' + w.duty) : '';
+    dutyNoteEl.style.display = w.duty ? 'block' : 'none';
+    dutyRow.hidden = currentType !== 'rect';
+  }
+
+  document.querySelectorAll('.duty-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      stopPlaying();
+      Object.assign(WAVES.rect, makeRect(parseInt(btn.dataset.k,10)));
+      document.querySelectorAll('.duty-btn').forEach(b => b.classList.toggle('active', b === btn));
+      updateDutyUI();
+      buildSpectrum();
+      setCount(harmCount);
+    });
+  });
 
   function setCount(n){
     const w = WAVES[currentType];
@@ -574,7 +609,11 @@
     { label:'ריבועי',    desc:'רק הרמוניות אי-זוגיות (1, 3, 5, 7, 9…), בעוצמה 1/n.', amp: n => n%2 ? 1/n : 0 },
     { label:'משולש',     desc:'רק הרמוניות אי-זוגיות (1, 3, 5, 7, 9…), בעוצמה 1/n² — דועכות הרבה יותר מהר.', amp: n => n%2 ? 1/(n*n) : 0 },
     { label:'שן מסור',   desc:'כל ההרמוניות (1, 2, 3, 4, 5…), בעוצמה 1/n.', amp: n => 1/n },
-    { label:'מלבני 1/3', desc:'כל ההרמוניות חוץ מכפולות של 3 (3, 6, 9…) — הן נעלמות. בעוצמה 1/n.', amp: n => n%3 ? 1/n : 0 }
+    ...[3,4,5].map(k => ({
+      label: 'מלבני 1/' + k,
+      desc: 'כל ההרמוניות חוץ מכפולות של ' + k + ' (' + [k,2*k,3*k].join(', ') + '…) — הן נעלמות.',
+      amp: n => (n % k) ? Math.abs(Math.sin(n*Math.PI/k)) / (n*Math.sin(Math.PI/k)) : 0
+    }))
   ];
   const specGrid = document.getElementById('specGrid');
   SPEC.forEach(sp => {
@@ -625,7 +664,7 @@
   harmCount = 1;
   slider.value = harmCount;
   harmCountEl.textContent = harmCount;
-  dutyNoteEl.textContent = WAVES[currentType].duty ? ('מילוי מחזור: ' + WAVES[currentType].duty) : '';
+  updateDutyUI();
   buildSpectrum();
   render();
 })();
