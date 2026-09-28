@@ -192,6 +192,13 @@
   .duty-btn{ background: var(--surface); border:1px solid var(--bezel-edge); color: var(--text-dim); font-family:'Space Mono',monospace; font-size:13px; padding:5px 16px; border-radius:999px; cursor:pointer; }
   .duty-btn:hover{ border-color: var(--copper); color: var(--text); }
   .duty-btn.active{ background: var(--surface-active); border-color: var(--copper-bright); color: var(--text); }
+  .defs{ margin-top: 16px; border-top: 1px solid var(--bezel-edge); padding-top: 12px; }
+  .defs summary{ cursor:pointer; font-size:14px; font-weight:700; color: var(--text); }
+  .defs ul{ margin: 10px 0 0; padding: 0 18px 0 0; font-size:13.5px; line-height:1.75; color: var(--text-dim); }
+  .defs li{ margin-bottom: 6px; }
+  .defs b{ color: var(--text); }
+  .defs b.c-partial{ color: var(--copper-bright); }
+  .defs b.c-overtone{ color: var(--ideal); }
   .topbar{ display:flex; justify-content:flex-end; margin-bottom: 6px; }
   .theme-btn{ background: var(--surface); border:1px solid var(--bezel-edge); color: var(--text-dim); font-family:'Heebo',sans-serif; font-size:12.5px; padding:6px 14px; border-radius:999px; cursor:pointer; }
   .theme-btn:hover{ border-color: var(--copper); color: var(--text); }
@@ -270,6 +277,15 @@
         <button class="btn" id="resetBtn">איפוס</button>
       </div>
     </div>
+
+    <details class="defs" open>
+      <summary>ההבדל בין הרמוניה, Partial ו-Overtone</summary>
+      <ul>
+        <li><b>הרמוניה:</b> מרכיב שתדרו הוא כפולה שלמה של תדר היסוד (n×f₀), למשל ההרמוניה השלישית היא פי 3 מתדר היסוד.</li>
+        <li><b class="c-partial">פארטיאל (Partial):</b> כל מרכיב תדרי שקיים בפועל בצליל, כולל היסוד, כשהפארטיאלים ממוספרים לפי סדר התדרים שלהם מהנמוך לגבוה.</li>
+        <li><b class="c-overtone">אוברטון (Overtone):</b> כל פארטיאל שנמצא מעל תדר היסוד, כשהאוברטון הראשון הוא הפארטיאל השני, האוברטון השני הוא הפארטיאל השלישי, וכן הלאה.</li>
+      </ul>
+    </details>
 
   </div>
   </div>
