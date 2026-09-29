@@ -118,6 +118,7 @@
     transition: border-color .15s ease, color .15s ease, background .15s ease;
   }
   .wave-btn svg{ width: 34px; height: 18px; opacity: .55; transition: opacity .15s ease; }
+  .wave-btn .en-label{ font-size: 10.5px; color: var(--text-faint); font-weight:400; direction:ltr; }
   .wave-btn:hover{ border-color: var(--copper); color: var(--text); }
   .wave-btn.active{ background: var(--surface-active); border-color: var(--copper-bright); color: var(--text); }
   .wave-btn.active svg{ opacity: 1; }
@@ -343,24 +344,24 @@
 
   const WAVES = {
     square: {
-      label: 'ריבועי', duty: '50%',
+      label: 'ריבועי', enLabel: 'Square', duty: '50%',
       harmonics: [1,3,5,7,9,11,13,15].map(n => sineHarm(n, 1/n)),
       ideal: t => (mod2pi(t) < Math.PI) ? Math.PI/4 : -Math.PI/4, // series sum of 1/n terms converges to PI/4
       icon: sqIcon
     },
     triangle: {
-      label: 'משולש', duty: null,
+      label: 'משולש', enLabel: 'Triangle', duty: null,
       harmonics: [1,3,5,7,9,11,13,15].map(n => sineHarm(n, Math.pow(-1,(n-1)/2) / (n*n))),
       ideal: t => (Math.PI/4) * Math.asin(Math.sin(t)), // peak PI^2/8 for 1/n^2 series
       icon: triIcon
     },
     saw: {
-      label: 'שן מסור', duty: null,
+      label: 'שן מסור', enLabel: 'Sawtooth', duty: null,
       harmonics: [1,2,3,4,5,6,7,8,9].map(n => sineHarm(n, Math.pow(-1,(n+1)) / n)),
       ideal: t => wrapPi(t) / 2, // series of (-1)^(n+1)/n sin(n*t) equals t/2
       icon: sawIcon
     },
-    rect: Object.assign({ label: 'מלבני', icon: rectIcon }, makeRect(3))
+    rect: Object.assign({ label: 'מלבני', enLabel: 'Rectangular', icon: rectIcon }, makeRect(3))
   };
 
   function sqIcon(){ return '<svg viewBox="0 0 40 20"><path d="M2 15 L2 5 L12 5 L12 15 L22 15 L22 5 L32 5 L32 15 L38 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>'; }
@@ -409,7 +410,7 @@
       const w = WAVES[key];
       const btn = document.createElement('button');
       btn.className = 'wave-btn' + (key===currentType ? ' active' : '');
-      btn.innerHTML = w.icon() + '<span>' + w.label + '</span>';
+      btn.innerHTML = w.icon() + '<span>' + w.label + '</span><span class="en-label">(' + w.enLabel + ')</span>';
       btn.addEventListener('click', () => selectType(key));
       btn.dataset.key = key;
       waveButtonsEl.appendChild(btn);
