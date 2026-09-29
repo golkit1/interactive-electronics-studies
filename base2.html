@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>בסיס 2 מול בסיס 10</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Secular+One&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --paper:#E7ECE4; --ink:#14231B; --muted:#55665B;
+  --board:#0F3D2E; --board-deep:#0A2C21; --silk:#F3F1E7; --copper:#C27A33; --led:#FF4130;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0B1410; --ink:#E4EBE5; --muted:#97A89D;
+    --board:#123F30; --board-deep:#0B2A20; --silk:#EFEDE3; --copper:#DB9D58;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0B1410; --ink:#E4EBE5; --muted:#97A89D;
+  --board:#123F30; --board-deep:#0B2A20; --silk:#EFEDE3; --copper:#DB9D58;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Rubik","Arial Hebrew","Segoe UI",Arial,sans-serif;font-size:1.0625rem;line-height:1.7}
+main{max-width:52rem;margin:0 auto;padding:2.5rem 1.25rem 4rem}
+h1,h2{font-family:"Secular One","Rubik",sans-serif;font-weight:400;line-height:1.2}
+h1{font-size:clamp(2rem,6vw,3rem);margin:0 0 .75rem}
+h2{font-size:1.6rem;margin:2.5rem 0 .6rem}
+p{max-width:40em;margin:0 0 1rem}
+.ltr{direction:ltr;unicode-bidi:isolate}
+.note{color:var(--muted);font-size:.95rem}
+
+.board{background-color:var(--board);color:var(--silk);border-radius:14px;padding:1.5rem 1rem;margin:1rem 0;
+  background-image:radial-gradient(circle,rgba(255,255,255,.07) 1.2px,transparent 1.6px);background-size:18px 18px;
+  border:3px solid var(--board-deep)}
+.row{display:flex;justify-content:safe center;gap:.5rem;overflow-x:auto;padding-bottom:.25rem}
+.cell{appearance:none;font:inherit;color:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.25rem;
+  padding:.6rem .4rem;min-width:6.6rem;flex:none;border-radius:10px;border:2px solid var(--copper);background:var(--board-deep)}
+.cell:hover{background:#133a2d}
+.cell .pw{font-size:1rem;opacity:.85;white-space:nowrap}
+.cell .dg{font-family:"Secular One","Rubik",sans-serif;font-size:2.8rem;line-height:1}
+.cell .vl{font-size:.95rem}
+.cell.zero .vl{opacity:.4}
+.bin .cell[aria-pressed="true"] .dg{color:var(--led);text-shadow:0 0 12px rgba(255,65,48,.6)}
+.sum{text-align:center;font-size:1.15rem;margin-top:1rem;font-variant-numeric:tabular-nums}
+.sum .t{color:var(--copper);font-weight:700}
+.sum b{font-family:"Secular One","Rubik",sans-serif;font-weight:400;font-size:1.8rem}
+.hint{text-align:center;font-size:.9rem;opacity:.75;margin:.6rem 0 0;max-width:none}
+:focus-visible{outline:3px solid var(--copper);outline-offset:3px}
+
+table{border-collapse:collapse;width:100%;margin-top:1rem}
+th,td{padding:.6rem .7rem;border-bottom:1px solid color-mix(in srgb,var(--ink) 20%,transparent);text-align:right}
+thead th{border-bottom:2px solid var(--ink)}
+tbody th{font-weight:500;color:var(--muted)}
+.tw{overflow-x:auto}
+</style>
+</head>
+<body>
+<main>
+  <h1>בסיס 2 מול בסיס 10</h1>
+  <p>בשיטה העשרונית, בסיס 10, משתמשים בעשר ספרות: 0 עד 9. בבסיס 2 משתמשים רק בשתי ספרות: 0 או 1. בשתי השיטות ערך הספרה נקבע לפי המיקום שלה.</p>
+
+  <h2>בסיס 10</h2>
+  <p>כל מיקום מייצג חזקה של 10. הספרה הראשונה מימין שווה 10<sup>0</sup> = 1, השנייה 10<sup>1</sup> = 10, השלישית 10<sup>2</sup> = 100, והרביעית 10<sup>3</sup> = 1000.</p>
+  <div class="board">
+    <div class="row ltr" id="dec"></div>
+    <div class="sum ltr" id="decSum"></div>
+    <p class="hint">לחצו על ספרה כדי להגדיל אותה (אחרי 9 היא חוזרת ל־0)</p>
+  </div>
+
+  <h2>בסיס 2</h2>
+  <p>כל מיקום מייצג חזקה של 2. הספרה הראשונה מימין שווה 2<sup>0</sup> = 1, השנייה 2<sup>1</sup> = 2, השלישית 2<sup>2</sup> = 4, הרביעית 2<sup>3</sup> = 8, והחמישית 2<sup>4</sup> = 16.</p>
+  <div class="board bin">
+    <div class="row ltr" id="bin"></div>
+    <div class="sum ltr" id="binSum"></div>
+    <p class="hint">לחצו על ספרה כדי להחליף בין 0 ל־1</p>
+  </div>
+
+  <h2>בקיצור</h2>
+  <div class="tw">
+  <table>
+    <thead><tr><th></th><th>בסיס 10</th><th>בסיס 2</th></tr></thead>
+    <tbody>
+      <tr><th>ספרות</th><td>0 עד 9</td><td>0 או 1</td></tr>
+      <tr><th>כל מיקום שמאלה</th><td>פי 10</td><td>פי 2</td></tr>
+      <tr><th>ערכי המיקומות מימין</th><td>1, 10, 100, 1000</td><td>1, 2, 4, 8, 16</td></tr>
+      <tr><th>שלוש ספרות מספיקות ל־</th><td>1000 מספרים (0 עד 999)</td><td>8 מספרים (0 עד 7)</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note" style="margin-top:1rem">בחשמל נוח לעבוד בבסיס 2: כל ספרה היא חוט אחד, עם מתח (1) או בלי מתח (0).</p>
+</main>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+function build(el,base,digits,sumEl){
+  const n=digits.length;
+  digits.forEach((_,i)=>{
+    const p=n-1-i,w=Math.pow(base,p);
+    const b=document.createElement('button');b.type='button';b.className='cell';
+    b.innerHTML='<span class="pw">'+base+'<sup>'+p+'</sup> = '+w+'</span><span class="dg"></span><span class="vl"></span>';
+    b.addEventListener('click',()=>{digits[i]=(digits[i]+1)%base;paint();});
+    el.appendChild(b);
+  });
+  function paint(){
+    const cells=el.querySelectorAll('.cell');let total=0;const parts=[];
+    digits.forEach((d,i)=>{
+      const p=n-1-i,w=Math.pow(base,p),c=cells[i];
+      c.querySelector('.dg').textContent=d;
+      c.querySelector('.vl').textContent=d*w===0?'= 0':'= '+(d>1?d+'×'+w+' = ':'')+d*w;
+      c.classList.toggle('zero',d===0);
+      c.setAttribute('aria-pressed',d?'true':'false');
+      c.setAttribute('aria-label','מיקום '+base+' בחזקת '+p+', ספרה '+d);
+      total+=d*w;if(d)parts.push(d*w);
+    });
+    sumEl.innerHTML='<span class="t">'+digits.join('')+'</span> = '+(parts.length>1?parts.join(' + ')+' = ':'')+'<b>'+total+'</b>';
+  }
+  paint();
+}
+build($('dec'),10,[2,3,4,7],$('decSum'));
+build($('bin'),2,[0,0,1,0,1],$('binSum'));
+})();
+</script>
+</body>
+</html>
