@@ -133,37 +133,21 @@ dd{margin:2px 0 0}
 
     <section class="module">
       <h2>דיאגרמת תזמון <span class="en">(Timing diagram)</span></h2>
-      <p class="hint">כל שורה היא חוט אחד במעגל לאורך זמן. המונה מתקדם ברגע שהשעון <b>יורד</b>, וכל יציאה מתהפכת בחצי מהקצב של זו שמעליה.</p>
+      <p class="hint">המונה מתקדם בכל פעם שהשעון עובר ממתח גבוה לנמוך. כל יציאה במונה משתנה במחצית הקצב של היציאה שלפניה.</p>
       <div class="cvs"><canvas id="a-timing" height="250"></canvas></div>
     </section>
 
     <section class="module">
-      <div class="step-head"><span class="num">1</span><h2>השעון</h2><span class="chip">CD40106</span></div>
+      <div class="step-head"><span class="num">1</span><h2>מונה בינארי</h2><span class="chip">CD4040</span></div>
       <div class="cols">
         <div>
-          <p>בתוך השבב יש שישה מהפכים עם <b>שמיט טריגר</b> <span class="en">(Schmitt trigger)</span>. מהפך הופך את הכניסה: כניסה נמוכה נותנת יציאה גבוהה, וההפך.</p>
-          <p>הקבל <b>C2</b> מחובר לכניסה, והפוטנציומטר מחבר את היציאה חזרה לכניסה. כשהיציאה גבוהה, הקבל נטען דרך הפוטנציומטר. כשהמתח עליו עובר את הסף העליון, היציאה מתהפכת לנמוכה והקבל מתחיל להתפרק. כשהוא יורד מתחת לסף התחתון, היציאה מתהפכת שוב. וכך הלאה, בלי סוף.</p>
-          <p>שני הספים השונים הם הסוד. בלי הרווח ביניהם המהפך היה "מתלבט" סביב נקודה אחת ולא היה נוצר גל ריבועי נקי.</p>
-          <h3>מה קובע את הקצב?</h3>
-          <p>ההתנגדות כפול הקיבול. פוטנציומטר גבוה יותר, או קבל גדול יותר, פירושם טעינה איטית יותר ושעון איטי יותר. בקירוב: זמן מחזור ≈ 0.8 × R × C.</p>
-          <p>במעגל הזה אין נורית על השעון עצמו. את הקצב שלו רואים בנורית LED1, שמתהפכת בכל פולס.</p>
-        </div>
-        <div>
-          <div class="cvs"><canvas id="a-capc" height="230"></canvas></div>
-          <p class="hint">למעלה: המתח על הקבל בין שני הספים. למטה: היציאה של המהפך.</p>
-        </div>
-      </div>
-      <div class="warn"><b>טיפ לבנייה:</b> פוטנציומטר אמיתי מגיע עד 0 אוהם בקצה. אז היציאה מחוברת ישירות לקבל גדול, והשעון נעשה מהיר מאוד. כדאי להוסיף נגד קבוע קטן, למשל 1 קילו־אוהם, בטור עם הפוטנציומטר.</div>
-    </section>
-
-    <section class="module">
-      <div class="step-head"><span class="num">2</span><h2>המונה</h2><span class="chip">CD4040</span></div>
-      <div class="cols">
-        <div>
-          <p>מונה בינארי של 12 שלבים <span class="en">(12-stage binary counter)</span>. בכל פעם שהשעון יורד מגבוה לנמוך, המספר עולה באחד, ומוצג בבינארי על היציאות Q1 עד Q12.</p>
-          <p>כאן משתמשים רק בשלוש היציאות הראשונות. שלוש ספרות בינאריות מספיקות כדי לספור מ־0 עד 7. אחרי 7 מגיע שוב 0 (מבחינת שלוש הספרות האלה), והספירה מתחילה מחדש.</p>
+          <p>מונה הוא מעגל שסופר פולסים.<br>בכל פעם שהוא מקבל פולס שעון, הוא מתקדם במספר אחד:</p>
+          <p dir="ltr" style="text-align:right;font-weight:500">0 → 1 → 2 → 3 → 4 → ...</p>
+          <p>במונה בינארי, המספרים מיוצגים באמצעות 0 ו־1.<br>לכל ספרה בינארית יש יציאה משלה, והיציאות יחד מייצגות את המספר שהמונה נמצא בו.</p>
+          <p>מונה בינארי של 12 שלבים <span class="en">(12-stage binary counter)</span>. בכל פעם שהשעון יורד מגבוה לנמוך, המונה מתקדם באחד. היציאות Q1 עד Q12 מייצגות את המספר שהמונה נמצא בו באמצעות שילוב של 0 ו־1.</p>
+          <p>אנחנו משתמשים רק בשלוש היציאות הראשונות. שלוש ספרות בינאריות מספיקות כדי לספור מ־0 עד 7. אחרי 7 מגיע שוב 0 (מבחינת שלוש הספרות האלה), והספירה מתחילה מחדש.</p>
           <h3>רגל האיפוס</h3>
-          <p>כשרגל <code>RESET</code> גבוהה, המונה חוזר לאפס ונשאר שם. הנגד <b>R5</b> מושך אותה לאדמה, כך שהיא נמוכה תמיד והמונה סופר. זה נקרא נגד <b>משיכה למטה</b> <span class="en">(Pull-down resistor)</span>. הכפתור "איפוס" למעלה מדמה פולס על הרגל הזו.</p>
+          <p>כשרגל <code>RESET</code> גבוהה, המונה מתאפס ונשאר באפס. הנגד <b>R5</b> מושך אותה לאדמה, כך שהיא נמוכה בזמן רגיל והמונה יכול לספור. זה נקרא נגד <b>משיכה למטה</b> <span class="en">(Pull-down resistor)</span>. הכפתור "איפוס" מעלה את המתח ברגל הזו ויוצר את פעולת האיפוס.</p>
           <h3>הנגדים של הנוריות</h3>
           <p>היציאות של המונה חלשות ויכולות לספק רק זרם קטן. הנגדים <b>R1</b>, <b>R2</b> ו־<b>R3</b> של 12 קילו־אוהם מגבילים את הזרם לפחות ממיליאמפר אחד, כך שהנוריות דולקות חלש אבל המונה לא נפגע.</p>
         </div>
@@ -177,7 +161,7 @@ dd{margin:2px 0 0}
     </section>
 
     <section class="module">
-      <div class="step-head"><span class="num">3</span><h2>איך קוראים את הנוריות</h2></div>
+      <div class="step-head"><span class="num">2</span><h2>איך קוראים את הנוריות</h2></div>
       <div class="cols">
         <div>
           <p>בשיטה העשרונית כל ספרה שווה פי עשרה מזו שמימינה: אחדות, עשרות, מאות. בבינארי כל ספרה שווה <b>פי שניים</b> מזו שמימינה <span class="en">(Place value)</span>.</p>
@@ -194,20 +178,20 @@ dd{margin:2px 0 0}
     </section>
 
     <section class="module">
-      <div class="step-head"><span class="num">4</span><h2>שערים שלא בשימוש</h2></div>
-      <p>בשבב 40106 יש שישה מהפכים, והשעון משתמש רק באחד. הכניסות של חמשת האחרים מחוברות לאדמה. כניסה של רכיב סימ"ס <span class="en">(CMOS)</span> שנשארת "באוויר" יכולה לקלוט רעשים, להתנדנד בעצמה ולבזבז זרם. היציאות שלהם יכולות להישאר לא מחוברות.</p>
+      <div class="step-head"><span class="num">3</span><h2>שערים שלא בשימוש</h2></div>
+      <p>בשבב 40106 יש שישה מהפכים, והשעון משתמש רק באחד. הכניסות של חמשת האחרים מחוברות לאדמה. כניסה של רכיב סימ"ס <span class="en">(CMOS)</span> שנשארת "באוויר" יכולה לקלוט רעשים ולהתנדנד בעצמה. היציאות שלהם יכולות להישאר לא מחוברות.</p>
     </section>
   </div>
 
   <!-- ===================== TAB B ===================== -->
   <div role="tabpanel" id="panel-b" aria-labelledby="tab-b" hidden>
-    <p class="lede" style="margin-bottom:6px">המעגל מדליק שמונה נוריות אחת אחרי השנייה, שוב ושוב. שלושה רכיבים עובדים יחד כדי שזה יקרה:</p>
+    <p class="lede" style="margin-bottom:6px">המעגל מדליק שמונה נוריות אחת אחרי השנייה, וחוזר על הרצף שוב ושוב. שלושה רכיבים עובדים יחד כדי ליצור את הרצף:</p>
     <ul class="lede" style="margin-top:0;padding-inline-start:22px">
-      <li><b>השעון</b> מוציא מתח שעולה ויורד שוב ושוב בקצב קבוע, כמו תקתוק של מטרונום. כל עלייה וירידה כזו נקראת פולס.</li>
-      <li><b>המונה</b> סופר את הפולסים: 0, 1, 2, עד 7, ואז חוזר ל־0.</li>
-      <li><b>הבורר</b> מקבל את המספר מהמונה ומדליק את הנורית שמתאימה לו.</li>
+      <li><b>השעון (40106)</b> מייצר אות מחזורי בקצב קבוע. כל פולס של השעון מקדם את הסיקוונסר צעד אחד.</li>
+      <li><b>המונה (4040)</b> סופר את הפולסים ומוציא את הספירה בצורה בינארית: 0, 1, 2, עד 7, ואז חוזר ל־0.</li>
+      <li><b>הבורר (4051)</b> מקבל את שלושת הביטים הנמוכים של המונה ומשתמש בהם כדי לבחור אחת מתוך שמונה יציאות.</li>
     </ul>
-    <p class="lede">הפוטנציומטר קובע את מהירות השעון, ולכן גם כמה מהר הנוריות מתחלפות.</p>
+    <p class="lede">הפוטנציומטר קובע את תדר השעון, ולכן גם את קצב המעבר בין שמונה השלבים.</p>
 
     <section class="module" aria-label="המעגל בפעולה">
       <div class="board"><svg id="b-board" viewBox="0 0 960 300" aria-label="תרשים חי של הסיקוונסר"></svg></div>
@@ -228,7 +212,7 @@ dd{margin:2px 0 0}
 
     <section class="module">
       <h2>דיאגרמת תזמון <span class="en">(Timing diagram)</span></h2>
-      <p class="hint">כל שורה היא חוט אחד במעגל לאורך זמן. המונה מתקדם ברגע שהשעון <b>יורד</b>, וכל יציאה מתהפכת בחצי מהקצב של זו שמעליה.</p>
+      <p class="hint">המונה מתקדם בכל פעם שהשעון עובר ממתח גבוה לנמוך. כל יציאה במונה משתנה במחצית הקצב של היציאה שלפניה.</p>
       <div class="cvs"><canvas id="b-timing" height="250"></canvas></div>
     </section>
 
@@ -304,29 +288,6 @@ dd{margin:2px 0 0}
     </section>
   </div>
 
-  <section class="module">
-    <h2>מושגים</h2>
-    <dl>
-      <div><dt>שעון <span class="en">(Clock)</span></dt><dd>אות ריבועי קבוע שמסמן לרכיבים אחרים מתי להתקדם.</dd></div>
-      <div><dt>פולס <span class="en">(Pulse)</span></dt><dd>עלייה אחת של המתח וירידה אחת בחזרה.</dd></div>
-      <div><dt>מתנד הרפיה <span class="en">(Relaxation oscillator)</span></dt><dd>מתנד שבו קבל נטען ומתפרק שוב ושוב בין שני ספים.</dd></div>
-      <div><dt>שמיט טריגר <span class="en">(Schmitt trigger)</span></dt><dd>כניסה עם שני ספים שונים, לעלייה ולירידה. מונעת התלבטות סביב נקודה אחת.</dd></div>
-      <div><dt>היסטרזיס <span class="en">(Hysteresis)</span></dt><dd>הרווח בין שני הספים של שמיט טריגר.</dd></div>
-      <div><dt>מונה בינארי <span class="en">(Binary counter)</span></dt><dd>רכיב שסופר פולסים ומציג את המספר כסדרה של אפסים ואחדים.</dd></div>
-      <div><dt>ביט <span class="en">(Bit)</span></dt><dd>ספרה בינארית אחת: 0 או 1, נמוך או גבוה.</dd></div>
-      <div><dt>ערך מקום <span class="en">(Place value)</span></dt><dd>כמה שווה ספרה לפי המיקום שלה. בבינארי: 1, 2, 4, 8 וכן הלאה.</dd></div>
-      <div><dt>ירידה של השעון <span class="en">(Falling edge)</span></dt><dd>הרגע שבו השעון עובר מגבוה לנמוך. המונה 4040 מתקדם ברגע הזה.</dd></div>
-      <div><dt>מחלק תדר <span class="en">(Frequency divider)</span></dt><dd>מעגל שמוציא אות בחלק מהתדר של הכניסה, למשל חצי.</dd></div>
-      <div><dt>אוקטבה <span class="en">(Octave)</span></dt><dd>המרחק בין שני תווים שהתדר של אחד כפול מהשני.</dd></div>
-      <div><dt>תת־מתנד <span class="en">(Sub-oscillator)</span></dt><dd>מתנד שמנגן אוקטבה אחת או יותר מתחת למתנד הראשי, לרוב בעזרת מחלק תדר.</dd></div>
-      <div><dt>מרבב <span class="en">(Multiplexer, Mux)</span></dt><dd>בורר שמחבר אחת מכמה כניסות ליציאה אחת, לפי מספר שמגיע לרגלי הבחירה.</dd></div>
-      <div><dt>מפצל <span class="en">(Demultiplexer, Demux)</span></dt><dd>הכיוון ההפוך: כניסה אחת שמנותבת לאחת מכמה יציאות. ה־4051 יודע לעשות את שניהם.</dd></div>
-      <div><dt>רגלי בחירה <span class="en">(Select pins, Address)</span></dt><dd>הרגליים A, B ו־C, שקובעות איזה ערוץ מחובר.</dd></div>
-      <div><dt>נגד משיכה למטה <span class="en">(Pull-down resistor)</span></dt><dd>נגד שמחזיק כניסה במצב נמוך כל עוד אף אחד לא דוחף אותה למעלה.</dd></div>
-      <div><dt>התנגדות במצב סגור <span class="en">(On-resistance)</span></dt><dd>ההתנגדות הקטנה שיש למתג אלקטרוני גם כשהוא מחובר.</dd></div>
-      <div><dt>מגבר עוקב <span class="en">(Buffer, Voltage follower)</span></dt><dd>מגבר שמוציא את אותו מתח שנכנס אליו, אבל יכול לספק זרם בלי "להעמיס" על המקור.</dd></div>
-    </dl>
-  </section>
 </div>
 <script>
 (function(){
@@ -475,7 +436,7 @@ cvVals.forEach((v,i)=>{const l=document.createElement('label');
 // ---------- canvases ----------
 function setup(cv){const r=cv.getBoundingClientRect(),d=window.devicePixelRatio||1,h=+cv.getAttribute('height');cv.style.height=h+'px';cv.width=Math.max(1,r.width*d);cv.height=h*d;const c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);c._w=r.width;c._h=h;return c;}
 const ctx={};
-function resize(){['a-timing','a-capc','b-timing','b-capc','b-cvc'].forEach(id=>ctx[id]=setup($(id)));}
+function resize(){['a-timing','b-timing','b-capc','b-cvc'].forEach(id=>ctx[id]=setup($(id)));}
 window.addEventListener('resize',resize);
 
 // ---------- collapsible sections ----------
@@ -489,30 +450,35 @@ document.querySelectorAll('section.module').forEach(sec=>{
   const btn=document.createElement('button');btn.className='fold';btn.setAttribute('aria-expanded','true');
   btn.setAttribute('aria-label','מזער או הרחב את הסעיף');btn.innerHTML='<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   head.appendChild(btn);head.classList.add('foldable');
+  if(head.querySelector('.num')){btn.setAttribute('aria-expanded','false');body.hidden=true;sec.classList.add('folded');}
   const toggle=()=>{const open=btn.getAttribute('aria-expanded')!=='true';btn.setAttribute('aria-expanded',open);body.hidden=!open;sec.classList.toggle('folded',!open);if(open)resize();};
   btn.addEventListener('click',e=>{e.stopPropagation();toggle();});
   head.addEventListener('click',toggle);
 });
 
-function stepLine(c,x0,w,n,fn,yOf){let prev=null;c.beginPath();
-  for(let i=0;i<=n;i++){const x=x0+w*i/n,v=fn(i/n);
+function stepLine(c,x0,w,n,fn,yOf,tMax=1){let prev=null;c.beginPath();
+  const iMax=Math.round(n*Math.min(1,tMax));
+  for(let i=0;i<=iMax;i++){const x=x0+w*i/n,v=fn(i/n);
     if(prev===null)c.moveTo(x,yOf(v));else if(v!==prev){c.lineTo(x,yOf(prev));c.lineTo(x,yOf(v));}else c.lineTo(x,yOf(v));prev=v;}
   c.stroke();}
 function drawTiming(c,s,names){
-  const W=c._w,H=c._h,L=86,R=12,w=W-L-R,span=12,p0=s.phase-span,rh=44,top=10;
+  const W=c._w,H=c._h,L=86,R=12,w=W-L-R,span=12,p0=Math.max(0,s.phase-span),pEnd=p0+span,rh=44,top=10;
   c.clearRect(0,0,W,H);
   const defs=[[names[0],p=>clkAt(p),css('--clk')],[names[1],p=>countAt(p)&1,css('--hi')],[names[2],p=>countAt(p)>>1&1,css('--hi')],[names[3],p=>countAt(p)>>2&1,css('--hi')]];
   c.strokeStyle=css('--grid');c.lineWidth=1;c.beginPath();
-  for(let k=Math.ceil(p0-DUTY);k+DUTY<=s.phase;k++){const x=L+(k+DUTY-p0)/span*w;c.moveTo(x,top);c.lineTo(x,top+rh*4+34);}c.stroke();
+  for(let k=Math.ceil(p0-DUTY);k+DUTY<=pEnd;k++){if(k+DUTY<p0)continue;const x=L+(k+DUTY-p0)/span*w;c.moveTo(x,top);c.lineTo(x,top+rh*4+34);}c.stroke();
   c.font='12px Rubik, Arial';c.textBaseline='middle';
   defs.forEach(([n,f,col],r)=>{const yb=top+r*rh+34,yt=top+r*rh+8;
     c.fillStyle=css('--muted');c.textAlign='left';c.fillText(n,4,(yb+yt)/2);
     c.strokeStyle=col;c.lineWidth=2.2;stepLine(c,L,w,600,t=>f(p0+span*t),v=>v?yt:yb);});
   const yN=top+4*rh+22;c.fillStyle=css('--muted');c.textAlign='left';c.fillText(names[4],4,yN);
   c.textAlign='center';c.fillStyle=css('--ink');c.font='500 14px Rubik, Arial';
-  for(let k=Math.floor(p0-DUTY)-1;k<=s.phase;k++){const a=Math.max(p0,k+DUTY),b=Math.min(s.phase,k+1+DUTY);if(b-a<0.35)continue;
+  for(let k=Math.floor(p0-DUTY)-1;k<=pEnd;k++){const a=Math.max(p0,k+DUTY),b=Math.min(pEnd,k+1+DUTY);if(b-a<0.35)continue;
     c.fillText(mod8(countAt(k+DUTY+0.01)),L+((a+b)/2-p0)/span*w,yN);}
+  playhead(c,L,w,p0,span,s.phase,top,top+rh*4+34);
 }
+function playhead(c,L,w,p0,span,ph,y0,y1){if(ph>=p0+span-0.02)return;const x=L+(ph-p0)/span*w;
+  c.save();c.strokeStyle=css('--ink');c.globalAlpha=0.55;c.lineWidth=1.5;c.setLineDash([4,4]);c.beginPath();c.moveTo(x,y0);c.lineTo(x,y1);c.stroke();c.restore();}
 function capV(p){const f=p-Math.floor(p);
   if(f<DUTY)return VCC-(VCC-VN)*Math.exp(-(f/DUTY)*A1);
   return VP*Math.exp(-((f-DUTY)/(1-DUTY))*A2);}
@@ -530,9 +496,9 @@ function drawCap(c,s){
   c.strokeStyle=css('--clk');stepLine(c,L,w,500,t=>clkAt(p0+span*t),v=>v?yt:yb);
 }
 function drawCV(c,s){
-  const W=c._w,H=c._h,L=40,R=10,w=W-L-R,span=16,p0=s.phase-span,top=12,h=H-24,y=v=>top+h-(v/VCC)*h;
+  const W=c._w,H=c._h,L=40,R=10,w=W-L-R,span=16,p0=Math.max(0,s.phase-span),top=12,h=H-24,y=v=>top+h-(v/VCC)*h;
   c.clearRect(0,0,W,H);grid5(c,L,w,y);
-  c.strokeStyle=css('--cv');c.lineWidth=2.5;stepLine(c,L,w,800,t=>cvVals[mod8(countAt(p0+span*t))],y);
+  c.strokeStyle=css('--cv');c.lineWidth=2.5;stepLine(c,L,w,800,t=>cvVals[mod8(countAt(p0+span*t))],y);playhead(c,L,w,p0,span,s.phase,top,top+h);
 }
 
 // ---------- controls ----------
@@ -558,7 +524,7 @@ let last=performance.now();
 function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;
   const s=active==='a'?simA:simB;
   if(!s.paused)s.phase+=dt/s.period();
-  if(active==='a'){boardA();drawTiming(ctx['a-timing'],simA,['CLK','Q1 → LED1','Q2 → LED2','Q3 → LED3','ספירה']);drawCap(ctx['a-capc'],simA);}
+  if(active==='a'){boardA();drawTiming(ctx['a-timing'],simA,['CLK','Q1 → LED1','Q2 → LED2','Q3 → LED3','ספירה']);}
   else{boardB();drawTiming(ctx['b-timing'],simB,['CLK','Q1 → A','Q2 → B','Q3 → C','ערוץ']);drawCap(ctx['b-capc'],simB);drawCV(ctx['b-cvc'],simB);}
   requestAnimationFrame(frame);}
 show('a');requestAnimationFrame(frame);
