@@ -54,6 +54,7 @@ button:hover{border-color:var(--muted)}
 button[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
 button:focus-visible,input:focus-visible{outline:3px solid var(--hi);outline-offset:2px}
 .hint{font-size:15px;color:var(--muted)}
+a{color:var(--hi);text-decoration:underline;text-underline-offset:3px}
 .flash{min-height:1.6em;margin-top:8px;font-size:15px;color:var(--muted)}
 .cvs{direction:ltr;background:var(--screen);border:1px solid var(--line);border-radius:4px}
 canvas{display:block;width:100%}
@@ -76,6 +77,26 @@ tr.on td{background:color-mix(in srgb,var(--hi) 16%,transparent);font-weight:700
 .cvgrid input{writing-mode:vertical-lr;direction:rtl;width:28px;height:120px;accent-color:var(--cv)}
 .cvgrid label.on span{color:var(--cv);font-weight:700}
 .cvgrid output{font-family:"Rubik",sans-serif;font-size:13px;direction:ltr}
+.cvgrid output.r{color:var(--muted);font-size:12px}
+#pgrid label.on span,#pgrid label.on output:first-child,#dgrid label.on span,#dgrid label.on output{color:var(--cv);font-weight:700}
+.seq16{display:grid;grid-template-columns:repeat(16,1fr);gap:4px;direction:ltr;margin-top:6px}
+.seq16 div{font-family:"Rubik",sans-serif;text-align:center;padding:8px 0;border:1px solid var(--line);border-radius:4px;background:var(--screen);font-weight:500}
+.seq16 div.half2{background:color-mix(in srgb,var(--clk) 12%,var(--screen))}
+.seq16 div.on{background:var(--hi);color:#fff;border-color:var(--hi)}
+@media (max-width:620px){.seq16{grid-template-columns:repeat(8,1fr)}}
+#e-table tr.flip td{background:color-mix(in srgb,var(--clk) 12%,transparent)}
+#e-table td.fa{color:var(--clk);font-weight:700}
+#e-table tr.sep td{border-top:2px solid var(--clk)}
+#e-table tr.on td{background:color-mix(in srgb,var(--hi) 16%,transparent)}
+.seq32{display:grid;grid-template-columns:70px repeat(8,1fr);gap:4px;direction:ltr;margin-top:6px}
+.seq32 div{font-family:"Rubik",sans-serif;text-align:center;padding:7px 0;border:1px solid var(--line);border-radius:4px;background:var(--screen);font-weight:500}
+.seq32 div.lbl{border:none;background:none;color:var(--muted);font-size:13px;font-weight:400;direction:rtl}
+.seq32 div.q1{background:color-mix(in srgb,var(--clk) 10%,var(--screen))}
+.seq32 div.q2{background:color-mix(in srgb,var(--cv) 12%,var(--screen))}
+.seq32 div.q3{background:color-mix(in srgb,var(--led) 10%,var(--screen))}
+#g-seq div.alt{background:color-mix(in srgb,var(--clk) 10%,var(--screen))}
+#h-seq div.alt{background:color-mix(in srgb,var(--clk) 12%,var(--screen))}
+.seq32 div.on{background:var(--hi);color:#fff;border-color:var(--hi)}
 .big{font-family:"Rubik",sans-serif;font-size:26px;font-weight:500;direction:ltr;unicode-bidi:isolate;color:var(--cv)}
 dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:4px 26px;margin:10px 0 0}
 dl div{padding:10px 0;border-bottom:1px solid var(--line)}
@@ -103,11 +124,17 @@ dd{margin:2px 0 0}
   <div class="tabs" role="tablist" aria-label="מעגלים">
     <button role="tab" id="tab-a" aria-controls="panel-a" aria-selected="true">מונה בינארי</button>
     <button role="tab" id="tab-b" aria-controls="panel-b" aria-selected="false">סיקוונסר שמונה צעדים</button>
+    <button role="tab" id="tab-c" aria-controls="panel-c" aria-selected="false">סיקוונסר צלילים</button>
+    <button role="tab" id="tab-d" aria-controls="panel-d" aria-selected="false">סיקוונסר CV</button>
+    <button role="tab" id="tab-e" aria-controls="panel-e" aria-selected="false">סיקוונסר XOR</button>
+    <button role="tab" id="tab-f" aria-controls="panel-f" aria-selected="false">סיקוונסר 32 צעדים</button>
+    <button role="tab" id="tab-g" aria-controls="panel-g" aria-selected="false">סיקוונסר 64 צעדים</button>
+    <button role="tab" id="tab-h" aria-controls="panel-h" aria-selected="false">קדימה ואחורה</button>
   </div>
 
   <!-- ===================== TAB A ===================== -->
   <div role="tabpanel" id="panel-a" aria-labelledby="tab-a">
-    <p class="lede" style="margin-bottom:6px">המעגל סופר מ־0 עד 7, שוב ושוב, ומציג את המספר בשלוש נוריות. שני רכיבים עובדים יחד כדי שזה יקרה:</p>
+    <p class="lede" style="margin-bottom:6px">המעגל סופר מ־0 עד 7, שוב ושוב, ומציג את המספר בשלוש נורות. שני רכיבים עובדים יחד כדי שזה יקרה:</p>
     <ul class="lede" style="margin-top:0;padding-inline-start:22px">
       <li><b>השעון</b> מוציא מתח שעולה ויורד שוב ושוב בקצב קבוע, כמו תקתוק של מטרונום. כל עלייה וירידה כזו נקראת פולס.</li>
       <li><b>המונה</b> סופר את הפולסים ומציג את המספר בבינארי. כל נורית היא ספרה אחת: דולקת היא 1, כבויה היא 0.</li>
@@ -147,9 +174,7 @@ dd{margin:2px 0 0}
           <p>מונה בינארי של 12 שלבים <span class="en">(12-stage binary counter)</span>. בכל פעם שהשעון יורד מגבוה לנמוך, המונה מתקדם באחד. היציאות Q1 עד Q12 מייצגות את המספר שהמונה נמצא בו באמצעות שילוב של 0 ו־1.</p>
           <p>אנחנו משתמשים רק בשלוש היציאות הראשונות. שלוש ספרות בינאריות מספיקות כדי לספור מ־0 עד 7. אחרי 7 מגיע שוב 0 (מבחינת שלוש הספרות האלה), והספירה מתחילה מחדש.</p>
           <h3>רגל האיפוס</h3>
-          <p>כשרגל <code>RESET</code> גבוהה, המונה מתאפס ונשאר באפס. הנגד <b>R5</b> מושך אותה לאדמה, כך שהיא נמוכה בזמן רגיל והמונה יכול לספור. זה נקרא נגד <b>משיכה למטה</b> <span class="en">(Pull-down resistor)</span>. הכפתור "איפוס" מעלה את המתח ברגל הזו ויוצר את פעולת האיפוס.</p>
-          <h3>הנגדים של הנוריות</h3>
-          <p>היציאות של המונה חלשות ויכולות לספק רק זרם קטן. הנגדים <b>R1</b>, <b>R2</b> ו־<b>R3</b> של 12 קילו־אוהם מגבילים את הזרם לפחות ממיליאמפר אחד, כך שהנוריות דולקות חלש אבל המונה לא נפגע.</p>
+          <p>כשרגל <code>RESET</code> גבוהה, המונה מתאפס ונשאר באפס. הנגד <b>R21</b> מושך אותה לאדמה, כך שהיא נמוכה בזמן רגיל והמונה יכול לספור. זה נקרא נגד <b>משיכה למטה</b> <span class="en">(Pull-down resistor)</span>. במעגל אין כפתור איפוס. הכפתור "איפוס" בדף מדמה מה קורה כשמעלים את המתח ברגל הזו. כדי להוסיף איפוס אמיתי, מחברים לחצן בין הרגל ל־VCC.</p>
         </div>
         <div>
           <table id="a-table" aria-label="טבלת ספירה">
@@ -161,17 +186,17 @@ dd{margin:2px 0 0}
     </section>
 
     <section class="module">
-      <div class="step-head"><span class="num">2</span><h2>איך קוראים את הנוריות</h2></div>
+      <div class="step-head"><span class="num">2</span><h2>איך קוראים את הנורות</h2></div>
       <div class="cols">
         <div>
-          <p>בשיטה העשרונית כל ספרה שווה פי עשרה מזו שמימינה: אחדות, עשרות, מאות. בבינארי כל ספרה שווה <b>פי שניים</b> מזו שמימינה <span class="en">(Place value)</span>.</p>
-          <p>לכן LED1 שווה 1, LED2 שווה 2, ו־LED3 שווה 4. כדי לדעת איזה מספר מוצג, מחברים את הערכים של הנוריות הדולקות. אם דולקות LED1 ו־LED3, המספר הוא 1 ועוד 4, כלומר 5.</p>
-          <p>בתרשים שלמעלה LED1, הספרה הקטנה, נמצאת בצד ימין, ו־LED3, הספרה הגדולה, בצד שמאל. כך הנוריות מסודרות כמו מספר בינארי שכותבים על דף.</p>
+          <p>בשיטה העשרונית כל ספרה שווה פי עשרה מזו שמימינה: אחדות, עשרות, מאות. <a href="https://golkit1.github.io/interactive-electronics-studies/base2.html" target="_blank" rel="noopener">בבינארי</a> כל ספרה שווה <b>פי שניים</b> מזו שמימינה.</p>
+          <p>לכן, בשלושת הביטים הראשונים, LED1 מייצגת 1, LED2 מייצגת 2, ו־LED3 מייצגת 4. כדי לדעת איזה מספר מוצג, מחברים את הערכים של הנורות הדולקות. אם דולקות LED1 ו־LED3, המספר הוא 1 ועוד 4, כלומר 5.</p>
+          <p>בתרשים שלמעלה LED1, הביט בעל הערך הנמוך ביותר, נמצאת בצד ימין, ו־LED3, הביט בעל הערך הגבוה ביותר, בצד שמאל. כך הנורות מסודרות כמו מספר בינארי שכותבים על דף.</p>
         </div>
         <div>
           <h3 style="margin-top:0">מחלק תדר ואוקטבות</h3>
-          <p>כל יציאה של המונה מתהפכת בחצי מהקצב של היציאה שלפניה. LED1 מהבהב בחצי מקצב השעון, LED2 ברבע, ו־LED3 בשמינית. לכן המונה הוא גם <b>מחלק תדר</b> <span class="en">(Frequency divider)</span>.</p>
-          <p>בצליל, חצי תדר הוא בדיוק <b>אוקטבה</b> <span class="en">(Octave)</span> אחת למטה. אם מזינים את המונה בשעון בתדר שמע, Q1 נותנת את אותו תו אוקטבה נמוך יותר, Q2 שתי אוקטבות, ו־Q3 שלוש. כך בנויים הרבה <b>תת־מתנדים</b> <span class="en">(Sub-oscillators)</span> בסינתיסייזרים.</p>
+          <p>כל יציאה של המונה מתהפכת בחצי מהתדר של היציאה שלפניה. LED1 מהבהבת בחצי מתדר השעון, LED2 ברבע, ו־LED3 בשמינית. לכן המונה הוא גם <b>מחלק תדר</b> <span class="en">(Frequency divider)</span>.</p>
+          <p>בצליל, חצי תדר הוא בדיוק <b>אוקטבה</b> <span class="en">(Octave)</span> אחת למטה. אם מזינים את המונה בשעון בתדר שמע, Q1 מפיקה תדר שהוא אוקטבה אחת מתחת לשעון, Q2 שתי אוקטבות מתחת, ו־Q3 שלוש.</p>
           <p class="hint">נסו: הזיזו את המהירות לקצה המהיר. LED1 נראה דולק כל הזמן, אבל LED3 עדיין מהבהב לאט.</p>
         </div>
       </div>
@@ -185,7 +210,7 @@ dd{margin:2px 0 0}
 
   <!-- ===================== TAB B ===================== -->
   <div role="tabpanel" id="panel-b" aria-labelledby="tab-b" hidden>
-    <p class="lede" style="margin-bottom:6px">המעגל מדליק שמונה נוריות אחת אחרי השנייה, וחוזר על הרצף שוב ושוב. שלושה רכיבים עובדים יחד כדי ליצור את הרצף:</p>
+    <p class="lede" style="margin-bottom:6px">המעגל מדליק שמונה נורות אחת אחרי השנייה, וחוזר על הרצף שוב ושוב. שלושה רכיבים עובדים יחד כדי ליצור את הרצף:</p>
     <ul class="lede" style="margin-top:0;padding-inline-start:22px">
       <li><b>השעון (40106)</b> מייצר אות מחזורי בקצב קבוע. כל פולס של השעון מקדם את הסיקוונסר צעד אחד.</li>
       <li><b>המונה (4040)</b> סופר את הפולסים ומוציא את הספירה בצורה בינארית: 0, 1, 2, עד 7, ואז חוזר ל־0.</li>
@@ -220,9 +245,8 @@ dd{margin:2px 0 0}
       <div class="step-head"><span class="num">1</span><h2>השעון</h2><span class="chip">CD40106</span></div>
       <div class="cols">
         <div>
-          <p>זה אותו שעון כמו במונה הבינארי: מהפך עם שמיט טריגר <span class="en">(Schmitt trigger)</span>, קבל שנטען ומתפרק בין שני ספים, ופוטנציומטר שקובע כמה מהר זה קורה.</p>
-          <p>הקבל <b>C1</b> מחובר לכניסה, והפוטנציומטר מחבר את היציאה חזרה לכניסה. זמן המחזור בקירוב: 0.8 × R × C.</p>
-          <p>כאן יש נורית על השעון עצמו: <b>LED1</b> עם הנגד <b>R5</b> מהבהב בכל פולס.</p>
+          <p>זה אותו שעון כמו במונה הבינארי: מהפך עם שמיט טריגר <span class="en">(Schmitt trigger)</span>, קבל שנטען ונפרק דרך נגד, ופוטנציומטר שקובע את קצב הטעינה והפריקה.</p>
+          <p>הקבל <b>C1</b> מחובר לכניסה, והפוטנציומטר מחבר את היציאה חזרה לכניסה.</p>
         </div>
         <div>
           <div class="cvs"><canvas id="b-capc" height="230"></canvas></div>
@@ -235,8 +259,7 @@ dd{margin:2px 0 0}
       <div class="step-head"><span class="num">2</span><h2>המונה</h2><span class="chip">CD4040</span></div>
       <div class="cols">
         <div>
-          <p>אותו מונה בינארי, אבל כאן היציאות Q1, Q2 ו־Q3 לא מדליקות נוריות. הן נכנסות לבורר, ומספרות לו איזה ערוץ לחבר.</p>
-          <p>הנגד <b>R22</b> מושך את רגל <code>RESET</code> לאדמה, כך שהמונה סופר כל הזמן. אפשר לחבר אליה כפתור או שער מבחוץ כדי להחזיר את הסיקוונסר להתחלה.</p>
+          <p>זה אותו מונה בינארי, אבל כאן היציאות Q1, Q2 ו־Q3 לא מדליקות נורות. הן מחוברות לכניסות הבחירה של הבורר, וקובעות איזה ערוץ ייבחר.</p>
         </div>
         <div>
           <table id="b-table" aria-label="טבלת ספירה">
@@ -249,45 +272,356 @@ dd{margin:2px 0 0}
 
     <section class="module">
       <div class="step-head"><span class="num">3</span><h2>הבורר</h2><span class="chip">CD4051</span></div>
-      <div class="cols">
+      <p>זה <b>בורר אנלוגי</b> <span class="en">(Analog Multiplexer)</span>: מתג אלקטרוני עם שמונה ערוצים. יש לו רגל משותפת אחת, <code>X</code>, ושמונה ערוצים, <code>X0</code> עד <code>X7</code>. בכל רגע רק ערוץ אחד מחובר ל־<code>X</code>.</p>
+      <p>שלוש רגלי הבחירה, <code>A</code>, <code>B</code> ו־<code>C</code>, קובעות איזה ערוץ ייבחר. הן מקבלות מספר בינארי מהמונה, ולכן הספירה עוברת בין שמונת הערוצים בזה אחר זה.</p>
+      <p>רגל <code>X</code> מחוברת ל־VCC, ולכן הערוץ שנבחר מקבל מתח והנורית שלו נדלקת.</p>
+      <p><code>INH</code> מאפשר לנתק את כל הערוצים. כאן הוא מחובר לאדמה, ולכן הבורר תמיד פעיל.</p>
+      <div class="warn"><b>שימו לב לכיוון הנורות:</b> הזרם זורם מ־VCC, דרך הבורר, אל הנורית ומשם דרך <code>R8</code> אל האדמה. לכן האנודה <span class="en">(Anode)</span> של הנורית פונה אל הבורר, והקתודה <span class="en">(Cathode)</span> אל הנגד.</div>
+    </section>
+
+  </div>
+
+
+  <!-- ===================== TAB C ===================== -->
+  <div role="tabpanel" id="panel-c" aria-labelledby="tab-c" hidden>
+    <p class="lede" style="margin-bottom:6px">בחלק הזה הסיקוונסר לא רק מדליק נורות, אלא גם מנגן. בורר נוסף בוחר בכל צעד פוטנציומטר אחר, והפוטנציומטר קובע את גובה הצליל של אוסילטור שני ב־40106:</p>
+    <ul class="lede" style="margin-top:0;padding-inline-start:22px">
+      <li><b>השעון והמונה</b> עובדים כמו בלשונית הקודמת וסופרים מ־0 עד 7.</li>
+      <li><b>הבורר (4051)</b> מקבל את אותה ספירה, ובכל צעד בוחר פוטנציומטר אחר מתוך שמונה.</li>
+      <li><b>המתנד השני (40106)</b> מייצר את הצליל. הפוטנציומטר שנבחר מחובר למעגל המתנד, וערכו קובע את תדר הצליל.</li>
+    </ul>
+    <p class="lede">כל פוטנציומטר מייצג תו אחד. מכוונים את שמונת הפוטנציומטרים, ומקבלים רצף של שמונה תווים שחוזר על עצמו.</p>
+
+    <section class="module" aria-label="המעגל בפעולה">
+      <div class="board"><svg id="c-board" viewBox="0 0 960 310" aria-label="תרשים חי של הפוטנציומטרים והמתנד"></svg></div>
+      <div class="controls">
+        <div class="slider">
+          <div class="top"><label for="c-pot">פוטנציומטר: מהירות השעון</label></div>
+          <input type="range" id="c-pot" min="0" max="1000" value="380">
+          <div class="top hint" style="font-weight:400"><span>איטי</span><span>מהיר</span></div>
+        </div>
+        <div class="btns">
+          <button id="c-sound" aria-pressed="false">השמע צליל</button>
+          <button id="c-pause" aria-pressed="false">עצור</button>
+          <button id="c-step">צעד אחד</button>
+          <button id="c-reset">איפוס <span class="en">(Reset)</span></button>
+        </div>
+      </div>
+      <div class="cols" style="margin-top:14px;align-items:center">
         <div>
-          <p>זה <b>מרבב אנלוגי</b> <span class="en">(Analog multiplexer)</span>: מתג סיבובי אלקטרוני עם שמונה מצבים. יש לו רגל משותפת אחת, <code>X</code>, ושמונה ערוצים, <code>X0</code> עד <code>X7</code>. בכל רגע רק ערוץ אחד מחובר לרגל המשותפת.</p>
-          <p>איזה ערוץ? את זה קובעות שלוש רגלי הבחירה, <code>A</code>, <code>B</code> ו־<code>C</code>. הן מקבלות מספר בינארי, והמספר הוא מספר הערוץ. כאן הן מחוברות ל־Q1, Q2 ו־Q3, כך שהמונה "מסובב" את המתג צעד אחרי צעד.</p>
-          <p>רגל <code>X</code> מחוברת ל־VCC, ולכן הערוץ הנבחר מקבל מתח והנורית שלו נדלקת.</p>
-          <h3>הרגליים האחרות</h3>
-          <ul class="pins">
-            <li><code>INH</code> (עיכוב, <span class="en">Inhibit</span>): כשהיא גבוהה, כל הערוצים מנותקים. כאן היא באדמה, אז המתג תמיד פעיל.</li>
-            <li><code>VEE</code>: המתח השלילי. מחוברת לאדמה, ולכן המתג מעביר רק מתחים בין 0 ל־VCC.</li>
-            <li><code>VDD</code> ו־<code>VSS</code>: הזנה ואדמה.</li>
-          </ul>
+          <div class="cvgrid" id="pgrid"></div>
+          <p class="hint">כל מחוון הוא פוטנציומטר אחד. למטה: ההתנגדות שלו. למעלה: התדר שהוא נותן.</p>
         </div>
         <div>
-          <h3 style="margin-top:0">נגד אחד לשמונה נוריות</h3>
-          <p>כל הנוריות חולקות נגד אחד, <b>R8</b>. זה עובד רק כי אף פעם לא דולקות שתי נוריות יחד. אם היו כמה נוריות דולקות במקביל על נגד אחד, הן היו מתחלקות בזרם בצורה לא שווה.</p>
-          <p>גם למתג עצמו יש קצת התנגדות כשהוא סגור <span class="en">(On-resistance)</span>, בסביבות מאות אוהם. במעגל הזה זה לא מפריע, אבל זה חשוב לזכור כשמעבירים דרכו מתחי שליטה.</p>
-          <div class="warn" style="margin-top:14px"><b>שימו לב לכיוון הנוריות:</b> הזרם זורם מ־VCC, דרך המתג, אל הערוץ ומשם דרך הנורית אל R8 והאדמה. לכן הצד החיובי של הנורית (האנודה, <span class="en">Anode</span>) צריך לפנות אל ערוצי הבורר, והצד השלילי (הקתודה, <span class="en">Cathode</span>) אל הנגד המשותף.</div>
+          <div>צעד נוכחי: <span class="big" style="direction:rtl" id="cStep"></span></div>
+          <div>התנגדות במעגל: <span class="big" id="cR" style="direction:rtl"></span></div>
+          <div>תדר הצליל: <span class="big" id="cF" style="direction:rtl"></span></div>
         </div>
       </div>
     </section>
 
     <section class="module">
-      <div class="step-head"><span class="num">4</span><h2>מנוריות למתחים</h2></div>
+      <h2>גובה הצליל לאורך זמן</h2>
+      <p class="hint">כל מדרגה היא צעד אחד של הסיקוונסר. הגובה שלה הוא התדר שהפוטנציומטר של אותו צעד נותן.</p>
+      <div class="cvs"><canvas id="c-pitch" height="220"></canvas></div>
+    </section>
+
+    <section class="module">
+      <div class="step-head"><span class="num">1</span><h2>המתנד השני</h2><span class="chip">CD40106 · U2.3</span></div>
+      <p>בשבב 40106 יש שישה מהפכים. אחד משמש כשעון, ואחר, <b>U2.3</b>, בנוי כמתנד נוסף באותה שיטה: קבל שנטען ומתפרק בין שני ספים דרך נגד שמחבר את היציאה חזרה לכניסה.</p>
+      <p>ההבדל הוא בגודל. לשעון יש קבל גדול, ולכן הוא מתקתק לאט. כאן הקבל <b>C2</b> הוא רק מיקרופרד אחד, והמתנד רוטט מאות פעמים בשנייה. בקצב כזה כבר לא רואים הבהוב, שומעים צליל.</p>
+      <p>הנגד של המתנד הזה לא קבוע. הוא בנוי משלושה חלקים בטור: הפוטנציומטר שנבחר, המתג שבתוך הבורר, והנגד <b>R7</b>. שינוי של כל אחד מהם משנה את התדר.</p>
+    </section>
+
+    <section class="module">
+      <div class="step-head"><span class="num">2</span><h2>הבורר בוחר נגד</h2><span class="chip">CD4051 · U4</span></div>
+      <p>בלשונית הקודמת הבורר חילק מתח לשמונה נורות. כאן הוא עובד כמו מתג סיבובי שבוחר איזה נגד יהיה חלק מהמעגל.</p>
+      <p>רגלי הבחירה <code>A</code>, <code>B</code> ו־<code>C</code> מחוברות ל־Q1, Q2 ו־Q3 של המונה, בדיוק כמו בבורר של הנורות. שני הבוררים מקבלים את אותו מספר, ולכן נורית 1 דולקת בזמן שפוטנציומטר P1 מנגן, נורית 2 עם P2, וכן הלאה.</p>
+      <p>צד אחד של כל שמונת הפוטנציומטרים מחובר יחד ליציאה של המתנד. הצד השני של כל פוטנציומטר מגיע לערוץ משלו בבורר, <code>X0</code> עד <code>X7</code>. הרגל המשותפת <code>X</code> של הבורר ממשיכה דרך <b>R7</b> אל הכניסה של המתנד ואל הקבל. כך בכל רגע רק פוטנציומטר אחד סוגר את המעגל, והשאר מנותקים.</p>
+    </section>
+
+    <section class="module">
+      <div class="step-head"><span class="num">3</span><h2>הנגד R7</h2></div>
+      <p>פוטנציומטר שמסובב עד הסוף מגיע ל־0 אוהם. בלי <b>R7</b>, היציאה של המתנד הייתה מחוברת כמעט ישירות לקבל, והתדר היה קופץ גבוה מאוד. <b>R7</b> של קילו־אוהם אחד שם גבול: זו ההתנגדות הקטנה ביותר האפשרית, ולכן הוא קובע את התו הגבוה ביותר.</p>
+    </section>
+
+    <section class="module">
+      <div class="step-head"><span class="num">4</span><h2>טווח הצלילים</h2></div>
       <div class="cols">
         <div>
-          <p>המרבב הוא מתג <b>דו־כיווני</b>. אפשר להכניס מתח לרגל המשותפת ולפזר אותו לשמונה ערוצים, כמו במעגל שלמעלה. ואפשר גם להפוך את הכיוון: להכניס שמונה מתחים שונים לשמונה הערוצים, ולקבל ברגל המשותפת בכל פעם את אחד מהם.</p>
-          <p>אם מחברים לכל ערוץ פוטנציומטר בין VCC לאדמה, הרגל <code>X</code> הופכת ליציאת <b>מתח שליטה</b> <span class="en">(CV)</span> שעולה ויורדת במדרגות. זה סיקוונסר מודולרי קלאסי: אותו שעון, אותו מונה, אותו בורר.</p>
-          <p>כדאי לחבר אחרי היציאה <b>מגבר עוקב</b> <span class="en">(Buffer)</span>, כדי שההתנגדות של הפוטנציומטרים ושל המתג לא ישפיעו על המתח שמגיע למודול הבא.</p>
-          <p class="hint">בדוגמה כאן VCC הוא 5 וולט.</p>
+          <p>התדר בקירוב: 1 חלקי (0.8 × R × C). R היא סכום ההתנגדויות, ו־C הוא <b>C2</b>.</p>
+          <p>שימו לב לטבלה: חצי הסיבוב הראשון של הפוטנציומטר מכסה טווח גדול של תדרים, והחצי השני מעט מאוד. הסיבה היא שהתדר תלוי ב"אחד חלקי R". כשההתנגדות קטנה, כל שינוי קטן בה מזיז את התדר הרבה.</p>
+          <p class="hint">בדוגמה כאן הפוטנציומטרים הם של 10 קילו־אוהם, וההתנגדות של המתג בבורר היא כ־200 אוהם.</p>
         </div>
         <div>
-          <div class="cvgrid" id="cvgrid"></div>
-          <div>מתח ביציאה: <span class="big" id="cvOut"></span></div>
+          <table id="c-table" aria-label="טבלת תדרים"><thead><tr><th>מיקום הפוטנציומטר</th><th>התנגדות כוללת</th><th>תדר</th></tr></thead><tbody></tbody></table>
         </div>
       </div>
-      <div class="cvs" style="margin-top:12px"><canvas id="b-cvc" height="200"></canvas></div>
     </section>
   </div>
 
+  <!-- ===================== TAB D ===================== -->
+  <div role="tabpanel" id="panel-d" aria-labelledby="tab-d" hidden>
+    <p class="lede" style="margin-bottom:6px">בגרסה הזו הסיקוונסר לא מנגן בעצמו. הוא מוציא <b>מתח שליטה</b> <span class="en">(CV)</span>: מתח שמשתנה במדרגות, צעד אחרי צעד. את המתח הזה אפשר לחבר למתנד חיצוני, כמו 4046 או מודול בסינתיסייזר מודולרי, והוא יכול לקבוע את גובה הצליל שלו.</p>
+    <ul class="lede" style="margin-top:0;padding-inline-start:22px">
+      <li><b>השעון והמונה</b> עובדים כמו בלשוניות הקודמות וסופרים מ־0 עד 7.</li>
+      <li><b>שמונת הפוטנציומטרים</b> מחוברים כמחלקי מתח בין VCC לאדמה. כל אחד מוציא מתח קבוע בין 0 ל־5 וולט.</li>
+      <li><b>הבורר (4051)</b> בוחר בכל צעד את המתח של פוטנציומטר אחד ומעביר אותו ליציאה.</li>
+    </ul>
+    <p class="lede">כל פוטנציומטר קובע את המתח של צעד אחד. שמונה פוטנציומטרים יוצרים רצף של שמונה מתחים שחוזר על עצמו.</p>
+
+    <section class="module" aria-label="המעגל בפעולה">
+      <div class="board"><svg id="d-board" viewBox="0 0 960 310" aria-label="תרשים חי של סיקוונסר המתח"></svg></div>
+      <div class="controls">
+        <div class="slider">
+          <div class="top"><label for="d-pot">פוטנציומטר: מהירות השעון</label></div>
+          <input type="range" id="d-pot" min="0" max="1000" value="380">
+          <div class="top hint" style="font-weight:400"><span>איטי</span><span>מהיר</span></div>
+        </div>
+        <div class="btns">
+          <button id="d-sound" aria-pressed="false">השמע המחשה</button>
+          <button id="d-pause" aria-pressed="false">עצור</button>
+          <button id="d-step">צעד אחד</button>
+          <button id="d-reset">איפוס <span class="en">(Reset)</span></button>
+        </div>
+      </div>
+      <div class="cols" style="margin-top:14px;align-items:center">
+        <div>
+          <div class="cvgrid" id="dgrid"></div>
+          <p class="hint">כל מחוון הוא פוטנציומטר אחד. המספר מעליו הוא המתח שהוא מוציא.</p>
+        </div>
+        <div>
+          <div>צעד נוכחי: <span class="big" id="dStep" style="direction:rtl"></span></div>
+          <div>מתח ביציאה: <span class="big" id="dV" style="direction:rtl"></span></div>
+          <p class="hint">כפתור ההמחשה מנגן צליל שהגובה שלו עולה עם המתח, בערך כמו מתנד שמקבל את המתח הזה.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="module">
+      <h2>המתח ביציאה לאורך זמן</h2>
+      <p class="hint">כל מדרגה היא צעד אחד של הסיקוונסר. הגובה שלה הוא המתח של הפוטנציומטר באותו צעד.</p>
+      <div class="cvs"><canvas id="d-cv" height="220"></canvas></div>
+    </section>
+
+    <section class="module">
+      <div class="step-head"><span class="num">1</span><h2>הפוטנציומטר כמחלק מתח</h2></div>
+      <p>לפוטנציומטר שלוש רגליים. שתי הרגליים שבקצוות מחוברות ל־VCC ולאדמה, והרגל האמצעית, <b>הזרוע</b> <span class="en">(Wiper)</span>, נוגעת בנקודה כלשהי לאורך הנגד שביניהן.</p>
+      <p>זהו <a href="https://app.notion.com/p/Voltage-Divider-1ad3a1fefe7a8023928dd715b9a62dda" target="_blank" rel="noopener">מחלק מתח</a>: הזרוע מקבלת חלק מהמתח, לפי המיקום שלה. בקצה של האדמה היא מוציאה 0 וולט, בקצה של VCC היא מוציאה 5 וולט, ובאמצע 2.5 וולט.</p>
+      <p>ההבדל מהלשונית הקודמת: שם הפוטנציומטר שימש כנגד משתנה, וההתנגדות שלו קבעה את תדר המתנד. כאן הפוטנציומטר משמש כמחלק מתח, והמתח שהוא מוציא מועבר הלאה.</p>
+    </section>
+
+    <section class="module">
+      <div class="step-head"><span class="num">2</span><h2>הבורר וה־CV</h2><span class="chip">CD4051 · U4</span></div>
+      <p>הזרוע של כל פוטנציומטר מחוברת לערוץ משלה בבורר, <code>X0</code> עד <code>X7</code>. רגלי הבחירה <code>A</code>, <code>B</code> ו־<code>C</code> מחוברות למונה, כמו בבורר של הנורות.</p>
+      <p>בלשונית של הנורות, המתח נכנס דרך הרגל המשותפת <code>X</code> ויוצא דרך הערוץ שנבחר. כאן הכיוון הפוך: שמונה מתחים נכנסים דרך הערוצים, ובכל רגע אחד מהם יוצא דרך <code>X</code>.</p>
+      <p>ה־4051 הוא בורר אנלוגי, ולכן הוא יכול להעביר גם מתחים שבין 0 ל־VCC, ולא רק אותות של 0 או 1. לדוגמה, אם בערוץ מסוים נכנסים 2.7 וולט, ביציאה יתקבל בערך אותו מתח.</p>
+      <p>היציאה עוברת דרך נגד <b>R2</b> אל שקע 3.5 מ"מ, ומשם אפשר לחבר אותה לכניסת CV של מעגל או מודול חיצוני. כניסת CV בעלת התנגדות גבוהה לא מושכת כמעט זרם, ולכן המתח שמגיע אליה נשאר קרוב למתח שהסיקוונסר מייצר.</p>
+      <p class="hint">בדוגמה כאן VCC הוא 5 וולט.</p>
+    </section>
+
+  </div>
+
+  <!-- ===================== TAB E ===================== -->
+  <div role="tabpanel" id="panel-e" aria-labelledby="tab-e" hidden>
+    <p class="lede" style="margin-bottom:6px">בגרסה הזו מוסיפים למעגל שער לוגי אחד ומתג, והסיקוונסר של שמונה צעדים הופך לרצף של 16 צעדים:</p>
+    <ul class="lede" style="margin-top:0;padding-inline-start:22px">
+      <li><b>השעון והמונה</b> עובדים כמו קודם, אבל עכשיו משתמשים גם ביציאה Q4 של המונה.</li>
+      <li><b>שער XOR (4070)</b> משלב את Q1 ואת Q4 לאות אחד.</li>
+      <li><b>המתג S2</b> בוחר מה נכנס לרגל A של הבוררים: Q1 כרגיל, או היציאה של שער ה־XOR.</li>
+    </ul>
+    <p class="lede">במצב XOR, שמונת הצעדים הראשונים מתנגנים לפי הסדר, ובשמונה הבאים כל זוג צעדים מתחלף. הרצף חוזר על עצמו רק אחרי 16 צעדים.</p>
+
+    <section class="module" aria-label="המעגל בפעולה">
+      <div class="board"><svg id="e-board" viewBox="0 0 960 300" aria-label="תרשים חי של סיקוונסר XOR"></svg></div>
+      <p class="hint" style="margin-top:8px">המונה מציג את היציאות שלו כמו שהן. בתוך הבורר רואים את שלוש הספרות שמגיעות אליו בפועל, אחרי המתג, ואת הערוץ שהן בוחרות.</p>
+      <div class="controls">
+        <div class="slider">
+          <div class="top"><label for="e-pot">פוטנציומטר: מהירות השעון</label></div>
+          <input type="range" id="e-pot" min="0" max="1000" value="300">
+          <div class="top hint" style="font-weight:400"><span>איטי</span><span>מהיר</span></div>
+        </div>
+        <div class="btns">
+          <button id="e-switch" aria-pressed="true">מתג S2 במצב XOR</button>
+          <button id="e-sound" aria-pressed="false">השמע צליל</button>
+          <button id="e-pause" aria-pressed="false">עצור</button>
+          <button id="e-step">צעד אחד</button>
+          <button id="e-reset">איפוס <span class="en">(Reset)</span></button>
+        </div>
+      </div>
+      <h3>הרצף המלא</h3>
+      <div class="seq16" id="e-seq"></div>
+      <p class="hint">כל משבצת היא צעד אחד של המונה, והמספר בה הוא הערוץ שהבורר בוחר. הצלילים נקבעים לפי הפוטנציומטרים בלשונית "סיקוונסר צלילים".</p>
+    </section>
+
+    <section class="module">
+      <h2>דיאגרמת תזמון <span class="en">(Timing diagram)</span></h2>
+      <p class="hint">שלוש השורות A, B ו־C הן מה שמגיע לרגלי הבחירה של הבורר, ויחד הן קובעות את מספר הערוץ. השורה A נוצרת מ־Q1 ומ־Q4: במצב XOR היא זהה ל־Q1 כש־Q4 נמוך, והפוכה ל־Q1 כש־Q4 גבוה.</p>
+      <div class="cvs"><canvas id="e-timing" height="340"></canvas></div>
+    </section>
+
+    <section class="module">
+      <div class="step-head"><span class="num">1</span><h2>שער XOR</h2><span class="chip">CD4070 · IC1.1</span></div>
+      <div class="cols">
+        <div>
+          <p>שער <b>XOR</b> <span class="en">(Exclusive OR)</span>, "או בלעדי", מקבל שתי כניסות. היציאה שלו גבוהה רק כשהכניסות <b>שונות</b> זו מזו. כששתיהן נמוכות, או ששתיהן גבוהות, היציאה נמוכה.</p>
+          <p>דרך נוספת להסתכל על זה: כשכניסה אחת נמוכה, השער מעביר את הכניסה השנייה כמו שהיא. כשכניסה אחת גבוהה, השער הופך את הכניסה השנייה. זו התכונה שמשמשת כאן.</p>
+          <p>בשבב 4070 יש ארבעה שערים, ומשתמשים רק באחד. הכניסות של שלושת האחרים מחוברות לאדמה, מאותה סיבה כמו בשערים שלא בשימוש ב־40106.</p>
+        </div>
+        <div>
+          <table aria-label="טבלת אמת של XOR"><thead><tr><th>Q4</th><th>Q1</th><th>יציאה</th><th>מה השער עושה ל־Q1</th></tr></thead>
+          <tbody>
+            <tr><td class="b">0</td><td class="b">0</td><td class="b">0</td><td rowspan="2" style="border-inline-start:1px solid var(--line)">מעביר כמו שהוא</td></tr>
+            <tr><td class="b">0</td><td class="b">1</td><td class="b">1</td></tr>
+            <tr style="background:color-mix(in srgb,var(--clk) 12%,transparent)"><td class="b">1</td><td class="b">0</td><td class="b">1</td><td rowspan="2" style="border-inline-start:1px solid var(--line)">הופך</td></tr>
+            <tr style="background:color-mix(in srgb,var(--clk) 12%,transparent)"><td class="b">1</td><td class="b">1</td><td class="b">0</td></tr>
+          </tbody></table>
+          <p class="hint">בשתי השורות העליונות Q4 נמוכה, והיציאה שווה ל־Q1. בשתי התחתונות Q4 גבוהה, והיציאה הפוכה ל־Q1.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="module">
+      <div class="step-head"><span class="num">2</span><h2>המתג S2</h2><span class="chip">SPDT</span></div>
+      <p>זה מתג דו־מצבי <span class="en">(SPDT)</span>: רגל אמצעית אחת שמתחברת לאחת משתי רגליים. הרגל האמצעית מחוברת לרגל <code>A</code> של שני הבוררים. רגל אחת של המתג מקבלת את Q1 ישירות מהמונה, והשנייה את היציאה של שער ה־XOR.</p>
+      <p>במצב Q1 המעגל הוא הסיקוונסר הרגיל של שמונה צעדים. במצב XOR הרצף משתנה. הרגליים <code>B</code> ו־<code>C</code> ממשיכות לקבל את Q2 ואת Q3 בשני המצבים.</p>
+      <p>שני הבוררים, של הנורות ושל הפוטנציומטרים, מקבלים את אותו אות ב־<code>A</code>. לכן הנורה שדולקת תמיד מתאימה לפוטנציומטר שמנגן.</p>
+      <div class="board" style="margin-top:12px"><svg id="e-swfig" viewBox="0 0 720 270" aria-label="איור של המתג S2 ושני הבוררים"></svg></div>
+      <p class="hint">לחצו על המתג באיור כדי להעביר אותו בין Q1 ל־XOR. הקו הצבוע הוא הדרך שבה האות מגיע לרגל A של שני הבוררים.</p>
+    </section>
+
+    <section class="module">
+      <div class="step-head"><span class="num">3</span><h2>למה 16 צעדים</h2></div>
+      <div class="cols">
+        <div>
+          <p>Q4 היא הספרה הרביעית של המונה, והיא מתהפכת פעם בשמונה צעדים. בצעדים 0 עד 7 היא נמוכה, ובצעדים 8 עד 15 היא גבוהה.</p>
+          <p>כש־Q4 נמוכה, שער ה־XOR מעביר את Q1 כמו שהיא, והבורר עובר על הערוצים לפי הסדר: 0, 1, 2, 3, 4, 5, 6, 7.</p>
+          <p>כש־Q4 גבוהה, השער הופך את Q1. הספרה הימנית של מספר הערוץ מתהפכת, וכל זוג ערוצים מתחלף: 1, 0, 3, 2, 5, 4, 7, 6.</p>
+          <p>רק אחרי שני החצאים המונה חוזר לאותו מצב, ולכן הרצף המלא הוא 16 צעדים. אותם שמונה פוטנציומטרים, בשני סדרים שונים.</p>
+        </div>
+        <div>
+          <table id="e-table" aria-label="טבלת 16 צעדים"><thead><tr><th>צעד</th><th>Q4</th><th>Q1</th><th>A</th><th>ערוץ</th></tr></thead><tbody></tbody></table>
+          <p class="hint">בצעדים 8 עד 15 (ברקע הכתום) Q4 גבוהה, ולכן A הפוכה ל־Q1. הסימן ⇄ מסמן את ההפיכה.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===================== TAB F ===================== -->
+  <div role="tabpanel" id="panel-f" aria-labelledby="tab-f" hidden>
+    <p class="lede" style="margin-bottom:6px">כאן יש שני שערי XOR ואין מתג. הרצף מתארך ל־32 צעדים:</p>
+    <ul class="lede" style="margin-top:0;padding-inline-start:22px">
+      <li><b>שער XOR ראשון</b> מקבל את Q1 ואת Q4, ושולח את התוצאה לרגל A של הבוררים.</li>
+      <li><b>שער XOR שני</b> מקבל את Q2 ואת Q5, ושולח את התוצאה לרגל B.</li>
+      <li><b>Q3</b> מגיעה ישירות לרגל C, כמו קודם.</li>
+    </ul>
+
+    <section class="module" aria-label="המעגל בפעולה">
+      <div class="board"><svg id="f-board" viewBox="0 0 960 300" aria-label="תרשים חי של סיקוונסר 32 צעדים"></svg></div>
+      <div class="controls">
+        <div class="slider">
+          <div class="top"><label for="f-pot">פוטנציומטר: מהירות השעון</label></div>
+          <input type="range" id="f-pot" min="0" max="1000" value="300">
+          <div class="top hint" style="font-weight:400"><span>איטי</span><span>מהיר</span></div>
+        </div>
+        <div class="btns">
+          <button id="f-sound" aria-pressed="false">השמע צליל</button>
+          <button id="f-pause" aria-pressed="false">עצור</button>
+          <button id="f-step">צעד אחד</button>
+          <button id="f-reset">איפוס <span class="en">(Reset)</span></button>
+        </div>
+      </div>
+      <h3>הרצף המלא</h3>
+      <div class="seq32" id="f-seq"></div>
+      <p class="hint">כל שורה היא שמונה צעדים. המספר בכל משבצת הוא הערוץ שהבורר בוחר. הצלילים נקבעים לפי הפוטנציומטרים בלשונית "סיקוונסר צלילים".</p>
+    </section>
+
+    <section class="module">
+      <div class="step-head"><span class="num">1</span><h2>למה 32 צעדים</h2></div>
+      <p>Q4 מתהפכת פעם בשמונה צעדים, ו־Q5 פעם ב־16 צעדים. יחד הן עוברות על ארבעה מצבים: 00, 01, 10, 11. כל מצב נמשך שמונה צעדים, ובכל אחד מהם הבורר עובר על אותם שמונה ערוצים בסדר אחר:</p>
+      <ul>
+        <li><b>Q5 ו־Q4 נמוכות:</b> שני השערים מעבירים את Q1 ואת Q2 כמו שהן, והסדר רגיל.</li>
+        <li><b>רק Q4 גבוהה:</b> השער הראשון הופך את A, וכל זוג ערוצים סמוכים מתחלף.</li>
+        <li><b>רק Q5 גבוהה:</b> השער השני הופך את B, וכל זוג של זוגות מתחלף.</li>
+        <li><b>שתיהן גבוהות:</b> A ו־B הפוכות, וכל רביעייה מתנגנת מהסוף להתחלה.</li>
+      </ul>
+      <p>אחרי ארבעת המצבים המונה חוזר לאותו מצב, ולכן הרצף המלא הוא 4 × 8 = 32 צעדים.</p>
+    </section>
+  </div>
+
+  <!-- ===================== TAB G ===================== -->
+  <div role="tabpanel" id="panel-g" aria-labelledby="tab-g" hidden>
+    <p class="lede" style="margin-bottom:6px">כאן יש שלושה שערי XOR, אחד לכל רגל בחירה של הבורר. הרצף מתארך ל־64 צעדים:</p>
+    <ul class="lede" style="margin-top:0;padding-inline-start:22px">
+      <li><b>שער XOR ראשון</b> מקבל את Q1 ואת Q4, ושולח את התוצאה לרגל A.</li>
+      <li><b>שער XOR שני</b> מקבל את Q2 ואת Q5, ושולח את התוצאה לרגל B.</li>
+      <li><b>שער XOR שלישי</b> מקבל את Q3 ואת Q6, ושולח את התוצאה לרגל C.</li>
+    </ul>
+
+    <section class="module" aria-label="המעגל בפעולה">
+      <div class="board"><svg id="g-board" viewBox="0 0 960 300" aria-label="תרשים חי של סיקוונסר 64 צעדים"></svg></div>
+      <div class="controls">
+        <div class="slider">
+          <div class="top"><label for="g-pot">פוטנציומטר: מהירות השעון</label></div>
+          <input type="range" id="g-pot" min="0" max="1000" value="330">
+          <div class="top hint" style="font-weight:400"><span>איטי</span><span>מהיר</span></div>
+        </div>
+        <div class="btns">
+          <button id="g-sound" aria-pressed="false">השמע צליל</button>
+          <button id="g-pause" aria-pressed="false">עצור</button>
+          <button id="g-step">צעד אחד</button>
+          <button id="g-reset">איפוס <span class="en">(Reset)</span></button>
+        </div>
+      </div>
+      <h3>הרצף המלא</h3>
+      <div class="seq32" id="g-seq"></div>
+      <p class="hint">כל שורה היא שמונה צעדים. המספר בכל משבצת הוא הערוץ שהבורר בוחר. הצלילים נקבעים לפי הפוטנציומטרים בלשונית "סיקוונסר צלילים".</p>
+    </section>
+
+    <section class="module">
+      <div class="step-head"><span class="num">1</span><h2>למה 64 צעדים</h2></div>
+      <p>Q4, ‏Q5 ו־Q6 הן הספרות האיטיות של המונה. יחד יש להן שמונה צירופים, והן עוברות לצירוף הבא פעם בשמונה צעדים.</p>
+      <p>כל צירוף משנה את הסדר של אותם שמונה ערוצים בדרך אחרת. לכן כל שורה ברצף נשמעת כמו וריאציה של השורה הראשונה.</p>
+      <p>שמונה שורות של שמונה צעדים: 8 × 8 = 64 צעדים עד שהרצף חוזר.</p>
+    </section>
+  </div>
+
+  <!-- ===================== TAB H ===================== -->
+  <div role="tabpanel" id="panel-h" aria-labelledby="tab-h" hidden>
+    <p class="lede" style="margin-bottom:6px">כאן יש שלושה שערי XOR, וכולם מקבלים את Q4. הסיקוונסר מנגן את שמונת הצעדים קדימה, ואז חוזר עליהם אחורה:</p>
+    <ul class="lede" style="margin-top:0;padding-inline-start:22px">
+      <li><b>שער XOR ראשון</b> מקבל את Q1 ואת Q4, ושולח את התוצאה לרגל A.</li>
+      <li><b>שער XOR שני</b> מקבל את Q2 ואת Q4, ושולח את התוצאה לרגל B.</li>
+      <li><b>שער XOR שלישי</b> מקבל את Q3 ואת Q4, ושולח את התוצאה לרגל C.</li>
+    </ul>
+
+    <section class="module" aria-label="המעגל בפעולה">
+      <div class="board"><svg id="h-board" viewBox="0 0 960 300" aria-label="תרשים חי של סיקוונסר קדימה ואחורה"></svg></div>
+      <div class="controls">
+        <div class="slider">
+          <div class="top"><label for="h-pot">פוטנציומטר: מהירות השעון</label></div>
+          <input type="range" id="h-pot" min="0" max="1000" value="330">
+          <div class="top hint" style="font-weight:400"><span>איטי</span><span>מהיר</span></div>
+        </div>
+        <div class="btns">
+          <button id="h-sound" aria-pressed="false">השמע צליל</button>
+          <button id="h-pause" aria-pressed="false">עצור</button>
+          <button id="h-step">צעד אחד</button>
+          <button id="h-reset">איפוס <span class="en">(Reset)</span></button>
+        </div>
+      </div>
+      <h3>הרצף המלא</h3>
+      <div class="seq32" id="h-seq"></div>
+      <p class="hint">המספר בכל משבצת הוא הערוץ שהבורר בוחר. הצלילים נקבעים לפי הפוטנציומטרים בלשונית "סיקוונסר צלילים".</p>
+    </section>
+
+    <section class="module">
+      <div class="step-head"><span class="num">1</span><h2>איך זה עובד</h2></div>
+      <p>כש־Q4 נמוכה, שלושת השערים מעבירים את Q1, ‏Q2 ו־Q3 כמו שהן, והבורר סופר קדימה: 0 עד 7.</p>
+      <p>כש־Q4 גבוהה, שלושת השערים הופכים את כל הספרות בבת אחת. 0 הופך ל־7, 1 הופך ל־6, וכן הלאה. לכן הבורר סופר אחורה: 7 עד 0.</p>
+      <p>בנקודות הסיבוב אותו צעד מתנגן פעמיים ברצף: 7 ואז שוב 7, ובסוף 0 ואז שוב 0.</p>
+    </section>
+  </div>
 </div>
 <script>
 (function(){
@@ -305,7 +639,7 @@ function mkSim(rSlow,rFast,potId){
   s.setPot(+$(potId).value);
   return s;
 }
-const simA=mkSim(100000,300,'a-pot'), simB=mkSim(50000,300,'b-pot');
+const simA=mkSim(100000,300,'a-pot'), simB=mkSim(50000,300,'b-pot'), simC=mkSim(50000,300,'c-pot'), simD=mkSim(50000,300,'d-pot'), simE=mkSim(50000,300,'e-pot'), simF=mkSim(50000,300,'f-pot'), simG=mkSim(50000,300,'g-pot'), simH=mkSim(50000,300,'h-pot');
 
 // ---------- SVG helpers ----------
 const NS='http://www.w3.org/2000/svg', FONT='Rubik, Arial, sans-serif';
@@ -343,7 +677,7 @@ function updCounter(c,n){for(let b=0;b<3;b++){const v=n>>b&1;c.txt[b].textConten
 
 // ---------- Board A: binary counter ----------
 const svgA=$('a-board');
-title(svgA,95,'1. שעון');title(svgA,325,'2. מונה');title(svgA,660,'3. נוריות');
+title(svgA,95,'1. שעון');title(svgA,325,'2. מונה');title(svgA,660,'3. נורות');
 const clkA=clockBlock(svgA,false), cntA=counterBlock(svgA);
 // Q1 -> LED1 (x=800), Q2 -> LED2 (660), Q3 -> LED3 (520)
 const colX=[800,660,520], rowY=[95,120,145], wA=[], ledA=[], valA=[];
@@ -369,13 +703,13 @@ function boardA(){
     ledA[b].setAttribute('fill',ledFill(v,dim));
     wA[b].setAttribute('stroke',v&&!dim?'var(--hi)':'var(--wire)');
     valA[b].setAttribute('fill',v&&!dim?'var(--led)':'var(--muted)');}
-  $('a-flash').textContent=fastAny?'חלק מהנוריות מהבהבות עכשיו מהר מדי לעין ונראות דולקות חלש. שימו לב ש־LED3 עדיין איטי יותר מ־LED1.':'';
+  $('a-flash').textContent=fastAny?'חלק מהנורות מהבהבות עכשיו מהר מדי לעין ונראות דולקות חלש. שימו לב ש־LED3 עדיין איטי יותר מ־LED1.':'';
   rowsA.forEach((tr,i)=>tr.classList.toggle('on',i===n));
 }
 
 // ---------- Board B: sequencer ----------
 const svgB=$('b-board');
-title(svgB,95,'1. שעון');title(svgB,325,'2. מונה');title(svgB,565,'3. בורר');title(svgB,800,'4. נוריות');
+title(svgB,95,'1. שעון');title(svgB,325,'2. מונה');title(svgB,565,'3. בורר');title(svgB,800,'4. נורות');
 const clkB=clockBlock(svgB,true), cntB=counterBlock(svgB);
 const selY=[95,120,145], wSel=[];
 for(let i=0;i<3;i++){label(svgB,400,selY[i]-5,'Q'+(i+1),{size:10,fill:'var(--muted)',anchor:'end'});
@@ -412,10 +746,566 @@ function boardB(){
   for(let i=0;i<8;i++){const on=i===ch;
     ledsB[i].setAttribute('fill',fast?'color-mix(in srgb,var(--led) 40%,var(--ledoff))':on?'var(--led)':'var(--ledoff)');
     chWire[i].setAttribute('stroke',on&&!fast?'var(--hi)':'var(--wire)');
-    rowsB[i].classList.toggle('on',on);cvLbl[i].classList.toggle('on',on);}
-  $('cvOut').textContent=cvVals[ch].toFixed(1)+' V';
-  $('b-flash').textContent=fast?'בקצב כזה העין כבר לא מספיקה לעקוב, וכל הנוריות נראות דולקות חלש. זו בדיוק הטכניקה שבה מסכי נוריות גדולים מדליקים שורה אחרי שורה.':'';
+    rowsB[i].classList.toggle('on',on);}
+  $('b-flash').textContent=fast?'בקצב כזה העין כבר לא מספיקה לעקוב, וכל הנורות נראות דולקות חלש. זו בדיוק הטכניקה שבה מסכי נורות גדולים מדליקים שורה אחרי שורה.':'';
 }
+
+// ---------- Board C: pots + tone oscillator ----------
+const POT=10000, R7=1000, RON=200, C2=1e-6;
+const toneF=r=>1/(0.8*r*C2);
+const potPos=[0.15,0.35,0.55,0.25,0.8,0.45,0.1,0.6];
+const rTot=i=>potPos[i]*POT+RON+R7;
+const fmtR=r=>r>=1000?(r/1000).toFixed(1)+' קילו־אוהם':Math.round(r)+' אוהם';
+const fmtF=f=>Math.round(f)+' הרץ';
+const svgC=$('c-board');
+title(svgC,95,'1. שעון');title(svgC,325,'2. מונה');title(svgC,565,'3. בורר');title(svgC,705,'4. פוטנציומטרים');title(svgC,870,'5. מתנד');
+const clkC=clockBlock(svgC,true), cntC=counterBlock(svgC);
+const wSelC=[];
+for(let i=0;i<3;i++){label(svgC,400,selY[i]-5,'Q'+(i+1),{size:10,fill:'var(--muted)',anchor:'end'});
+  wSelC[i]=el(svgC,'line',{x1:410,y1:selY[i],x2:480,y2:selY[i],stroke:'var(--wire)','stroke-width':3});}
+block(svgC,480,40,170,230);label(svgC,565,262,'CD4051',{fill:'var(--muted)'});
+['A','B','C'].forEach((n,i)=>label(svgC,490,selY[i]+4,n,{size:11,fill:'var(--muted)',anchor:'start'}));
+label(svgC,538,196,'X',{size:11,fill:'var(--muted)'});
+el(svgC,'circle',{cx:552,cy:200,r:5,fill:'var(--ink)'});
+const armC=el(svgC,'line',{x1:552,y1:200,x2:625,y2:cy(0),stroke:'var(--cv)','stroke-width':3.5,'stroke-linecap':'round'});
+// common X -> R7 -> oscillator input
+const wCom=el(svgC,'polyline',{points:'552,200 552,292 880,292 880,232',fill:'none',stroke:'var(--cv)','stroke-width':2.5});
+el(svgC,'rect',{x:690,y:285,width:34,height:14,fill:'var(--screen)',stroke:'var(--ink)','stroke-width':1.5});
+label(svgC,707,280,'R7',{size:11,fill:'var(--muted)'});
+const potR=[],potW=[],potL=[];
+for(let i=0;i<8;i++){
+  el(svgC,'circle',{cx:628,cy:cy(i),r:4,fill:'var(--screen)',stroke:'var(--ink)','stroke-width':1.5});
+  label(svgC,608,cy(i)+4,'X'+i,{size:10,fill:'var(--muted)',anchor:'end'});
+  potW[i]=el(svgC,'line',{x1:632,y1:cy(i),x2:675,y2:cy(i),stroke:'var(--wire)','stroke-width':2.5});
+  potR[i]=el(svgC,'rect',{x:675,y:cy(i)-6,width:44,height:12,fill:'var(--screen)',stroke:'var(--ink)','stroke-width':1.5});
+  el(svgC,'line',{x1:719,y1:cy(i),x2:765,y2:cy(i),stroke:'var(--wire)','stroke-width':2});
+  potL[i]=label(svgC,697,cy(i)-9,'P'+(i+1),{size:10,fill:'var(--muted)'});
+}
+el(svgC,'line',{x1:765,y1:cy(0),x2:765,y2:cy(7),stroke:'var(--wire)','stroke-width':2});
+el(svgC,'line',{x1:765,y1:150,x2:800,y2:150,stroke:'var(--wire)','stroke-width':2});
+block(svgC,800,70,140,162);label(svgC,870,92,'CD40106',{fill:'var(--muted)'});
+label(svgC,870,110,'U2.3 · C2',{size:11,fill:'var(--muted)'});
+const oscWave=el(svgC,'path',{d:'',fill:'none',stroke:'var(--cv)','stroke-width':2});
+const oscF=label(svgC,870,210,'',{size:16,weight:500,fill:'var(--cv)',attrs:{direction:'rtl'}});
+function waveD(f){const n=Math.max(1,Math.min(14,Math.round(f/80)));const x0=815,w=110,y1=130,y2=170;let d=`M${x0},${y2}`;
+  for(let k=0;k<n;k++){const a=x0+w*k/n,m=a+w/(2*n),b=x0+w*(k+1)/n;d+=` L${a},${y1} L${m},${y1} L${m},${y2} L${b},${y2}`;}return d;}
+let lastCh=-1;
+function boardC(){
+  const s=simC,f=1/s.period(),clk=clkAt(s.phase),ch=mod8(countAt(s.phase)),fast=f>14;
+  clkC.f.textContent=(f<10?f.toFixed(2):f.toFixed(1))+' הרץ';
+  clkC.led.setAttribute('fill',ledFill(clk,fast));
+  clkC.w.setAttribute('stroke',clk?'var(--clk)':'var(--wire)');
+  updCounter(cntC,ch);
+  for(let b=0;b<3;b++)wSelC[b].setAttribute('stroke',ch>>b&1?'var(--hi)':'var(--wire)');
+  armC.setAttribute('y2',cy(ch));
+  for(let i=0;i<8;i++){const on=i===ch;
+    potW[i].setAttribute('stroke',on?'var(--cv)':'var(--wire)');
+    potR[i].setAttribute('stroke',on?'var(--cv)':'var(--ink)');
+    potL[i].setAttribute('fill',on?'var(--cv)':'var(--muted)');
+    pLbl[i].classList.toggle('on',on);}
+  const r=rTot(ch),tf=toneF(r);
+  $('cStep').textContent='P'+(ch+1);$('cR').textContent=fmtR(r);$('cF').textContent=fmtF(tf);
+  oscF.textContent=fmtF(tf);
+  if(ch!==lastCh){oscWave.setAttribute('d',waveD(tf));lastCh=ch;}
+  audioSet(tf);
+}
+// pot sliders
+const pLbl=[],pOut=[];
+potPos.forEach((v,i)=>{const l=document.createElement('label');
+  l.innerHTML=`<output></output><input type="range" min="0" max="1" step="0.01" value="${v}" aria-label="פוטנציומטר P${i+1}"><span>P${i+1}</span><output class="r"></output>`;
+  const inp=l.querySelector('input'),o=l.querySelectorAll('output');
+  const upd=()=>{potPos[i]=+inp.value;o[0].textContent=Math.round(toneF(rTot(i)));o[1].textContent=(potPos[i]*POT/1000).toFixed(1)+'k';lastCh=-1;};
+  inp.addEventListener('input',upd);upd();
+  $('pgrid').appendChild(l);pLbl.push(l);pOut.push(o);});
+// range table
+const tbC=document.querySelector('#c-table tbody');
+[0,0.25,0.5,0.75,1].forEach(p=>{const r=p*POT+RON+R7,tr=document.createElement('tr');
+  tr.innerHTML=`<td class="b">${Math.round(p*100)}%</td><td>${fmtR(r)}</td><td>${fmtF(toneF(r))}</td>`;tbC.appendChild(tr);});
+// audio
+let actx=null,osc=null,gain=null,soundOn=false;
+function audioSet(f){if(osc&&actx)osc.frequency.setTargetAtTime(f,actx.currentTime,0.004);}
+function soundStart(){try{
+  if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();
+  actx.resume();
+  osc=actx.createOscillator();osc.type='square';gain=actx.createGain();gain.gain.value=0;
+  osc.connect(gain).connect(actx.destination);osc.start();
+  gain.gain.setTargetAtTime(0.06,actx.currentTime,0.02);soundOn=true;}catch(e){soundOn=false;}}
+function soundStop(){if(osc){try{gain.gain.setTargetAtTime(0,actx.currentTime,0.02);const o=osc;setTimeout(()=>{try{o.stop();}catch(e){}},120);}catch(e){}osc=null;}soundOn=false;}
+function setSound(on){const b=$('c-sound');if(on)soundStart();else soundStop();b.setAttribute('aria-pressed',soundOn);b.textContent=soundOn?'השתק':'השמע צליל';}
+$('c-sound').addEventListener('click',()=>setSound(!soundOn));
+
+// ---------- Board D: CV sequencer ----------
+const dVals=[1.2,3.0,2.2,4.1,0.8,3.6,1.8,2.7];
+const svgD=$('d-board');
+title(svgD,95,'1. שעון');title(svgD,325,'2. מונה');title(svgD,565,'3. בורר');title(svgD,745,'4. פוטנציומטרים');title(svgD,895,'5. יציאה');
+const clkD=clockBlock(svgD,true), cntD=counterBlock(svgD);
+const wSelD=[];
+for(let i=0;i<3;i++){label(svgD,400,selY[i]-5,'Q'+(i+1),{size:10,fill:'var(--muted)',anchor:'end'});
+  wSelD[i]=el(svgD,'line',{x1:410,y1:selY[i],x2:480,y2:selY[i],stroke:'var(--wire)','stroke-width':3});}
+block(svgD,480,40,170,230);label(svgD,565,262,'CD4051',{fill:'var(--muted)'});
+['A','B','C'].forEach((n,i)=>label(svgD,490,selY[i]+4,n,{size:11,fill:'var(--muted)',anchor:'start'}));
+label(svgD,538,196,'X',{size:11,fill:'var(--muted)'});
+el(svgD,'circle',{cx:552,cy:200,r:5,fill:'var(--ink)'});
+const armD=el(svgD,'line',{x1:552,y1:200,x2:625,y2:cy(0),stroke:'var(--cv)','stroke-width':3.5,'stroke-linecap':'round'});
+const wOut=el(svgD,'polyline',{points:'552,200 552,292 895,292 895,252',fill:'none',stroke:'var(--cv)','stroke-width':2.5});
+el(svgD,'rect',{x:700,y:285,width:34,height:14,fill:'var(--screen)',stroke:'var(--ink)','stroke-width':1.5});
+label(svgD,717,280,'R2',{size:11,fill:'var(--muted)'});
+label(svgD,690,50,'0V',{size:10,fill:'var(--muted)'});label(svgD,800,50,'5V',{size:10,fill:'var(--muted)'});
+const dW=[],dFill=[],dTxt=[],dL=[];
+for(let i=0;i<8;i++){
+  el(svgD,'circle',{cx:628,cy:cy(i),r:4,fill:'var(--screen)',stroke:'var(--ink)','stroke-width':1.5});
+  label(svgD,608,cy(i)+4,'X'+i,{size:10,fill:'var(--muted)',anchor:'end'});
+  dW[i]=el(svgD,'line',{x1:632,y1:cy(i),x2:690,y2:cy(i),stroke:'var(--wire)','stroke-width':2.5});
+  el(svgD,'rect',{x:690,y:cy(i)-6,width:110,height:12,fill:'var(--screen)',stroke:'var(--line)','stroke-width':1});
+  dFill[i]=el(svgD,'rect',{x:690,y:cy(i)-6,width:0,height:12,fill:'color-mix(in srgb,var(--cv) 35%,var(--screen))'});
+  dL[i]=label(svgD,672,cy(i)-8,'P'+(i+1),{size:9,fill:'var(--muted)'});
+  dTxt[i]=label(svgD,808,cy(i)+4,'',{size:11,fill:'var(--muted)',anchor:'start'});
+}
+block(svgD,850,120,90,132);
+label(svgD,895,142,'CV OUT',{size:11,fill:'var(--muted)'});
+el(svgD,'circle',{cx:895,cy:172,r:13,fill:'var(--screen)',stroke:'var(--ink)','stroke-width':2});
+el(svgD,'circle',{cx:895,cy:172,r:5,fill:'var(--ink)'});
+const dOutT=label(svgD,895,222,'',{size:20,weight:500,fill:'var(--cv)'});
+function boardD(){
+  const s=simD,f=1/s.period(),clk=clkAt(s.phase),ch=mod8(countAt(s.phase)),fast=f>14;
+  clkD.f.textContent=(f<10?f.toFixed(2):f.toFixed(1))+' הרץ';
+  clkD.led.setAttribute('fill',ledFill(clk,fast));
+  clkD.w.setAttribute('stroke',clk?'var(--clk)':'var(--wire)');
+  updCounter(cntD,ch);
+  for(let b=0;b<3;b++)wSelD[b].setAttribute('stroke',ch>>b&1?'var(--hi)':'var(--wire)');
+  armD.setAttribute('y2',cy(ch));
+  for(let i=0;i<8;i++){const on=i===ch;
+    dW[i].setAttribute('stroke',on?'var(--cv)':'var(--wire)');
+    dFill[i].setAttribute('width',dVals[i]/VCC*110);
+    dFill[i].setAttribute('fill',on?'var(--cv)':'color-mix(in srgb,var(--cv) 35%,var(--screen))');
+    dTxt[i].textContent=dVals[i].toFixed(1)+'V';dTxt[i].setAttribute('fill',on?'var(--cv)':'var(--muted)');
+    dL[i].setAttribute('fill',on?'var(--cv)':'var(--muted)');
+    dLbl[i].classList.toggle('on',on);}
+  const v=dVals[ch];
+  $('dStep').textContent='P'+(ch+1);$('dV').textContent=v.toFixed(1)+' וולט';dOutT.textContent=v.toFixed(1)+'V';
+  if(dOsc&&actx)dOsc.frequency.setTargetAtTime(110*Math.pow(2,v*0.8),actx.currentTime,0.004);
+}
+const dLbl=[];
+dVals.forEach((v,i)=>{const l=document.createElement('label');
+  l.innerHTML=`<output></output><input type="range" min="0" max="5" step="0.1" value="${v}" aria-label="פוטנציומטר P${i+1}"><span>P${i+1}</span>`;
+  const inp=l.querySelector('input'),o=l.querySelector('output');
+  const upd=()=>{dVals[i]=+inp.value;o.textContent=dVals[i].toFixed(1);};
+  inp.addEventListener('input',upd);upd();
+  $('dgrid').appendChild(l);dLbl.push(l);});
+let dOsc=null,dGain=null,dOn=false;
+function dStart(){try{
+  if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();
+  actx.resume();dOsc=actx.createOscillator();dOsc.type='square';dGain=actx.createGain();dGain.gain.value=0;
+  dOsc.connect(dGain).connect(actx.destination);dOsc.start();dGain.gain.setTargetAtTime(0.06,actx.currentTime,0.02);dOn=true;}catch(e){dOn=false;}}
+function dStop(){if(dOsc){try{dGain.gain.setTargetAtTime(0,actx.currentTime,0.02);const o=dOsc;setTimeout(()=>{try{o.stop();}catch(e){}},120);}catch(e){}dOsc=null;}dOn=false;}
+function setDSound(on){const b=$('d-sound');if(on)dStart();else dStop();b.setAttribute('aria-pressed',dOn);b.textContent=dOn?'השתק':'השמע המחשה';}
+$('d-sound').addEventListener('click',()=>setDSound(!dOn));
+
+// ---------- Board E: XOR sequencer ----------
+let xorOn=true;
+const chOf=n=>{n=((n%16)+16)%16;const a=xorOn?((n&1)^(n>>3&1)):(n&1);return (n&6)|a;};
+const svgE=$('e-board');
+title(svgE,95,'1. שעון');title(svgE,325,'2. מונה');title(svgE,490,'3. XOR ומתג');title(svgE,655,'4. בורר');title(svgE,830,'5. נורות');
+const clkE=clockBlock(svgE,true);
+block(svgE,240,50,170,190);label(svgE,325,72,'CD4040',{fill:'var(--muted)'});
+const eBox=[],eTxt=[];
+[['Q4',3],['Q3',2],['Q2',1],['Q1',0]].forEach(([n,b],i)=>{const x=252+i*38;
+  eBox[b]=el(svgE,'rect',{x,y:110,width:32,height:40,rx:4,fill:'var(--screen)',stroke:'var(--line)'});
+  eTxt[b]=label(svgE,x+16,138,'0',{size:20,weight:500});
+  label(svgE,x+16,168,n,{size:12,fill:'var(--muted)'});});
+label(svgE,325,196,'בעשרוני',{size:11,fill:'var(--muted)',attrs:{direction:'rtl'}});
+const eDec=label(svgE,325,224,'',{size:22,weight:500});
+// wires from counter
+const eQ1=el(svgE,'polyline',{points:'410,85 440,85',fill:'none',stroke:'var(--wire)','stroke-width':3});
+const eQ1up=el(svgE,'polyline',{points:'425,85 425,52 520,52',fill:'none',stroke:'var(--wire)','stroke-width':3});
+const eQ4=el(svgE,'polyline',{points:'410,110 440,110',fill:'none',stroke:'var(--wire)','stroke-width':3});
+const eQ2=el(svgE,'line',{x1:410,y1:175,x2:590,y2:175,stroke:'var(--wire)','stroke-width':3});
+const eQ3=el(svgE,'line',{x1:410,y1:200,x2:590,y2:200,stroke:'var(--wire)','stroke-width':3});
+[['Q1',85],['Q4',110],['Q2',175],['Q3',200]].forEach(([n,y])=>label(svgE,414,y-5,n,{size:10,fill:'var(--muted)',anchor:'start'}));
+// XOR gate shape
+el(svgE,'path',{d:'M440,72 Q458,97 440,123 Q480,123 500,97 Q480,72 440,72 Z',fill:'var(--panel)',stroke:'var(--ink)','stroke-width':1.5});
+el(svgE,'path',{d:'M433,72 Q451,97 433,123',fill:'none',stroke:'var(--ink)','stroke-width':1.5});
+label(svgE,466,101,'XOR',{size:10,fill:'var(--muted)'});
+const eXo=el(svgE,'polyline',{points:'500,97 520,97',fill:'none',stroke:'var(--wire)','stroke-width':3});
+const bitTag=(x,y)=>{const r=el(svgE,'rect',{x:x-9,y:y-9,width:18,height:18,rx:3,fill:'var(--screen)',stroke:'var(--line)'});const t=label(svgE,x,y+5,'0',{size:13,weight:700});return {r,t};};
+const tIn1=bitTag(452,62),tIn2=bitTag(452,133),tOut=bitTag(510,117),tA=bitTag(576,58);
+const eEq=label(svgE,466,158,'',{size:13,weight:500,fill:'var(--ink)'});
+const setTag=(g,v,col)=>{g.t.textContent=v;g.t.setAttribute('fill',v?col:'var(--muted)');g.r.setAttribute('stroke',v?col:'var(--line)');};
+// switch S2
+el(svgE,'circle',{cx:522,cy:52,r:4,fill:'var(--screen)',stroke:'var(--ink)','stroke-width':1.5});
+el(svgE,'circle',{cx:522,cy:97,r:4,fill:'var(--screen)',stroke:'var(--ink)','stroke-width':1.5});
+el(svgE,'circle',{cx:560,cy:75,r:4,fill:'var(--ink)'});
+const eArm=el(svgE,'line',{x1:560,y1:75,x2:526,y2:97,stroke:'var(--ink)','stroke-width':3,'stroke-linecap':'round'});
+label(svgE,545,128,'S2',{size:11,fill:'var(--muted)'});
+const swHit=el(svgE,'rect',{x:510,y:40,width:60,height:70,fill:'transparent',style:'cursor:pointer'});
+const eA=el(svgE,'line',{x1:560,y1:75,x2:590,y2:75,stroke:'var(--wire)','stroke-width':3});
+// mux
+block(svgE,590,40,140,230);label(svgE,660,262,'CD4051',{fill:'var(--muted)'});
+[['A',75],['B',175],['C',200]].forEach(([n,y])=>label(svgE,598,y+4,n,{size:11,fill:'var(--muted)',anchor:'start'}));
+el(svgE,'line',{x1:560,y1:240,x2:648,y2:240,stroke:'var(--hi)','stroke-width':3});
+label(svgE,556,244,'VCC',{size:12,anchor:'end',fill:'var(--hi)'});
+el(svgE,'circle',{cx:652,cy:240,r:5,fill:'var(--ink)'});
+const eArmM=el(svgE,'line',{x1:652,y1:240,x2:715,y2:cy(0),stroke:'var(--hi)','stroke-width':3.5,'stroke-linecap':'round'});
+const selBox=[],selTxt=[];
+[['C',2],['B',1],['A',0]].forEach(([n,b],i)=>{const x=604+i*24;
+  selBox[b]=el(svgE,'rect',{x,y:100,width:20,height:24,rx:3,fill:'var(--screen)',stroke:'var(--line)'});
+  selTxt[b]=label(svgE,x+10,117,'0',{size:14,weight:700});
+  label(svgE,x+10,137,n,{size:10,fill:'var(--muted)'});});
+const selCh=label(svgE,640,158,'',{size:12,weight:500,fill:'var(--hi)',attrs:{direction:'rtl'}});
+const eCh=[],eLed=[];
+for(let i=0;i<8;i++){
+  el(svgE,'circle',{cx:718,cy:cy(i),r:4,fill:'var(--screen)',stroke:'var(--ink)','stroke-width':1.5});
+  label(svgE,704,cy(i)+4,'X'+i,{size:10,fill:'var(--muted)',anchor:'end'});
+  eCh[i]=el(svgE,'line',{x1:722,y1:cy(i),x2:812,y2:cy(i),stroke:'var(--wire)','stroke-width':2.5});
+  eLed[i]=el(svgE,'circle',{cx:825,cy:cy(i),r:11,fill:'var(--ledoff)',stroke:'var(--line)'});
+  el(svgE,'line',{x1:836,y1:cy(i),x2:880,y2:cy(i),stroke:'var(--wire)','stroke-width':2});}
+el(svgE,'line',{x1:880,y1:cy(0),x2:880,y2:cy(7)+30,stroke:'var(--wire)','stroke-width':2});
+el(svgE,'rect',{x:868,y:cy(7)+30,width:24,height:12,fill:'none',stroke:'var(--ink)','stroke-width':1.5});
+label(svgE,898,cy(7)+40,'R18',{size:11,fill:'var(--muted)',anchor:'start'});
+gnd(svgE,880,cy(7)+52);
+// sequence strip + table
+const seqEl=$('e-seq'),seqCells=[];
+for(let i=0;i<16;i++){const d=document.createElement('div');if(i>=8)d.className='half2';seqEl.appendChild(d);seqCells.push(d);}
+const tbE=document.querySelector('#e-table tbody'),rowsE=[];
+for(let i=0;i<16;i++){const tr=document.createElement('tr');tbE.appendChild(tr);rowsE.push(tr);}
+function fillSeq(){for(let i=0;i<16;i++){seqCells[i].textContent=chOf(i);
+  const a=xorOn?((i&1)^(i>>3&1)):(i&1);
+  const fl=xorOn&&i>=8;rowsE[i].classList.toggle('flip',fl);rowsE[i].classList.toggle('sep',i===8);
+  rowsE[i].innerHTML=`<td class="b">${i}</td><td class="b">${i>>3&1}</td><td class="b">${i&1}</td><td class="b${fl?' fa':''}">${a}${fl?' ⇄':''}</td><td class="b${fl?' fa':''}">X${chOf(i)}</td>`;}}
+fillSeq();
+function setXor(on){xorOn=on;const b=$('e-switch');b.setAttribute('aria-pressed',on);b.textContent=on?'מתג S2 במצב XOR':'מתג S2 במצב Q1';fillSeq();if(typeof drawSwFig==='function')drawSwFig();}
+
+// ---------- S2 illustration ----------
+const sf=$('e-swfig');
+const sfT=(x,y,t,o={})=>label(sf,x,y,t,Object.assign({size:12,fill:'var(--muted)'},o));
+// sources
+sfT(20,58,'Q1',{anchor:'start',size:13,fill:'var(--ink)',weight:500});
+sfT(20,128,'Q4',{anchor:'start',size:13,fill:'var(--ink)',weight:500});
+const sfQ1a=el(sf,'polyline',{points:'48,54 80,54',fill:'none',stroke:'var(--wire)','stroke-width':3});
+const sfQ1=el(sf,'polyline',{points:'80,54 250,54',fill:'none',stroke:'var(--wire)','stroke-width':3});
+const sfQ1x=el(sf,'polyline',{points:'80,54 80,104 118,104',fill:'none',stroke:'var(--wire)','stroke-width':3});
+const sfQ4=el(sf,'polyline',{points:'48,124 118,124',fill:'none',stroke:'var(--wire)','stroke-width':3});
+el(sf,'path',{d:'M118,92 Q134,114 118,136 Q156,136 176,114 Q156,92 118,92 Z',fill:'var(--panel)',stroke:'var(--ink)','stroke-width':1.5});
+el(sf,'path',{d:'M111,92 Q127,114 111,136',fill:'none',stroke:'var(--ink)','stroke-width':1.5});
+sfT(143,118,'XOR',{size:10});
+const sfX=el(sf,'polyline',{points:'176,114 250,114',fill:'none',stroke:'var(--wire)','stroke-width':3});
+// switch
+el(sf,'circle',{cx:254,cy:54,r:5,fill:'var(--screen)',stroke:'var(--ink)','stroke-width':1.5});
+el(sf,'circle',{cx:254,cy:114,r:5,fill:'var(--screen)',stroke:'var(--ink)','stroke-width':1.5});
+el(sf,'circle',{cx:310,cy:84,r:5,fill:'var(--ink)'});
+const sfArm=el(sf,'line',{x1:310,y1:84,x2:258,y2:114,stroke:'var(--ink)','stroke-width':3.5,'stroke-linecap':'round'});
+sfT(282,150,'S2',{size:13,weight:500,fill:'var(--ink)'});
+const sfState=sfT(282,168,'',{size:12,attrs:{direction:'rtl'}});
+const sfHit=el(sf,'rect',{x:235,y:35,width:90,height:100,fill:'transparent',style:'cursor:pointer'});
+// common A line to both muxes
+const sfA=el(sf,'polyline',{points:'310,84 400,84 400,44 470,44',fill:'none',stroke:'var(--cv)','stroke-width':3});
+const sfA2=el(sf,'polyline',{points:'400,84 400,174 470,174',fill:'none',stroke:'var(--cv)','stroke-width':3});
+el(sf,'circle',{cx:400,cy:84,r:4.5,fill:'var(--cv)'});
+sfT(356,76,'A',{size:12,weight:700,fill:'var(--cv)'});
+// Q2, Q3 to both
+sfT(20,238,'Q2',{anchor:'start',size:13,fill:'var(--ink)',weight:500});
+sfT(20,258,'Q3',{anchor:'start',size:13,fill:'var(--ink)',weight:500});
+el(sf,'polyline',{points:'48,234 430,234 430,64 470,64',fill:'none',stroke:'var(--wire)','stroke-width':2});
+el(sf,'polyline',{points:'430,194 470,194',fill:'none',stroke:'var(--wire)','stroke-width':2});
+el(sf,'circle',{cx:430,cy:194,r:3.5,fill:'var(--wire)'});
+el(sf,'polyline',{points:'48,254 445,254 445,84 470,84',fill:'none',stroke:'var(--wire)','stroke-width':2});
+el(sf,'polyline',{points:'445,214 470,214',fill:'none',stroke:'var(--wire)','stroke-width':2});
+el(sf,'circle',{cx:445,cy:214,r:3.5,fill:'var(--wire)'});
+// mux blocks
+[[26,'בורר הנורות','U1'],[156,'בורר הפוטנציומטרים','U4']].forEach(([y,t,u])=>{
+  block(sf,470,y,230,80);
+  [['A',18],['B',38],['C',58]].forEach(([n,d])=>sfT(478,y+d+4,n,{anchor:'start',size:11}));
+  sfT(600,y+36,t,{size:14,weight:500,fill:'var(--ink)',attrs:{direction:'rtl'}});
+  sfT(600,y+58,'CD4051 · '+u,{size:11});});
+function drawSwFig(){
+  sfArm.setAttribute('y2',xorOn?114:54);
+  sfQ1.setAttribute('stroke',xorOn?'var(--wire)':'var(--cv)');
+  sfQ1x.setAttribute('stroke',xorOn?'var(--hi)':'var(--wire)');sfQ4.setAttribute('stroke',xorOn?'var(--hi)':'var(--wire)');sfQ1a.setAttribute('stroke',xorOn?'var(--hi)':'var(--cv)');
+  sfX.setAttribute('stroke',xorOn?'var(--cv)':'var(--wire)');
+  sfState.textContent=xorOn?'במצב XOR':'במצב Q1';
+}
+sfHit.addEventListener('click',()=>setXor(!xorOn));
+drawSwFig();
+$('e-switch').addEventListener('click',()=>setXor(!xorOn));
+swHit.addEventListener('click',()=>setXor(!xorOn));
+const hi=v=>v?'var(--hi)':'var(--wire)';
+function boardE(){
+  const s=simE,f=1/s.period(),clk=clkAt(s.phase),n=((countAt(s.phase)%16)+16)%16,ch=chOf(n),fast=f>14;
+  clkE.f.textContent=(f<10?f.toFixed(2):f.toFixed(1))+' הרץ';
+  clkE.led.setAttribute('fill',ledFill(clk,fast));
+  clkE.w.setAttribute('stroke',clk?'var(--clk)':'var(--wire)');
+  for(let b=0;b<4;b++){const v=n>>b&1;eTxt[b].textContent=v;eBox[b].setAttribute('fill',v?'color-mix(in srgb,var(--hi) 22%,var(--screen))':'var(--screen)');}
+  eDec.textContent=n;
+  const q1=n&1,q4=n>>3&1,x=q1^q4,a=xorOn?x:q1;
+  eQ1.setAttribute('stroke',hi(q1));eQ1up.setAttribute('stroke',hi(q1));eQ4.setAttribute('stroke',hi(q4));
+  eQ2.setAttribute('stroke',hi(n>>1&1));eQ3.setAttribute('stroke',hi(n>>2&1));eXo.setAttribute('stroke',hi(x));eA.setAttribute('stroke',hi(a));
+  eArm.setAttribute('y2',xorOn?97:52);
+  setTag(tIn1,q1,'var(--hi)');setTag(tIn2,q4,'var(--hi)');setTag(tOut,x,'var(--hi)');setTag(tA,a,'var(--cv)');
+  eEq.textContent=q1+' XOR '+q4+' = '+x;
+  eArmM.setAttribute('y2',cy(ch));
+  const sel=[a,n>>1&1,n>>2&1];
+  for(let b=0;b<3;b++){selTxt[b].textContent=sel[b];selBox[b].setAttribute('fill',sel[b]?'color-mix(in srgb,'+(b===0?'var(--cv)':'var(--hi)')+' 22%,var(--screen))':'var(--screen)');}
+  selCh.textContent='ערוץ '+ch;
+  for(let i=0;i<8;i++){const on=i===ch;
+    eLed[i].setAttribute('fill',fast?'color-mix(in srgb,var(--led) 40%,var(--ledoff))':on?'var(--led)':'var(--ledoff)');
+    eCh[i].setAttribute('stroke',on&&!fast?'var(--hi)':'var(--wire)');}
+  seqCells.forEach((c,i)=>c.classList.toggle('on',i===n));
+  rowsE.forEach((r,i)=>r.classList.toggle('on',i===n));
+  if(eOsc&&actx)eOsc.frequency.setTargetAtTime(toneF(rTot(ch)),actx.currentTime,0.004);
+}
+let eOsc=null,eGain=null,eOn=false;
+function eStart(){try{
+  if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();
+  actx.resume();eOsc=actx.createOscillator();eOsc.type='square';eGain=actx.createGain();eGain.gain.value=0;
+  eOsc.connect(eGain).connect(actx.destination);eOsc.start();eGain.gain.setTargetAtTime(0.06,actx.currentTime,0.02);eOn=true;}catch(e){eOn=false;}}
+function eStop(){if(eOsc){try{eGain.gain.setTargetAtTime(0,actx.currentTime,0.02);const o=eOsc;setTimeout(()=>{try{o.stop();}catch(e){}},120);}catch(e){}eOsc=null;}eOn=false;}
+function setESound(on){const b=$('e-sound');if(on)eStart();else eStop();b.setAttribute('aria-pressed',eOn);b.textContent=eOn?'השתק':'השמע צליל';}
+$('e-sound').addEventListener('click',()=>setESound(!eOn));
+
+// ---------- Board F: XOR 32 steps ----------
+const chF=n=>{n=((n%32)+32)%32;return (n&7)^(n>>3&3);};
+const svgF=$('f-board');
+title(svgF,95,'1. שעון');title(svgF,325,'2. מונה');title(svgF,490,'3. שני שערי XOR');title(svgF,660,'4. בורר');title(svgF,830,'5. נורות');
+const clkF=clockBlock(svgF,true);
+block(svgF,228,50,194,190);label(svgF,325,72,'CD4040',{fill:'var(--muted)'});
+const fBox=[],fTxt=[];
+[['Q5',4],['Q4',3],['Q3',2],['Q2',1],['Q1',0]].forEach(([n,b],i)=>{const x=238+i*36;
+  fBox[b]=el(svgF,'rect',{x,y:110,width:32,height:40,rx:4,fill:'var(--screen)',stroke:'var(--line)'});
+  fTxt[b]=label(svgF,x+16,138,'0',{size:20,weight:500});
+  label(svgF,x+16,168,n,{size:12,fill:'var(--muted)'});});
+label(svgF,325,196,'בעשרוני',{size:11,fill:'var(--muted)',attrs:{direction:'rtl'}});
+const fDec=label(svgF,325,224,'',{size:22,weight:500});
+function xorShape(svg,x,yc){
+  el(svg,'path',{d:`M${x},${yc-24} Q${x+18},${yc} ${x},${yc+24} Q${x+40},${yc+24} ${x+60},${yc} Q${x+40},${yc-24} ${x},${yc-24} Z`,fill:'var(--panel)',stroke:'var(--ink)','stroke-width':1.5});
+  el(svg,'path',{d:`M${x-7},${yc-24} Q${x+11},${yc} ${x-7},${yc+24}`,fill:'none',stroke:'var(--ink)','stroke-width':1.5});
+  label(svg,x+27,yc+4,'XOR',{size:10,fill:'var(--muted)'});}
+const fW={};
+[['Q1',66,445,66],['Q4',92,445,92],['Q2',128,445,128],['Q5',154,445,154]].forEach(([n,y,x2])=>{
+  fW[n]=el(svgF,'line',{x1:422,y1:y,x2:x2,y2:y,stroke:'var(--wire)','stroke-width':3});
+  label(svgF,426,y-4,n,{size:10,fill:'var(--muted)',anchor:'start'});});
+fW.Q3=el(svgF,'line',{x1:422,y1:200,x2:590,y2:200,stroke:'var(--wire)','stroke-width':3});
+label(svgF,426,196,'Q3',{size:10,fill:'var(--muted)',anchor:'start'});
+xorShape(svgF,445,79);xorShape(svgF,445,141);
+label(svgF,475,48,'IC1.1',{size:10,fill:'var(--muted)'});label(svgF,475,178,'IC1.2',{size:10,fill:'var(--muted)'});
+const fA=el(svgF,'line',{x1:505,y1:79,x2:590,y2:79,stroke:'var(--wire)','stroke-width':3});
+const fB=el(svgF,'line',{x1:505,y1:141,x2:590,y2:141,stroke:'var(--wire)','stroke-width':3});
+const fTag=(x,y)=>{const r=el(svgF,'rect',{x:x-9,y:y-9,width:18,height:18,rx:3,fill:'var(--screen)',stroke:'var(--line)'});const t=label(svgF,x,y+5,'0',{size:13,weight:700});return {r,t};};
+const ftA=fTag(545,64),ftB=fTag(545,126);
+block(svgF,590,40,140,230);label(svgF,660,262,'CD4051',{fill:'var(--muted)'});
+[['A',79],['B',141],['C',200]].forEach(([n,y])=>label(svgF,598,y+4,n,{size:11,fill:'var(--muted)',anchor:'start'}));
+const fSelBox=[],fSelTxt=[];
+[['C',2],['B',1],['A',0]].forEach(([n,b],i)=>{const x=612+i*22;
+  fSelBox[b]=el(svgF,'rect',{x,y:98,width:19,height:22,rx:3,fill:'var(--screen)',stroke:'var(--line)'});
+  fSelTxt[b]=label(svgF,x+9.5,114,'0',{size:13,weight:700});
+  label(svgF,x+9.5,166,'',{});});
+const fSelCh=label(svgF,645,138,'',{size:12,weight:500,fill:'var(--hi)',attrs:{direction:'rtl'}});
+el(svgF,'line',{x1:560,y1:240,x2:648,y2:240,stroke:'var(--hi)','stroke-width':3});
+label(svgF,556,244,'VCC',{size:12,anchor:'end',fill:'var(--hi)'});
+el(svgF,'circle',{cx:652,cy:240,r:5,fill:'var(--ink)'});
+const fArm=el(svgF,'line',{x1:652,y1:240,x2:715,y2:cy(0),stroke:'var(--hi)','stroke-width':3.5,'stroke-linecap':'round'});
+const fCh=[],fLed=[];
+for(let i=0;i<8;i++){
+  el(svgF,'circle',{cx:718,cy:cy(i),r:4,fill:'var(--screen)',stroke:'var(--ink)','stroke-width':1.5});
+  label(svgF,704,cy(i)+4,'X'+i,{size:10,fill:'var(--muted)',anchor:'end'});
+  fCh[i]=el(svgF,'line',{x1:722,y1:cy(i),x2:812,y2:cy(i),stroke:'var(--wire)','stroke-width':2.5});
+  fLed[i]=el(svgF,'circle',{cx:825,cy:cy(i),r:11,fill:'var(--ledoff)',stroke:'var(--line)'});
+  el(svgF,'line',{x1:836,y1:cy(i),x2:880,y2:cy(i),stroke:'var(--wire)','stroke-width':2});}
+el(svgF,'line',{x1:880,y1:cy(0),x2:880,y2:cy(7)+30,stroke:'var(--wire)','stroke-width':2});
+el(svgF,'rect',{x:868,y:cy(7)+30,width:24,height:12,fill:'none',stroke:'var(--ink)','stroke-width':1.5});
+label(svgF,898,cy(7)+40,'R14',{size:11,fill:'var(--muted)',anchor:'start'});
+gnd(svgF,880,cy(7)+52);
+// sequence grid
+const fSeq=$('f-seq'),fCells=[];
+for(let r=0;r<4;r++){const l=document.createElement('div');l.className='lbl';l.textContent='שורה '+(r+1);fSeq.appendChild(l);
+  for(let c=0;c<8;c++){const d=document.createElement('div');const n=r*8+c;d.textContent=chF(n);if(r)d.className='q'+r;fSeq.appendChild(d);fCells.push(d);}}
+function boardF(){
+  const s=simF,f=1/s.period(),clk=clkAt(s.phase),n=((countAt(s.phase)%32)+32)%32,ch=chF(n),fast=f>14;
+  clkF.f.textContent=(f<10?f.toFixed(2):f.toFixed(1))+' הרץ';
+  clkF.led.setAttribute('fill',ledFill(clk,fast));
+  clkF.w.setAttribute('stroke',clk?'var(--clk)':'var(--wire)');
+  for(let b=0;b<5;b++){const v=n>>b&1;fTxt[b].textContent=v;fBox[b].setAttribute('fill',v?'color-mix(in srgb,var(--hi) 22%,var(--screen))':'var(--screen)');}
+  fDec.textContent=n;
+  const q=b=>n>>b&1,a=q(0)^q(3),bb=q(1)^q(4),c=q(2);
+  fW.Q1.setAttribute('stroke',hi(q(0)));fW.Q2.setAttribute('stroke',hi(q(1)));fW.Q3.setAttribute('stroke',hi(c));fW.Q4.setAttribute('stroke',hi(q(3)));fW.Q5.setAttribute('stroke',hi(q(4)));
+  fA.setAttribute('stroke',a?'var(--cv)':'var(--wire)');fB.setAttribute('stroke',bb?'var(--cv)':'var(--wire)');
+  [[ftA,a],[ftB,bb]].forEach(([g,v])=>{g.t.textContent=v;g.t.setAttribute('fill',v?'var(--cv)':'var(--muted)');g.r.setAttribute('stroke',v?'var(--cv)':'var(--line)');});
+  const sel=[a,bb,c];
+  for(let b=0;b<3;b++){fSelTxt[b].textContent=sel[b];fSelBox[b].setAttribute('fill',sel[b]?'color-mix(in srgb,var(--hi) 22%,var(--screen))':'var(--screen)');}
+  fSelCh.textContent='ערוץ '+ch;
+  fArm.setAttribute('y2',cy(ch));
+  for(let i=0;i<8;i++){const on=i===ch;
+    fLed[i].setAttribute('fill',fast?'color-mix(in srgb,var(--led) 40%,var(--ledoff))':on?'var(--led)':'var(--ledoff)');
+    fCh[i].setAttribute('stroke',on&&!fast?'var(--hi)':'var(--wire)');}
+  fCells.forEach((d,i)=>d.classList.toggle('on',i===n));
+  if(fOsc&&actx)fOsc.frequency.setTargetAtTime(toneF(rTot(ch)),actx.currentTime,0.004);
+}
+let fOsc=null,fGain=null,fOn=false;
+function fStart(){try{
+  if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();
+  actx.resume();fOsc=actx.createOscillator();fOsc.type='square';fGain=actx.createGain();fGain.gain.value=0;
+  fOsc.connect(fGain).connect(actx.destination);fOsc.start();fGain.gain.setTargetAtTime(0.06,actx.currentTime,0.02);fOn=true;}catch(e){fOn=false;}}
+function fStop(){if(fOsc){try{fGain.gain.setTargetAtTime(0,actx.currentTime,0.02);const o=fOsc;setTimeout(()=>{try{o.stop();}catch(e){}},120);}catch(e){}fOsc=null;}fOn=false;}
+function setFSound(on){const b=$('f-sound');if(on)fStart();else fStop();b.setAttribute('aria-pressed',fOn);b.textContent=fOn?'השתק':'השמע צליל';}
+$('f-sound').addEventListener('click',()=>setFSound(!fOn));
+
+// ---------- Board G: XOR 64 steps ----------
+const chG=n=>{n=((n%64)+64)%64;return (n&7)^(n>>3&7);};
+const svgG=$('g-board');
+title(svgG,95,'1. שעון');title(svgG,325,'2. מונה');title(svgG,490,'3. שלושה שערי XOR');title(svgG,660,'4. בורר');title(svgG,830,'5. נורות');
+const clkG=clockBlock(svgG,true);
+block(svgG,222,50,206,190);label(svgG,325,72,'CD4040',{fill:'var(--muted)'});
+const gBox=[],gTxt=[];
+[['Q6',5],['Q5',4],['Q4',3],['Q3',2],['Q2',1],['Q1',0]].forEach(([n,b],i)=>{const x=230+i*32;
+  gBox[b]=el(svgG,'rect',{x,y:110,width:28,height:38,rx:4,fill:'var(--screen)',stroke:'var(--line)'});
+  gTxt[b]=label(svgG,x+14,136,'0',{size:18,weight:500});
+  label(svgG,x+14,166,n,{size:11,fill:'var(--muted)'});});
+label(svgG,325,196,'בעשרוני',{size:11,fill:'var(--muted)',attrs:{direction:'rtl'}});
+const gDec=label(svgG,325,224,'',{size:22,weight:500});
+const gW={};
+[['Q1',56],['Q4',80],['Q2',116],['Q5',140],['Q3',176],['Q6',200]].forEach(([n,y])=>{
+  gW[n]=el(svgG,'line',{x1:428,y1:y,x2:445,y2:y,stroke:'var(--wire)','stroke-width':3});
+  label(svgG,430,y-3,n,{size:9,fill:'var(--muted)',anchor:'start'});});
+const gOut=[],gTag=[];
+[68,128,188].forEach((yc,i)=>{xorShape(svgG,445,yc);
+  gOut[i]=el(svgG,'line',{x1:505,y1:yc,x2:590,y2:yc,stroke:'var(--wire)','stroke-width':3});
+  const r=el(svgG,'rect',{x:536,y:yc-23,width:18,height:18,rx:3,fill:'var(--screen)',stroke:'var(--line)'});
+  const t=label(svgG,545,yc-9,'0',{size:13,weight:700});gTag[i]={r,t};});
+block(svgG,590,40,140,238);label(svgG,660,272,'CD4051',{fill:'var(--muted)'});
+[['A',68],['B',128],['C',188]].forEach(([n,y])=>label(svgG,598,y+4,n,{size:11,fill:'var(--muted)',anchor:'start'}));
+const gSelBox=[],gSelTxt=[];
+[['C',2],['B',1],['A',0]].forEach(([n,b],i)=>{const x=612+i*22;
+  gSelBox[b]=el(svgG,'rect',{x,y:84,width:19,height:22,rx:3,fill:'var(--screen)',stroke:'var(--line)'});
+  gSelTxt[b]=label(svgG,x+9.5,100,'0',{size:13,weight:700});});
+const gSelCh=label(svgG,645,154,'',{size:12,weight:500,fill:'var(--hi)',attrs:{direction:'rtl'}});
+el(svgG,'line',{x1:560,y1:248,x2:648,y2:248,stroke:'var(--hi)','stroke-width':3});
+label(svgG,556,252,'VCC',{size:12,anchor:'end',fill:'var(--hi)'});
+el(svgG,'circle',{cx:652,cy:248,r:5,fill:'var(--ink)'});
+const gArm=el(svgG,'line',{x1:652,y1:248,x2:715,y2:cy(0),stroke:'var(--hi)','stroke-width':3.5,'stroke-linecap':'round'});
+const gCh=[],gLed=[];
+for(let i=0;i<8;i++){
+  el(svgG,'circle',{cx:718,cy:cy(i),r:4,fill:'var(--screen)',stroke:'var(--ink)','stroke-width':1.5});
+  label(svgG,704,cy(i)+4,'X'+i,{size:10,fill:'var(--muted)',anchor:'end'});
+  gCh[i]=el(svgG,'line',{x1:722,y1:cy(i),x2:812,y2:cy(i),stroke:'var(--wire)','stroke-width':2.5});
+  gLed[i]=el(svgG,'circle',{cx:825,cy:cy(i),r:11,fill:'var(--ledoff)',stroke:'var(--line)'});
+  el(svgG,'line',{x1:836,y1:cy(i),x2:880,y2:cy(i),stroke:'var(--wire)','stroke-width':2});}
+el(svgG,'line',{x1:880,y1:cy(0),x2:880,y2:cy(7)+30,stroke:'var(--wire)','stroke-width':2});
+el(svgG,'rect',{x:868,y:cy(7)+30,width:24,height:12,fill:'none',stroke:'var(--ink)','stroke-width':1.5});
+label(svgG,898,cy(7)+40,'R16',{size:11,fill:'var(--muted)',anchor:'start'});
+gnd(svgG,880,cy(7)+52);
+const gSeq=$('g-seq'),gCells=[];
+for(let r=0;r<8;r++){const l=document.createElement('div');l.className='lbl';l.textContent='שורה '+(r+1);gSeq.appendChild(l);
+  for(let c=0;c<8;c++){const d=document.createElement('div');d.textContent=chG(r*8+c);if(r&1)d.className='alt';gSeq.appendChild(d);gCells.push(d);}}
+function boardG(){
+  const s=simG,f=1/s.period(),clk=clkAt(s.phase),n=((countAt(s.phase)%64)+64)%64,ch=chG(n),fast=f>14;
+  clkG.f.textContent=(f<10?f.toFixed(2):f.toFixed(1))+' הרץ';
+  clkG.led.setAttribute('fill',ledFill(clk,fast));
+  clkG.w.setAttribute('stroke',clk?'var(--clk)':'var(--wire)');
+  for(let b=0;b<6;b++){const v=n>>b&1;gTxt[b].textContent=v;gBox[b].setAttribute('fill',v?'color-mix(in srgb,var(--hi) 22%,var(--screen))':'var(--screen)');}
+  gDec.textContent=n;
+  ['Q1','Q2','Q3','Q4','Q5','Q6'].forEach((k,b)=>gW[k].setAttribute('stroke',hi(n>>b&1)));
+  const sel=[0,1,2].map(b=>(n>>b&1)^(n>>(b+3)&1));
+  for(let b=0;b<3;b++){const v=sel[b];
+    gOut[b].setAttribute('stroke',v?'var(--cv)':'var(--wire)');
+    gTag[b].t.textContent=v;gTag[b].t.setAttribute('fill',v?'var(--cv)':'var(--muted)');gTag[b].r.setAttribute('stroke',v?'var(--cv)':'var(--line)');
+    gSelTxt[b].textContent=v;gSelBox[b].setAttribute('fill',v?'color-mix(in srgb,var(--hi) 22%,var(--screen))':'var(--screen)');}
+  gSelCh.textContent='ערוץ '+ch;
+  gArm.setAttribute('y2',cy(ch));
+  for(let i=0;i<8;i++){const on=i===ch;
+    gLed[i].setAttribute('fill',fast?'color-mix(in srgb,var(--led) 40%,var(--ledoff))':on?'var(--led)':'var(--ledoff)');
+    gCh[i].setAttribute('stroke',on&&!fast?'var(--hi)':'var(--wire)');}
+  gCells.forEach((d,i)=>d.classList.toggle('on',i===n));
+  if(gOsc&&actx)gOsc.frequency.setTargetAtTime(toneF(rTot(ch)),actx.currentTime,0.004);
+}
+let gOsc=null,gGain=null,gOn=false;
+function gStart(){try{
+  if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();
+  actx.resume();gOsc=actx.createOscillator();gOsc.type='square';gGain=actx.createGain();gGain.gain.value=0;
+  gOsc.connect(gGain).connect(actx.destination);gOsc.start();gGain.gain.setTargetAtTime(0.06,actx.currentTime,0.02);gOn=true;}catch(e){gOn=false;}}
+function gStop(){if(gOsc){try{gGain.gain.setTargetAtTime(0,actx.currentTime,0.02);const o=gOsc;setTimeout(()=>{try{o.stop();}catch(e){}},120);}catch(e){}gOsc=null;}gOn=false;}
+function setGSound(on){const b=$('g-sound');if(on)gStart();else gStop();b.setAttribute('aria-pressed',gOn);b.textContent=gOn?'השתק':'השמע צליל';}
+$('g-sound').addEventListener('click',()=>setGSound(!gOn));
+
+// ---------- Board H: forward-backward ----------
+const chH=n=>{n=((n%16)+16)%16;return (n&7)^((n>>3&1)?7:0);};
+const svgH=$('h-board');
+title(svgH,95,'1. שעון');title(svgH,325,'2. מונה');title(svgH,490,'3. שלושה שערי XOR');title(svgH,660,'4. בורר');title(svgH,830,'5. נורות');
+const clkH=clockBlock(svgH,true);
+block(svgH,240,50,170,190);label(svgH,325,72,'CD4040',{fill:'var(--muted)'});
+const hBox=[],hTxt=[];
+[['Q4',3],['Q3',2],['Q2',1],['Q1',0]].forEach(([n,b],i)=>{const x=252+i*38;
+  hBox[b]=el(svgH,'rect',{x,y:110,width:32,height:40,rx:4,fill:'var(--screen)',stroke:'var(--line)'});
+  hTxt[b]=label(svgH,x+16,138,'0',{size:20,weight:500});
+  label(svgH,x+16,168,n,{size:12,fill:'var(--muted)'});});
+label(svgH,325,196,'בעשרוני',{size:11,fill:'var(--muted)',attrs:{direction:'rtl'}});
+const hDec=label(svgH,325,224,'',{size:22,weight:500});
+const hW={};
+[['Q1',56],['Q2',116],['Q3',176]].forEach(([n,y])=>{
+  hW[n]=el(svgH,'line',{x1:410,y1:y,x2:445,y2:y,stroke:'var(--wire)','stroke-width':3});
+  label(svgH,413,y-4,n,{size:10,fill:'var(--muted)',anchor:'start'});});
+hW.Q4=el(svgH,'polyline',{points:'410,228 428,228 428,80 445,80',fill:'none',stroke:'var(--wire)','stroke-width':3});
+hW.Q4b=el(svgH,'polyline',{points:'428,140 445,140',fill:'none',stroke:'var(--wire)','stroke-width':3});
+hW.Q4c=el(svgH,'polyline',{points:'428,200 445,200',fill:'none',stroke:'var(--wire)','stroke-width':3});
+el(svgH,'circle',{cx:428,cy:140,r:3.5,fill:'var(--ink)'});el(svgH,'circle',{cx:428,cy:200,r:3.5,fill:'var(--ink)'});
+label(svgH,413,224,'Q4',{size:10,fill:'var(--muted)',anchor:'start'});
+const hOut=[],hTag=[];
+[68,128,188].forEach((yc,i)=>{xorShape(svgH,445,yc);
+  hOut[i]=el(svgH,'line',{x1:505,y1:yc,x2:590,y2:yc,stroke:'var(--wire)','stroke-width':3});
+  const r=el(svgH,'rect',{x:536,y:yc-23,width:18,height:18,rx:3,fill:'var(--screen)',stroke:'var(--line)'});
+  const t=label(svgH,545,yc-9,'0',{size:13,weight:700});hTag[i]={r,t};});
+block(svgH,590,40,140,238);label(svgH,660,272,'CD4051',{fill:'var(--muted)'});
+[['A',68],['B',128],['C',188]].forEach(([n,y])=>label(svgH,598,y+4,n,{size:11,fill:'var(--muted)',anchor:'start'}));
+const hSelBox=[],hSelTxt=[];
+[['C',2],['B',1],['A',0]].forEach(([n,b],i)=>{const x=612+i*22;
+  hSelBox[b]=el(svgH,'rect',{x,y:84,width:19,height:22,rx:3,fill:'var(--screen)',stroke:'var(--line)'});
+  hSelTxt[b]=label(svgH,x+9.5,100,'0',{size:13,weight:700});});
+const hSelCh=label(svgH,645,154,'',{size:12,weight:500,fill:'var(--hi)',attrs:{direction:'rtl'}});
+el(svgH,'line',{x1:560,y1:248,x2:648,y2:248,stroke:'var(--hi)','stroke-width':3});
+label(svgH,556,252,'VCC',{size:12,anchor:'end',fill:'var(--hi)'});
+el(svgH,'circle',{cx:652,cy:248,r:5,fill:'var(--ink)'});
+const hArm=el(svgH,'line',{x1:652,y1:248,x2:715,y2:cy(0),stroke:'var(--hi)','stroke-width':3.5,'stroke-linecap':'round'});
+const hCh=[],hLed=[];
+for(let i=0;i<8;i++){
+  el(svgH,'circle',{cx:718,cy:cy(i),r:4,fill:'var(--screen)',stroke:'var(--ink)','stroke-width':1.5});
+  label(svgH,704,cy(i)+4,'X'+i,{size:10,fill:'var(--muted)',anchor:'end'});
+  hCh[i]=el(svgH,'line',{x1:722,y1:cy(i),x2:812,y2:cy(i),stroke:'var(--wire)','stroke-width':2.5});
+  hLed[i]=el(svgH,'circle',{cx:825,cy:cy(i),r:11,fill:'var(--ledoff)',stroke:'var(--line)'});
+  el(svgH,'line',{x1:836,y1:cy(i),x2:880,y2:cy(i),stroke:'var(--wire)','stroke-width':2});}
+el(svgH,'line',{x1:880,y1:cy(0),x2:880,y2:cy(7)+30,stroke:'var(--wire)','stroke-width':2});
+el(svgH,'rect',{x:868,y:cy(7)+30,width:24,height:12,fill:'none',stroke:'var(--ink)','stroke-width':1.5});
+gnd(svgH,880,cy(7)+52);
+const hSeq=$('h-seq'),hCells=[];
+['קדימה','אחורה'].forEach((t,r)=>{const l=document.createElement('div');l.className='lbl';l.textContent=t;hSeq.appendChild(l);
+  for(let c=0;c<8;c++){const d=document.createElement('div');d.textContent=chH(r*8+c);if(r)d.className='alt';hSeq.appendChild(d);hCells.push(d);}});
+function boardH(){
+  const s=simH,f=1/s.period(),clk=clkAt(s.phase),n=((countAt(s.phase)%16)+16)%16,ch=chH(n),fast=f>14;
+  clkH.f.textContent=(f<10?f.toFixed(2):f.toFixed(1))+' הרץ';
+  clkH.led.setAttribute('fill',ledFill(clk,fast));
+  clkH.w.setAttribute('stroke',clk?'var(--clk)':'var(--wire)');
+  for(let b=0;b<4;b++){const v=n>>b&1;hTxt[b].textContent=v;hBox[b].setAttribute('fill',v?'color-mix(in srgb,var(--hi) 22%,var(--screen))':'var(--screen)');}
+  hDec.textContent=n;
+  const q4=n>>3&1;
+  hW.Q1.setAttribute('stroke',hi(n&1));hW.Q2.setAttribute('stroke',hi(n>>1&1));hW.Q3.setAttribute('stroke',hi(n>>2&1));
+  [hW.Q4,hW.Q4b,hW.Q4c].forEach(w=>w.setAttribute('stroke',hi(q4)));
+  for(let b=0;b<3;b++){const v=(n>>b&1)^q4;
+    hOut[b].setAttribute('stroke',v?'var(--cv)':'var(--wire)');
+    hTag[b].t.textContent=v;hTag[b].t.setAttribute('fill',v?'var(--cv)':'var(--muted)');hTag[b].r.setAttribute('stroke',v?'var(--cv)':'var(--line)');
+    hSelTxt[b].textContent=v;hSelBox[b].setAttribute('fill',v?'color-mix(in srgb,var(--hi) 22%,var(--screen))':'var(--screen)');}
+  hSelCh.textContent='ערוץ '+ch;
+  hArm.setAttribute('y2',cy(ch));
+  for(let i=0;i<8;i++){const on=i===ch;
+    hLed[i].setAttribute('fill',fast?'color-mix(in srgb,var(--led) 40%,var(--ledoff))':on?'var(--led)':'var(--ledoff)');
+    hCh[i].setAttribute('stroke',on&&!fast?'var(--hi)':'var(--wire)');}
+  hCells.forEach((d,i)=>d.classList.toggle('on',i===n));
+  if(hOsc&&actx)hOsc.frequency.setTargetAtTime(toneF(rTot(ch)),actx.currentTime,0.004);
+}
+let hOsc=null,hGain=null,hOn=false;
+function hStart(){try{
+  if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();
+  actx.resume();hOsc=actx.createOscillator();hOsc.type='square';hGain=actx.createGain();hGain.gain.value=0;
+  hOsc.connect(hGain).connect(actx.destination);hOsc.start();hGain.gain.setTargetAtTime(0.06,actx.currentTime,0.02);hOn=true;}catch(e){hOn=false;}}
+function hStop(){if(hOsc){try{hGain.gain.setTargetAtTime(0,actx.currentTime,0.02);const o=hOsc;setTimeout(()=>{try{o.stop();}catch(e){}},120);}catch(e){}hOsc=null;}hOn=false;}
+function setHSound(on){const b=$('h-sound');if(on)hStart();else hStop();b.setAttribute('aria-pressed',hOn);b.textContent=hOn?'השתק':'השמע צליל';}
+$('h-sound').addEventListener('click',()=>setHSound(!hOn));
 
 // ---------- tables ----------
 const dot=v=>`<span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${v?'var(--led)':'var(--ledoff)'};border:1px solid var(--line)"></span>`;
@@ -425,18 +1315,10 @@ for(let i=0;i<8;i++){
   const b=document.createElement('tr');b.innerHTML=`<td class="b">${i}</td><td class="b">${i>>2&1}</td><td class="b">${i>>1&1}</td><td class="b">${i&1}</td><td class="b">X${i}</td>`;tbB.appendChild(b);}
 const rowsA=[...tbA.children], rowsB=[...tbB.children];
 
-// ---------- CV sliders ----------
-const cvVals=[0,2.5,1.2,4,1.8,3.3,0.6,2.2], cvLbl=[];
-cvVals.forEach((v,i)=>{const l=document.createElement('label');
-  l.innerHTML=`<output>${v.toFixed(1)}</output><input type="range" min="0" max="5" step="0.1" value="${v}" aria-label="מתח בערוץ ${i}"><span>X${i}</span>`;
-  const inp=l.querySelector('input'),out=l.querySelector('output');
-  inp.addEventListener('input',()=>{cvVals[i]=+inp.value;out.textContent=cvVals[i].toFixed(1);});
-  $('cvgrid').appendChild(l);cvLbl.push(l);});
-
 // ---------- canvases ----------
 function setup(cv){const r=cv.getBoundingClientRect(),d=window.devicePixelRatio||1,h=+cv.getAttribute('height');cv.style.height=h+'px';cv.width=Math.max(1,r.width*d);cv.height=h*d;const c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);c._w=r.width;c._h=h;return c;}
 const ctx={};
-function resize(){['a-timing','b-timing','b-capc','b-cvc'].forEach(id=>ctx[id]=setup($(id)));}
+function resize(){['a-timing','b-timing','b-capc','c-pitch','d-cv','e-timing'].forEach(id=>ctx[id]=setup($(id)));}
 window.addEventListener('resize',resize);
 
 // ---------- collapsible sections ----------
@@ -495,12 +1377,39 @@ function drawCap(c,s){
   const yt=top+h1+22,yb=top+h1+62;c.fillStyle=css('--muted');c.textAlign='right';c.fillText('יציאה',L-5,(yt+yb)/2);
   c.strokeStyle=css('--clk');stepLine(c,L,w,500,t=>clkAt(p0+span*t),v=>v?yt:yb);
 }
-function drawCV(c,s){
+
+function drawPitch(c,s){
+  const W=c._w,H=c._h,L=64,R=10,w=W-L-R,span=16,p0=Math.max(0,s.phase-span),top=12,h=H-24;
+  const fmin=Math.log(toneF(POT+RON+R7)*0.9),fmax=Math.log(toneF(RON+R7)*1.1),y=f=>top+h-(Math.log(f)-fmin)/(fmax-fmin)*h;
+  c.clearRect(0,0,W,H);
+  c.strokeStyle=css('--grid');c.lineWidth=1;c.font='11px Rubik, Arial';c.fillStyle=css('--muted');c.textAlign='right';c.textBaseline='middle';
+  [100,200,400,800].forEach(f=>{c.beginPath();c.moveTo(L,y(f));c.lineTo(L+w,y(f));c.stroke();c.fillText(String(f),L-6,y(f));});
+  c.save();c.translate(14,top+h/2);c.rotate(-Math.PI/2);c.textAlign='center';c.fillText('תדר (הרץ)',0,0);c.restore();
+  c.strokeStyle=css('--cv');c.lineWidth=2.5;stepLine(c,L,w,800,t=>toneF(rTot(mod8(countAt(p0+span*t)))),y);
+  playhead(c,L,w,p0,span,s.phase,top,top+h);
+}
+function drawDCV(c,s){
   const W=c._w,H=c._h,L=40,R=10,w=W-L-R,span=16,p0=Math.max(0,s.phase-span),top=12,h=H-24,y=v=>top+h-(v/VCC)*h;
   c.clearRect(0,0,W,H);grid5(c,L,w,y);
-  c.strokeStyle=css('--cv');c.lineWidth=2.5;stepLine(c,L,w,800,t=>cvVals[mod8(countAt(p0+span*t))],y);playhead(c,L,w,p0,span,s.phase,top,top+h);
+  c.strokeStyle=css('--cv');c.lineWidth=2.5;stepLine(c,L,w,800,t=>dVals[mod8(countAt(p0+span*t))],y);playhead(c,L,w,p0,span,s.phase,top,top+h);
 }
-
+function drawTimingE(c,s){
+  const W=c._w,H=c._h,L=86,R=12,w=W-L-R,span=16,p0=Math.max(0,s.phase-span),pEnd=p0+span,rh=44,top=10;
+  c.clearRect(0,0,W,H);
+  const cnt=p=>((countAt(p)%16)+16)%16;
+  const defs=[['CLK',p=>clkAt(p),css('--clk')],['Q1',p=>cnt(p)&1,css('--hi')],['Q4',p=>cnt(p)>>3&1,css('--hi')],['A',p=>{const n=cnt(p);return xorOn?((n&1)^(n>>3&1)):(n&1);},css('--cv')],['Q2 → B',p=>cnt(p)>>1&1,css('--cv')],['Q3 → C',p=>cnt(p)>>2&1,css('--cv')]];
+  c.strokeStyle=css('--grid');c.lineWidth=1;c.beginPath();
+  for(let k=Math.ceil(p0-DUTY);k+DUTY<=pEnd;k++){if(k+DUTY<p0)continue;const x=L+(k+DUTY-p0)/span*w;c.moveTo(x,top);c.lineTo(x,top+rh*6+34);}c.stroke();
+  c.font='12px Rubik, Arial';c.textBaseline='middle';
+  defs.forEach(([n,f,col],r)=>{const yb=top+r*rh+34,yt=top+r*rh+8;
+    c.fillStyle=css('--muted');c.textAlign='left';c.fillText(n,4,(yb+yt)/2);
+    c.strokeStyle=col;c.lineWidth=2.2;stepLine(c,L,w,800,t=>f(p0+span*t),v=>v?yt:yb);});
+  const yN=top+6*rh+22;c.fillStyle=css('--muted');c.textAlign='left';c.fillText('ערוץ',4,yN);
+  c.textAlign='center';c.fillStyle=css('--ink');c.font='500 13px Rubik, Arial';
+  for(let k=Math.floor(p0-DUTY)-1;k<=pEnd;k++){const a=Math.max(p0,k+DUTY),b=Math.min(pEnd,k+1+DUTY);if(b-a<0.35)continue;
+    c.fillText(chOf(countAt(k+DUTY+0.01)),L+((a+b)/2-p0)/span*w,yN);}
+  playhead(c,L,w,p0,span,s.phase,top,top+rh*6+34);
+}
 // ---------- controls ----------
 function wire(pfx,s){
   $(pfx+'-pot').addEventListener('input',e=>s.setPot(+e.target.value));
@@ -509,25 +1418,42 @@ function wire(pfx,s){
   $(pfx+'-step').addEventListener('click',()=>{if(!s.paused)pb.click();s.phase=Math.floor(s.phase-DUTY)+1+DUTY+0.02;});
   $(pfx+'-reset').addEventListener('click',()=>{s.phase=0.02;});
 }
-wire('a',simA);wire('b',simB);
+wire('a',simA);wire('b',simB);wire('c',simC);wire('d',simD);wire('e',simE);wire('f',simF);wire('g',simG);wire('h',simH);
 
 // ---------- tabs ----------
 let active='a';
-const tabs=[$('tab-a'),$('tab-b')];
-function show(id){active=id;
+const tabs=[$('tab-a'),$('tab-b'),$('tab-c'),$('tab-d'),$('tab-e'),$('tab-f'),$('tab-g'),$('tab-h')],ids=['a','b','c','d','e','f','g','h'];
+const HASH={a:'binary',b:'seq8',c:'sound',d:'cv',e:'xor16',f:'xor32',g:'xor64',h:'backward'};
+function show(id,noHash){active=id;
+  if(!noHash){try{history.replaceState(null,'','#'+HASH[id]);}catch(e){}}
   tabs.forEach(t=>{const on=t.id==='tab-'+id;t.setAttribute('aria-selected',on);t.tabIndex=on?0:-1;});
-  $('panel-a').hidden=id!=='a';$('panel-b').hidden=id!=='b';resize();}
+  ids.forEach(k=>$('panel-'+k).hidden=id!==k);
+  if(id!=='c'&&soundOn)setSound(false);
+  if(id!=='d'&&dOn)setDSound(false);
+  if(id!=='e'&&eOn)setESound(false);
+  if(id!=='f'&&fOn)setFSound(false);
+  if(id!=='g'&&gOn)setGSound(false);
+  if(id!=='h'&&hOn)setHSound(false);
+  resize();}
 tabs.forEach(t=>{t.addEventListener('click',()=>show(t.id.slice(4)));
-  t.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){const o=t.id==='tab-a'?'b':'a';show(o);$('tab-'+o).focus();}});});
+  t.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){const i=ids.indexOf(t.id.slice(4)),d=e.key==='ArrowLeft'?1:-1,o=ids[(i+d+ids.length)%ids.length];show(o);$('tab-'+o).focus();}});});
 
 let last=performance.now();
 function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;
-  const s=active==='a'?simA:simB;
+  const s={a:simA,b:simB,c:simC,d:simD,e:simE,f:simF,g:simG,h:simH}[active];
   if(!s.paused)s.phase+=dt/s.period();
   if(active==='a'){boardA();drawTiming(ctx['a-timing'],simA,['CLK','Q1 → LED1','Q2 → LED2','Q3 → LED3','ספירה']);}
-  else{boardB();drawTiming(ctx['b-timing'],simB,['CLK','Q1 → A','Q2 → B','Q3 → C','ערוץ']);drawCap(ctx['b-capc'],simB);drawCV(ctx['b-cvc'],simB);}
+  else if(active==='c'){boardC();drawPitch(ctx['c-pitch'],simC);}
+  else if(active==='d'){boardD();drawDCV(ctx['d-cv'],simD);}
+  else if(active==='e'){boardE();drawTimingE(ctx['e-timing'],simE);}
+  else if(active==='f'){boardF();}
+  else if(active==='g'){boardG();}
+  else if(active==='h'){boardH();}
+  else{boardB();drawTiming(ctx['b-timing'],simB,['CLK','Q1 → A','Q2 → B','Q3 → C','ערוץ']);drawCap(ctx['b-capc'],simB);}
   requestAnimationFrame(frame);}
-show('a');requestAnimationFrame(frame);
+(function(){const h=(location.hash||'').slice(1);const id=Object.keys(HASH).find(k=>HASH[k]===h);show(id||'a',!id);})();
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);const id=Object.keys(HASH).find(k=>HASH[k]===h);if(id&&id!==active)show(id,true);});
+requestAnimationFrame(frame);
 })();
 </script>
 </body>
