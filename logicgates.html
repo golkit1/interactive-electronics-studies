@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>שערים לוגיים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Secular+One&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F7FA; --paper:#FFFFFF; --ink:#1D2A36; --muted:#5E6E7D; --line:#D5DEE6;
+  --grid:rgba(31,111,139,.06); --hi:#F2A516; --hi-soft:#FDF1D6; --lo:#AEBBC7;
+  --accent:#1F6F8B; --accent-soft:#E3F0F5; --ok:#2E8B57; --bad:#C0392B;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#131A21; --paper:#1B242D; --ink:#E6EDF3; --muted:#9AABBA; --line:#2E3B47;
+    --grid:rgba(90,176,207,.06); --hi-soft:#3A2E12; --lo:#4A5967;
+    --accent:#5AB0CF; --accent-soft:#1D3440; --ok:#4CC286; --bad:#E5675A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131A21; --paper:#1B242D; --ink:#E6EDF3; --muted:#9AABBA; --line:#2E3B47;
+  --grid:rgba(90,176,207,.06); --hi-soft:#3A2E12; --lo:#4A5967;
+  --accent:#5AB0CF; --accent-soft:#1D3440; --ok:#4CC286; --bad:#E5675A;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Assistant","Rubik","Segoe UI",Arial,sans-serif; font-size:18px; line-height:1.6;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px;
+}
+.wrap{max-width:980px; margin:0 auto; padding:28px 20px 60px}
+h1,h2,h3{font-family:"Secular One","Assistant",Arial,sans-serif; font-weight:400; line-height:1.2; margin:0}
+h1{font-size:clamp(2.4rem,6vw,3.6rem); letter-spacing:.01em}
+h2{font-size:1.6rem; margin-bottom:.4em}
+h3{font-size:1.2rem; margin-bottom:.3em}
+p{margin:.4em 0 .9em; max-width:68ch}
+.lead{font-size:1.15rem; color:var(--muted); max-width:62ch; margin-top:.6em}
+.bits{display:inline-flex; gap:6px; vertical-align:middle; margin-inline-start:10px}
+.bit{display:inline-grid; place-items:center; width:1.9em; height:1.9em; border-radius:6px; font-weight:700; font-size:.9rem}
+.bit.one{background:var(--hi); color:#2a1d00}
+.bit.zero{background:var(--lo); color:var(--paper)}
+
+nav.tabs{display:flex; gap:4px; margin:28px 0 20px; border-bottom:2px solid var(--line); overflow-x:auto}
+.tab{
+  font:inherit; font-weight:600; font-size:1rem; background:none; border:0; color:var(--muted);
+  padding:10px 16px; cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; white-space:nowrap;
+}
+.tab[aria-selected="true"]{color:var(--accent); border-bottom-color:var(--accent)}
+.tab:hover{color:var(--ink)}
+button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent); outline-offset:2px; border-radius:4px}
+
+.panel[hidden]{display:none}
+.sheet{background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:22px}
+.two{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+@media (max-width:720px){.two{grid-template-columns:1fr}}
+.cap{font-size:.95rem; color:var(--muted); margin:.3em 0 0}
+.cap b{color:var(--ink)}
+svg{max-width:100%; height:auto; display:block}
+.stack>*+*{margin-top:18px}
+
+/* schematic */
+.wire{fill:none; stroke:var(--lo); stroke-width:3; stroke-linecap:round; stroke-linejoin:round; transition:stroke .15s}
+.wire.hi{stroke:var(--hi)}
+.body{fill:var(--paper); stroke:var(--ink); stroke-width:2.5; stroke-linejoin:round}
+.edge{fill:none; stroke:var(--ink); stroke-width:2.5}
+.dot{fill:var(--ink)}
+.lever{stroke:var(--ink); stroke-width:3; stroke-linecap:round}
+.sw,.tog{cursor:pointer}
+.sw:hover .lever{stroke:var(--accent)}
+.tog circle{stroke:var(--ink); stroke-width:2}
+.tog:hover circle{stroke:var(--accent)}
+.lbl{font-family:"Assistant",Arial,sans-serif; font-size:13px; fill:var(--muted)}
+.num{font-family:"Assistant",Arial,sans-serif; font-weight:700; font-size:14px; text-anchor:middle; dominant-baseline:central}
+
+/* gate chips */
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px}
+.chip{
+  font:inherit; font-weight:600; font-size:.98rem; padding:7px 14px; border-radius:999px; cursor:pointer;
+  background:var(--paper); color:var(--ink); border:1.5px solid var(--line);
+}
+.chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--paper)}
+.gate-grid{display:grid; grid-template-columns:1.5fr 1fr; gap:22px; align-items:start}
+@media (max-width:720px){.gate-grid{grid-template-columns:1fr}}
+.hint{font-size:.95rem; color:var(--muted)}
+table.truth{border-collapse:collapse; width:100%; font-size:1.05rem; text-align:center}
+.truth th{font-weight:600; color:var(--muted); padding:6px; border-bottom:2px solid var(--line)}
+.truth td{padding:7px; border-bottom:1px solid var(--line)}
+.truth tr.now td{background:var(--hi-soft); font-weight:700}
+.truth td.o1{color:var(--hi); font-weight:700}
+.analog summary{cursor:pointer; color:var(--accent); font-size:1.1rem; line-height:1}
+.analog p{margin:.5em 0 0}
+.analog{margin-top:14px; padding:6px 12px; border-inline-start:4px solid var(--accent); background:var(--accent-soft); border-radius:6px; font-size:.98rem}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>שערים לוגיים</h1>
+    <p class="lead">רכיבים קטנים שמקבלים אותות של "כן" ו"לא" ומחליטים לפי כלל קבוע מה יצא. כל האות מורכב משני מצבים בלבד:
+      <span class="bits"><span class="bit one">1</span></span> יש מתח,
+      <span class="bits"><span class="bit zero">0</span></span> אין מתח.</p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-tab="intro">מה זה שער?</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="gates">שבעת השערים</button>
+  </nav>
+
+  <!-- intro -->
+  <section class="panel stack" data-panel="intro">
+    <div class="sheet">
+      <h2>שער לוגי מקבל החלטה לפי הקלט</h2>
+      <p>שער לוגי מקבל אותות בכניסות שלו, ולפי מצבם קובע מה יהיה האות ביציאה. אפשר לדמיין אותו כמו מתג שנשלט על ידי אותות חשמליים במקום על ידי יד.</p>
+      <p>אפשר להבין את שני השערים הבסיסיים בעזרת מתגים רגילים ונורה. לחצו על המתגים וראו כיצד מצבם משפיע על הנורה.</p>
+      <div class="two">
+        <div>
+          <div id="c-series"></div>
+          <p class="cap"><b>מתגים בטור = שער AND.</b> הנורה נדלקת רק כששני המתגים סגורים.</p>
+        </div>
+        <div>
+          <div id="c-parallel"></div>
+          <p class="cap"><b>מתגים במקביל = שער OR.</b> הנורה נדלקת כשלפחות אחד המתגים סגור.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- gates -->
+  <section class="panel" data-panel="gates" hidden>
+    <div class="chips" id="gate-chips"></div>
+    <div class="sheet gate-grid">
+      <div>
+        <h2 id="g-title"></h2>
+        <div id="g-svg"></div>
+        <p class="hint">לחצו על העיגולים בכניסות כדי להחליף בין 0 ל־1.</p>
+      </div>
+      <div>
+        <p id="g-desc" style="margin-top:0"></p>
+        <table class="truth" id="g-table"></table>
+        <details class="analog" id="g-analog-wrap"><summary aria-label="הצג הסבר"></summary><p id="g-analog"></p></details>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+
+/* ---------- gates data ---------- */
+const G={
+  not:{name:'NOT',also:'מהפך',n:1,f:a=>a?0:1,
+    desc:'לשער הזה יש כניסה אחת. הוא פשוט הופך: 1 נכנס, 0 יוצא. 0 נכנס, 1 יוצא.',
+    analog:'כמו כפתור שמכבה את האור כשלוחצים עליו.'},
+  and:{name:'AND',n:2,f:(a,b)=>a&b,
+    desc:'היציאה היא 1 רק כששתי הכניסות הן 1.',
+    analog:'כמו שני מתגים בטור: צריך את שניהם סגורים.'},
+  or:{name:'OR',n:2,f:(a,b)=>a|b,
+    desc:'היציאה היא 1 כשלפחות אחת הכניסות היא 1.',
+    analog:'כמו שני מתגים במקביל: מספיק אחד סגור.'},
+  nand:{name:'NAND',n:2,f:(a,b)=>1-(a&b),
+    desc:'ההפך של AND: היציאה היא 0 רק כששתי הכניסות הן 1. העיגול הקטן ביציאה אומר "הפוך".',
+    analog:'משערי NAND בלבד אפשר לבנות כל שער אחר, ולכן הוא אחד הנפוצים ביותר.'},
+  nor:{name:'NOR',n:2,f:(a,b)=>1-(a|b),
+    desc:'ההפך של OR: היציאה היא 1 רק כששתי הכניסות הן 0.',
+    analog:'כמו מערכת השקיה שפועלת רק כשאין גשם וגם אין אף אחד בגינה.'},
+  xor:{name:'XOR',n:2,f:(a,b)=>a^b,
+    desc:'היציאה היא 1 כשהכניסות שונות זו מזו.',
+    analog:'כמו מנורה בחדר מדרגות עם מתג למטה ומתג למעלה: כל לחיצה על אחד מהם הופכת את המצב.'},
+  xnor:{name:'XNOR',n:2,f:(a,b)=>1-(a^b),
+    desc:'היציאה היא 1 כשהכניסות שוות זו לזו.',
+    analog:'שער שבודק "האם שני האותות זהים?".'}
+};
+const ORDER=['not','and','or','nand','nor','xor','xnor'];
+const out=(k,a,b)=>G[k].n===1?G[k].f(a):G[k].f(a,b);
+
+/* ---------- gate symbol ---------- */
+function gateSVG(k,a,b,o={}){
+  const g=G[k], y=out(k,a,b);
+  const base=(k==='and'||k==='nand')?'and':(k==='not'?'not':'or');
+  const bubble=['not','nand','nor','xnor'].includes(k);
+  const shape={and:'M60,20 H100 A40,40 0 0 1 100,100 H60 Z',or:'M55,20 Q80,60 55,100 Q110,100 140,60 Q110,20 55,20 Z',not:'M60,25 L130,60 L60,95 Z'}[base];
+  const edge=k==='xor'||k==='xnor'?54:(base==='or'?64:60);
+  const outX=base==='not'?(bubble?142:130):(bubble?152:140);
+  const bx=base==='not'?136:146;
+  const cls=v=>'wire'+(v?' hi':'');
+  const tog=(id,v,cy,label)=>`
+    <g class="${o.static?'':'tog'}" ${o.static?'':`data-in="${id}" role="button" tabindex="0" aria-label="כניסה ${label}: ${v}"`}>
+      <text class="lbl" x="18" y="${cy-18}" text-anchor="middle">${label}</text>
+      <circle cx="18" cy="${cy}" r="12" fill="${v?'var(--hi)':'var(--lo)'}"/>
+      <text class="num" x="18" y="${cy}" fill="${v?'#2a1d00':'var(--paper)'}">${v}</text>
+    </g>`;
+  let s=`<svg viewBox="0 0 240 124" dir="ltr" role="img" aria-label="סמל שער ${g.name}">`;
+  if(g.n===1){ s+=`<line class="${cls(a)}" x1="30" y1="60" x2="60" y2="60"/>`; }
+  else{ s+=`<line class="${cls(a)}" x1="30" y1="40" x2="${edge}" y2="40"/><line class="${cls(b)}" x1="30" y1="80" x2="${edge}" y2="80"/>`; }
+  const hide=o.hide;
+  s+=`<line class="${hide?'wire':cls(y)}" x1="${outX}" y1="60" x2="200" y2="60"/>`;
+  s+=`<path class="body" d="${shape}"/>`;
+  if(k==='xor'||k==='xnor') s+=`<path class="edge" d="M45,20 Q70,60 45,100"/>`;
+  if(bubble) s+=`<circle class="body" cx="${bx}" cy="60" r="6"/>`;
+  s+= g.n===1?tog('a',a,60,'א'):tog('a',a,40,'א')+tog('b',b,80,'ב');
+  const on=!hide&&y;
+  if(on) s+=`<circle cx="214" cy="60" r="22" fill="var(--hi)" opacity=".25"/>`;
+  s+=`<circle cx="214" cy="60" r="13" fill="${hide?'var(--paper)':(y?'var(--hi)':'var(--lo)')}" stroke="var(--ink)" stroke-width="2"/>
+      <text class="num" x="214" y="60" fill="${hide?'var(--ink)':(y?'#2a1d00':'var(--paper)')}">${hide?'?':y}</text>
+      <text class="lbl" x="214" y="92" text-anchor="middle">יציאה</text></svg>`;
+  return s;
+}
+function bindToggles(root,cb){
+  root.querySelectorAll('[data-in]').forEach(el=>{
+    const go=()=>cb(el.dataset.in);
+    el.addEventListener('click',go);
+    el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});
+  });
+}
+
+/* ---------- tabs ---------- */
+$$('.tab').forEach(t=>t.addEventListener('click',()=>{
+  $$('.tab').forEach(x=>x.setAttribute('aria-selected',x===t));
+  $$('.panel').forEach(p=>p.hidden=p.dataset.panel!==t.dataset.tab);
+}));
+
+/* ---------- intro circuits ---------- */
+const circ={series:[0,0],parallel:[0,0]};
+function w(pts,lit){return `<polyline class="wire${lit?' hi':''}" points="${pts.map(p=>p.join(',')).join(' ')}"/>`}
+function sw(x1,x2,y,closed,id,lit){
+  const lx=closed?x2:x2-8, ly=closed?y:y-22;
+  return `<g class="sw" data-sw="${id}" role="button" tabindex="0" aria-label="מתג ${id===0?'ראשון':'שני'}: ${closed?'סגור':'פתוח'}">
+    <rect x="${x1-8}" y="${y-32}" width="${x2-x1+16}" height="46" fill="transparent"/>
+    <line class="lever${lit?'':''}" x1="${x1}" y1="${y}" x2="${lx}" y2="${ly}" style="${lit?'stroke:var(--hi)':''}"/>
+    <circle class="dot" cx="${x1}" cy="${y}" r="4"/><circle class="dot" cx="${x2}" cy="${y}" r="4"/>
+    <text class="lbl" x="${(x1+x2)/2}" y="${y+22}" text-anchor="middle">${id===0?'מתג 1':'מתג 2'}</text></g>`;
+}
+function battery(){return `<line x1="16" y1="80" x2="44" y2="80" stroke="var(--ink)" stroke-width="3"/><line x1="23" y1="92" x2="37" y2="92" stroke="var(--ink)" stroke-width="6"/><text class="lbl" x="52" y="78">+</text>`}
+function led(x,on,bottom){
+  return (on?`<circle cx="${x}" cy="86" r="24" fill="var(--hi)" opacity=".28"/>`:'')+
+  `<polygon points="${x-11},75 ${x+11},75 ${x},97" fill="${on?'var(--hi)':'var(--paper)'}" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>
+   <line x1="${x-11}" y1="97" x2="${x+11}" y2="97" stroke="var(--ink)" stroke-width="2.5"/>
+   <text class="lbl" x="${x-18}" y="90" text-anchor="end">נורה</text>`;
+}
+function drawCircuits(){
+  const [a,b]=circ.series, ls=a&&b;
+  $('#c-series').innerHTML=`<svg viewBox="0 0 320 170" dir="ltr">
+    ${w([[30,80],[30,40],[90,40]],ls)}${w([[130,40],[170,40]],ls)}${w([[210,40],[290,40],[290,75]],ls)}
+    ${w([[290,97],[290,140],[30,140],[30,92]],ls)}
+    ${sw(90,130,40,a,0,ls)}${sw(170,210,40,b,1,ls)}${battery()}${led(290,ls)}</svg>`;
+  const [c,d]=circ.parallel, lp=c||d;
+  $('#c-parallel').innerHTML=`<svg viewBox="0 0 320 170" dir="ltr">
+    ${w([[30,80],[30,40],[60,40]],lp)}
+    ${w([[60,40],[120,40]],c)}${w([[160,40],[230,40]],c)}
+    ${w([[60,40],[60,100],[120,100]],d)}${w([[160,100],[230,100],[230,40]],d)}
+    ${w([[230,40],[290,40],[290,75]],lp)}${w([[290,97],[290,150],[30,150],[30,92]],lp)}
+    ${sw(120,160,40,c,0,c)}${sw(120,160,100,d,1,d)}${battery()}${led(290,lp)}</svg>`;
+  [['#c-series','series'],['#c-parallel','parallel']].forEach(([sel,key])=>{
+    $(sel).querySelectorAll('.sw').forEach(el=>{
+      const go=()=>{const i=+el.dataset.sw; circ[key][i]=circ[key][i]?0:1; drawCircuits(); $(sel).querySelector(`[data-sw="${i}"]`).focus()};
+      el.addEventListener('click',go);
+      el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});
+    });
+  });
+}
+drawCircuits();
+
+/* ---------- gates tab ---------- */
+let gk='and', ga=0, gb=0;
+$('#gate-chips').innerHTML=ORDER.map(k=>`<button class="chip" data-g="${k}" aria-pressed="${k===gk}">${G[k].name}</button>`).join('');
+$$('#gate-chips .chip').forEach(c=>c.addEventListener('click',()=>{gk=c.dataset.g; $('#g-analog-wrap').open=false; $$('#gate-chips .chip').forEach(x=>x.setAttribute('aria-pressed',x===c)); drawGate()}));
+function drawGate(focusId){
+  const g=G[gk];
+  $('#g-title').textContent='שער '+g.name+(g.also?` (${g.also})`:'');
+  $('#g-svg').innerHTML=gateSVG(gk,ga,gb);
+  bindToggles($('#g-svg'),id=>{ if(id==='a')ga^=1; else gb^=1; drawGate(id)});
+  if(focusId) $('#g-svg').querySelector(`[data-in="${focusId}"]`)?.focus();
+  $('#g-desc').textContent=g.desc;
+  $('#g-analog').textContent=g.analog;
+  const rows=g.n===1?[[0],[1]]:[[0,0],[0,1],[1,0],[1,1]];
+  $('#g-table').innerHTML=`<tr>${g.n===1?'<th>א</th>':'<th>א</th><th>ב</th>'}<th>יציאה</th></tr>`+
+    rows.map(r=>{const y=out(gk,r[0],r[1]); const now=g.n===1?r[0]===ga:(r[0]===ga&&r[1]===gb);
+      return `<tr class="${now?'now':''}">${r.map(v=>`<td>${v}</td>`).join('')}<td class="${y?'o1':''}">${y}</td></tr>`}).join('');
+}
+drawGate();
+
+</script>
+</body>
+</html>
