@@ -50,8 +50,8 @@ svg{width:100%;height:auto;display:block;direction:ltr}
 .part.off{stroke:var(--off)}
 .lbl{fill:var(--muted);font:500 15px "Rubik",sans-serif}
 .dot{fill:var(--neg);stroke:var(--panel);stroke-width:1.5}
-#batQ{transition:opacity .25s}
-#batQ.off{opacity:.35}
+#batQ,#vbBat{transition:opacity .25s}
+#batQ.off,#vbBat.off{opacity:.35}
 .pos{fill:var(--pos);font:700 16px "Rubik",sans-serif}
 .neg{fill:var(--neg);font:700 16px "Rubik",sans-serif}
 .contact{fill:var(--panel);stroke:var(--ink);stroke-width:3}
@@ -64,6 +64,7 @@ svg{width:100%;height:auto;display:block;direction:ltr}
 .switch{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 button{font:inherit;font-weight:500;border:2px solid var(--ink);background:transparent;color:var(--ink);border-radius:8px;padding:12px 8px;cursor:pointer}
 .switch button[aria-pressed="true"]{background:var(--ink);color:var(--btn-ink)}
+.reset{width:100%;margin-top:8px;padding:7px;border-width:1px;font-size:.92rem}
 button:focus-visible,input:focus-visible{outline:3px solid var(--dot);outline-offset:2px}
 
 .slider{margin-top:14px;display:block}
@@ -81,9 +82,15 @@ canvas{width:100%;height:190px;display:block}
 .notes b{display:block;font-size:1.1rem}
 .explain{margin-top:0}
 .explain p{font-size:1rem}
-.sliders{margin-top:14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
-@media (max-width:720px){.sliders{grid-template-columns:1fr}}
-.sliders .slider{margin-top:0}
+.sliders{margin-top:14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 24px;padding:10px 14px}
+@media (max-width:860px){.sliders{grid-template-columns:1fr}}
+.sliders .slider{margin-top:0;display:grid;grid-template-columns:auto auto 1fr auto;align-items:center;gap:8px}
+.sliders .slider b{order:1;font-size:.95rem;white-space:nowrap;min-width:5.2em}
+.sliders .ends{display:contents}
+.sliders .ends span{font-size:.8rem;color:var(--muted)}
+.sliders .ends span:first-child{order:2}
+.sliders .slider input{order:3;margin:0;min-width:60px}
+.sliders .ends span:last-child{order:4}
 .explain h2{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:900;font-size:1.6rem;line-height:1.2;margin:0 0 8px}
 .explain p{margin:0 0 8px;max-width:65ch}
 .explain p:last-child{margin-bottom:0}
@@ -121,14 +128,26 @@ canvas{width:100%;height:190px;display:block}
         <path id="r2" class="part" d="M410 60 l6 -9 l10 18 l10 -18 l10 18 l10 -18 l10 18 l10 -18 l10 18 l4 -9"/>
         <text class="lbl" x="450" y="95" text-anchor="middle">נגד פריקה</text>
 
+        <defs><pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="var(--rule)" stroke-width="3"/></pattern></defs>
+        <rect x="285" y="192" width="70" height="32" fill="url(#hatch)"/>
         <path class="part" d="M285 190 H355 M285 226 H355"/>
+        <text class="lbl" x="364" y="213" style="font-size:13px">אין מעבר</text>
         <g id="plusG"></g><g id="minusG"></g>
         <text class="lbl" x="276" y="213" text-anchor="end">קבל</text>
 
-        <!-- fill gauge -->
-        <rect x="392" y="160" width="26" height="100" rx="5" fill="none" stroke="var(--rule)" stroke-width="2"/>
-        <rect id="gauge" x="394" y="258" width="22" height="0" rx="3" fill="var(--fill)"/>
-        <text id="gaugeTxt" class="lbl" x="405" y="282" text-anchor="middle" style="fill:var(--ink);font-weight:700">0%</text>
+        <!-- voltage bars -->
+        <text class="lbl" x="478" y="120" text-anchor="middle" direction="rtl" style="fill:var(--ink);font-weight:700;unicode-bidi:embed">מתח (Voltage)</text>
+        <g id="vbBat">
+          <rect x="438" y="132" width="26" height="104" rx="5" fill="none" stroke="var(--rule)" stroke-width="2"/>
+          <rect x="440" y="134" width="22" height="100" rx="3" fill="var(--pos)"/>
+          <text class="lbl" x="451" y="254" text-anchor="middle">סוללה</text>
+          <text class="lbl" x="451" y="272" text-anchor="middle" style="fill:var(--ink);font-weight:700">5.0V</text>
+        </g>
+        <rect x="492" y="132" width="26" height="104" rx="5" fill="none" stroke="var(--rule)" stroke-width="2"/>
+        <rect id="gauge" x="494" y="234" width="22" height="0" rx="3" fill="var(--fill)"/>
+        <line x1="434" y1="134" x2="522" y2="134" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text class="lbl" x="505" y="254" text-anchor="middle">קבל</text>
+        <text id="gaugeTxt" class="lbl" x="505" y="272" text-anchor="middle" style="fill:var(--ink);font-weight:700">0.0V</text>
 
         <line id="blade" class="part" x1="320" y1="130" x2="350" y2="60"/>
         <circle class="contact" cx="290" cy="60" r="5"/>
@@ -146,12 +165,17 @@ canvas{width:100%;height:190px;display:block}
       <div class="card">
         <div class="switch" role="group" aria-label="מתג">
           <button id="bCharge" aria-pressed="false">טעינה</button>
-          <button id="bDis" aria-pressed="true">פריקה</button>
+          <button id="bDis" aria-pressed="false">פריקה</button>
         </div>
+        <button id="bReset" class="reset">איפוס</button>
       </div>
-      <section class="card explain" id="exCharge">
+      <section class="card explain" id="exIdle">
+        <h2>מצב התחלתי</h2>
+        <p>הקבל ריק והמתג באמצע, לא מחובר לשום צד. לחצו על "טעינה" כדי להתחיל.</p>
+      </section>
+      <section class="card explain" id="exCharge" hidden>
         <h2>טעינת קבל</h2>
-        <p>כאשר מחברים קבל לסוללה, הסוללה מעבירה אלקטרונים מלוחית אחת של הקבל ללוחית השנייה דרך החוטים. האלקטרונים אינם עוברים דרך הרווח שבין הלוחיות.</p>
+        <p>כאשר מחברים קבל לסוללה, הסוללה גורמת לאלקטרונים לזרום מלוחית אחת של הקבל ללוחית השנייה דרך החוטים. האלקטרונים אינם עוברים דרך הרווח שבין הלוחיות.</p>
         <p>אם הלוחית העליונה מחוברת ל־+ של הסוללה, הסוללה מושכת ממנה אלקטרונים. כתוצאה מכך נשאר בלוחית העליונה חוסר באלקטרונים, ולכן היא נעשית חיובית (+).</p>
         <p>האלקטרונים שהוצאו מהלוחית העליונה עוברים דרך החוטים והסוללה ומגיעים אל הלוחית התחתונה. כך מצטבר בה עודף אלקטרונים, ולכן היא נעשית שלילית (−).</p>
         <p>כך נוצר בין שתי הלוחיות הפרש מתח ושדה חשמלי.</p>
@@ -160,7 +184,7 @@ canvas{width:100%;height:190px;display:block}
         <h2>פריקת קבל</h2>
         <p>כאשר מנתקים את הסוללה ומחברים את שתי הלוחיות דרך נגד, האלקטרונים העודפים על הלוחית השלילית מתחילים לזרום דרך החוט והנגד אל הלוחית החיובית.</p>
         <p>כך הלוחית השלילית מאבדת בהדרגה את עודף האלקטרונים, והלוחית החיובית מקבלת אותם.</p>
-        <p>ככל שהאלקטרונים עוברים, ההפרש בין המטען של שתי הלוחיות הולך וקטן. לכן גם הזרם הולך ונחלש, עד שהקבל מתרוקן.</p>
+        <p>ככל שהאלקטרונים עוברים, הפרש המתח בין שתי הלוחיות הולך וקטן. לכן גם הזרם הולך ונחלש, עד שהקבל מתרוקן.</p>
         <p>חשוב: גם בזמן הפריקה האלקטרונים אינם עוברים דרך הרווח שבין הלוחיות. הם זורמים במסלול החיצוני, דרך החוט והנגד.</p>
       </section>
     </div>
@@ -169,17 +193,17 @@ canvas{width:100%;height:190px;display:block}
   <section class="card sliders">
     <label class="slider"><b>נגד טעינה</b>
       <input id="sR1" type="range" min="0" max="6" step="1" value="3">
-      <span class="ends"><span>קטן · מהיר</span><span>גדול · איטי</span></span></label>
+      <span class="ends"><span>מהיר</span><span>איטי</span></span></label>
     <label class="slider"><b>נגד פריקה</b>
       <input id="sR2" type="range" min="0" max="6" step="1" value="3">
-      <span class="ends"><span>קטן · מהיר</span><span>גדול · איטי</span></span></label>
+      <span class="ends"><span>מהיר</span><span>איטי</span></span></label>
     <label class="slider"><b>קבל</b>
       <input id="sC" type="range" min="0" max="3" step="1" value="2">
-      <span class="ends"><span>קטן · מהיר</span><span>גדול · איטי</span></span></label>
+      <span class="ends"><span>מהיר</span><span>איטי</span></span></label>
   </section>
 
   <section class="card graph">
-    <canvas id="cv" aria-label="גרף: כמה הקבל מלא לאורך הזמן"></canvas>
+    <canvas id="cv" aria-label="גרף: מתח הקבל לאורך הזמן"></canvas>
   </section>
 
   <section class="notes">
@@ -233,15 +257,18 @@ canvas{width:100%;height:190px;display:block}
 
   function setMode(mode) {
     if (st.mode === mode) return;
-    if (st.mode) marks.push({ t: wall, mode });
+    if (st.mode && mode !== 'idle') marks.push({ t: wall, mode });
     st.mode = mode;
-    $('blade').setAttribute('x2', mode === 'charge' ? 290 : 350);
+    $('blade').setAttribute('x2', mode === 'charge' ? 290 : mode === 'discharge' ? 350 : 320);
+    $('blade').setAttribute('y2', mode === 'idle' ? 66 : 60);
+    $('exIdle').hidden = mode !== 'idle';
     $('bCharge').setAttribute('aria-pressed', mode === 'charge');
     $('bDis').setAttribute('aria-pressed', mode === 'discharge');
     $('exCharge').hidden = mode !== 'charge';
     $('exDis').hidden = mode !== 'discharge';
     document.querySelectorAll('.wire').forEach(w => w.classList.toggle('on', w.dataset.on === 'both' || w.dataset.on === mode));
-    ['r1','bat','bat2','batQ'].forEach(id => $(id).classList.toggle('off', mode !== 'charge'));
+    $('r1').classList.toggle('off', mode !== 'charge');
+    ['bat','bat2','batQ','vbBat'].forEach(id => $(id).classList.toggle('off', mode === 'discharge'));
     $('r2').classList.toggle('off', mode !== 'discharge');
     $('dotsCharge').style.display = mode === 'charge' ? '' : 'none';
     $('dotsDischarge').style.display = mode === 'discharge' ? '' : 'none';
@@ -249,6 +276,7 @@ canvas{width:100%;height:190px;display:block}
   const toggle = () => setMode(st.mode === 'charge' ? 'discharge' : 'charge');
   $('bCharge').onclick = () => setMode('charge');
   $('bDis').onclick = () => setMode('discharge');
+  $('bReset').onclick = () => { st.lvl = 0; hist.length = 0; marks.length = 0; setMode('idle'); };
   $('swHit').addEventListener('click', toggle);
   $('swHit').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
 
@@ -276,7 +304,8 @@ canvas{width:100%;height:190px;display:block}
     ctx.strokeStyle = rule; ctx.fillStyle = muted; ctx.lineWidth = 1;
     ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(L, yOf(1)); ctx.lineTo(L + pw, yOf(1)); ctx.stroke(); ctx.setLineDash([]);
     ctx.beginPath(); ctx.moveTo(L, yOf(0)); ctx.lineTo(L + pw, yOf(0)); ctx.stroke();
-    ctx.fillText('מלא', L - 8, yOf(1)); ctx.fillText('ריק', L - 8, yOf(0));
+    ctx.fillText('5V', L - 8, yOf(1)); ctx.fillText('0V', L - 8, yOf(0));
+    ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillText('מתח הסוללה', L + 6, yOf(1) - 3);
 
     ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
     for (const m of marks) {
@@ -300,15 +329,16 @@ canvas{width:100%;height:190px;display:block}
     const dt = Math.min(0.05, (now - last) / 1000); last = now; wall += dt;
     const charging = st.mode === 'charge';
     const tau = (charging ? st.R1 : st.R2) * st.C;
-    const k = Math.exp(-dt / SLOW / tau);
-    st.lvl = charging ? 1 + (st.lvl - 1) * k : st.lvl * k;
-    const flow = charging ? 1 - st.lvl : st.lvl;                 // 0..1
+    const k = Math.exp(-dt / SLOW / tau), idle = st.mode === 'idle';
+    if (!idle) st.lvl = charging ? 1 + (st.lvl - 1) * k : st.lvl * k;
+    const flow = idle ? 0 : charging ? 1 - st.lvl : st.lvl;                 // 0..1
     const I = flow / (charging ? st.R1 : st.R2) * 150;            // relative to 150Ω
 
     hist.push({ t: wall, v: st.lvl });
     while (hist.length && hist[0].t < wall - WINDOW - 1) hist.shift();
     while (marks.length && marks[0].t < wall - WINDOW - 1) marks.shift();
 
+    if (!idle) {
     const d = dots[st.mode], loop = loops[st.mode];
     d.offset -= 160 * Math.min(2, I) * dt;
     const sp = loop.total / d.n;
@@ -316,19 +346,25 @@ canvas{width:100%;height:190px;display:block}
       const p = loop.at(d.offset + j * sp);
       el.setAttribute('cx', p[0]); el.setAttribute('cy', p[1]);
       el.style.visibility = loop.hidden(p) || flow < 0.004 ? 'hidden' : 'visible';
+      let op = 1;
+      if (Math.abs(p[0] - 320) < 1) {
+        if (p[1] <= 190) op = Math.min(1, (190 - p[1]) / 45);
+        else if (p[1] >= 226) op = Math.min(1, (p[1] - 226) / 45);
+      }
+      el.style.opacity = op;
     });
+    }
 
     const n = st.lvl > 0.02 ? Math.max(1, Math.round(SLOTS * st.lvl)) : 0;
     for (let j = 0; j < SLOTS; j++) { const v = j < n ? 'visible' : 'hidden'; plusEls[j].style.visibility = v; minusEls[j].style.visibility = v; }
-    const h = 96 * st.lvl; $('gauge').setAttribute('y', 258 - h); $('gauge').setAttribute('height', h);
-    $('gaugeTxt').textContent = Math.round(st.lvl * 100) + '%';
+    const h = 100 * st.lvl; $('gauge').setAttribute('y', 234 - h); $('gauge').setAttribute('height', h);
+    $('gaugeTxt').textContent = (st.lvl * 5).toFixed(1) + 'V';
 
 
     draw(); requestAnimationFrame(frame);
   }
 
-  readSliders(); setMode('discharge'); requestAnimationFrame(frame);
-  setTimeout(() => setMode('charge'), 800);
+  readSliders(); setMode('idle'); requestAnimationFrame(frame);
 })();
 </script>
 </body>
