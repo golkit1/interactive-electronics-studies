@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>מגבר שרת (Op-Amp)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&family=Suez+One&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#ECEFF3; --panel:#FFFFFF; --ink:#1B2230; --muted:#5C6678; --line:#CBD3DD;
+  --hl:#D9650A; --btn:#1B2230; --btn-ink:#FFFFFF;
+  --screen:#142030; --grid:rgba(255,255,255,.08); --axis:rgba(255,255,255,.22);
+  --tr-in:#6FA4FF; --tr-out:#FF9A3C; --tr-clip:#FF5A64;
+  --c1:#6FA4FF; --c2:#3FD19E; --c3:#C98BFF;
+  --led:#FF3B30; --dot:#F2A900; --in-ink:#2F6FD6;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#11161F; --panel:#19202C; --ink:#E6EAF1; --muted:#9AA4B6; --line:#2C3545;
+    --hl:#FF9A3C; --in-ink:#6FA4FF; --btn:#E6EAF1; --btn-ink:#11161F; --screen:#0B121C;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#11161F; --panel:#19202C; --ink:#E6EAF1; --muted:#9AA4B6; --line:#2C3545;
+  --hl:#FF9A3C; --in-ink:#6FA4FF; --btn:#E6EAF1; --btn-ink:#11161F; --screen:#0B121C;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Heebo","Arial Hebrew",Arial,sans-serif;font-size:18px;line-height:1.6}
+.wrap{max-width:820px;margin:0 auto;padding:0 1.2rem 4rem}
+h1{font-family:"Suez One","Heebo",serif;font-weight:400;font-size:clamp(2.6rem,8vw,4.2rem);line-height:1.05;margin:2.6rem 0 1.2rem}
+.rule{display:flex;gap:1.2rem;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1rem 1.2rem;margin-bottom:2rem}
+.rule svg{flex:0 0 120px;width:120px;height:auto}
+.rule p{margin:.2rem 0}
+.rule strong{font-weight:700}
+
+details.part{border-top:2px solid var(--ink)}
+details.part:last-of-type{border-bottom:2px solid var(--ink)}
+summary{list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:.9rem;padding:1rem .2rem;font-family:"Suez One","Heebo",serif;font-size:clamp(1.4rem,4vw,1.9rem)}
+summary::-webkit-details-marker{display:none}
+summary .n{font-family:"Heebo",sans-serif;font-weight:700;font-size:1rem;color:var(--muted);min-width:1.4rem}
+summary::after{content:"+";margin-inline-start:auto;font-family:"Heebo",sans-serif;font-size:1.6rem;color:var(--muted);transition:transform .2s}
+details[open] summary::after{transform:rotate(45deg)}
+summary:focus-visible{outline:3px solid var(--hl);outline-offset:2px;border-radius:6px}
+.body{padding:0 .2rem 2rem}
+.body > p{margin:0 0 1rem;max-width:62ch}
+
+.circuit{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:.6rem;margin-bottom:1rem;overflow-x:auto}
+.circuit svg{display:block;width:100%;min-width:320px;max-width:520px;margin:0 auto;height:auto;direction:ltr}
+svg .w{fill:none;stroke:var(--ink);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+svg .r{fill:var(--panel);stroke:var(--ink);stroke-width:2}
+svg .hl{stroke:var(--hl);stroke-width:3}
+svg .op{fill:var(--panel);stroke:var(--ink);stroke-width:2.2;stroke-linejoin:round}
+svg .sg{fill:var(--ink);font:700 20px "Heebo",sans-serif}
+svg .dot{fill:var(--ink)}
+.en{font-family:"Heebo",sans-serif;font-weight:500;font-size:.5em;color:var(--muted);margin-inline-start:.5rem;unicode-bidi:isolate}
+h1 .en{font-size:.38em}
+svg text{direction:rtl}
+svg .sg{direction:ltr}
+.rule svg text{direction:ltr}
+svg .lb{fill:var(--muted);font:500 13px "Heebo",sans-serif}
+svg .lbh{fill:var(--hl);font:700 13px "Heebo",sans-serif}
+svg .src{fill:var(--panel);stroke:var(--ink);stroke-width:2}
+svg .fade{opacity:.12;transition:opacity .3s}
+svg .bypass{fill:none;stroke:var(--hl);stroke-width:2.5;stroke-dasharray:6 5;transition:opacity .3s}
+svg .cur{fill:var(--dot);stroke:var(--ink);stroke-width:1}
+.why{background:var(--panel);border-inline-start:4px solid var(--hl);border-radius:8px;padding:.8rem 1rem;margin-bottom:1rem}
+.why p{margin:.2rem 0}
+svg .led-glow{fill:var(--led);opacity:0;transition:opacity .15s;filter:blur(6px)}
+svg .led{fill:var(--panel);stroke:var(--ink);stroke-width:2;transition:fill .15s}
+svg .led.on{fill:var(--led)}
+svg .led-glow.on{opacity:.7}
+
+.ctrl{display:grid;gap:.9rem;margin-bottom:1rem}
+.ctrl label{display:grid;grid-template-columns:8.5rem 1fr 5.5rem;align-items:center;gap:.8rem;font-weight:500}
+.ctrl output{font-weight:700;text-align:start;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--hl);height:2rem}
+input[type=range]:focus-visible{outline:3px solid var(--hl);outline-offset:2px;border-radius:4px}
+.chip{display:inline-block;width:.8em;height:.8em;border-radius:50%;margin-inline-end:.4em;vertical-align:middle}
+
+.seg{display:inline-flex;border:2px solid var(--ink);border-radius:999px;overflow:hidden;margin-bottom:1rem}
+.seg button{border:0;background:transparent;color:var(--ink);font:500 1rem "Heebo",sans-serif;padding:.45rem 1.1rem;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--btn);color:var(--btn-ink)}
+.seg button:focus-visible,.play:focus-visible{outline:3px solid var(--hl);outline-offset:2px}
+
+.scope{background:var(--screen);border-radius:14px;padding:.5rem;margin-bottom:.6rem}
+.scope canvas{display:block;width:100%;height:220px}
+.legend{display:flex;flex-wrap:wrap;gap:1.2rem;font-size:.95rem;color:var(--muted);margin-bottom:.8rem}
+.status{font-weight:700;min-height:1.6em;margin:.2rem 0 1rem}
+.status.warn{color:var(--hl)}
+.play{border:2px solid var(--ink);background:var(--btn);color:var(--btn-ink);font:700 1rem "Heebo",sans-serif;padding:.5rem 1.3rem;border-radius:999px;cursor:pointer}
+.play[aria-pressed="true"]{background:var(--hl);border-color:var(--hl);color:#fff}
+.note{color:var(--muted);font-size:.95rem}
+
+.meters{display:flex;gap:1.6rem;align-items:flex-end;justify-content:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1rem;margin-bottom:.8rem}
+.meter{display:flex;flex-direction:column;align-items:center;gap:.3rem;font-weight:700}
+.meter .tube{width:46px;height:150px;border:2px solid var(--ink);border-radius:8px;position:relative;overflow:hidden;background:var(--paper)}
+.meter .fill{position:absolute;bottom:0;left:0;right:0;transition:height .12s}
+.meter .v{direction:ltr;unicode-bidi:isolate;font-variant-numeric:tabular-nums;font-weight:500;color:var(--muted);font-size:.95rem}
+.vs{font-family:"Suez One",serif;font-size:2rem;padding-bottom:3.2rem;color:var(--muted)}
+
+@media (max-width:560px){
+  .ctrl label{grid-template-columns:1fr 4.5rem}
+  .ctrl label > span:first-child{grid-column:1 / -1}
+  .rule{flex-direction:column;align-items:flex-start}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.ctrl output{direction:ltr;unicode-bidi:isolate;text-align:right}
+.intro{}
+.intro > p{margin:.2rem 0;max-width:62ch}
+.intro > p:first-child{margin-bottom:.8rem}
+.intro #symSvg{margin-top:1.2rem}
+.chipfig{margin:1.2rem 0 0}
+.chipfig figcaption{font-weight:700;margin-bottom:.4rem}
+.chipfig svg{max-width:560px}
+svg .pin{fill:var(--paper);stroke:var(--ink);stroke-width:1.5}
+svg .body{fill:var(--panel);stroke:var(--ink);stroke-width:2.2}
+svg .pn{fill:var(--muted);font:500 11px "Heebo",sans-serif}
+svg .pl{fill:var(--ink);font:500 12px "Heebo",sans-serif}
+svg .opS{fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linejoin:round}
+svg .sgS{fill:var(--ink);font:700 12px "Heebo",sans-serif}
+.tabs{position:sticky;top:0;z-index:5;display:flex;gap:.25rem;overflow-x:auto;scrollbar-width:none;background:var(--paper);border-bottom:2px solid var(--ink);padding-top:calc(.5rem + env(safe-area-inset-top,0px));margin:0 0 1.2rem}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:0;border:0;border-radius:10px 10px 0 0;background:transparent;color:var(--ink);cursor:pointer;padding:.45rem .9rem .4rem;font:700 1rem "Heebo",sans-serif;line-height:1.25}
+.tab small{font-weight:500;font-size:.72rem;color:var(--muted)}
+.tab:hover{background:var(--line)}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+.tab[aria-selected="true"] small{color:var(--paper);opacity:.75}
+.tab:focus-visible{outline:3px solid var(--hl);outline-offset:-3px}
+details.part{border:0!important}
+details.part:not([open]){display:none}
+details.part > summary{cursor:default;pointer-events:none;padding-top:.2rem}
+details.part > summary::after{display:none}
+.sum{background:var(--ink);color:var(--paper);border-radius:10px;padding:.8rem 1rem;font-size:1.05rem}
+.rl{margin:0 0 1rem;padding-inline-start:1.4rem}
+.rl li{margin:.15rem 0}
+.whyf{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.2rem 1rem;margin-bottom:1rem}
+.whyf > summary{cursor:pointer;display:block;font:700 1rem "Heebo",sans-serif;padding:.6rem 0;color:var(--hl);list-style:none}
+.whyf > summary::after{display:none}
+.whyf > summary::-webkit-details-marker{display:none}
+.whyf > summary::before{content:"◂ ";display:inline-block;transition:transform .2s}
+.whyf[open] > summary::before{transform:rotate(-90deg)}
+.whyf ol{margin:.2rem 0 .6rem;padding-inline-start:1.4rem}
+.whyf li{margin:.5rem 0}
+.whyf .formula{margin:.5rem 0 0;background:var(--paper)}
+.whyf p{margin:.4rem 0 .8rem}
+.steps{padding-bottom:.4rem}
+.steps p{margin:.35rem 0}
+.steps .q{font-weight:700;margin-top:.8rem}
+.steps .clipnote{color:var(--hl);font-weight:700}
+svg .lbin{fill:var(--in-ink);font:700 13px "Heebo",sans-serif}
+.formula{direction:ltr;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.7rem 1rem;margin-bottom:1rem;font-variant-numeric:tabular-nums;overflow-x:auto}
+.formula div{white-space:nowrap}
+.formula .sym{color:var(--muted)}
+.formula .num{font-weight:700}
+.formula .cmp{text-align:center;font-size:clamp(1.4rem,5vw,2rem);font-weight:700;padding:.3rem 0;white-space:nowrap}
+.formula .cmp b{color:var(--hl);padding:0 .3rem}
+.formula .cmp .arr{color:var(--muted);padding:0 .5rem;font-weight:400}
+.formula .cmp .res{display:inline-block;padding:.1rem .7rem;border-radius:8px;background:var(--paper)}
+.formula .cmp .res.bad2{background:var(--hl);color:#fff}
+.formula .cmp .res.hi{background:var(--led);color:#fff}
+.formula .bad{color:var(--hl);font-weight:700}
+.formula sub{font-size:.7em}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>מגבר שרת <span class="en" dir="ltr">Op-Amp</span></h1>
+
+  <nav class="tabs" role="tablist" id="tabs" aria-label="חלקים"></nav>
+
+  <details class="part" id="p0" open>
+    <summary>מבוא <span class="en" dir="ltr">Introduction</span></summary>
+    <div class="body intro">
+    <p>מגבר שרת, או באנגלית <span dir="ltr">Op-Amp (Operational Amplifier)</span>, הוא רכיב אלקטרוני שיכול להגביר אות חיצוני בעוצמה גבוהה מאוד.</p>
+    <p>למגבר שרת שני הדקי הזנת חשמל: <span dir="ltr">Vs+</span> ו־<span dir="ltr">Vs−</span>.</p>
+    <p>כניסה המסומנת ב־<b>+</b>: כניסה לא הופכת מופע (Non-Inverting Input).</p>
+    <p>כניסה המסומנת ב־<b>−</b>: כניסה הופכת מופע (Inverting Input).</p>
+    <p>יציאה (Vout).</p>
+    <div class="circuit" id="symSvg"></div>
+    <figure class="chipfig"><figcaption>שני מגברים בשבב אחד</figcaption><div class="circuit" id="dip8"></div></figure>
+    <figure class="chipfig"><figcaption>ארבעה מגברים בשבב אחד</figcaption><div class="circuit" id="dip14"></div></figure>
+    </div>
+  </details>
+
+  <!-- 1 -->
+  <details class="part" id="p1">
+    <summary><span class="n">1</span>משווה <span class="en" dir="ltr">Comparator</span></summary>
+    <div class="body">
+      <p>אם המתח בפלוס גבוה מהמתח במינוס, היציאה קופצת ל־9 וולט והנורה דולקת. אחרת היציאה יורדת ל־0 וולט והנורה כבויה.</p>
+      <p>ככל שיש יותר אור, ההתנגדות של הנגד תלוי האור (LDR) קטנה, והמתח בפלוס עולה. את הסף קובעים בנגד משתנה (Potentiometer).</p>
+      <div class="circuit" id="sch1"></div>
+      <div class="ctrl">
+        <label><span>אור</span><input type="range" id="light" min="0" max="100" value="30"><output id="lightO"></output></label>
+        <label><span>סף</span><input type="range" id="thr" min="0" max="100" value="50"><output id="thrO"></output></label>
+      </div>
+      <div class="formula" id="f1"></div>
+      <div class="meters">
+        <div class="meter"><div class="tube"><div class="fill" id="mPlus" style="background:var(--c1)"></div></div><span>+</span><span class="v" id="vPlus"></span></div>
+        <div class="vs" id="vsSign">&lt;</div>
+        <div class="meter"><div class="tube"><div class="fill" id="mMinus" style="background:var(--c3)"></div></div><span>−</span><span class="v" id="vMinus"></span></div>
+      </div>
+      <p class="status" id="st1"></p>
+    </div>
+  </details>
+
+  <!-- 2 -->
+  <details class="part" id="p2">
+    <summary><span class="n">2</span>חוצץ <span class="en" dir="ltr">Buffer</span></summary>
+    <div class="body">
+      <p>חוצץ הוא מעגל שתפקידו להעביר את המתח מהכניסה ליציאה בלי לשנות את הערך שלו. החוצץ נקרא גם עוקב מתח (Voltage Follower).</p>
+      <p><b>לדוגמה:</b> אם נכנס לחוצץ מתח של 3 וולט, ייצא ממנו מתח של 3 וולט.</p>
+      <p>החוצץ לא מגביר את המתח ולא משנה את צורת הגל. הוא פשוט מחזק את היכולת של האות להמשיך למודול הבא בלי להיחלש.</p>
+      <p>לכל מודול בסינתיסייזר יש התנגדות כניסה (Input Impedance) והתנגדות יציאה (Output Impedance). כאשר מחברים מודולים ישירות, הם יכולים להשפיע זה על זה ולגרום לאות להיחלש.</p>
+      <p>החוצץ מפריד בין המודולים ועוזר לשמור על האות כפי שהיה.</p>
+      <div class="seg" role="group" aria-label="חוצץ">
+        <button type="button" id="bufOff" aria-pressed="true">בלי חוצץ</button>
+        <button type="button" id="bufOn" aria-pressed="false">עם חוצץ</button>
+      </div>
+      <div class="circuit" id="sch2"></div>
+      <div class="ctrl">
+        <label><span>התנגדות כניסה</span><input type="range" id="load" min="0" max="100" value="35"><output id="loadO"></output></label>
+      </div>
+      <div class="formula" id="f2"></div>
+      <div class="scope"><canvas id="sc2"></canvas></div>
+      <div class="legend"><span><i class="chip" style="background:var(--tr-in)"></i>כניסה</span><span><i class="chip" style="background:var(--tr-out)"></i>יציאה</span></div>
+      <p class="status" id="st2"></p>
+      <div class="why" id="why2"></div>
+      <div class="sum">החוצץ לא מגדיל את המתח. הוא שומר על המתח ומונע מהמודול הבא להחליש אותו.</div>
+    </div>
+  </details>
+
+  <!-- 3 -->
+  <details class="part" id="p3">
+    <summary><span class="n">3</span>מגבר שאינו הופך מופע <span class="en" dir="ltr">Non-Inverting Amplifier</span></summary>
+    <div class="body">
+      <p>הגל נכנס לכניסה החיובית (+), ולכן הגל ביציאה נשאר באותו מופע. הוא לא מתהפך.</p>
+      <p>שני נגדים קובעים כמה המגבר יגדיל את הגל:</p>
+      <ul class="rl">
+        <li><b>R2</b>: נגד המשוב (Feedback)</li>
+        <li><b>R1</b>: נגד שמחובר לאדמה</li>
+      </ul>
+      <p>מידת ההגדלה נקראת הגבר (Gain).</p>
+      <p><b>לדוגמה:</b> אם ההגבר הוא ×2, גל של 2 וולט יהפוך לגל של 4 וולט.</p>
+      <p>אבל המגבר יכול להוציא רק מתח עד גבול מסוים. אם הגבול הוא 9 וולט, הגל לא יכול לעבור אותו. כשהוא מגיע לגבול, החלק העליון או התחתון של הגל נחתך (Clipping), ונוצר עיוות (Distortion).</p>
+      <div class="circuit" id="sch3"></div>
+      <div class="ctrl">
+        <label><span>עוצמת הכניסה</span><input type="range" id="in3" min="0.5" max="5" step="0.1" value="1"><output id="in3O"></output></label>
+        <label><span>R1</span><input type="range" id="r1_3" min="1" max="100" step="1" value="10"><output id="r1_3O"></output></label>
+        <label><span>R2</span><input type="range" id="r2_3" min="0" max="200" step="1" value="20" style="accent-color:var(--hl)"><output id="r2_3O"></output></label>
+      </div>
+      <div class="formula" id="f3"></div>
+      <details class="whyf">
+        <summary>למה זו הנוסחה?</summary>
+        <div class="steps" id="why3"></div>
+      </details>
+      <div class="scope"><canvas id="sc3"></canvas></div>
+      <div class="legend"><span><i class="chip" style="background:var(--tr-in)"></i>כניסה</span><span><i class="chip" style="background:var(--tr-out)"></i>יציאה</span><span><i class="chip" style="background:var(--tr-clip)"></i>גבול ההזנה</span></div>
+      <p class="status" id="st3"></p>
+      <button type="button" class="play" id="play3" aria-pressed="false">השמע</button>
+      <div class="sum" style="margin-top:1rem">המגבר מגדיל את הגל בלי להפוך אותו. אם הגל המוגדל עובר את גבול המגבר, הוא נחתך ונוצר עיוות.</div>
+    </div>
+  </details>
+
+  <!-- 4 -->
+  <details class="part" id="p4">
+    <summary><span class="n">4</span>מגבר הופך מופע <span class="en" dir="ltr">Inverting Amplifier</span></summary>
+    <div class="body">
+      <p>הגל נכנס לכניסה השלילית (−) דרך R1, שנקרא נגד הכניסה (Input Resistor).</p>
+      <p>R2 הוא נגד המשוב (Feedback Resistor). שני הנגדים קובעים כמה המגבר יגדיל את הגל.</p>
+      <p>במקרה הזה היציאה הפוכה ביחס לכניסה:</p>
+      <ul class="rl">
+        <li>כשהכניסה עולה, היציאה יורדת.</li>
+        <li>כשהכניסה יורדת, היציאה עולה.</li>
+      </ul>
+      <p>לכן בנוסחת ההגבר מופיע סימן מינוס:</p>
+      <div class="formula"><div class="num">Gain = −R2 / R1</div></div>
+      <p><b>לדוגמה:</b> אם <span dir="ltr">R1 = 10 kΩ</span> ו־<span dir="ltr">R2 = 20 kΩ</span>:</p>
+      <div class="formula"><div class="num">Gain = −20 / 10 = −2</div></div>
+      <p>אם נכנס 1 וולט, נקבל:</p>
+      <div class="formula"><div class="num">Vout = −2 × 1 V = −2 V</div></div>
+      <p>כלומר, המגבר מגדיל את המתח פי 2 והופך את המופע.</p>
+      <div class="circuit" id="sch4"></div>
+      <div class="ctrl">
+        <label><span>עוצמת הכניסה</span><input type="range" id="in4" min="0.5" max="5" step="0.1" value="1"><output id="in4O"></output></label>
+        <label><span>R1</span><input type="range" id="r1_4" min="1" max="100" step="1" value="10"><output id="r1_4O"></output></label>
+        <label><span>R2</span><input type="range" id="r2_4" min="0" max="200" step="1" value="20" style="accent-color:var(--hl)"><output id="r2_4O"></output></label>
+      </div>
+      <div class="formula" id="f4"></div>
+      <div class="scope"><canvas id="sc4"></canvas></div>
+      <div class="legend"><span><i class="chip" style="background:var(--tr-in)"></i>כניסה</span><span><i class="chip" style="background:var(--tr-out)"></i>יציאה</span><span><i class="chip" style="background:var(--tr-clip)"></i>גבול ההזנה</span></div>
+      <p class="status" id="st4"></p>
+      <div class="sum">היחס בין R2 ל־R1 קובע כמה המגבר יגדיל את הגל. סימן המינוס אומר שהיציאה הפוכה ביחס לכניסה.</div>
+    </div>
+  </details>
+
+  <!-- 5 -->
+  <details class="part" id="p5">
+    <summary><span class="n">5</span>מיקסר <span class="en" dir="ltr">Mixer</span></summary>
+    <div class="body">
+      <p>כל ערוץ נכנס לכניסה השלילית (−) דרך נגד משלו, בדרך כלל 10 קילו־אוהם.</p>
+      <p>כאן כל נגד כניסה הוא נגד משתנה, וכך שולטים בעוצמה של כל ערוץ: ככל שההתנגדות קטנה, הערוץ חזק יותר.</p>
+      <p>כל האותות נפגשים בכניסה ומתחברים ביציאה לאות אחד משולב.</p>
+      <p>נגד המשוב (Rf) קובע את מידת ההגברה של האות המשולב.</p>
+      <p>זהו למעשה מגבר הופך מופע, ולכן האות המשולב ביציאה הפוך ביחס לאותות שבכניסה.</p>
+      <div class="circuit" id="sch5"></div>
+      <div class="ctrl">
+        <label><span><i class="chip" style="background:var(--c1)"></i>ערוץ 1</span><input type="range" id="v1" style="accent-color:var(--c1)" min="0" max="100" step="1" value="50"><output id="v1O"></output></label>
+        <label><span><i class="chip" style="background:var(--c2)"></i>ערוץ 2</span><input type="range" id="v2" style="accent-color:var(--c2)" min="0" max="100" step="1" value="40"><output id="v2O"></output></label>
+        <label><span><i class="chip" style="background:var(--c3)"></i>ערוץ 3</span><input type="range" id="v3" style="accent-color:var(--c3)" min="0" max="100" step="1" value="0"><output id="v3O"></output></label>
+        <label><span>Rf</span><input type="range" id="rf5" min="0" max="40" step="1" value="10" style="accent-color:var(--hl)"><output id="rf5O"></output></label>
+      </div>
+      <div class="formula" id="f5"></div>
+      <div class="scope"><canvas id="sc5"></canvas></div>
+      <div class="legend"><span><i class="chip" style="background:var(--c1)"></i>ערוץ 1</span><span><i class="chip" style="background:var(--c2)"></i>ערוץ 2</span><span><i class="chip" style="background:var(--c3)"></i>ערוץ 3</span><span><i class="chip" style="background:var(--tr-out)"></i>יציאה</span><span><i class="chip" style="background:var(--tr-clip)"></i>גבול ההזנה</span></div>
+      <p class="status" id="st5"></p>
+      <button type="button" class="play" id="play5" aria-pressed="false">השמע</button>
+      <div class="sum" style="margin-top:1rem">המיקסר מחבר כמה אותות לאות אחד. היחס בין נגדי הכניסה ל־Rf קובע את עוצמת האות המשולב, והיציאה הפוכה במופע.</div>
+    </div>
+  </details>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const VS = 9;                                   // supply ±9 V
+const clamp = (v,a=-VS,b=VS)=>Math.max(a,Math.min(b,v));
+const f1d = v => (Math.round(v*10)/10).toFixed(1);
+const f2d = v => (Math.round(v*100)/100).toFixed(2).replace('-','−');
+const kO = v => (v<10 ? f1d(v) : Math.round(v)) + ' kΩ';
+
+/* ---------- schematic helpers ---------- */
+const S = {
+  w:(d,c='w')=>`<path class="${c}" d="${d}"/>`,
+  rH:(cx,y,c='')=>`<rect class="r ${c}" x="${cx-20}" y="${y-7}" width="40" height="14" rx="2"/>`,
+  rvH:(cx,y,col)=>`<rect class="r" x="${cx-20}" y="${y-7}" width="40" height="14" rx="2" style="stroke:${col};stroke-width:3"/>`+
+     `<path class="w" d="M${cx-15} ${y+11}L${cx+15} ${y-9}M${cx+15} ${y-9}l-8.5 1M${cx+15} ${y-9}l-3 8"/>`,
+  rV:(x,cy,c='')=>`<rect class="r ${c}" x="${x-7}" y="${cy-20}" width="14" height="40" rx="2"/>`,
+  g:(x,y)=>`<path class="w" d="M${x} ${y}v7M${x-11} ${y+7}h22M${x-7} ${y+12}h14M${x-3} ${y+17}h6"/>`,
+  dot:(x,y)=>`<circle class="dot" cx="${x}" cy="${y}" r="3.5"/>`,
+  op:(x,y,top)=>`<polygon class="op" points="${x},${y-50} ${x},${y+50} ${x+90},${y}"/>`+
+     `<text class="sg" x="${x+10}" y="${y-18}">${top}</text><text class="sg" x="${x+10}" y="${y+33}">${top==='+'?'−':'+'}</text>`,
+  src:(x,y)=>`<circle class="src" cx="${x}" cy="${y}" r="15"/><path class="w" d="M${x-8} ${y}q4 -9 8 0t8 0"/>`,
+  t:(x,y,s,a='middle',c='lb',id='')=>{
+    const ltr = !/[\u0590-\u05FF]/.test(s) && id!=='noI';
+    const an = ltr ? a : (a==='end'?'start':a==='start'?'end':a);
+    return `<text ${id?`id="${id}"`:''} class="${c}" x="${x}" y="${y}" text-anchor="${an}" ${ltr?'style="direction:ltr"':''}>${s}</text>`;
+  },
+  svg:(vb,inner)=>`<svg viewBox="${vb}" role="img">${inner}</svg>`
+};
+
+
+/* ---------- intro: symbol + chip layouts ---------- */
+$('symSvg').innerHTML = S.svg('0 0 360 200',
+  `<polygon class="op" points="130,45 130,155 225,100"/>` +
+  `<text class="sg" x="140" y="80" style="direction:ltr">+</text><text class="sg" x="140" y="133" style="direction:ltr">−</text>` +
+  S.w('M85 72H130M85 128H130M225 100H270M178 72V35M178 128V165') +
+  `<circle class="src" cx="82" cy="72" r="4"/><circle class="src" cx="82" cy="128" r="4"/><circle class="src" cx="273" cy="100" r="4"/>` +
+  `<circle class="src" cx="178" cy="31" r="4"/><circle class="src" cx="178" cy="169" r="4"/>` +
+  S.t(72,77,'V+','end','pl') + S.t(72,133,'V−','end','pl') + S.t(284,105,'Vout','start','pl') +
+  S.t(178,20,'Vs+','middle','pl') + S.t(178,190,'Vs−','middle','pl')
+);
+function chipSVG(labels, amps){
+  const n=labels.length, h=n/2, P=34, X=180, W=190, Y=20, top=Y+10;
+  const H = h*P+20, py = i => top + (i-1)*P + P/2;           // left row i (1-based)
+  const pos = pin => pin<=h ? {side:'L', y:py(pin)} : {side:'R', y:py(n-pin+1)};
+  let s = `<rect class="body" x="${X}" y="${Y}" width="${W}" height="${H}" rx="3"/>` +
+          `<path class="body" d="M${X+W/2-18} ${Y}a18 18 0 0 0 36 0"/>`;
+  for(let pin=1; pin<=n; pin++){
+    const {side,y}=pos(pin), L=side==='L';
+    s += `<rect class="pin" x="${L?X-10:X+W}" y="${y-6}" width="10" height="12"/>`;
+    s += S.t(L?X-14:X+W+14, y+4, String(pin), L?'end':'start', 'pn');
+    s += S.t(L?X-34:X+W+34, y+4, labels[pin-1], L?'end':'start', 'pl');
+  }
+  amps.forEach(([minus,plus,out])=>{
+    const a=pos(minus), b=pos(plus), o=pos(out), L=a.side==='L';
+    const y1=Math.min(a.y,b.y)-14, y2=Math.max(a.y,b.y)+14, ym=(y1+y2)/2;
+    const bx = L? X+14 : X+W-14, ax = L? bx+50 : bx-50, wx = L? ax+8 : ax-8, edge = L? X : X+W;
+    s += `<polygon class="opS" points="${bx},${y1} ${bx},${y2} ${ax},${ym}"/>`;
+    s += `<path class="opS" d="M${edge} ${a.y}H${bx}M${edge} ${b.y}H${bx}M${ax} ${ym}H${wx}V${o.y}H${edge}"/>`;
+    const sx = L? bx+4 : bx-12;
+    s += `<text class="sgS" x="${sx}" y="${a.y+4}" style="direction:ltr">−</text><text class="sgS" x="${sx}" y="${b.y+4}" style="direction:ltr">+</text>`;
+  });
+  return S.svg(`0 0 ${2*X+W} ${H+2*Y}`, s);
+}
+$('dip8').innerHTML = chipSVG(
+  ['Output 1','Inverting Input 1','Non-Inverting Input 1','Vs−','Non-Inverting Input 2','Inverting Input 2','Output 2','Vs+'],
+  [[2,3,1],[6,5,7]]);
+$('dip14').innerHTML = chipSVG(
+  ['Output 1','Inverting Input 1','Non-Inverting Input 1','Vs+','Non-Inverting Input 2','Inverting Input 2','Output 2',
+   'Output 3','Inverting Input 3','Non-Inverting Input 3','Vs−','Non-Inverting Input 4','Inverting Input 4','Output 4'],
+  [[2,3,1],[6,5,7],[9,10,8],[13,12,14]]);
+
+/* 1 comparator */
+$('sch1').innerHTML = S.svg('0 0 440 215',
+  S.w('M60 22V145') + S.w('M60 185V195') + S.g(60,195) + S.rV(60,165) +
+  `<path class="w" d="M84 165H70M70 165l7 -5M70 165l7 5"/>` + S.w('M84 165H165V135H190') +
+  S.t(60,16,'9 V') + S.t(40,170,'סף','end') +
+  S.w('M130 22V138') + S.g(130,138) + S.rV(130,43) + S.rV(130,107) +
+  `<path class="w" d="M98 28l14 8M112 36l-6 0M112 36l-3 -5M98 44l14 8M112 52l-6 0M112 52l-3 -5"/>` +
+  S.w('M130 85H190') + S.dot(130,85) +
+  S.t(130,16,'9 V') + S.t(146,40,'','start','lbh','ldrLab') + S.t(120,112,'10 kΩ','end') +
+  S.op(190,110,'+') +
+  S.w('M280 110H345') + S.rH(318,110) + S.w('M367 110H392V132') + S.g(392,132) +
+  `<circle class="led-glow" id="glow" cx="356" cy="110" r="18"/>` +
+  `<polygon class="led" id="led" points="345,97 345,123 367,110"/>` + S.w('M367 97V123') +
+  S.t(356,150,'נורה') + S.t(300,100,'','middle','lbh','voutLab')
+);
+
+/* 2 buffer */
+$('sch2').innerHTML = S.svg('0 -4 430 229',
+  S.src(50,120) + S.w('M50 105V65H170') + S.w('M50 135V150') + S.g(50,150) + S.rH(80,65) +
+  `<rect x="22" y="44" width="92" height="96" rx="8" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4"/>` +
+  S.t(68,36,'התנגדות יציאה') + S.t(92,92,'Rout','middle') + S.t(92,106,'10 kΩ','middle') + S.t(58,188,'המודול הקודם') +
+  `<g id="bufGrp" class="fade">` + S.op(170,90,'+') + S.w('M260 90H310') +
+    S.w('M290 90V160H150V115H170') + S.dot(290,90) +
+    S.w('M215 65V34') + S.t(215,28,'±9 V') + `</g>` +
+  S.t(141,86,'אין זרם','middle','lbh','noI') +
+  `<path class="bypass" id="bypass" d="M135 65V10H310V90"/>` + S.dot(135,65) +
+  `<path id="path2a" d="M50 105V65H135V10H310V90H350V160" fill="none" stroke="none"/>` +
+  `<path id="path2b" d="M215 34V70L260 90H350V160" fill="none" stroke="none"/>` +
+  `<g id="dots2"></g>` +
+  S.w('M310 90H350V160') + S.g(350,160) + S.rV(350,125,'hl') +
+  `<path class="w" d="M334 146L366 104M366 104l-9 2M366 104l-2 9"/>` +
+  `<rect x="322" y="76" width="70" height="108" rx="8" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4"/>` +
+  S.t(357,202,'המודול הבא') + S.t(357,220,'','middle','lbh','spkR')
+);
+
+/* 3 non-inverting */
+$('sch3').innerHTML = S.svg('0 0 400 230',
+  S.src(50,120) + S.w('M50 105V65H170') + S.w('M50 135V150') + S.g(50,150) + S.t(50,188,'','middle','lbin','vinlab3') +
+  S.op(170,90,'+') + S.w('M260 90H350') + S.dot(290,90) + S.t(352,80,'','end','lbh','voutlab3') +
+  S.w('M290 90V160H150V115H170') + S.rH(220,160,'hl') + S.t(220,186,'','middle','lbh','r2lab3') +
+  S.dot(150,160) + S.w('M150 160V205') + S.rV(150,188) + S.g(150,205) + S.t(128,212,'','end','lb','r1lab3') +
+  S.dot(150,115) + S.t(142,142,'','end','lbin','vmlab3')
+);
+
+/* 4 inverting */
+$('sch4').innerHTML = S.svg('0 0 400 200',
+  S.src(40,120) + S.w('M40 105V75H180') + S.rH(98,75) + S.w('M40 135V150') + S.g(40,150) +
+  S.t(40,188,'Vin') + S.t(98,60,'','middle','lb','r1lab4') +
+  S.op(180,100,'−') + S.w('M180 125H160V150') + S.g(160,150) +
+  S.w('M145 75V30H300V100') + S.dot(145,75) + S.rH(222,30,'hl') + S.t(222,16,'','middle','lbh','r2lab4') +
+  S.w('M270 100H350') + S.dot(300,100) + S.t(352,90,'Vout','end')
+);
+
+/* 5 mixer */
+{
+  let s='';
+  [[45,'var(--c1)',1],[95,'var(--c2)',2],[145,'var(--c3)',3]].forEach(([y,c,i])=>{
+    s += S.w(`M42 ${y}H150`) + S.rvH(96,y,c) + S.t(96,y-15,'','middle','lb',`rinlab${i}`) +
+         `<circle cx="30" cy="${y}" r="12" style="fill:${c};stroke:var(--ink);stroke-width:2"/>`;
+  });
+  s += S.w('M150 45V145H190') + S.dot(150,95) + S.dot(150,45) +
+       S.op(190,170,'−') + S.w('M190 195H170V215') + S.g(170,215) +
+       S.w('M150 45V12H310V170') + S.rvH(230,12,'var(--hl)') + S.t(230,38,'','middle','lbh','rflab5') +
+       S.w('M280 170H360') + S.dot(310,170) + S.t(362,160,'Vout','end');
+  $('sch5').innerHTML = S.svg('0 -12 400 262', s);
+}
+
+/* ---------- 1 comparator ---------- */
+function upd1(){
+  const L = +$('light').value, T = +$('thr').value;
+  const Rldr = 200*Math.pow(1/200, L/100);          // 200 kΩ (dark) → 1 kΩ (bright)
+  const vp = VS*10/(Rldr+10), vm = VS*T/100;
+  const on = vp > vm;
+  $('lightO').value = kO(Rldr); $('thrO').value = T+'%';
+  $('ldrLab').textContent = 'LDR '+kO(Rldr);
+  $('voutLab').textContent = on ? '9 V' : '0 V';
+  $('mPlus').style.height = (vp/9*100)+'%'; $('mMinus').style.height = (vm/9*100)+'%';
+  $('vPlus').textContent = f1d(vp)+' V'; $('vMinus').textContent = f1d(vm)+' V';
+  $('vsSign').textContent = on ? '>' : '<';
+  $('led').classList.toggle('on',on); $('glow').classList.toggle('on',on);
+  $('f1').innerHTML =
+    `<div class="cmp">V+ <b>${on?'&gt;':'&lt;'}</b> V− <span class="arr">→</span> <span class="res ${on?'hi':''}">Vout = ${on?'9':'0'} V</span></div>`;
+  $('st1').textContent = on ? 'פלוס גבוה ממינוס: הנורה דולקת' : 'מינוס גבוה מפלוס: הנורה כבויה';
+}
+['light','thr'].forEach(id=>$(id).addEventListener('input',upd1)); upd1();
+
+/* ---------- 2 buffer ---------- */
+const st = {buf:false};
+const VIN2 = 5, RSRC = 10;
+const Rload = () => Math.pow(100, +$('load').value/100);   // 1 → 100 kΩ
+const bufK = () => st.buf ? 1 : Rload()/(RSRC+Rload());
+function upd2(){
+  const Rl = Rload(), k = bufK();
+  $('loadO').value = kO(Rl); $('spkR').textContent = 'Rin '+kO(Rl);
+  $('bufOn').setAttribute('aria-pressed',st.buf); $('bufOff').setAttribute('aria-pressed',!st.buf);
+  $('bufGrp').classList.toggle('fade',!st.buf);
+  $('bypass').style.opacity = st.buf?0:1;
+  $('noI').style.opacity = st.buf?1:0;
+  $('f2').innerHTML = st.buf
+    ? `<div class="cmp"><span class="res">Vout = Vin = ${VIN2} V</span></div>`
+    : `<div class="cmp">Vin = ${VIN2} V <span class="arr">→</span> <span class="res bad2">Vout = ${f2d(VIN2*k)} V</span></div>`;
+  $('st2').textContent = st.buf ? 'היציאה שווה לכניסה, גם כשהתנגדות הכניסה של המודול הבא נמוכה'
+                                : 'היציאה חלשה: '+Math.round(k*100)+'% מהכניסה';
+  $('st2').classList.toggle('warn',!st.buf && k<.6);
+  $('why2').innerHTML = st.buf
+    ? '<p>הכניסה של מגבר השרת כמעט לא לוקחת זרם, ולכן המודול הקודם לא מאבד מתח.</p><p>את הזרם למודול הבא נותנת ההזנה, דרך מגבר השרת.</p>'
+    : '<p>הזרם (Current) למודול הבא יוצא מהמודול הקודם ועובר דרך התנגדות היציאה שלו.</p><p>התנגדות היציאה והתנגדות הכניסה יוצרות מחלק מתח (Voltage Divider). ככל שהתנגדות הכניסה של המודול הבא נמוכה יותר, יותר מתח נשאר על התנגדות היציאה, ופחות מגיע למודול הבא.</p>';
+}
+$('load').addEventListener('input',upd2);
+$('bufOn').onclick=()=>{st.buf=true;upd2()}; $('bufOff').onclick=()=>{st.buf=false;upd2()};
+upd2();
+const cur2 = () => { const Rl=Rload(); const I = st.buf ? 1/Rl : 1/(RSRC+Rl); return 20 + 140*Math.sqrt(Math.min(1,I*2)); };
+let dotPos2 = 0;
+{ let h=''; for(let i=0;i<10;i++) h+='<circle class="cur" r="4.5"/>'; $('dots2').innerHTML=h; }
+function drawDots2(dt){
+  const path = $(st.buf?'path2b':'path2a'), L = path.getTotalLength();
+  if(!reduce) dotPos2 = (dotPos2 + cur2()*dt) % 1e6;
+  const n = Math.max(4, Math.round(L/45)), gap = L/n;
+  [...$('dots2').children].forEach((c,i)=>{
+    if(i>=n){ c.style.display='none'; return; }
+    const pt = path.getPointAtLength((dotPos2 + i*gap) % L);
+    c.style.display=''; c.setAttribute('cx',pt.x); c.setAttribute('cy',pt.y);
+  });
+}
+
+/* ---------- 3 non-inverting ---------- */
+const a3 = {vin:1, g:3};
+function upd3(){
+  const vin=+$('in3').value, R1=+$('r1_3').value, R2=+$('r2_3').value, g=1+R2/R1, vo=g*vin;
+  Object.assign(a3,{vin,g});
+  $('in3O').value=f1d(vin)+' V'; $('r1_3O').value=kO(R1); $('r2_3O').value=kO(R2);
+  $('r1lab3').textContent='R1 '+kO(R1); $('r2lab3').textContent='R2 '+kO(R2);
+  const clip = vo>VS, voR = Math.min(vo,VS), vm = voR*R1/(R1+R2);
+  $('vinlab3').textContent='Vin '+f1d(vin)+' V'; $('voutlab3').textContent='Vout '+f1d(voR)+' V';
+  $('vmlab3').textContent='V− '+f1d(vm)+' V';
+  const nz = v => String(Math.round(v*100)/100);
+  const L = x => `<span dir="ltr">${x}</span>`;
+  const ratio = (R1+R2)/R1, words={1:'את כל',2:'חצי',3:'שליש',4:'רבע',5:'חמישית',6:'שישית',8:'שמינית',10:'עשירית'};
+  const frac = Number.isInteger(ratio) && words[ratio] ? words[ratio] : L(`${R1}/${R1+R2}`);
+  const out = nz(vo);
+  $('why3').innerHTML =
+    `<p>נניח שנכנס ${nz(vin)} וולט.</p>`+
+    `<p>הנגדים הם ${L('R1 = '+R1+' kΩ')} ו־${L('R2 = '+R2+' kΩ')}.</p>`+
+    `<p>היחס ביניהם קובע שההגבר הוא פי ${nz(g)}, ולכן היציאה תהיה ${out} וולט.</p>`+
+    `<p class="q">אבל למה דווקא ${out} וולט?</p>`+
+    (R2===0
+      ? `<p>כש־R2 הוא 0, המינוס מחובר ישר ליציאה ומקבל את כל היציאה.</p>`
+      : `<p>R1 ו־R2 מחלקים את מתח היציאה. במקרה הזה, V− מקבל ${frac} מהיציאה.</p>`)+
+    `<p>המגבר משנה את היציאה עד ש־V− יהיה שווה ל־Vin, כלומר ${nz(vin)} וולט.</p>`+
+    `<p>אם ${R2===0?'כל היציאה':frac+' מהיציאה'} צריך להיות ${nz(vin)} וולט, היציאה חייבת להיות ${out} וולט.</p>`+
+    (clip ? `<p class="clipnote">אבל היציאה לא יכולה לעבור 9 וולט, ולכן הגל נחתך. במקרה כזה V− כבר לא מצליח להגיע ל־Vin.</p>` : '');
+  $('f3').innerHTML =
+    `<div class="sym">Gain = 1 + R2 / R1</div>`+
+    `<div class="num">Gain = 1 + ${R2} / ${R1} = ${f2d(g)}</div>`+
+    `<div class="sym" style="margin-top:.4rem">Vout = Gain × Vin</div>`+
+    `<div class="num">Vout = ${f2d(g)} × ${f1d(vin)} V = ${f2d(vo)} V`+
+    (clip?` <span class="bad">→ 9 V (Clipping)</span>`:'')+`</div>`;
+  $('st3').textContent = clip ? 'הגל נחתך' : 'הגל גדל פי '+f1d(g);
+  $('st3').classList.toggle('warn',clip);
+  if(snd && snd.id==='play3'){ snd.a.gain.setTargetAtTime(vin/VS,AC.currentTime,.02); snd.gain.gain.setTargetAtTime(g,AC.currentTime,.02); }
+}
+['in3','r1_3','r2_3'].forEach(id=>$(id).addEventListener('input',upd3));
+
+/* ---------- 4 inverting ---------- */
+const a4 = {vin:1, g:-2};
+function upd4(){
+  const vin=+$('in4').value, R1=+$('r1_4').value, R2=+$('r2_4').value, g=-R2/R1, vo=g*vin;
+  Object.assign(a4,{vin,g});
+  $('in4O').value=f1d(vin)+' V'; $('r1_4O').value=kO(R1); $('r2_4O').value=kO(R2);
+  $('r1lab4').textContent='R1 '+kO(R1); $('r2lab4').textContent='R2 '+kO(R2);
+  const clip = Math.abs(vo)>VS;
+  $('f4').innerHTML =
+    `<div class="sym">Gain = −R2 / R1</div>`+
+    `<div class="num">Gain = −${R2} / ${R1} = ${f2d(g)}</div>`+
+    `<div class="sym" style="margin-top:.4rem">Vout = Gain × Vin</div>`+
+    `<div class="num">Vout = ${f2d(g)} × ${f1d(vin)} V = ${f2d(vo)} V`+
+    (clip?` <span class="bad">→ −9 V (Clipping)</span>`:'')+`</div>`;
+  $('st4').textContent = clip ? 'הגל נחתך' : 'הגל גדל פי '+f1d(-g)+' והתהפך';
+  $('st4').classList.toggle('warn',clip);
+}
+['in4','r1_4','r2_4'].forEach(id=>$(id).addEventListener('input',upd4));
+
+/* ---------- 5 mixer ---------- */
+const FR = [1, 1.26, 1.5], RIN = 10;
+const wave = [
+  x=>Math.sin(2*Math.PI*x),
+  x=>{const p=((x%1)+1)%1; return p<.5? 4*p-1 : 3-4*p;},
+  x=>{const p=((x%1)+1)%1; return 2*p-1;}
+];
+const VCH = 1;                                   // each channel input: 1 V
+const a5 = {v:[VCH,VCH,VCH], k:[1,1,0], rin:[10,10,Infinity], rf:10};
+const rinOf = v => v<=0 ? Infinity : 100*Math.pow(0.01, v/100);   // slider → 100 kΩ … 1 kΩ, 0 = off
+const rStr = r => Number.isFinite(r) ? (r<10 ? f1d(r) : String(Math.round(r))) : '∞';
+function upd5(){
+  a5.rf = +$('rf5').value;
+  a5.rin = [1,2,3].map(i=>rinOf(+$('v'+i).value));
+  a5.k = a5.rin.map(r => Number.isFinite(r) ? a5.rf/r : 0);
+  a5.rin.forEach((r,i)=>{
+    $('v'+(i+1)+'O').value = Number.isFinite(r) ? kO(r) : 'כבוי';
+    $('rinlab'+(i+1)).textContent = `Rin${i+1} ` + (Number.isFinite(r) ? kO(r) : '∞');
+  });
+  $('rf5O').value = kO(a5.rf); $('rflab5').textContent = 'Rf '+kO(a5.rf);
+  const vo = -a5.k.reduce((a,k)=>a+k*VCH,0);
+  const clip = Math.abs(vo)>VS;
+  const terms = a5.rin.map(r => Number.isFinite(r) ? `${VCH}/${rStr(r)}` : '0').join(' + ');
+  $('f5').innerHTML =
+    `<div class="sym">Vout = −Rf × (V1/Rin1 + V2/Rin2 + V3/Rin3)</div>`+
+    `<div class="num">Vout = −${a5.rf} × (${terms}) = ${f2d(vo)} V`+
+    (clip?` <span class="bad">→ −9 V (Clipping)</span>`:'')+`</div>`;
+  const on = a5.k.some(k=>k>0);
+  $('st5').textContent = !on ? 'כל הערוצים סגורים' : clip ? 'יותר מדי ביחד: הגל נחתך' : 'הערוצים מתחברים לאות אחד';
+  $('st5').classList.toggle('warn',clip);
+  if(snd && snd.id==='play5') snd.vols.forEach((g,i)=>g.gain.setTargetAtTime(VCH/VS*a5.k[i],AC.currentTime,.02));
+}
+['v1','v2','v3','rf5'].forEach(id=>$(id).addEventListener('input',upd5));
+
+
+/* ---------- tabs ---------- */
+{
+  const parts=[...document.querySelectorAll('details.part')], bar=$('tabs');
+  const select=(d,focus)=>{
+    parts.forEach(x=>{ x.open = (x===d); });
+    [...bar.children].forEach(b=>b.setAttribute('aria-selected', b.dataset.id===d.id));
+    const btn=bar.querySelector(`[data-id="${d.id}"]`);
+    const br=bar.getBoundingClientRect(), bb=btn.getBoundingClientRect(); bar.scrollLeft += (bb.left+bb.width/2)-(br.left+br.width/2); if(focus) btn.focus({preventScroll:true});
+    if(window.scrollY > bar.offsetTop) window.scrollTo({top:bar.offsetTop});
+    try{ if(d!==parts[0]) history.replaceState(null,'','#'+d.id); else if(location.hash) history.replaceState(null,'',location.pathname+location.search); }catch(e){}
+  };
+  parts.forEach(d=>{
+    const sum=d.querySelector('summary'); sum.tabIndex=-1;
+    sum.addEventListener('click',e=>e.preventDefault());
+    const n=sum.querySelector('.n'), en=sum.querySelector('.en');
+    const title=[...sum.childNodes].filter(x=>x.nodeType===3).map(x=>x.textContent).join('').trim();
+    const b=document.createElement('button');
+    b.type='button'; b.className='tab'; b.setAttribute('role','tab'); b.dataset.id=d.id;
+    b.innerHTML=`<span>${n?n.textContent+' ':''}${title}</span>${en?`<small dir="ltr">${en.textContent}</small>`:''}`;
+    b.onclick=()=>select(d);
+    bar.appendChild(b);
+  });
+  bar.addEventListener('keydown',e=>{
+    const i=parts.findIndex(p=>p.open); let j=i;
+    if(e.key==='ArrowLeft') j=Math.min(parts.length-1,i+1);
+    else if(e.key==='ArrowRight') j=Math.max(0,i-1);
+    else return;
+    e.preventDefault(); select(parts[j],true);
+  });
+  const start = parts.find(p=>'#'+p.id===location.hash) || parts[0];
+  select(start);
+  if(!location.hash || start===parts[0]) requestAnimationFrame(()=>window.scrollTo(0,0));
+}
+
+/* ---------- sound ---------- */
+let AC=null, snd=null;
+function linearCurve(){ const n=1025,c=new Float32Array(n); for(let i=0;i<n;i++)c[i]=i/(n-1)*2-1; return c; }
+function stopSnd(){
+  if(!snd) return;
+  const s=snd; snd=null;
+  s.master.gain.setTargetAtTime(0,AC.currentTime,.03);
+  setTimeout(()=>s.oscs.forEach(o=>o.stop()),200);
+  $(s.id).setAttribute('aria-pressed','false'); $(s.id).textContent='השמע';
+}
+function startSnd(id){
+  stopSnd();
+  AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+  AC.resume();
+  const master = AC.createGain(); master.gain.value=0; master.connect(AC.destination);
+  const sh = AC.createWaveShaper(); sh.curve = linearCurve(); sh.connect(master);
+  const s = {id, master, oscs:[]};
+  if(id==='play3'){
+    const o=AC.createOscillator(); o.frequency.value=220;
+    const a=AC.createGain(); a.gain.value=a3.vin/VS;
+    const g=AC.createGain(); g.gain.value=a3.g;
+    o.connect(a).connect(g).connect(sh); o.start(); s.oscs=[o]; s.a=a; s.gain=g;
+  } else {
+    s.vols=[];
+    ['sine','triangle','sawtooth'].forEach((t,i)=>{ const o=AC.createOscillator(); o.type=t; o.frequency.value=220*FR[i];
+      const v=AC.createGain(); v.gain.value=VCH/VS*a5.k[i]; o.connect(v).connect(sh); o.start(); s.oscs.push(o); s.vols.push(v); });
+  }
+  master.gain.setTargetAtTime(.22,AC.currentTime,.03);
+  snd=s; $(id).setAttribute('aria-pressed','true'); $(id).textContent='עצור';
+}
+['play3','play5'].forEach(id=>$(id).onclick=()=> (snd&&snd.id===id)?stopSnd():startSnd(id));
+document.querySelectorAll('details.part').forEach(d=>d.addEventListener('toggle',()=>{
+  if(!d.open && snd && d.contains($(snd.id))) stopSnd();
+}));
+
+upd3(); upd4(); upd5();
+
+/* ---------- scopes (values in volts) ---------- */
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function drawScope(cv, traces, showClip){
+  const dpr = window.devicePixelRatio||1, W=cv.clientWidth, H=cv.clientHeight;
+  if(cv.width!==Math.round(W*dpr)){ cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr); }
+  const c=cv.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,W,H);
+  const R=12, y=v=>H/2 - v/R*(H/2-4);
+  c.strokeStyle=css('--grid'); c.lineWidth=1;
+  for(let i=1;i<10;i++){c.beginPath();c.moveTo(W*i/10,0);c.lineTo(W*i/10,H);c.stroke();}
+  for(let v=-9;v<=9;v+=3){c.beginPath();c.moveTo(0,y(v));c.lineTo(W,y(v));c.stroke();}
+  c.strokeStyle=css('--axis'); c.beginPath(); c.moveTo(0,H/2); c.lineTo(W,H/2); c.stroke();
+  if(showClip){
+    c.strokeStyle=css('--tr-clip'); c.setLineDash([6,5]); c.lineWidth=1.5;
+    [VS,-VS].forEach(v=>{c.beginPath();c.moveTo(0,y(v));c.lineTo(W,y(v));c.stroke();});
+    c.setLineDash([]);
+    c.fillStyle=css('--tr-clip'); c.font='12px Heebo, sans-serif'; c.textAlign='left'; c.direction='ltr';
+    c.fillText('+9 V',6,y(VS)-5); c.fillText('−9 V',6,y(-VS)+14);
+  }
+  traces.forEach(tr=>{
+    c.strokeStyle=tr.color; c.lineWidth=tr.width||2.5; c.globalAlpha=tr.alpha||1;
+    c.beginPath();
+    for(let px=0;px<=W;px+=2){ const v=tr.f(px/W); px?c.lineTo(px,y(v)):c.moveTo(px,y(v)); }
+    c.stroke(); c.globalAlpha=1;
+  });
+}
+let t0=performance.now(), last=null;
+function frame(now){
+  const dt = last===null?0:Math.min(.05,(now-last)/1000); last=now;
+  const ph = reduce?0:(now-t0)/1000*.35, P=2;
+  const sin = x=>Math.sin(2*Math.PI*(x*P+ph));
+  const cin=css('--tr-in'), cout=css('--tr-out');
+  if($('p2').open){ const k=bufK(); drawDots2(dt);
+    drawScope($('sc2'),[{f:x=>VIN2*sin(x),color:cin,width:2},{f:x=>VIN2*k*sin(x),color:cout,width:3}],false); }
+  if($('p3').open)
+    drawScope($('sc3'),[{f:x=>a3.vin*sin(x),color:cin,width:2},{f:x=>clamp(a3.g*a3.vin*sin(x)),color:cout,width:3}],true);
+  if($('p4').open)
+    drawScope($('sc4'),[{f:x=>a4.vin*sin(x),color:cin,width:2},{f:x=>clamp(a4.g*a4.vin*sin(x)),color:cout,width:3}],true);
+  if($('p5').open){
+    const ch=[0,1,2].map(i=>x=>VCH*wave[i]((x*P+ph)*FR[i]));
+    const cc=[css('--c1'),css('--c2'),css('--c3')];
+    const tr=ch.map((f,i)=>({f,color:cc[i],width:1.5,alpha:a5.k[i]>0?.7:.15}));
+    tr.push({f:x=>clamp(-(a5.k[0]*ch[0](x)+a5.k[1]*ch[1](x)+a5.k[2]*ch[2](x))),color:cout,width:3});
+    drawScope($('sc5'),tr,true);
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
