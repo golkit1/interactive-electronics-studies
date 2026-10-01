@@ -61,6 +61,9 @@ summary .n{font-family:"Heebo",sans-serif;font-weight:700;font-size:1rem;color:v
 .duo figcaption{text-align:center;font-weight:700;margin-bottom:.3rem}
 .duo figcaption .en{font-size:.75em}
 .duo p{margin:.3rem 0 0;text-align:center;font-size:.95rem;color:var(--muted)}
+.duo .cond{margin:.4rem 0 0;padding-inline-start:1.2rem;font-size:.95rem}
+.duo .cond li{margin:.3rem 0}
+.duo p.lead{text-align:start;color:var(--ink);font-weight:500;margin:.4rem 0 0}
 .duo svg{display:block;width:100%;max-width:220px;margin:0 auto;height:auto;direction:ltr}
 
 svg .w{fill:none;stroke:var(--ink);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
@@ -72,6 +75,8 @@ svg .ar{fill:var(--ink)}
 svg text{direction:rtl}
 svg .lb{fill:var(--muted);font:500 13px "Heebo",sans-serif}
 svg .pin{fill:var(--ink);font:700 13px "Heebo",sans-serif;direction:ltr}
+svg .chg{fill:var(--small);font:700 13px "Heebo",sans-serif;direction:ltr}
+svg .chg.n{fill:var(--muted)}
 svg .lbl{fill:var(--muted);font:500 13px "Heebo",sans-serif;direction:ltr}
 svg .val{fill:var(--muted);font:500 13px "Heebo",sans-serif;direction:ltr}
 svg .big-t{fill:var(--ink);font:700 18px "Heebo",sans-serif;direction:ltr}
@@ -90,6 +95,9 @@ svg .hit{fill:transparent;cursor:pointer}
 .press{display:block;width:100%;max-width:340px;margin:0 auto 1rem;border:2px solid var(--ink);background:var(--btn);color:var(--btn-ink);font:700 1.1rem "Heebo",sans-serif;padding:.8rem 1.3rem;border-radius:999px;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:none}
 .press[aria-pressed="true"]{background:var(--hl);border-color:var(--hl);color:#fff}
 .press:focus-visible{outline:3px solid var(--hl);outline-offset:3px}
+.path{background:var(--panel);border:1px solid var(--line);border-inline-start:4px solid var(--small);border-radius:8px;padding:.6rem 1rem;margin-bottom:1rem;min-height:4.6em}
+.path b{color:var(--small)}
+.path .st{display:block;font-weight:700;margin-bottom:.2rem}
 .status{text-align:center;font-weight:700;min-height:1.6em;margin:0 0 1rem}
 
 .seg{display:inline-flex;border:2px solid var(--ink);border-radius:999px;overflow:hidden;margin-bottom:1rem;direction:ltr}
@@ -100,9 +108,12 @@ svg .hit{fill:transparent;cursor:pointer}
 .row > span{font-weight:500;margin-bottom:1rem}
 
 .bars{display:grid;gap:.6rem;margin-bottom:1rem}
-.bar{display:grid;grid-template-columns:7.5rem 1fr;align-items:center;gap:.8rem;font-weight:500}
+.bar{display:grid;grid-template-columns:7.5rem 1fr 4rem;align-items:center;gap:.8rem;font-weight:500}
 .track{height:18px;background:var(--panel);border:1px solid var(--line);border-radius:999px;overflow:hidden}
 .track div{height:100%;width:0;border-radius:999px}
+.track{position:relative}
+.track .thr{position:absolute;z-index:1;top:-3px;bottom:-3px;width:0;border-inline-start:3px dashed var(--ink);border-radius:0;background:none}
+.bar output{font-weight:700;font-variant-numeric:tabular-nums;direction:ltr;text-align:end}
 
 .ctrl label{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:.8rem;font-weight:500;margin-bottom:.6rem}
 input[type=range]{width:100%;accent-color:var(--hl);height:2rem}
@@ -132,18 +143,26 @@ pre{direction:ltr;text-align:left;background:var(--screen);color:#E6EAF1;border-
   <details class="part" id="p0" open>
     <summary>מבוא <span class="en" dir="ltr">Introduction</span></summary>
     <div class="body">
-      <p>טרנזיסטור (Transistor) הוא מתג חשמלי. במקום אצבע שלוחצת על כפתור, זרם קטן פותח וסוגר אותו.</p>
+      <p>טרנזיסטור (Transistor) הוא רכיב אלקטרוני שיכול לשמש כמו מתג חשמלי.<br>במקום שאצבע תלחץ על כפתור, אות חשמלי קטן שולט במתג.</p>
       <p>לטרנזיסטור שלוש רגליים:</p>
       <ul class="rl">
-        <li><b>בסיס (Base)</b>: הידית ששולטת במתג.</li>
-        <li><b>קולט (Collector)</b> ו<b>פולט (Emitter)</b>: דרכם עובר הזרם הגדול, למשל לנורה או למנוע.</li>
+        <li><b>בסיס (Base)</b> — הרגל ששולטת בטרנזיסטור.</li>
+        <li><b>קולט (Collector)</b> ו־<b>פולט (Emitter)</b> — הרגליים שביניהן עובר הזרם, למשל אל נורה או מנוע.</li>
       </ul>
-      <div class="sum"><span class="sm">זרם קטן בבסיס</span> &nbsp;←&nbsp; <span class="bg">זרם גדול בין הקולט לפולט</span></div>
+      <div class="sum"><span class="sm">אות קטן בבסיס</span> &nbsp;←&nbsp; <span class="bg">שליטה בזרם גדול יותר בין הקולט לפולט</span></div>
       <p>יש שני סוגים:</p>
       <div class="duo">
-        <figure><figcaption>NPN</figcaption><div id="symNPN"></div><p>נדלק כשהבסיס מקבל פלוס</p></figure>
-        <figure><figcaption>PNP</figcaption><div id="symPNP"></div><p>נדלק כשהבסיס מחובר לאדמה (GND)</p></figure>
+        <figure><figcaption>NPN</figcaption><div id="symNPN"></div><ul class="cond">
+          <li>כשהמתח בבסיס נמוך, או קרוב למתח בפולט ← הטרנזיסטור <b>כבוי (OFF)</b>.</li>
+          <li>כשהמתח בבסיס גבוה ממתח הפולט בכ־0.6 עד 0.7 וולט ← הטרנזיסטור <b>דולק (ON)</b>, וזרם יכול לעבור בין הקולט לפולט.</li>
+        </ul></figure>
+        <figure><figcaption>PNP</figcaption><div id="symPNP"></div><p class="lead">ב־PNP הכיוון הפוך:</p>
+        <ul class="cond">
+          <li>כשהמתח בבסיס גבוה, או קרוב למתח בפולט ← הטרנזיסטור <b>כבוי (OFF)</b>.</li>
+          <li>כשהמתח בבסיס נמוך ממתח הפולט בכ־0.6 עד 0.7 וולט ← הטרנזיסטור <b>דולק (ON)</b>, וזרם יכול לעבור בין הפולט לקולט.</li>
+        </ul></figure>
       </div>
+      <div class="sum">דרך פשוטה לזכור:<br>ב־NPN הבסיס צריך להיות גבוה מהפולט. ב־PNP הבסיס צריך להיות נמוך מהפולט.</div>
       <div class="duo" style="max-width:420px;margin-inline:auto">
         <figure><figcaption>איך מזהים את הרגליים</figcaption><div id="pinout"></div><p>הצד השטוח עם הכיתוב מולכם. משמאל לימין: <bdi>E B C</bdi></p><p>כך ב־<bdi>2N3904</bdi> וב־<bdi>2N3906</bdi></p></figure>
       </div>
@@ -172,13 +191,13 @@ pre{direction:ltr;text-align:left;background:var(--screen);color:#E6EAF1;border-
   <details class="part" id="p2">
     <summary><span class="n">2</span>PNP</summary>
     <div class="body">
-      <p>כאן הכול הפוך: הפולט מחובר לפלוס, והטרנזיסטור נדלק כשהבסיס מחובר לאדמה (GND). כשלוחצים, הכפתור מושך את הבסיס למטה והנורה נדלקת.</p>
+      <p>כאן הכול הפוך: הפולט מחובר לפלוס של הסוללה (+9V), והטרנזיסטור נדלק כשהבסיס מחובר לאדמה (GND). כשלוחצים, הכפתור מושך את הבסיס למטה והנורה נדלקת.</p>
       <div class="circuit" id="sch2"></div>
       <div class="legend"><span><i style="color:var(--small)"></i>זרם קטן (בבסיס)</span><span><i style="color:var(--big)"></i>זרם גדול (בנורה)</span></div>
       <button class="press" id="b2" aria-pressed="false">לחצו והחזיקו</button>
       <div class="status" id="st2"></div>
-      <details class="whyf"><summary>למה הנגד של 10k מחובר לפלוס?</summary>
-        <p>כשהכפתור לא לחוץ, הנגד מחזיק את הבסיס בפלוס. כך טרנזיסטור PNP נשאר כבוי והנורה לא דולקת.</p>
+      <details class="whyf"><summary>למה הנגד של 10k מחובר לפלוס של הסוללה?</summary>
+        <p>כשהכפתור לא לחוץ, הנגד מחבר את הבסיס לפלוס של הסוללה (+9V). כך טרנזיסטור PNP נשאר כבוי והנורה לא דולקת.</p>
       </details>
     </div>
   </details>
@@ -187,7 +206,8 @@ pre{direction:ltr;text-align:left;background:var(--screen);color:#E6EAF1;border-
   <details class="part" id="p3">
     <summary><span class="n">3</span>דעיכה עם קבל <span class="en" dir="ltr">LED Fade Out</span></summary>
     <div class="body">
-      <p>הוספנו קבל (Capacitor) ליד הבסיס. כשלוחצים, הקבל מתמלא. כשעוזבים, הקבל מתרוקן לאט דרך הבסיס, והנורה דועכת בהדרגה.</p>
+      <p>הוספנו קבל (Capacitor) ליד הבסיס.<br>כשנלחץ על הכפתור, הקבל נטען.<br>כשעוזבים את הכפתור, הקבל מתחיל להיפרק בהדרגה, ולכן המתח בבסיס יורד בהדרגה.<br>ככל שהמתח יורד, הטרנזיסטור מעביר פחות, והנורה נחלשת בהדרגה עד שהיא נכבית.</p>
+      <div class="sum">בקיצור: הקבל מאפשר לנו להפוך כיבוי מיידי לדעיכה הדרגתית.</div>
       <div class="circuit" id="sch3"></div>
       <div class="row"><span>גודל הקבל:</span>
         <div class="seg" id="capSeg">
@@ -195,10 +215,13 @@ pre{direction:ltr;text-align:left;background:var(--screen);color:#E6EAF1;border-
         </div>
       </div>
       <div class="bars">
-        <div class="bar"><span>מילוי הקבל</span><div class="track"><div id="capFill" style="background:var(--small)"></div></div></div>
-        <div class="bar"><span>אור הנורה</span><div class="track"><div id="ledFill" style="background:var(--led)"></div></div></div>
+        <div class="bar"><span>מתח על הקבל</span><div class="track"><div id="capFill" style="background:var(--small)"></div><div class="thr" id="thrMark"></div></div><output id="capV"></output></div>
+        <div class="bar"><span>אור הנורה</span><div class="track"><div id="ledFill" style="background:var(--led)"></div></div><output id="ledP"></output></div>
       </div>
+      <div class="legend"><span><i style="color:var(--small)"></i>זרם קטן (בבסיס)</span><span><i style="color:var(--big)"></i>זרם גדול (בנורה)</span></div>
+      <div class="path" id="path3"></div>
       <button class="press" id="b3" aria-pressed="false">לחצו ועזבו</button>
+      <p class="cap">הקו המקווקו הוא סף ההדלקה: הטרנזיסטור נדלק רק כשיש על הקבל בערך 0.6 וולט ומעלה. המתח לא עולה הרבה מעל 0.7 וולט, כי הבסיס "מושך" את מה שמעבר לזה.</p>
       <p class="cap">קבל גדול יותר מחזיק יותר חשמל, ולכן הנורה דועכת לאט יותר.</p>
     </div>
   </details>
@@ -357,12 +380,17 @@ $('sch3').innerHTML=`<svg viewBox="0 0 520 330">
   ${Rh(245,285,200)}${dot(150,40)}${dot(305,200)}${dot(342,200)}
   ${W('M305,200 V230')}${Rv(305,230,270)}${W('M305,270 V290')}${dot(305,290)}
   ${W('M342,200 V240')}<path class="w" d="M328,240 H356" style="stroke-width:3"/><path class="w" d="M328,250 H356" style="stroke-width:3"/>${W('M342,250 V290')}${dot(342,290)}
-  ${txt(322,236,'+','pin')}
+  ${txt(320,246,'+','pin')}
   ${W('M392,40 V55')}${Rv(392,55,95)}${W('M392,95 V110')}
   ${ledDown(392,110,'L3')}${W('M392,138 V176 M392,224 V290')}
   ${npn(392,200)}${dot(392,290)}
   ${flow('fb3','M50,150 V40 H392 V176 L377,192 V208 L392,224 V290 H50 V162','b')}
+  ${flow('fs3a','M150,40 V200 H375 V208 L392,224 V290','s')}
+  ${flow('fc3','M305,200 H342 V238','s')}
+  <g id="capChg" opacity="0"><text class="chg" x="332" y="233" text-anchor="middle">+</text><text class="chg" x="342" y="233" text-anchor="middle">+</text><text class="chg" x="352" y="233" text-anchor="middle">+</text><text class="chg n" x="332" y="265" text-anchor="middle">−</text><text class="chg n" x="342" y="265" text-anchor="middle">−</text><text class="chg n" x="352" y="265" text-anchor="middle">−</text></g>
   ${flow('fs3','M342,240 V200 H375 V208 L392,224 V290 H342 V250','s')}
+  ${txt(362,192,'B','pin','end')}${txt(400,168,'C','pin','start')}${txt(400,240,'E','pin','start')}
+  <text class="lbl" id="bothLbl" x="404" y="270" text-anchor="start" opacity="0">שני הזרמים</text>
   ${txt(265,230,'R1 1k','val')}${txt(296,310,'R2 10k','val')}<text class="val" id="c1lbl" x="362" y="252">C1 220µF</text>${txt(410,80,'R3 1k','val','start')}
   ${txt(205,248,'כפתור','lb')}${txt(420,128,'נורה','lbl','start')}${txt(425,205,'2N3904','val','start')}
   ${txt(352,312,'קבל','lb')}
@@ -419,24 +447,43 @@ holdable('b1','k1',on=>{
 });
 holdable('b2','k2',on=>{
   setLed('L2',on?1:0); setFlow('fb2',on?1:0); setFlow('fs2',on?1:0);
-  $('st2').textContent = on ? 'הבסיס מחובר לאדמה ← הנורה דולקת' : 'הבסיס בפלוס ← הנורה כבויה';
+  $('st2').textContent = on ? 'הבסיס מחובר לאדמה ← הנורה דולקת' : 'הבסיס מחובר לפלוס של הסוללה ← הנורה כבויה';
 });
 
 /* ---------- 3: capacitor simulation ---------- */
+const VMAX=0.75;
 let pressed3=false, charge=0, capUF=220, last=performance.now();
 holdable('b3','k3',on=>{ pressed3=on; });
+$('thrMark').style.insetInlineStart='60%';
 $('capSeg').addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b) return;
   capUF=+b.dataset.c; $('c1lbl').textContent='C1 '+capUF+'µF';
   [...$('capSeg').children].forEach(x=>x.setAttribute('aria-pressed',x===b));
 });
 function step3(dt){
-  const tauUp=0.08*capUF/220, tauDown=1.4*capUF/220;
+  const tauUp=0.08*capUF/220, tauDown=4*capUF/220;
   charge += pressed3 ? (1-charge)*(1-Math.exp(-dt/tauUp)) : -charge*(1-Math.exp(-dt/tauDown));
-  const bright=Math.max(0,Math.min(1,(charge-0.12)/0.6));
-  $('capFill').style.width=(charge*100).toFixed(1)+'%';
+  const V=VMAX*charge, bright=Math.max(0,Math.min(1,(V-0.5)/0.2));
+  $('capFill').style.width=(V*100).toFixed(1)+'%';
+  $('capV').textContent=V.toFixed(2)+'V';
   $('ledFill').style.width=(bright*100).toFixed(1)+'%';
-  setLed('L3',bright); setFlow('fb3',bright.toFixed(2)); setFlow('fs3',(!pressed3&&bright>0.02)?bright.toFixed(2):0);
+  $('ledP').textContent=Math.round(bright*100)+'%';
+  setLed('L3',bright); setFlow('fb3',bright.toFixed(2));
+  setFlow('fs3a',pressed3?1:0);
+  if(pressed3) step3.held=(step3.held||0)+dt; else step3.held=0;
+  setFlow('fc3',pressed3?Math.max(0,1-step3.held/0.9).toFixed(2):0);
+  $('capChg').setAttribute('opacity',charge.toFixed(2));
+  setFlow('fs3',(!pressed3&&bright>0.02)?bright.toFixed(2):0);
+  $('bothLbl').setAttribute('opacity',bright>0.05?1:0);
+  const mode=pressed3?'p':(bright>0.02?'d':'o');
+  if(mode!==step3.mode){
+    step3.mode=mode;
+    $('path3').innerHTML = mode==='p'
+      ? '<span class="st">הכפתור לחוץ: הזרם הקטן מגיע מהסוללה</span><b><bdi>VCC</bdi> ← כפתור ← <bdi>R1</bdi> ← בסיס ← פולט ← <bdi>GND</bdi></b><br>ברגע הלחיצה חלק מהזרם נכנס גם לקבל ונאגר בו. הקבל מתמלא מהר מאוד, כי הוא צריך רק 0.7 וולט.'
+      : mode==='d'
+      ? '<span class="st">עזבתם את הכפתור: עכשיו הקבל נותן את הזרם הקטן</span><b>קבל ← בסיס ← פולט ← <bdi>GND</bdi></b><br>הקבל מתרוקן, הזרם בבסיס נחלש, והנורה דועכת.'
+      : '<span class="st">אין זרם בבסיס</span>הכפתור לא לחוץ והקבל ריק, לכן הנורה כבויה.';
+  }
 }
 
 /* ---------- 4: PWM + motor ---------- */
