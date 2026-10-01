@@ -146,7 +146,15 @@ details.part > summary::after{display:none}
 .whyf[open] > summary::before{transform:rotate(-90deg)}
 .whyf ol{margin:.2rem 0 .6rem;padding-inline-start:1.4rem}
 .whyf li{margin:.5rem 0}
-.whyf .formula{margin:.5rem 0 0;background:var(--paper)}
+.whyf .gr{display:grid;gap:.8rem}
+.gcard{display:flex;gap:1rem;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-inline-start:5px solid var(--hl);border-radius:12px;padding:1rem 1.1rem}
+.gn{font-family:"Suez One",serif;font-size:2.2rem;line-height:1;color:var(--hl);min-width:1.6rem;text-align:center}
+.gcard h3{margin:0 0 .3rem;font-size:1.2rem}
+.gcard h3 .en{font-size:.7em}
+.gcard p{margin:0 0 .5rem}
+.tablink{color:var(--hl);font-weight:700;text-decoration:none;border-bottom:2px solid currentColor}
+.tablink:hover{opacity:.8}
+.formula{margin:.5rem 0 0;background:var(--paper)}
 .whyf p{margin:.4rem 0 .8rem}
 .steps{padding-bottom:.4rem}
 .steps p{margin:.35rem 0}
@@ -184,6 +192,30 @@ svg .lbin{fill:var(--in-ink);font:700 13px "Heebo",sans-serif}
     <div class="circuit" id="symSvg"></div>
     <figure class="chipfig"><figcaption>שני מגברים בשבב אחד</figcaption><div class="circuit" id="dip8"></div></figure>
     <figure class="chipfig"><figcaption>ארבעה מגברים בשבב אחד</figcaption><div class="circuit" id="dip14"></div></figure>
+    </div>
+  </details>
+
+  <details class="part" id="pg">
+    <summary>כללי הזהב <span class="en" dir="ltr">Golden Rules</span></summary>
+    <div class="body">
+      <p>שלושה מאפיינים של מגבר שרת. אלה הם הערכים האידיאליים שאנחנו מניחים כשאנחנו מסבירים איך מגבר שרת עובד:</p>
+      <div class="gr">
+        <div class="gcard"><span class="gn">1</span><div>
+          <h3>הגבר אינסופי <span class="en" dir="ltr">Infinite Gain</span></h3>
+          <p>המגבר יכול להגיב גם להפרש מתח קטן מאוד בין שתי הכניסות.</p>
+          <a class="tablink" href="#p1" data-tab="p1">רואים את זה בלשונית: משווה</a>
+        </div></div>
+        <div class="gcard"><span class="gn">2</span><div>
+          <h3>התנגדות כניסה אינסופית <span class="en" dir="ltr">Infinite Input Impedance</span></h3>
+          <p>הכניסות כמעט לא מושפעות מהמעגל שמחובר אליהן.</p>
+          <a class="tablink" href="#p2" data-tab="p2">רואים את זה בלשונית: חוצץ</a>
+        </div></div>
+        <div class="gcard"><span class="gn">3</span><div>
+          <h3>התנגדות יציאה אפסית <span class="en" dir="ltr">Zero Output Impedance</span></h3>
+          <p>היציאה יכולה להעביר את המתח הלאה בלי שהמודול הבא ישפיע עליו כמעט.</p>
+          <a class="tablink" href="#p2" data-tab="p2">רואים את זה בלשונית: חוצץ</a>
+        </div></div>
+      </div>
     </div>
   </details>
 
@@ -640,6 +672,9 @@ function upd5(){
     else return;
     e.preventDefault(); select(parts[j],true);
   });
+  document.querySelectorAll('.tablink').forEach(l=>l.addEventListener('click',e=>{
+    e.preventDefault(); const d=$(l.dataset.tab); if(d){ select(d); window.scrollTo({top:bar.offsetTop}); }
+  }));
   const start = parts.find(p=>'#'+p.id===location.hash) || parts[0];
   select(start);
   if(!location.hash || start===parts[0]) requestAnimationFrame(()=>window.scrollTo(0,0));
