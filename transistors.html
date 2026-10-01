@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>טרנזיסטור כמתג (Transistor as a Switch)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&family=Suez+One&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#ECEFF3; --panel:#FFFFFF; --ink:#1B2230; --muted:#5C6678; --line:#CBD3DD;
+  --hl:#D9650A; --btn:#1B2230; --btn-ink:#FFFFFF; --screen:#142030;
+  --small:#2F6FD6; --big:#F2A900; --led:#FF3B30;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#11161F; --panel:#19202C; --ink:#E6EAF1; --muted:#9AA4B6; --line:#2C3545;
+    --hl:#FF9A3C; --small:#6FA4FF; --btn:#E6EAF1; --btn-ink:#11161F; --screen:#0B121C;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#11161F; --panel:#19202C; --ink:#E6EAF1; --muted:#9AA4B6; --line:#2C3545;
+  --hl:#FF9A3C; --small:#6FA4FF; --btn:#E6EAF1; --btn-ink:#11161F; --screen:#0B121C;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Heebo","Arial Hebrew",Arial,sans-serif;font-size:18px;line-height:1.6}
+.wrap{max-width:820px;margin:0 auto;padding:0 1.2rem 4rem}
+h1{font-family:"Suez One","Heebo",serif;font-weight:400;font-size:clamp(2.6rem,8vw,4.2rem);line-height:1.05;margin:2.6rem 0 1.2rem}
+.en{font-family:"Heebo",sans-serif;font-weight:500;font-size:.5em;color:var(--muted);margin-inline-start:.5rem;unicode-bidi:isolate}
+h1 .en{font-size:.38em}
+
+.tabs{position:sticky;top:0;z-index:5;display:flex;gap:.25rem;overflow-x:auto;scrollbar-width:none;background:var(--paper);border-bottom:2px solid var(--ink);padding-top:calc(.5rem + env(safe-area-inset-top,0px));margin:0 0 1.2rem}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;border:0;border-radius:10px 10px 0 0;background:transparent;color:var(--ink);cursor:pointer;padding:.45rem .9rem .4rem;font:700 1rem "Heebo",sans-serif;line-height:1.25}
+.tab small{font-weight:500;font-size:.72rem;color:var(--muted)}
+.tab:hover{background:var(--line)}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+.tab[aria-selected="true"] small{color:var(--paper);opacity:.75}
+.tab:focus-visible{outline:3px solid var(--hl);outline-offset:-3px}
+
+details.part:not([open]){display:none}
+details.part > summary{list-style:none;display:flex;align-items:baseline;gap:.9rem;padding:.2rem .2rem 1rem;font-family:"Suez One","Heebo",serif;font-size:clamp(1.4rem,4vw,1.9rem);pointer-events:none}
+details.part > summary::-webkit-details-marker{display:none}
+summary .n{font-family:"Heebo",sans-serif;font-weight:700;font-size:1rem;color:var(--muted);min-width:1.4rem}
+.body{padding:0 .2rem 2rem}
+.body > p{margin:0 0 1rem;max-width:62ch}
+.rl{margin:0 0 1rem;padding-inline-start:1.4rem}
+.rl li{margin:.2rem 0}
+.sum{background:var(--ink);color:var(--paper);border-radius:10px;padding:.8rem 1rem;font-size:1.1rem;font-weight:700;margin-bottom:1.2rem;text-align:center}
+.sum .sm{color:var(--small);filter:brightness(1.4)}
+.sum .bg{color:var(--big)}
+
+.circuit{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:.6rem;margin-bottom:1rem;overflow-x:auto}
+.circuit svg{display:block;width:100%;min-width:320px;max-width:520px;margin:0 auto;height:auto;direction:ltr}
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.8rem;margin-bottom:1rem}
+.duo figure{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:.6rem}
+.duo figcaption{text-align:center;font-weight:700;margin-bottom:.3rem}
+.duo figcaption .en{font-size:.75em}
+.duo p{margin:.3rem 0 0;text-align:center;font-size:.95rem;color:var(--muted)}
+.duo svg{display:block;width:100%;max-width:220px;margin:0 auto;height:auto;direction:ltr}
+
+svg .w{fill:none;stroke:var(--ink);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+svg .r{fill:var(--panel);stroke:var(--ink);stroke-width:2}
+svg .q{fill:var(--panel);stroke:var(--ink);stroke-width:2}
+svg .dot{fill:var(--ink)}
+svg .term{fill:var(--panel);stroke:var(--ink);stroke-width:2}
+svg .ar{fill:var(--ink)}
+svg text{direction:rtl}
+svg .lb{fill:var(--muted);font:500 13px "Heebo",sans-serif}
+svg .pin{fill:var(--ink);font:700 13px "Heebo",sans-serif;direction:ltr}
+svg .lbl{fill:var(--muted);font:500 13px "Heebo",sans-serif;direction:ltr}
+svg .val{fill:var(--muted);font:500 13px "Heebo",sans-serif;direction:ltr}
+svg .big-t{fill:var(--ink);font:700 18px "Heebo",sans-serif;direction:ltr}
+svg .led{fill:var(--panel);stroke:var(--ink);stroke-width:2}
+svg .glow{fill:var(--led);filter:blur(7px)}
+svg .flow{fill:none;stroke-linecap:round;stroke-linejoin:round;animation:run .9s linear infinite;transition:opacity .15s}
+svg .flow.s{stroke:var(--small);stroke-width:3.5;stroke-dasharray:1 12}
+svg .flow.b{stroke:var(--big);stroke-width:6;stroke-dasharray:1 16}
+@keyframes run{to{stroke-dashoffset:-26}}
+svg .btn-bar{transition:transform .08s}
+svg .hit{fill:transparent;cursor:pointer}
+@media (prefers-reduced-motion:reduce){*{transition:none!important} svg .flow{animation:none}}
+
+.legend{display:flex;flex-wrap:wrap;gap:1.2rem;font-size:.95rem;color:var(--muted);margin:-.3rem 0 1rem}
+.legend i{display:inline-block;width:1.6em;height:0;border-top:4px dotted;vertical-align:middle;margin-inline-end:.4em}
+.press{display:block;width:100%;max-width:340px;margin:0 auto 1rem;border:2px solid var(--ink);background:var(--btn);color:var(--btn-ink);font:700 1.1rem "Heebo",sans-serif;padding:.8rem 1.3rem;border-radius:999px;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:none}
+.press[aria-pressed="true"]{background:var(--hl);border-color:var(--hl);color:#fff}
+.press:focus-visible{outline:3px solid var(--hl);outline-offset:3px}
+.status{text-align:center;font-weight:700;min-height:1.6em;margin:0 0 1rem}
+
+.seg{display:inline-flex;border:2px solid var(--ink);border-radius:999px;overflow:hidden;margin-bottom:1rem;direction:ltr}
+.seg button{border:0;background:transparent;color:var(--ink);font:500 1rem "Heebo",sans-serif;padding:.45rem 1rem;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--btn);color:var(--btn-ink)}
+.seg button:focus-visible{outline:3px solid var(--hl);outline-offset:-3px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:.8rem}
+.row > span{font-weight:500;margin-bottom:1rem}
+
+.bars{display:grid;gap:.6rem;margin-bottom:1rem}
+.bar{display:grid;grid-template-columns:7.5rem 1fr;align-items:center;gap:.8rem;font-weight:500}
+.track{height:18px;background:var(--panel);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.track div{height:100%;width:0;border-radius:999px}
+
+.ctrl label{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:.8rem;font-weight:500;margin-bottom:.6rem}
+input[type=range]{width:100%;accent-color:var(--hl);height:2rem}
+input[type=range]:focus-visible{outline:3px solid var(--hl);outline-offset:2px;border-radius:4px}
+.readout{display:flex;justify-content:center;gap:1.6rem;flex-wrap:wrap;font-variant-numeric:tabular-nums;margin-bottom:.8rem;direction:ltr}
+.readout b{color:var(--hl)}
+.scope{background:var(--screen);border-radius:14px;padding:.5rem;margin-bottom:.4rem}
+.scope canvas{display:block;width:100%;height:120px}
+.cap{font-size:.95rem;color:var(--muted);text-align:center;margin:0 0 1rem}
+
+.whyf{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.2rem 1rem;margin-bottom:.8rem}
+.whyf > summary{cursor:pointer;display:block;font:700 1rem "Heebo",sans-serif;padding:.6rem 0;color:var(--hl);list-style:none}
+.whyf > summary::-webkit-details-marker{display:none}
+.whyf > summary::before{content:"◂ ";display:inline-block;transition:transform .2s}
+.whyf[open] > summary::before{transform:rotate(-90deg)}
+.whyf p{margin:.2rem 0 .8rem}
+pre{direction:ltr;text-align:left;background:var(--screen);color:#E6EAF1;border-radius:10px;padding:.8rem 1rem;overflow-x:auto;font-size:.85rem;line-height:1.5;margin:.2rem 0 .8rem}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>טרנזיסטור כמתג <span class="en" dir="ltr">Transistor as a Switch</span></h1>
+
+  <nav class="tabs" role="tablist" id="tabs" aria-label="חלקים"></nav>
+
+  <!-- 0 -->
+  <details class="part" id="p0" open>
+    <summary>מבוא <span class="en" dir="ltr">Introduction</span></summary>
+    <div class="body">
+      <p>טרנזיסטור (Transistor) הוא מתג חשמלי. במקום אצבע שלוחצת על כפתור, זרם קטן פותח וסוגר אותו.</p>
+      <p>לטרנזיסטור שלוש רגליים:</p>
+      <ul class="rl">
+        <li><b>בסיס (Base)</b>: הידית ששולטת במתג.</li>
+        <li><b>קולט (Collector)</b> ו<b>פולט (Emitter)</b>: דרכם עובר הזרם הגדול, למשל לנורה או למנוע.</li>
+      </ul>
+      <div class="sum"><span class="sm">זרם קטן בבסיס</span> &nbsp;←&nbsp; <span class="bg">זרם גדול בין הקולט לפולט</span></div>
+      <p>יש שני סוגים:</p>
+      <div class="duo">
+        <figure><figcaption>NPN</figcaption><div id="symNPN"></div><p>נדלק כשהבסיס מקבל פלוס</p></figure>
+        <figure><figcaption>PNP</figcaption><div id="symPNP"></div><p>נדלק כשהבסיס מחובר לאדמה (GND)</p></figure>
+      </div>
+      <div class="duo" style="max-width:420px;margin-inline:auto">
+        <figure><figcaption>איך מזהים את הרגליים</figcaption><div id="pinout"></div><p>הצד השטוח עם הכיתוב מולכם. משמאל לימין: <bdi>E B C</bdi></p><p>כך ב־<bdi>2N3904</bdi> וב־<bdi>2N3906</bdi></p></figure>
+      </div>
+    </div>
+  </details>
+
+  <!-- 1 -->
+  <details class="part" id="p1">
+    <summary><span class="n">1</span>NPN</summary>
+    <div class="body">
+      <p>לחצו והחזיקו את הכפתור. זרם קטן נכנס לבסיס, הטרנזיסטור נסגר כמו מתג, והנורה נדלקת.</p>
+      <div class="circuit" id="sch1"></div>
+      <div class="legend"><span><i style="color:var(--small)"></i>זרם קטן (בבסיס)</span><span><i style="color:var(--big)"></i>זרם גדול (בנורה)</span></div>
+      <button class="press" id="b1" aria-pressed="false">לחצו והחזיקו</button>
+      <div class="status" id="st1"></div>
+      <details class="whyf"><summary>למה יש נגד של 10k?</summary>
+        <p>כשהכפתור לא לחוץ, הנגד מחבר את הבסיס לאדמה (GND). כך הטרנזיסטור נכבה בוודאות ולא "מהבהב" מרעשים.</p>
+      </details>
+      <details class="whyf"><summary>למה יש נגד של 1k לפני הבסיס?</summary>
+        <p>הבסיס צריך רק זרם קטן. הנגד שומר שלא ייכנס אליו יותר מדי ושהטרנזיסטור לא יישרף.</p>
+      </details>
+    </div>
+  </details>
+
+  <!-- 2 -->
+  <details class="part" id="p2">
+    <summary><span class="n">2</span>PNP</summary>
+    <div class="body">
+      <p>כאן הכול הפוך: הפולט מחובר לפלוס, והטרנזיסטור נדלק כשהבסיס מחובר לאדמה (GND). כשלוחצים, הכפתור מושך את הבסיס למטה והנורה נדלקת.</p>
+      <div class="circuit" id="sch2"></div>
+      <div class="legend"><span><i style="color:var(--small)"></i>זרם קטן (בבסיס)</span><span><i style="color:var(--big)"></i>זרם גדול (בנורה)</span></div>
+      <button class="press" id="b2" aria-pressed="false">לחצו והחזיקו</button>
+      <div class="status" id="st2"></div>
+      <details class="whyf"><summary>למה הנגד של 10k מחובר לפלוס?</summary>
+        <p>כשהכפתור לא לחוץ, הנגד מחזיק את הבסיס בפלוס. כך טרנזיסטור PNP נשאר כבוי והנורה לא דולקת.</p>
+      </details>
+    </div>
+  </details>
+
+  <!-- 3 -->
+  <details class="part" id="p3">
+    <summary><span class="n">3</span>דעיכה עם קבל <span class="en" dir="ltr">LED Fade Out</span></summary>
+    <div class="body">
+      <p>הוספנו קבל (Capacitor) ליד הבסיס. כשלוחצים, הקבל מתמלא. כשעוזבים, הקבל מתרוקן לאט דרך הבסיס, והנורה דועכת בהדרגה.</p>
+      <div class="circuit" id="sch3"></div>
+      <div class="row"><span>גודל הקבל:</span>
+        <div class="seg" id="capSeg">
+          <button data-c="47">47µF</button><button data-c="220" aria-pressed="true">220µF</button><button data-c="1000">1000µF</button>
+        </div>
+      </div>
+      <div class="bars">
+        <div class="bar"><span>מילוי הקבל</span><div class="track"><div id="capFill" style="background:var(--small)"></div></div></div>
+        <div class="bar"><span>אור הנורה</span><div class="track"><div id="ledFill" style="background:var(--led)"></div></div></div>
+      </div>
+      <button class="press" id="b3" aria-pressed="false">לחצו ועזבו</button>
+      <p class="cap">קבל גדול יותר מחזיק יותר חשמל, ולכן הנורה דועכת לאט יותר.</p>
+    </div>
+  </details>
+
+  <!-- 4 -->
+  <details class="part" id="p4">
+    <summary><span class="n">4</span>מנוע וארדואינו <span class="en" dir="ltr">Motor &amp; Arduino</span></summary>
+    <div class="body">
+      <p>מנוע צריך הרבה יותר זרם ממה שהארדואינו (Arduino) יכול לתת. לכן הארדואינו רק שולט בבסיס, והטרנזיסטור מעביר את הזרם הגדול למנוע.</p>
+      <div class="circuit" id="sch4"></div>
+      <div class="ctrl">
+        <label><span>נגד משתנה (Potentiometer)</span><input type="range" id="pot" min="0" max="1023" value="400"></label>
+      </div>
+      <div class="readout"><span>analogRead: <b id="aR"></b></span><span>PWM: <b id="pR"></b></span><span id="pctR"></span></div>
+      <div class="scope"><canvas id="pwm"></canvas></div>
+      <p class="cap">הארדואינו מדליק ומכבה את הטרנזיסטור מהר מאוד. ככל שהחלק הדלוק ארוך יותר, המנוע מסתובב מהר יותר. השיטה נקראת PWM (Pulse Width Modulation).</p>
+      <details class="whyf"><summary>למה יש דיודה ליד המנוע?</summary>
+        <p>כשמנוע נכבה הוא יוצר לרגע קפיצת מתח. הדיודה (Diode) מעבירה אותה בחזרה למנוע ומגינה על הטרנזיסטור.</p>
+      </details>
+      <details class="whyf"><summary>הקוד</summary>
+<pre>const int potPin = A0;
+const int motorPin = 3;
+const int threshold = 2;
+
+int potValue = 0;
+int pwmValue = 0;
+int prevPWM = 0;
+
+void setup() {
+  pinMode(motorPin, OUTPUT);
+  Serial.begin(115200);
+}
+
+void loop() {
+  potValue = analogRead(potPin);
+  pwmValue = map(potValue, 0, 1023, 0, 255);
+
+  if (abs(pwmValue - prevPWM) &gt; threshold) {
+    analogWrite(motorPin, pwmValue);
+    Serial.print("PWM ");
+    Serial.println(pwmValue);
+    prevPWM = pwmValue;
+  }
+}</pre>
+        <p>הקוד קורא את הנגד המשתנה (0 עד 1023), ממיר לערך PWM (0 עד 255) ושולח אותו לרגל 3.</p>
+      </details>
+    </div>
+  </details>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- drawing helpers ---------- */
+const W = (d) => `<path class="w" d="${d}"/>`;
+const dot = (x,y) => `<circle class="dot" cx="${x}" cy="${y}" r="4"/>`;
+const Rv = (x,y1,y2) => `<rect class="r" x="${x-8}" y="${y1}" width="16" height="${y2-y1}" rx="2"/>`;
+const Rh = (x1,x2,y) => `<rect class="r" x="${x1}" y="${y-8}" width="${x2-x1}" height="16" rx="2"/>`;
+const txt = (x,y,s,c='lb',a='middle') => `<text class="${c}" x="${x}" y="${y}" text-anchor="${a}">${s}</text>`;
+function battery(x,yTop,yBot){
+  return W(`M${x},${yTop} V150`)+`<path class="w" d="M${x-18},150 H${x+18}" style="stroke-width:3"/>`+
+    `<path class="w" d="M${x-9},162 H${x+9}" style="stroke-width:5"/>`+W(`M${x},162 V${yBot}`)+
+    txt(x+30,148,'+','pin')+txt(x+34,172,'9V','val');
+}
+function gnd(x,y){ return W(`M${x},${y} v10 M${x-12},${y+10} h24 M${x-7},${y+15} h14 M${x-3},${y+20} h6`); }
+/* LED pointing down, anode at y */
+function ledDown(x,y,id){
+  return `<circle class="glow" id="${id}g" cx="${x}" cy="${y+14}" r="22" opacity="0"/>`+
+    W(`M${x},${y-6} V${y}`)+`<polygon class="led" id="${id}" points="${x-14},${y} ${x+14},${y} ${x},${y+22}"/>`+
+    W(`M${x-14},${y+22} H${x+14} M${x},${y+22} V${y+28}`)+
+    W(`M${x+18},${y+4} l10,-8 M${x+22},${y+12} l10,-8`);
+}
+/* NPN transistor; c=collector top x, base bar at bx, center y */
+function npn(x,y){
+  const bx=x-17;
+  return `<circle class="q" cx="${x-3}" cy="${y}" r="27"/>`+
+    W(`M${bx},${y-16} V${y+16}`).replace('class="w"','class="w" style="stroke-width:3.5"')+
+    W(`M${bx},${y-8} L${x},${y-24} M${bx},${y+8} L${x},${y+24}`)+
+    `<polygon class="ar" points="${x},${y+24} ${x-11},${y+21} ${x-5},${y+13}"/>`;
+}
+/* PNP: emitter top, arrow pointing in */
+function pnp(x,y){
+  const bx=x-17;
+  return `<circle class="q" cx="${x-3}" cy="${y}" r="27"/>`+
+    W(`M${bx},${y-16} V${y+16}`).replace('class="w"','class="w" style="stroke-width:3.5"')+
+    W(`M${bx},${y-8} L${x},${y-24} M${bx},${y+8} L${x},${y+24}`)+
+    `<polygon class="ar" points="${bx},${y-8} ${bx+11},${y-8} ${bx+6},${y-15}"/>`;
+}
+/* pushbutton between x1..x2 on y */
+function button(x1,x2,y,id){
+  const m=(x1+x2)/2;
+  return `<circle class="term" cx="${x1}" cy="${y}" r="4"/><circle class="term" cx="${x2}" cy="${y}" r="4"/>`+
+    `<g class="btn-bar" id="${id}">`+W(`M${x1-4},${y-16} H${x2+4} M${m},${y-16} V${y-30} M${m-9},${y-30} H${m+9}`)+`</g>`+
+    `<rect class="hit" id="${id}h" x="${x1-10}" y="${y-40}" width="${x2-x1+20}" height="50"/>`;
+}
+const flow = (id,d,k) => `<path class="flow ${k}" id="${id}" d="${d}" opacity="0"/>`;
+
+/* ---------- intro symbols ---------- */
+function sym(type){
+  const x=130,y=80;
+  return `<svg viewBox="0 0 220 160">`+W(`M60,${y} H${x-17} M${x},${y-24} V20 M${x},${y+24} V140`)+(type==='n'?npn(x,y):pnp(x,y))+
+    txt(48,y+5,'B','pin','end')+txt(140,28,type==='n'?'C':'E','pin','start')+txt(140,138,type==='n'?'E':'C','pin','start')+
+    txt(52,y-12,'בסיס','lbl','end')+txt(156,28,type==='n'?'קולט':'פולט','lbl','start')+txt(156,138,type==='n'?'פולט':'קולט','lbl','start')+`</svg>`;
+}
+$('symNPN').innerHTML=sym('n'); $('symPNP').innerHTML=sym('p');
+$('pinout').innerHTML=`<svg viewBox="0 0 220 170">
+  <path class="q" d="M65,85 V35 Q65,15 85,15 H135 Q155,15 155,35 V85 Z"/>
+  ${txt(110,55,'2N3904','val')}
+  ${W('M80,85 V140 M110,85 V140 M140,85 V140')}
+  ${txt(80,160,'E','big-t')}${txt(110,160,'B','big-t')}${txt(140,160,'C','big-t')}
+</svg>`;
+
+/* ---------- 1: NPN ---------- */
+$('sch1').innerHTML=`<svg viewBox="0 0 520 330">
+  ${battery(50,40,290)}
+  ${W('M50,40 H392 M50,290 H392')}
+  ${W('M150,40 V200 H180 M230,200 H250 M300,200 H375')}
+  ${button(180,230,200,'k1')}
+  ${Rh(250,300,200)}${dot(150,40)}${dot(320,200)}
+  ${W('M320,200 V230')}${Rv(320,230,270)}${W('M320,270 V290')}${dot(320,290)}
+  ${W('M392,40 V55')}${Rv(392,55,95)}${W('M392,95 V110')}
+  ${ledDown(392,110,'L1')}${W('M392,138 V176 M392,224 V290')}
+  ${npn(392,200)}${dot(392,290)}
+  ${flow('fb1','M50,150 V40 H392 V176 L377,192 V208 L392,224 V290 H50 V162','b')}
+  ${flow('fs1','M150,40 V200 H375 V208 L392,224 V290','s')}
+  ${txt(275,230,'R1 1k','val')}${txt(340,254,'R2 10k','val','start')}${txt(410,80,'R3 1k','val','start')}
+  ${txt(205,248,'כפתור','lb')}${txt(420,128,'נורה','lbl','start')}${txt(425,205,'2N3904','val','start')}
+  ${txt(362,192,'B','pin','end')}${txt(400,168,'C','pin','start')}${txt(400,240,'E','pin','start')}
+  ${gnd(220,290)}
+</svg>`;
+
+/* ---------- 2: PNP ---------- */
+$('sch2').innerHTML=`<svg viewBox="0 0 520 330">
+  ${battery(50,40,290)}
+  ${W('M50,40 H392 M50,290 H392')}
+  ${W('M392,40 V106 M392,154 V170')}${pnp(392,130)}
+  ${ledDown(392,176,'L2')}${W('M392,204 V225')}${Rv(392,225,265)}${W('M392,265 V290')}
+  ${W('M320,40 V55')}${Rv(320,55,95)}${W('M320,95 V130')}${dot(320,40)}${dot(320,130)}
+  ${W('M375,130 H300')}${Rh(250,300,130)}${W('M250,130 H230 M180,130 H150 V290')}
+  ${button(180,230,130,'k2')}${dot(150,290)}${dot(392,40)}
+  ${flow('fb2','M50,150 V40 H392 V106 L377,122 V138 L392,154 V290 H50 V162','b')}
+  ${flow('fs2','M392,40 V106 L377,122 V130 H150 V290','s')}
+  ${txt(275,160,'R4 1k','val')}${txt(338,80,'R5 10k','val','start')}${txt(410,250,'R6 1k','val','start')}
+  ${txt(205,178,'כפתור','lb')}${txt(420,194,'נורה','lbl','start')}${txt(425,135,'2N3906','val','start')}
+  ${txt(362,122,'B','pin','end')}${txt(400,98,'E','pin','start')}${txt(400,164,'C','pin','start')}
+  ${gnd(250,290)}
+</svg>`;
+
+/* ---------- 3: fade ---------- */
+$('sch3').innerHTML=`<svg viewBox="0 0 520 330">
+  ${battery(50,40,290)}
+  ${W('M50,40 H392 M50,290 H392')}
+  ${W('M150,40 V200 H180 M230,200 H245 M285,200 H375')}
+  ${button(180,230,200,'k3')}
+  ${Rh(245,285,200)}${dot(150,40)}${dot(305,200)}${dot(342,200)}
+  ${W('M305,200 V230')}${Rv(305,230,270)}${W('M305,270 V290')}${dot(305,290)}
+  ${W('M342,200 V240')}<path class="w" d="M328,240 H356" style="stroke-width:3"/><path class="w" d="M328,250 H356" style="stroke-width:3"/>${W('M342,250 V290')}${dot(342,290)}
+  ${txt(322,236,'+','pin')}
+  ${W('M392,40 V55')}${Rv(392,55,95)}${W('M392,95 V110')}
+  ${ledDown(392,110,'L3')}${W('M392,138 V176 M392,224 V290')}
+  ${npn(392,200)}${dot(392,290)}
+  ${flow('fb3','M50,150 V40 H392 V176 L377,192 V208 L392,224 V290 H50 V162','b')}
+  ${flow('fs3','M342,240 V200 H375 V208 L392,224 V290 H342 V250','s')}
+  ${txt(265,230,'R1 1k','val')}${txt(296,310,'R2 10k','val')}<text class="val" id="c1lbl" x="362" y="252">C1 220µF</text>${txt(410,80,'R3 1k','val','start')}
+  ${txt(205,248,'כפתור','lb')}${txt(420,128,'נורה','lbl','start')}${txt(425,205,'2N3904','val','start')}
+  ${txt(352,312,'קבל','lb')}
+</svg>`;
+
+/* ---------- 4: motor ---------- */
+$('sch4').innerHTML=`<svg viewBox="0 0 520 330">
+  <rect class="q" x="130" y="70" width="110" height="200" rx="8"/>
+  ${txt(192,135,'Arduino','big-t')}
+  ${txt(138,104,'5V','val','start')}${txt(138,164,'A0','val','start')}${txt(138,244,'GND','val','start')}
+  ${txt(232,204,'3','val','end')}${txt(232,264,'GND','val','end')}
+  ${W('M130,100 H70 V120')}${Rv(70,120,200)}${W('M70,200 V240 H130')}
+  ${W('M130,160 H88')}<polygon class="ar" points="80,160 92,154 92,166"/>
+  ${W('M240,200 H255')}${Rh(255,300,200)}${W('M300,200 H375')}
+  ${W('M240,260 H270 V300 H392 V224')}${dot(392,300)}
+  ${npn(392,200)}
+  ${W('M392,176 V140')}
+  <circle class="q" cx="392" cy="112" r="26"/>
+  <g id="rotor"><path class="w" d="M392,94 V130 M374,112 H410" style="stroke-width:3"/></g>
+  ${W('M392,86 V40')}<circle class="term" cx="392" cy="36" r="5"/>
+  ${W('M392,60 H460 V82 M460,140 V160 H392')}${dot(392,60)}${dot(392,160)}
+  <polygon class="q" points="447,124 473,124 460,100"/>${W('M447,100 H473 M460,124 V140 M460,82 V100')}
+  ${flow('fb4','M392,40 V86 M392,138 V176 L377,192 V208 L392,224 V300','b')}
+  ${flow('fs4','M240,200 H375 V208 L392,224 V300 H270 V260 H240','s')}
+  ${txt(277,228,'1k','val')}${txt(405,32,'+V','pin','start')}${txt(484,116,'דיודה','lbl','start')}
+  ${txt(56,165,'נגד','lbl','end')}${txt(56,183,'משתנה','lbl','end')}
+  ${txt(362,192,'B','pin','end')}${txt(360,117,'מנוע','lbl','end')}
+</svg>`;
+
+/* ---------- press-and-hold logic ---------- */
+function holdable(btnId, svgKey, onChange){
+  const b=$(btnId), bar=$(svgKey), hit=$(svgKey+'h');
+  let on=false;
+  const set=v=>{ if(v===on) return; on=v; b.setAttribute('aria-pressed',v); bar.style.transform=v?'translateY(12px)':''; onChange(v); };
+  [b,hit].forEach(el=>{
+    el.addEventListener('pointerdown',e=>{e.preventDefault(); el.setPointerCapture?.(e.pointerId); set(true);});
+    ['pointerup','pointercancel','pointerleave'].forEach(t=>el.addEventListener(t,()=>set(false)));
+  });
+  b.addEventListener('keydown',e=>{ if(e.key===' '||e.key==='Enter'){e.preventDefault(); set(true);} });
+  b.addEventListener('keyup',e=>{ if(e.key===' '||e.key==='Enter') set(false); });
+  b.addEventListener('contextmenu',e=>e.preventDefault());
+  onChange(false);
+}
+function setLed(id,level){
+  const l=$(id), g=$(id+'g');
+  l.style.fill = level>0.02 ? `color-mix(in srgb, var(--led) ${Math.round(level*100)}%, var(--panel))` : '';
+  g.setAttribute('opacity',(level*0.75).toFixed(2));
+}
+const setFlow=(id,v)=>$(id).setAttribute('opacity',v);
+
+holdable('b1','k1',on=>{
+  setLed('L1',on?1:0); setFlow('fb1',on?1:0); setFlow('fs1',on?1:0);
+  $('st1').textContent = on ? 'יש זרם בבסיס ← הנורה דולקת' : 'אין זרם בבסיס ← הנורה כבויה';
+});
+holdable('b2','k2',on=>{
+  setLed('L2',on?1:0); setFlow('fb2',on?1:0); setFlow('fs2',on?1:0);
+  $('st2').textContent = on ? 'הבסיס מחובר לאדמה ← הנורה דולקת' : 'הבסיס בפלוס ← הנורה כבויה';
+});
+
+/* ---------- 3: capacitor simulation ---------- */
+let pressed3=false, charge=0, capUF=220, last=performance.now();
+holdable('b3','k3',on=>{ pressed3=on; });
+$('capSeg').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  capUF=+b.dataset.c; $('c1lbl').textContent='C1 '+capUF+'µF';
+  [...$('capSeg').children].forEach(x=>x.setAttribute('aria-pressed',x===b));
+});
+function step3(dt){
+  const tauUp=0.08*capUF/220, tauDown=1.4*capUF/220;
+  charge += pressed3 ? (1-charge)*(1-Math.exp(-dt/tauUp)) : -charge*(1-Math.exp(-dt/tauDown));
+  const bright=Math.max(0,Math.min(1,(charge-0.12)/0.6));
+  $('capFill').style.width=(charge*100).toFixed(1)+'%';
+  $('ledFill').style.width=(bright*100).toFixed(1)+'%';
+  setLed('L3',bright); setFlow('fb3',bright.toFixed(2)); setFlow('fs3',(!pressed3&&bright>0.02)?bright.toFixed(2):0);
+}
+
+/* ---------- 4: PWM + motor ---------- */
+let angle=0;
+const cv=$('pwm'), ctx=cv.getContext('2d');
+function duty(){ return Math.round(+$('pot').value/1023*255); }
+function drawPWM(){
+  const d=duty(), dpr=devicePixelRatio||1, w=cv.clientWidth, h=cv.clientHeight;
+  cv.width=w*dpr; cv.height=h*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
+  const top=22, bot=h-18, periods=5, pw=(w-20)/periods, f=d/255;
+  ctx.strokeStyle='rgba(255,255,255,.12)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(10,bot); ctx.lineTo(w-10,bot); ctx.stroke();
+  ctx.strokeStyle='#FF9A3C'; ctx.lineWidth=3; ctx.lineJoin='round'; ctx.beginPath();
+  let x=10; ctx.moveTo(x, f>0?top:bot);
+  for(let i=0;i<periods;i++){
+    const hi=pw*f;
+    if(f>0){ ctx.lineTo(x,top); ctx.lineTo(x+hi,top); }
+    if(f<1){ ctx.lineTo(x+hi,bot); ctx.lineTo(x+pw,bot); }
+    x+=pw;
+  }
+  ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,.6)'; ctx.font='12px Heebo, sans-serif';
+  ctx.textAlign='left'; ctx.fillText('5V',12,14);
+}
+function upd4(){
+  const a=+$('pot').value, d=duty(), f=d/255;
+  $('aR').textContent=a; $('pR').textContent=d;
+  $('pctR').textContent=`${Math.round(f*100)}% דלוק`;
+  setFlow('fb4',f>0?(0.35+0.65*f).toFixed(2):0); setFlow('fs4',f>0?(0.35+0.65*f).toFixed(2):0);
+  drawPWM();
+}
+$('pot').addEventListener('input',upd4);
+addEventListener('resize',drawPWM);
+
+/* ---------- animation loop ---------- */
+function loop(t){
+  const dt=Math.min(0.1,(t-last)/1000); last=t;
+  step3(dt);
+  if(!reduce){ angle=(angle+dt*900*duty()/255)%360; $('rotor').setAttribute('transform',`rotate(${angle} 392 112)`); }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ---------- tabs ---------- */
+{
+  const parts=[...document.querySelectorAll('details.part')], bar=$('tabs');
+  const select=(d,focus)=>{
+    parts.forEach(x=>{ x.open=(x===d); });
+    [...bar.children].forEach(b=>b.setAttribute('aria-selected',b.dataset.id===d.id));
+    const btn=bar.querySelector(`[data-id="${d.id}"]`);
+    const br=bar.getBoundingClientRect(), bb=btn.getBoundingClientRect(); bar.scrollLeft+=(bb.left+bb.width/2)-(br.left+br.width/2);
+    if(focus) btn.focus({preventScroll:true});
+    if(window.scrollY>bar.offsetTop) window.scrollTo({top:bar.offsetTop});
+    try{ if(d!==parts[0]) history.replaceState(null,'','#'+d.id); else if(location.hash) history.replaceState(null,'',location.pathname+location.search); }catch(e){}
+    if(d.id==='p4') requestAnimationFrame(drawPWM);
+  };
+  parts.forEach(d=>{
+    const sum=d.querySelector('summary'); sum.tabIndex=-1;
+    sum.addEventListener('click',e=>e.preventDefault());
+    const n=sum.querySelector('.n'), en=sum.querySelector('.en');
+    const title=[...sum.childNodes].filter(x=>x.nodeType===3).map(x=>x.textContent).join('').trim();
+    const b=document.createElement('button');
+    b.type='button'; b.className='tab'; b.setAttribute('role','tab'); b.dataset.id=d.id;
+    b.innerHTML=`<span>${n?n.textContent+' ':''}${title}</span>${en?`<small dir="ltr">${en.textContent}</small>`:''}`;
+    b.onclick=()=>select(d);
+    bar.appendChild(b);
+  });
+  bar.addEventListener('keydown',e=>{
+    const i=parts.findIndex(p=>p.open); let j=i;
+    if(e.key==='ArrowLeft') j=Math.min(parts.length-1,i+1);
+    else if(e.key==='ArrowRight') j=Math.max(0,i-1);
+    else return;
+    e.preventDefault(); select(parts[j],true);
+  });
+  const start=parts.find(p=>'#'+p.id===location.hash)||parts[0];
+  select(start);
+  upd4();
+  if(!location.hash||start===parts[0]) requestAnimationFrame(()=>window.scrollTo(0,0));
+}
+</script>
+</body>
+</html>
