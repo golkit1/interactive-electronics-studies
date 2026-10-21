@@ -162,6 +162,19 @@ footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px 
 .sim .scopewrap{margin-top:.6rem}
 .sim .legend{font-size:.8rem; gap:.9rem; margin-top:.2rem}
 .sim .stage{grid-template-columns:1fr 105px}
+.zone{margin-top:.5rem; background:var(--surface); border:1px solid var(--grid); border-radius:14px; padding:.5rem .7rem}
+.zone .vin{font-weight:700}
+.zone .vin b{display:inline-block; min-width:2.6em; text-align:center; font-size:1.25rem}
+.gauge{margin:1.5rem .4rem .2rem; direction:ltr}
+.track{position:relative; height:14px; border-radius:7px; background:var(--paper); border:1px solid var(--grid)}
+.band{position:absolute; top:0; bottom:0; background:var(--grid)}
+.tick{position:absolute; top:-6px; bottom:-6px; width:3px; margin-left:-1.5px; background:var(--ink); border-radius:2px; transition:background .1s,box-shadow .1s}
+.tick span{position:absolute; bottom:100%; left:50%; transform:translateX(-50%); white-space:nowrap; font-size:.75rem; color:var(--muted); direction:rtl}
+.tick.hit{background:var(--high); box-shadow:0 0 8px var(--high)}
+.tick.hit span{color:var(--ink); font-weight:700}
+.ptr{position:absolute; top:50%; width:16px; height:16px; margin:-8px 0 0 -8px; border-radius:50%; background:var(--water); border:2px solid var(--surface)}
+.ends{display:flex; justify-content:space-between; font-size:.75rem; color:var(--muted); margin-top:.15rem}
+.zsay{min-height:1.4em}
 @media (prefers-reduced-motion:reduce){.hero path{animation:none}}
 </style>
 </head>
@@ -229,9 +242,9 @@ footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px 
         <p class="hint" style="color:var(--muted)">לחצו על שורה כדי לראות אותה במעגל.</p>
         <ol class="steps stepsel" id="stepList">
           <li><button data-k="0">הקבל ריק, אז בכניסה יש 0. NOT הופך, וביציאה יש 1.</button></li>
-          <li><button data-k="1">היציאה ממלאת את הקבל לאט, דרך הנגד. הדלי מתמלא.</button></li>
-          <li><button data-k="2">הדלי עובר את הרף העליון. עכשיו השער רואה 1, ומתהפך: ביציאה יש 0.</button></li>
-          <li><button data-k="3">היציאה עכשיו מרוקנת את הקבל. הדלי יורד עד הרף התחתון, השער מתהפך שוב, וחוזרים לצעד 2.</button></li>
+          <li><button data-k="1">היציאה ממלאת את הקבל לאט, דרך הנגד, והמתח בכניסה עולה. כל עוד הוא מתחת לרף העליון, השער לא מתהפך, וביציאה עדיין יש 1.</button></li>
+          <li><button data-k="2">המתח בכניסה מגיע לרף העליון. השער מתהפך, וביציאה יש 0.</button></li>
+          <li><button data-k="3">עכשיו היציאה מרוקנת את הקבל, והמתח בכניסה יורד. כשהוא מגיע לרף התחתון, השער מתהפך שוב, וחוזרים לצעד 2.</button></li>
         </ol>
         <div class="bar" style="flex-wrap:wrap">
           <button class="pause" id="nextStep">הצעד הבא</button>
@@ -278,6 +291,16 @@ footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px 
           <text x="65" y="252" text-anchor="middle">הקבל</text>
         </svg>
       </div>
+      <div class="zone" id="zone">
+        <div class="vin">מתח בכניסה: <b class="ltr" id="vNum">0.0</b> וולט</div>
+        <div class="gauge ltr" aria-hidden="true">
+          <div class="track"><div class="band" id="gBand"></div>
+            <div class="tick" id="tL"><span>רף תחתון</span></div><div class="tick" id="tU"><span>רף עליון</span></div>
+            <div class="ptr" id="gPtr"></div></div>
+          <div class="ends"><span>0</span><span>9</span></div>
+        </div>
+        <div class="zsay" id="zSay"></div>
+      </div>
       <div class="bar"><button class="pause" id="pauseBtn" aria-pressed="false">עצירה</button><span class="badge" id="slow">הדלי והגרף בהילוך איטי</span></div>
 
       <div class="scopewrap">
@@ -317,7 +340,6 @@ footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px 
   </details>
 </section>
 
-<footer class="wrap">המספרים בדף הם הערכה. במעגל אמיתי הקצב יכול לצאת קצת שונה, וזה בסדר.</footer>
 
 <script>
 (function(){
@@ -440,15 +462,15 @@ footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px 
   /* sk-by-sk mode */
   const segs=[
     {v0:0, pcs:[]},
-    {v0:0, pcs:[{o:1,tau:Math.log(1/(1-0.58))}]},
-    {v0:0.5, pcs:[{o:1,tau:Math.log(0.5/(1-U))},{o:0,tau:0.12}]},
-    {v0:U, pcs:[{o:0,tau:A},{o:1,tau:0.15}]}
+    {v0:0, pcs:[{o:1,tau:Math.log(1/(1-0.6))}]},
+    {v0:0.6, pcs:[{o:1,tau:Math.log(0.4/(1-U))},{o:0,tau:0.12,h:U},{o:0,tau:0.12}]},
+    {v0:U, pcs:[{o:0,tau:A},{o:1,tau:0.12,h:L},{o:1,tau:0.15}]}
   ];
   segs.forEach(g=>g.total=g.pcs.reduce((a,b)=>a+b.tau,0));
   function segAt(k,t){const g=segs[k]; if(!g.total) return {v:0,o:1};
     let rem=t*g.total, v=g.v0, o=1;
     for(const pc of g.pcs){o=pc.o; const d=Math.min(rem,pc.tau);
-      v=o?1-(1-v)*Math.exp(-d):v*Math.exp(-d); rem-=d; if(rem<=0) break;}
+      v=pc.h!==undefined?pc.h:o?1-(1-v)*Math.exp(-d):v*Math.exp(-d); rem-=d; if(rem<=0) break;}
     return {v,o};}
   let stepMode=false, sk=0, stepT=0, hold=0;
   const stepList=document.getElementById("stepList"), runAll=document.getElementById("runAll");
@@ -461,6 +483,12 @@ footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px 
   runAll.onclick=()=>{stepMode=false; [...stepList.children].forEach(li=>li.classList.remove("act"));
     runAll.setAttribute("aria-pressed","true"); if(paused) togglePause();};
   const bitIn=document.getElementById("bitIn"), bitOut=document.getElementById("bitOut");
+  let lastO=1, flipAge=9, flipTo=1;
+  const gPtr=document.getElementById("gPtr"), tU=document.getElementById("tU"), tL=document.getElementById("tL");
+  { const b=document.getElementById("gBand"); b.style.left=(L*100)+"%"; b.style.width=((U-L)*100)+"%";
+    tU.style.left=(U*100)+"%"; tL.style.left=(L*100)+"%"; }
+  const VCC=9, vNum=document.getElementById("vNum"), zSay=document.getElementById("zSay"),
+        lineU=document.getElementById("lineU"), lineL=document.getElementById("lineL");
   /* flow arrows */
   const circ=document.getElementById("circ"), flowG=document.getElementById("flow");
   function mkFlow(d,sp){const pth=mk("path",{d:d,fill:"none",stroke:"none"}); circ.appendChild(pth);
@@ -505,6 +533,16 @@ footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px 
     if(!paused){fbFlow.off+=dt*70*cur*dir; if(s.o) ledFlow.off+=dt*45;}
     drawFlow(fbFlow,dir,true); drawFlow(ledFlow,1,!!s.o);
     tankTxt.textContent=(stepMode&&sk===0)?"ריק":s.o?"מתמלא":"מתרוקן";
+    if(s.o!==lastO){flipAge=0; flipTo=s.o; lastO=s.o} else if(!paused) flipAge+=dt;
+    const flash=flipAge<1.1&&!(stepMode&&sk===0);
+    vNum.textContent=(s.v*VCC).toFixed(1);
+    gPtr.style.left=(s.v*100)+"%";
+    tU.classList.toggle("hit",flash&&flipTo===0); tL.classList.toggle("hit",flash&&flipTo===1);
+    zSay.textContent=flash?(flipTo===0?"נגע ברף העליון: השער מתהפך, וביציאה יש 0.":"נגע ברף התחתון: השער מתהפך, וביציאה יש 1."):
+      s.v<L?"מתחת לרף התחתון: השער רואה 0, וביציאה יש 1.":
+      "בין הרפים: השער לא מתהפך. ביציאה נשאר "+s.o+".";
+    lineU.style.stroke=(flash&&flipTo===0)?hi:ink; lineU.style.strokeWidth=(flash&&flipTo===0)?4:2;
+    lineL.style.stroke=(flash&&flipTo===1)?hi:ink; lineL.style.strokeWidth=(flash&&flipTo===1)?4:2;
     bitIn.textContent=1-s.o; bitOut.textContent=s.o;
     bitIn.style.fill=s.o?ink:hi; bitOut.style.fill=s.o?hi:ink;
 
