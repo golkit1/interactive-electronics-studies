@@ -49,7 +49,8 @@ svg{width:100%;height:auto;display:block;direction:ltr}
 .part{fill:none;stroke:var(--ink);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;transition:stroke .25s}
 .part.off{stroke:var(--off)}
 .lbl{fill:var(--muted);font:500 15px "Rubik",sans-serif}
-.dot{fill:var(--neg);stroke:var(--panel);stroke-width:1.5}
+.dot{fill:var(--dot);stroke:var(--dot-edge);stroke-width:1.2}
+.note{font-size:.9rem;color:var(--muted)}
 #batQ,#vbBat{transition:opacity .25s}
 #batQ.off,#vbBat.off{opacity:.35}
 .pos{fill:var(--pos);font:700 16px "Rubik",sans-serif}
@@ -101,6 +102,7 @@ canvas{width:100%;height:190px;display:block}
 <div class="wrap">
   <h1>קבל: טעינה ופריקה</h1>
   <p class="lead">לחצו על המתג וצפו בקבל מתמלא ומתרוקן.</p>
+  <p class="note" style="margin:-10px 0 18px">הנקודות הצהובות מראות את כיוון הזרם: מה־+ אל ה־−. בפועל האלקטרונים נעים בכיוון ההפוך, אבל נהוג לצייר את הזרם כך.</p>
 
   <section class="stage">
     <div class="card">
@@ -121,7 +123,7 @@ canvas{width:100%;height:190px;display:block}
           <text class="neg" x="63" y="174" text-anchor="middle">−</text><text class="neg" x="71" y="174" text-anchor="middle">−</text><text class="neg" x="89" y="174" text-anchor="middle">−</text><text class="neg" x="97" y="174" text-anchor="middle">−</text>
         </g>
         <circle cx="552" cy="316" r="5" class="dot"/>
-        <text class="lbl" x="540" y="321" text-anchor="end">אלקטרון</text>
+        <text class="lbl" x="540" y="321" text-anchor="start" direction="rtl" style="unicode-bidi:embed">כיוון הזרם (Current)</text>
 
         <path id="r1" class="part" d="M140 60 l6 -9 l10 18 l10 -18 l10 18 l10 -18 l10 18 l10 -18 l10 18 l4 -9"/>
         <text class="lbl" x="180" y="95" text-anchor="middle">נגד טעינה</text>
@@ -175,17 +177,15 @@ canvas{width:100%;height:190px;display:block}
       </section>
       <section class="card explain" id="exCharge" hidden>
         <h2>טעינת קבל</h2>
-        <p>כאשר מחברים קבל לסוללה, הסוללה גורמת לאלקטרונים לזרום מלוחית אחת של הקבל ללוחית השנייה דרך החוטים. האלקטרונים אינם עוברים דרך הרווח שבין הלוחיות.</p>
-        <p>אם הלוחית העליונה מחוברת ל־+ של הסוללה, הסוללה מושכת ממנה אלקטרונים. כתוצאה מכך נשאר בלוחית העליונה חוסר באלקטרונים, ולכן היא נעשית חיובית (+).</p>
-        <p>האלקטרונים שהוצאו מהלוחית העליונה עוברים דרך החוטים והסוללה ומגיעים אל הלוחית התחתונה. כך מצטבר בה עודף אלקטרונים, ולכן היא נעשית שלילית (−).</p>
-        <p>כך נוצר בין שתי הלוחיות הפרש מתח ושדה חשמלי.</p>
+        <p>כאשר מחברים את הקבל לסוללה, הזרם יוצא מה־+ של הסוללה, עובר דרך נגד הטעינה ומגיע אל הלוחית העליונה של הקבל.</p>
+        <p>הלוחית העליונה נטענת ב־+, והלוחית התחתונה, שמחוברת ל־− של הסוללה, נטענת ב־−. הזרם אינו עובר דרך הרווח שבין הלוחיות.</p>
+        <p>ככל שהקבל מתמלא, הזרם נחלש, עד שהמתח על הקבל שווה למתח הסוללה.</p>
       </section>
       <section class="card explain" id="exDis" hidden>
         <h2>פריקת קבל</h2>
-        <p>כאשר מנתקים את הסוללה ומחברים את שתי הלוחיות דרך נגד, האלקטרונים העודפים על הלוחית השלילית מתחילים לזרום דרך החוט והנגד אל הלוחית החיובית.</p>
-        <p>כך הלוחית השלילית מאבדת בהדרגה את עודף האלקטרונים, והלוחית החיובית מקבלת אותם.</p>
-        <p>ככל שהאלקטרונים עוברים, הפרש המתח בין שתי הלוחיות הולך וקטן. לכן גם הזרם הולך ונחלש, עד שהקבל מתרוקן.</p>
-        <p>חשוב: גם בזמן הפריקה האלקטרונים אינם עוברים דרך הרווח שבין הלוחיות. הם זורמים במסלול החיצוני, דרך החוט והנגד.</p>
+        <p>כאשר מנתקים את הסוללה ומחברים את שתי הלוחיות דרך נגד, הקבל מתנהג כמו סוללה קטנה: הזרם יוצא מהלוחית החיובית (+), עובר דרך נגד הפריקה וחוזר אל הלוחית השלילית (−).</p>
+        <p>ככל שהקבל מתרוקן, המתח עליו יורד, ולכן גם הזרם הולך ונחלש, עד שהקבל ריק.</p>
+        <p>גם בזמן הפריקה הזרם אינו עובר דרך הרווח שבין הלוחיות, אלא במסלול החיצוני, דרך החוט והנגד.</p>
       </section>
     </div>
   </section>
@@ -336,7 +336,7 @@ canvas{width:100%;height:190px;display:block}
 
     if (!idle) {
     const d = dots[st.mode], loop = loops[st.mode];
-    d.offset -= 160 * Math.min(2, I) * dt;
+    d.offset += 160 * Math.min(2, I) * dt;
     const sp = loop.total / d.n;
     d.els.forEach((el, j) => {
       const p = loop.at(d.offset + j * sp);
