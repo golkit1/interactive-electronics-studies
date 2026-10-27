@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>אפנון בדיודה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@900&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EDF2F5; --panel:#F9FBFC; --grid:#DCE5EC; --ink:#15223A; --muted:#566579;
+  --rule:#C3CFDA; --off:#BCC8D3; --dot:#F2A900; --dot-edge:#7A5200;
+  --hi:#C0263A; --lo:#2459C4; --tone:#1F8A5B; --btn-ink:#F9FBFC;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1620; --panel:#15202C; --grid:#1C2936; --ink:#E4ECF3; --muted:#93A3B5;
+    --rule:#2C3B4B; --off:#34465A; --dot:#FFC233; --dot-edge:#4A3300;
+    --hi:#FF6B7D; --lo:#6FA0FF; --tone:#4FD18F; --btn-ink:#0E1620;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1620; --panel:#15202C; --grid:#1C2936; --ink:#E4ECF3; --muted:#93A3B5;
+  --rule:#2C3B4B; --off:#34465A; --dot:#FFC233; --dot-edge:#4A3300;
+  --hi:#FF6B7D; --lo:#6FA0FF; --tone:#4FD18F; --btn-ink:#0E1620;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0; color:var(--ink); font-family:"Rubik",system-ui,Arial,sans-serif; font-size:18px; line-height:1.5;
+  background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;
+}
+.wrap{max-width:980px;margin:0 auto;padding:28px 16px 56px}
+h1{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:900;font-size:clamp(2rem,6vw,3rem);line-height:1.05;margin:0 0 6px}
+.lead{margin:0 0 18px;color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px}
+
+svg{width:100%;height:auto;display:block;direction:ltr}
+.schem{overflow-x:auto}
+@media (max-width:600px){.schem svg{min-width:560px}}
+.w{fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.w.off{stroke:var(--off)}
+.lbl{fill:var(--muted);font:500 15px "Rubik",sans-serif}
+.ttl{fill:var(--ink);font:700 16px "Rubik",sans-serif}
+.gnd{fill:none;stroke:var(--ink);stroke-width:2.5;stroke-linecap:round}
+#diode{fill:var(--panel);stroke:var(--ink);stroke-width:3;stroke-linejoin:round;transition:fill .08s}
+#diode.open{fill:var(--dot)}
+.dot{fill:var(--dot);stroke:var(--dot-edge);stroke-width:1.2}
+.waves path{fill:none;stroke:var(--tone);stroke-width:3;stroke-linecap:round}
+
+.status{display:flex;gap:10px;align-items:center;justify-content:center;margin:12px 0 2px;font-weight:500;font-size:1.05rem;min-height:1.6em}
+.pill{display:inline-block;width:14px;height:14px;border-radius:50%;flex:none}
+
+.controls{margin-top:14px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px;align-items:end}
+@media (max-width:700px){.controls{grid-template-columns:1fr}}
+.slider b{font-weight:500;display:block}
+.slider input{width:100%;accent-color:var(--ink);margin:4px 0 0}
+.ends{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted)}
+.buttons{display:flex;gap:10px;flex-wrap:wrap}
+button{font:inherit;font-weight:500;border:2px solid var(--ink);background:transparent;color:var(--ink);border-radius:8px;padding:10px 16px;cursor:pointer}
+button[aria-pressed="true"]{background:var(--ink);color:var(--btn-ink)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--dot);outline-offset:2px}
+
+.scope{margin-top:14px}
+canvas{width:100%;height:200px;display:block}
+
+.steps{margin:14px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:760px){.steps{grid-template-columns:1fr}}
+.steps li{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;font-size:1rem}
+.steps b{display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>אפנון בדיודה (Diode Modulation)</h1>
+  <p class="lead">מתנד איטי מדליק ומכבה מתנד של צליל. התוצאה: ביפ־ביפ קצבי.</p>
+
+  <section class="card">
+    <div class="schem"><svg viewBox="0 0 660 300" role="img" aria-label="מעגל: מתנד איטי, דיודה, מתנד צליל ורמקול">
+      <!-- slow oscillator -->
+      <text class="ttl" x="140" y="34" text-anchor="middle" direction="rtl" style="unicode-bidi:embed">מתנד איטי</text>
+      <path class="w" d="M90 160 V90 H115"/>
+      <path class="w" d="M115 90 l5 -8 l10 16 l10 -16 l10 16 l10 -16 l10 16 l5 -8"/>
+      <path class="w" d="M120 108 L162 72" style="stroke-width:2"/><path d="M162 72 l-9 2 l5 6 z" fill="var(--ink)"/>
+      <path class="w" d="M165 90 H190 V160"/>
+      <path class="w" d="M90 160 H110"/>
+      <path class="w" d="M110 136 V184 L152 160 Z"/>
+      <path d="M121 166 h8 v-12 h7 M125 166 h7 v-12" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+      <circle cx="157" cy="160" r="5" fill="var(--panel)" stroke="var(--ink)" stroke-width="3"/>
+      <path class="w" d="M162 160 H190"/>
+      <path class="w" d="M90 160 V203 M72 203 H108 M72 213 H108 M90 213 V262"/>
+      <text class="lbl" x="66" y="212" text-anchor="end">10µF</text>
+      <text id="lvl" class="ttl" x="190" y="186" text-anchor="middle">+</text>
+
+      <!-- diode -->
+      <path id="wireAB" class="w" d="M190 160 H236"/>
+      <path id="diode" d="M236 146 V174 L262 160 Z"/>
+      <path id="diodeBar" class="w" d="M262 146 V174"/>
+      <path id="wireBC" class="w" d="M262 160 H330"/>
+      <text class="ttl" x="249" y="132" text-anchor="middle" direction="rtl" style="unicode-bidi:embed">דיודה</text>
+      <g id="dots"></g>
+
+      <!-- tone oscillator -->
+      <text class="ttl" x="380" y="34" text-anchor="middle" direction="rtl" style="unicode-bidi:embed">מתנד צליל</text>
+      <path class="w" d="M330 160 V90 H355"/>
+      <path class="w" d="M355 90 l5 -8 l10 16 l10 -16 l10 16 l10 -16 l10 16 l5 -8"/>
+      <path class="w" d="M360 108 L402 72" style="stroke-width:2"/><path d="M402 72 l-9 2 l5 6 z" fill="var(--ink)"/>
+      <path class="w" d="M405 90 H430 V160"/>
+      <path class="w" d="M330 160 H350"/>
+      <path class="w" d="M350 136 V184 L392 160 Z"/>
+      <path d="M361 166 h8 v-12 h7 M365 166 h7 v-12" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+      <circle cx="397" cy="160" r="5" fill="var(--panel)" stroke="var(--ink)" stroke-width="3"/>
+      <path class="w" d="M402 160 H430"/>
+      <path class="w" d="M330 160 V203 M312 203 H348 M312 213 H348 M330 213 V262"/>
+      <text class="lbl" x="306" y="212" text-anchor="end">1µF</text>
+
+      <!-- output -->
+      <path class="w" d="M430 160 H462"/>
+      <path class="w" d="M462 160 l5 -8 l10 16 l10 -16 l10 16 l10 -16 l10 16 l5 -8"/>
+      <text class="lbl" x="492" y="190" text-anchor="middle">100k</text>
+      <path class="w" d="M522 160 H556"/>
+      <path class="w" d="M556 148 H568 V172 H556 Z M568 148 L588 132 V188 L568 172"/>
+      <path class="w" d="M562 172 V262"/>
+      <g id="waves" class="waves"><path d="M600 146 q8 14 0 28"/><path d="M612 138 q14 22 0 44"/></g>
+      <text class="ttl" x="575" y="116" text-anchor="middle" direction="rtl" style="unicode-bidi:embed">רמקול</text>
+
+      <!-- ground -->
+      <path class="w" d="M90 262 H562"/>
+      <path class="gnd" d="M326 262 V272 M312 272 H340 M317 278 H335 M322 284 H330"/>
+    </svg></div>
+    <div class="status" id="status" aria-live="polite"></div>
+  </section>
+
+  <section class="card controls">
+    <label class="slider"><b>קצב (פוטנציומטר של המתנד האיטי)</b>
+      <input id="sRate" type="range" min="0" max="100" value="35">
+      <span class="ends"><span>איטי</span><span>מהיר</span></span></label>
+    <label class="slider"><b>גובה הצליל (פוטנציומטר של מתנד הצליל)</b>
+      <input id="sPitch" type="range" min="0" max="100" value="45">
+      <span class="ends"><span>נמוך</span><span>גבוה</span></span></label>
+    <div class="buttons">
+      <button id="bPlay" aria-pressed="false">השמעה</button>
+      <button id="bDiode" aria-pressed="true">דיודה מחוברת</button>
+    </div>
+  </section>
+
+  <section class="card scope">
+    <canvas id="cv" aria-label="גרף: המתח במתנד האיטי וביציאה"></canvas>
+  </section>
+
+  <ol class="steps">
+    <li><b>המתנד האיטי</b>עובר בין מתח גבוה למתח נמוך, כמה פעמים בשנייה.</li>
+    <li><b>מתח גבוה</b>הדיודה פתוחה, הזרם נכנס למתנד הצליל, והצליל נעצר.</li>
+    <li><b>מתח נמוך</b>הדיודה סגורה, ומתנד הצליל מתנגן.</li>
+  </ol>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const NS = 'http://www.w3.org/2000/svg';
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+  const st = { rate: 2, pitch: 400, diode: true, phase: 0, high: true };
+  const rateOf = v => 0.5 * Math.pow(16, v / 100);      // 0.5 .. 8 Hz
+  const pitchOf = v => 120 * Math.pow(10, v / 100);     // 120 .. 1200 Hz
+
+  // current dots: osc1 output -> diode -> osc2 input
+  const N = 6, dots = [];
+  for (let k = 0; k < N; k++) { const c = document.createElementNS(NS, 'circle'); c.setAttribute('r', 4); c.setAttribute('class', 'dot'); c.setAttribute('cy', 160); $('dots').appendChild(c); dots.push(c); }
+  let dotOff = 0;
+
+  // audio
+  let ac = null, nodes = null;
+  function startAudio() {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    const t = ac.currentTime + 0.02;
+    const tone = ac.createOscillator(); tone.type = 'square'; tone.frequency.value = st.pitch;
+    const gate = ac.createGain(); gate.gain.value = 0;
+    const lfo = ac.createOscillator(); lfo.type = 'square'; lfo.frequency.value = st.rate;
+    const lfoScale = ac.createGain(); lfoScale.gain.value = -0.5;    // high -> silent
+    const offset = ac.createConstantSource(); offset.offset.value = st.diode ? 0.5 : 1;
+    const master = ac.createGain(); master.gain.value = 0.12;
+    lfo.connect(lfoScale); if (st.diode) lfoScale.connect(gate.gain);
+    offset.connect(gate.gain);
+    tone.connect(gate).connect(master).connect(ac.destination);
+    [tone, lfo, offset].forEach(n => n.start(t));
+    nodes = { tone, lfo, lfoScale, offset, gate, master, last: t };
+    st.phase = 0;
+  }
+  function stopAudio() {
+    if (!nodes) return;
+    const t = ac.currentTime;
+    nodes.master.gain.setTargetAtTime(0, t, 0.01);
+    const n = nodes; nodes = null;
+    setTimeout(() => { [n.tone, n.lfo, n.offset].forEach(x => { try { x.stop(); } catch (e) {} }); }, 120);
+  }
+  function setDiode(on) {
+    st.diode = on;
+    $('bDiode').setAttribute('aria-pressed', on);
+    $('bDiode').textContent = on ? 'דיודה מחוברת' : 'דיודה מנותקת';
+    ['wireAB', 'diodeBar', 'wireBC'].forEach(id => $(id).classList.toggle('off', !on));
+    $('diode').style.stroke = on ? '' : css('--off');
+    if (nodes) {
+      try { nodes.lfoScale.disconnect(); } catch (e) {}
+      if (on) nodes.lfoScale.connect(nodes.gate.gain);
+      nodes.offset.offset.setValueAtTime(on ? 0.5 : 1, ac.currentTime);
+    }
+  }
+
+  $('bPlay').onclick = () => {
+    const playing = $('bPlay').getAttribute('aria-pressed') === 'true';
+    if (playing) { stopAudio(); $('bPlay').setAttribute('aria-pressed', 'false'); $('bPlay').textContent = 'השמעה'; }
+    else { startAudio(); $('bPlay').setAttribute('aria-pressed', 'true'); $('bPlay').textContent = 'עצירה'; }
+  };
+  $('bDiode').onclick = () => setDiode(!st.diode);
+  function readSliders() {
+    st.rate = rateOf(+$('sRate').value); st.pitch = pitchOf(+$('sPitch').value);
+    if (nodes) {
+      nodes.lfo.frequency.setValueAtTime(st.rate, ac.currentTime);
+      nodes.tone.frequency.setTargetAtTime(st.pitch, ac.currentTime, 0.01);
+    }
+  }
+  $('sRate').addEventListener('input', readSliders);
+  $('sPitch').addEventListener('input', readSliders);
+  readSliders();
+
+  // scope
+  const cv = $('cv'), ctx = cv.getContext('2d');
+  let W = 0, H = 0;
+  new ResizeObserver(() => {
+    const dpr = window.devicePixelRatio || 1, r = cv.getBoundingClientRect();
+    W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }).observe(cv);
+  const hist = []; const WINDOW = 3;   // seconds shown
+
+  let wall = 0, lastPerf = performance.now(), tonePhase = 0;
+  function frame(now) {
+    let dt;
+    if (nodes) { const t = ac.currentTime; dt = Math.max(0, t - nodes.last); nodes.last = t; }
+    else { dt = Math.min(0.05, (now - lastPerf) / 1000); }
+    lastPerf = now; wall += dt;
+    st.phase = (st.phase + st.rate * dt) % 1;
+    st.high = st.phase < 0.5;
+    const open = st.diode && st.high;
+    const sounding = !open;
+
+    // history for the scope (sample every frame)
+    tonePhase += st.pitch / 40 * dt;   // slowed down so the wave is visible
+    hist.push({ t: wall, lfo: st.high ? 1 : 0, out: sounding ? ((tonePhase % 1) < 0.5 ? 1 : 0) : 0, on: sounding });
+    while (hist.length && hist[0].t < wall - WINDOW - 0.5) hist.shift();
+
+    // circuit state
+    $('diode').classList.toggle('open', open);
+    $('lvl').textContent = st.high ? 'גבוה' : 'נמוך';
+    $('lvl').style.fill = st.high ? css('--hi') : css('--lo');
+    $('waves').style.visibility = sounding ? 'visible' : 'hidden';
+    dotOff = (dotOff + 90 * dt) % 140;
+    dots.forEach((d, k) => {
+      const x = 190 + ((dotOff + k * (140 / N)) % 140);
+      d.setAttribute('cx', x);
+      d.style.visibility = open && (x < 232 || x > 268) ? 'visible' : 'hidden';
+    });
+    const s = $('status');
+    if (!st.diode) s.innerHTML = '<span class="pill" style="background:var(--tone)"></span>בלי דיודה: הצליל מתנגן כל הזמן';
+    else if (open) s.innerHTML = '<span class="pill" style="background:var(--dot)"></span>הדיודה פתוחה: הצליל נעצר';
+    else s.innerHTML = '<span class="pill" style="background:var(--tone)"></span>הדיודה סגורה: הצליל מתנגן';
+
+    draw();
+    requestAnimationFrame(frame);
+  }
+
+  function draw() {
+    if (!W) return;
+    ctx.clearRect(0, 0, W, H);
+    const L = 8, R = 8, pw = W - L - R;
+    const rows = [{ key: 'lfo', label: 'מתנד איטי', color: css('--hi'), top: 26 }, { key: 'out', label: 'יציאה לרמקול', color: css('--tone'), top: 26 + (H - 26) / 2 }];
+    const rh = (H - 26) / 2 - 26;
+    ctx.font = '14px Rubik, sans-serif'; ctx.textBaseline = 'bottom'; ctx.textAlign = 'right';
+    for (const r of rows) {
+      ctx.fillStyle = css('--muted'); ctx.fillText(r.label, W - R, r.top - 4);
+      ctx.strokeStyle = css('--rule'); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(L, r.top + rh); ctx.lineTo(L + pw, r.top + rh); ctx.stroke();
+      ctx.strokeStyle = r.color; ctx.lineWidth = 2.5; ctx.beginPath();
+      let first = true, prevY = null;
+      for (const h of hist) {
+        const x = L + pw - (wall - h.t) / WINDOW * pw; if (x < L) continue;
+        const y = r.top + rh - h[r.key] * rh;
+        if (first) { ctx.moveTo(x, y); first = false; }
+        else { if (prevY !== y) ctx.lineTo(x, prevY); ctx.lineTo(x, y); }
+        prevY = y;
+      }
+      ctx.stroke();
+    }
+  }
+
+  setDiode(true);
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
