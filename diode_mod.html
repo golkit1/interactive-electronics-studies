@@ -50,8 +50,6 @@ svg{width:100%;height:auto;display:block;direction:ltr}
 .dot{fill:var(--dot);stroke:var(--dot-edge);stroke-width:1.2}
 .waves path{fill:none;stroke:var(--tone);stroke-width:3;stroke-linecap:round}
 
-.status{display:flex;gap:10px;align-items:center;justify-content:center;margin:12px 0 2px;font-weight:500;font-size:1.05rem;min-height:1.6em}
-.pill{display:inline-block;width:14px;height:14px;border-radius:50%;flex:none}
 
 .controls{margin-top:14px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px;align-items:end}
 @media (max-width:700px){.controls{grid-template-columns:1fr}}
@@ -66,10 +64,6 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--dot);outline-of
 .scope{margin-top:14px}
 canvas{width:100%;height:200px;display:block}
 
-.steps{margin:14px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-@media (max-width:760px){.steps{grid-template-columns:1fr}}
-.steps li{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;font-size:1rem}
-.steps b{display:block}
 </style>
 </head>
 <body>
@@ -130,7 +124,6 @@ canvas{width:100%;height:200px;display:block}
       <path class="w" d="M90 262 H562"/>
       <path class="gnd" d="M326 262 V272 M312 272 H340 M317 278 H335 M322 284 H330"/>
     </svg></div>
-    <div class="status" id="status" aria-live="polite"></div>
   </section>
 
   <section class="card controls">
@@ -142,6 +135,7 @@ canvas{width:100%;height:200px;display:block}
       <span class="ends"><span>נמוך</span><span>גבוה</span></span></label>
     <div class="buttons">
       <button id="bPlay" aria-pressed="false">השמעה</button>
+      <button id="bPause" aria-pressed="false">השהיה</button>
       <button id="bDiode" aria-pressed="true">דיודה מחוברת</button>
     </div>
   </section>
@@ -150,11 +144,6 @@ canvas{width:100%;height:200px;display:block}
     <canvas id="cv" aria-label="גרף: המתח במתנד האיטי וביציאה"></canvas>
   </section>
 
-  <ol class="steps">
-    <li><b>המתנד האיטי</b>עובר בין מתח גבוה למתח נמוך, כמה פעמים בשנייה.</li>
-    <li><b>מתח גבוה</b>הדיודה פתוחה, הזרם נכנס למתנד הצליל, והצליל נעצר.</li>
-    <li><b>מתח נמוך</b>הדיודה סגורה, ומתנד הצליל מתנגן.</li>
-  </ol>
 </div>
 
 <script>
@@ -163,7 +152,7 @@ canvas{width:100%;height:200px;display:block}
   const NS = 'http://www.w3.org/2000/svg';
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
-  const st = { rate: 2, pitch: 400, diode: true, phase: 0, high: true };
+  const st = { rate: 2, pitch: 400, diode: true, phase: 0, high: true, paused: false };
   const rateOf = v => 0.5 * Math.pow(16, v / 100);      // 0.5 .. 8 Hz
   const pitchOf = v => 120 * Math.pow(10, v / 100);     // 120 .. 1200 Hz
 
@@ -213,9 +202,19 @@ canvas{width:100%;height:200px;display:block}
   $('bPlay').onclick = () => {
     const playing = $('bPlay').getAttribute('aria-pressed') === 'true';
     if (playing) { stopAudio(); $('bPlay').setAttribute('aria-pressed', 'false'); $('bPlay').textContent = 'השמעה'; }
-    else { startAudio(); $('bPlay').setAttribute('aria-pressed', 'true'); $('bPlay').textContent = 'עצירה'; }
+    else { if (st.paused) setPaused(false); startAudio(); $('bPlay').setAttribute('aria-pressed', 'true'); $('bPlay').textContent = 'עצירה'; }
   };
   $('bDiode').onclick = () => setDiode(!st.diode);
+  function setPaused(p) {
+    st.paused = p;
+    $('bPause').setAttribute('aria-pressed', p);
+    $('bPause').textContent = p ? 'המשך' : 'השהיה';
+    if (ac) { if (p) ac.suspend(); else ac.resume(); }
+  }
+  $('bPause').onclick = () => setPaused(!st.paused);
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space' && !/^(BUTTON|INPUT)$/.test(e.target.tagName)) { e.preventDefault(); setPaused(!st.paused); }
+  });
   function readSliders() {
     st.rate = rateOf(+$('sRate').value); st.pitch = pitchOf(+$('sPitch').value);
     if (nodes) {
@@ -241,6 +240,7 @@ canvas{width:100%;height:200px;display:block}
     let dt;
     if (nodes) { const t = ac.currentTime; dt = Math.max(0, t - nodes.last); nodes.last = t; }
     else { dt = Math.min(0.05, (now - lastPerf) / 1000); }
+    if (st.paused) dt = 0;
     lastPerf = now; wall += dt;
     st.phase = (st.phase + st.rate * dt) % 1;
     st.high = st.phase < 0.5;
@@ -249,7 +249,7 @@ canvas{width:100%;height:200px;display:block}
 
     // history for the scope (sample every frame)
     tonePhase += st.pitch / 40 * dt;   // slowed down so the wave is visible
-    hist.push({ t: wall, lfo: st.high ? 1 : 0, out: sounding ? ((tonePhase % 1) < 0.5 ? 1 : 0) : 0, on: sounding });
+    if (dt > 0) hist.push({ t: wall, lfo: st.high ? 1 : 0, out: sounding ? ((tonePhase % 1) < 0.5 ? 1 : 0) : 0, on: sounding });
     while (hist.length && hist[0].t < wall - WINDOW - 0.5) hist.shift();
 
     // circuit state
@@ -263,10 +263,6 @@ canvas{width:100%;height:200px;display:block}
       d.setAttribute('cx', x);
       d.style.visibility = open && (x < 232 || x > 268) ? 'visible' : 'hidden';
     });
-    const s = $('status');
-    if (!st.diode) s.innerHTML = '<span class="pill" style="background:var(--tone)"></span>בלי דיודה: הצליל מתנגן כל הזמן';
-    else if (open) s.innerHTML = '<span class="pill" style="background:var(--dot)"></span>הדיודה פתוחה: הצליל נעצר';
-    else s.innerHTML = '<span class="pill" style="background:var(--tone)"></span>הדיודה סגורה: הצליל מתנגן';
 
     draw();
     requestAnimationFrame(frame);
