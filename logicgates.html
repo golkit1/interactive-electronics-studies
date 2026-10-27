@@ -145,7 +145,7 @@ table.truth{border-collapse:collapse; width:100%; font-size:1.05rem; text-align:
       </div>
       <div>
         <p id="g-desc" style="margin-top:0"></p>
-        <table class="truth" id="g-table"></table>
+        <table class="truth" id="g-table" dir="ltr"></table>
         <details class="analog" id="g-analog-wrap"><summary aria-label="הצג הסבר"></summary><p id="g-analog"></p></details>
       </div>
     </div>
@@ -207,7 +207,7 @@ function gateSVG(k,a,b,o={}){
   s+=`<path class="body" d="${shape}"/>`;
   if(k==='xor'||k==='xnor') s+=`<path class="edge" d="M45,20 Q70,60 45,100"/>`;
   if(bubble) s+=`<circle class="body" cx="${bx}" cy="60" r="6"/>`;
-  s+= g.n===1?tog('a',a,60,'א'):tog('a',a,40,'א')+tog('b',b,80,'ב');
+  s+= g.n===1?tog('a',a,60,'A'):tog('a',a,40,'A')+tog('b',b,80,'B');
   const on=!hide&&y;
   if(on) s+=`<circle cx="214" cy="60" r="22" fill="var(--hi)" opacity=".25"/>`;
   s+=`<circle cx="214" cy="60" r="13" fill="${hide?'var(--paper)':(y?'var(--hi)':'var(--lo)')}" stroke="var(--ink)" stroke-width="2"/>
@@ -283,7 +283,7 @@ function drawGate(focusId){
   $('#g-desc').textContent=g.desc;
   $('#g-analog').textContent=g.analog;
   const rows=g.n===1?[[0],[1]]:[[0,0],[0,1],[1,0],[1,1]];
-  $('#g-table').innerHTML=`<tr>${g.n===1?'<th>א</th>':'<th>א</th><th>ב</th>'}<th>יציאה</th></tr>`+
+  $('#g-table').innerHTML=`<tr>${g.n===1?'<th>A</th>':'<th>A</th><th>B</th>'}<th>OUT</th></tr>`+
     rows.map(r=>{const y=out(gk,r[0],r[1]); const now=g.n===1?r[0]===ga:(r[0]===ga&&r[1]===gb);
       return `<tr class="${now?'now':''}">${r.map(v=>`<td>${v}</td>`).join('')}<td class="${y?'o1':''}">${y}</td></tr>`}).join('');
 }
