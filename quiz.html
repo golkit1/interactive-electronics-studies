@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>תרגול מבוא לחשמל</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f4ef; --card:#ffffff; --ink:#1f2328; --muted:#6b7078; --line:#e3e0d8;
+  --accent:#3b5bdb; --accent-soft:#e7ecff; --ok:#2b8a3e; --ok-soft:#e3f6e8; --bad:#c92a2a; --bad-soft:#fdeaea;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#16181c; --card:#1f2228; --ink:#eceef1; --muted:#9aa0a8; --line:#30343b;
+    --accent:#7c94ff; --accent-soft:#252c45; --ok:#5ccb75; --ok-soft:#1d3324; --bad:#ff7b7b; --bad-soft:#3a2224; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Rubik',system-ui,sans-serif;min-height:100vh;display:flex;justify-content:center}
+.wrap{width:100%;max-width:640px;padding:24px 16px 48px}
+h1{font-size:1.6rem;margin:8px 0 4px}
+.sub{color:var(--muted);margin:0 0 24px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px}
+.opt-row{display:flex;flex-direction:column;gap:10px;margin:16px 0 24px}
+.choice{display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;cursor:pointer;font-size:1rem}
+.choice input{width:20px;height:20px;accent-color:var(--accent)}
+.choice small{color:var(--muted);margin-inline-start:auto}
+.btn{display:block;width:100%;padding:16px;border:none;border-radius:14px;background:var(--accent);color:#fff;font:inherit;font-size:1.1rem;font-weight:500;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:8px}
+.bar>div{height:100%;background:var(--ok);width:0;transition:width .4s}
+.count{color:var(--muted);font-size:.9rem;margin-bottom:16px}
+.q-text{font-size:1.3rem;font-weight:500;line-height:1.5;margin-bottom:20px}
+.q-svg{display:flex;justify-content:center;margin:0 0 20px;color:var(--ink)}
+.q-svg svg{width:220px;max-width:80%;height:auto}
+.answers{display:grid;gap:10px}
+.ans{display:flex;align-items:center;gap:12px;text-align:right;padding:14px 16px;border:2px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font:inherit;font-size:1.05rem;cursor:pointer;transition:border-color .15s,background .15s}
+.ans:hover:not(:disabled){border-color:var(--accent);background:var(--accent-soft)}
+.ans .n{flex:none;width:28px;height:28px;border-radius:50%;background:var(--line);display:grid;place-items:center;font-size:.85rem;color:var(--muted)}
+.ans.ok{border-color:var(--ok);background:var(--ok-soft)}
+.ans.bad{border-color:var(--bad);background:var(--bad-soft)}
+.ans:disabled{cursor:default}
+.feedback{min-height:28px;margin:16px 0 8px;font-weight:500}
+.feedback.ok{color:var(--ok)} .feedback.bad{color:var(--bad)}
+.hidden{display:none}
+.end h2{font-size:1.5rem;margin:0 0 8px}
+.review{margin:16px 0 24px;padding:0;list-style:none}
+.review li{padding:10px 0;border-bottom:1px solid var(--line)}
+.review b{display:block}
+.review span{color:var(--muted);font-size:.95rem}
+.stack{display:grid;gap:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>מבוא לחשמל</h1>
+  <p class="sub">תרגול בשאלות אמריקאיות. בלי ציון, בקצב שלך.</p>
+
+  <div class="panel" id="start">
+    <div style="font-weight:500">מה לתרגל?</div>
+    <div class="opt-row" id="topics"></div>
+    <button class="btn" id="go">מתחילים</button>
+  </div>
+
+  <div class="panel hidden" id="quiz">
+    <div class="bar"><div id="barFill"></div></div>
+    <div class="count" id="countTxt"></div>
+    <div class="q-svg hidden" id="qSvg"></div>
+    <div class="q-text" id="qText"></div>
+    <div class="answers" id="answers"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="btn hidden" id="next">ממשיכים</button>
+  </div>
+
+  <div class="panel hidden end" id="end">
+    <h2>סיימת! 🎉</h2>
+    <p id="endTxt"></p>
+    <ul class="review" id="review"></ul>
+    <div class="stack">
+      <button class="btn" id="again">עוד סבב</button>
+      <button class="btn ghost" id="home">חזרה להתחלה</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* כל שאלה: [שאלה, תשובה נכונה, [שלוש תשובות שגויות]] */
+const TOPICS = {
+ 'אטום וחומרים': [
+  ['איזה חלקיק נושא מטען שלילי ונע סביב הגרעין?', 'אלקטרון', ['פרוטון','נייטרון','אטום']],
+  ['איזה חלקיק נושא מטען חיובי ונמצא בגרעין?', 'פרוטון', ['אלקטרון','נייטרון','אלקטרון חופשי']],
+  ['איזה חלקיק בגרעין הוא בלי מטען?', 'נייטרון', ['פרוטון','אלקטרון','אלקטרון חופשי']],
+  ['איך נקרא חלקיק בקליפה החיצונית של אטום נחושת, שעובר בקלות לאטום שכן?', 'אלקטרון חופשי', ['פרוטון חופשי','נייטרון','גרעין']],
+  ['איך נקרא חומר שזרם עובר דרכו בקלות?', 'מוליך (Conductor)', ['מבודד (Insulator)','נגד (Resistor)','קבל (Capacitor)']],
+  ['איך נקרא חומר שזרם כמעט לא עובר דרכו?', 'מבודד (Insulator)', ['מוליך (Conductor)','מתג (Switch)','נגד (Resistor)']],
+  ['מאיזה חומר עשוי החלק הפנימי של כבל?', 'נחושת', ['פלסטיק','זכוכית','עץ']],
+  ['מאיזה חומר עשוי החלק החיצוני של כבל?', 'פלסטיק', ['נחושת','ברזל','אלומיניום']]
+ ],
+ 'מתח, זרם והתנגדות': [
+  ['מה זה מתח (Voltage)?', 'הפרש הפוטנציאלים בין שתי נקודות במעגל', ['כמות האלקטרונים שעוברת בנקודה במעגל בכל שנייה','עד כמה קשה לאלקטרונים לעבור דרך רכיב','כמות המטען שקבל יכול לאגור']],
+  ['מה זו התנגדות (Resistance)?', 'עד כמה קשה לאלקטרונים לעבור דרך רכיב', ['הפרש הפוטנציאלים בין שתי נקודות במעגל','כמות האלקטרונים שעוברת בנקודה במעגל בכל שנייה','הכוח שדוחף את האלקטרונים במעגל']],
+  ['איך נקרא הכוח שדוחף את האלקטרונים לנוע במעגל?', 'הכוח האלקטרו־מניע (EMF)', ['התנגדות (Resistance)','זרם (Current)','אלקטרון חופשי']],
+  ['באיזו יחידה מודדים מתח?', 'וולט', ['אמפר','אוהם','פאראד']],
+  ['באיזו יחידה מודדים זרם?', 'אמפר', ['וולט','אוהם','פאראד']],
+  ['באיזו יחידה מודדים התנגדות?', 'אוהם', ['וולט','אמפר','פאראד']],
+  ['באיזו יחידה מודדים קבל?', 'פאראד', ['וולט','אמפר','אוהם']],
+  ['באנלוגיית המים, מה מייצג את המתח?', 'הפרש הגובה בין המיכלים', ['כמות המים שזורמת בצינור','הקוטר של הצינור','הגודל של המיכל']],
+  ['מה הערך של נגד שכתוב עליו 4k7?', '4,700 אוהם', ['47 אוהם','470 אוהם','47,000 אוהם']]
+ ],
+ 'רכיבים ומקורות מתח': [
+  ['איזה רכיב מגביל את כמות הזרם במעגל?', 'נגד (Resistor)', ['קבל (Capacitor)','דיודה (Diode)','מתג (Switch)']],
+  ['איזה רכיב אוגר מטען חשמלי ומשחרר אותו?', 'קבל (Capacitor)', ['סוללה (Battery)','נגד (Resistor)','דיודה (Diode)']],
+  ['איזה רכיב מאפשר לזרם לעבור רק בכיוון אחד?', 'דיודה (Diode)', ['מתג (Switch)','נגד (Resistor)','קבל (Capacitor)']],
+  ['איזה רכיב מחבר או מנתק נקודות במעגל?', 'מתג (Switch)', ['דיודה (Diode)','נגד (Resistor)','לוח ניסויים (Breadboard)']],
+  ['איזה רכיב מגיב לכמות האור שנופלת עליו?', 'נגד משתנה אור (LDR)', ['פאנל סולארי','דיודה (Diode)','קבל (Capacitor)']],
+  ['איך נקראות שתי הרגליים של דיודה?', 'אנודה וקתודה', ['פלוס ומינוס','כניסה ויציאה','פרוטון ואלקטרון']],
+  ['איזה מקור מתח ממיר אנרגיה כימית לחשמל?', 'סוללה (Battery)', ['פאנל סולארי','ספק כוח (PSU)','קבל (Capacitor)']],
+  ['איזה מקור מתח ממיר אור לחשמל?', 'פאנל סולארי', ['סוללה (Battery)','ספק כוח (PSU)','נגד משתנה אור (LDR)']],
+  ['מה ממיר את החשמל מהקיר למתח ישר ויציב?', 'ספק כוח (PSU)', ['סוללה (Battery)','פאנל סולארי','קבל (Capacitor)']],
+  ['מה זה לוח ניסויים (Breadboard)?', 'לוח לבניית מעגלים בלי הלחמה', ['לוח שמלחימים עליו רכיבים','לוח שמייצר מתח למעגל','ציור של מעגל חשמלי']],
+  ['מה זו סכמה חשמלית (Schematic)?', 'ציור שמייצג מעגל בעזרת סימנים', ['תמונה של המעגל האמיתי','רשימה של הרכיבים במעגל','הוראות הלחמה']]
+ ],
+ 'מה קורה אם...': [
+  ['מה קורה לזרם כשמגדילים את ההתנגדות?', 'הזרם קטן יותר', ['הזרם גדול יותר','הזרם לא משתנה','הזרם משנה כיוון']],
+  ['מה קורה לזרם כשמקטינים את ההתנגדות?', 'הזרם גדול יותר', ['הזרם קטן יותר','הזרם לא משתנה','הזרם נעצר']],
+  ['מה קורה כשהמעגל פתוח?', 'הזרם לא זורם', ['הזרם זורם חזק יותר','נוצר קצר','הזרם זורם רק בכיוון אחד']],
+  ['מה קורה כששתי רגלי רכיב נמצאות באותה שורה בלוח הניסויים?', 'נוצר קצר והרכיב לא עובד', ['הרכיב עובד כרגיל','הזרם עובר דרכו חזק יותר','הרכיב מתחבר לצד השני של הלוח']],
+  ['מה מסמנת נקודה במקום שבו שני קווים נפגשים בסכמה?', 'הקווים מחוברים', ['הקווים לא מחוברים','יש שם רכיב','שם מתחיל המעגל']],
+  ['מה המשמעות כששני קווים חוצים זה את זה בסכמה בלי נקודה?', 'הקווים לא מחוברים', ['הקווים מחוברים','יש שם קצר','זו טעות בסכמה']],
+  ['מה עושים אם רכיב מתחמם מאוד או מריח שרוף?', 'מנתקים מיד את הסוללה', ['מחכים שיתקרר','מחליפים את הרכיב בזמן שהמעגל מחובר','מוסיפים עוד נגד']],
+  ['מה עושים לפני שמוסיפים רכיב למעגל?', 'מנתקים את הסוללה', ['מחברים את הסוללה כדי לבדוק','לוחצים על המתג','בודקים שהזרם זורם']]
+ ]
+};
+
+const S = 'fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"';
+const svg = inner => `<svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg"><g ${S}>${inner}</g></svg>`;
+const SYMBOLS = [
+ ['נגד (Resistor)', svg('<path d="M0 40H30L35 28L45 52L55 28L65 52L75 28L85 52L90 40H120"/>')],
+ ['קבל (Capacitor)', svg('<path d="M0 40H52M52 20V60M68 20V60M68 40H120"/>')],
+ ['דיודה (Diode)', svg('<path d="M0 40H45M72 24V56M72 40H120"/><path d="M45 24V56L72 40Z"/>')],
+ ['סוללה (Battery)', svg('<path d="M0 40H52M52 18V62M68 30V50M68 40H120"/><path d="M38 20H46M42 16V24"/>')],
+ ['מתג (Switch)', svg('<path d="M0 40H38M84 40H120M44 38L76 22"/><circle cx="41" cy="40" r="3"/><circle cx="81" cy="40" r="3"/>')],
+ ['נגד משתנה אור (LDR)', svg('<path d="M0 40H34M86 40H120M40 34H80V46H40Z"/><circle cx="60" cy="40" r="28"/><path d="M14 6L32 22M32 22H25M32 22V15M28 2L46 18M46 18H39M46 18V11"/>')]
+];
+const SYM_TOPIC = 'זיהוי סימנים בסכמה';
+
+const $ = id => document.getElementById(id);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+// בניית רשימת הנושאים במסך הפתיחה
+[...Object.keys(TOPICS), SYM_TOPIC].forEach((name, i) => {
+  const n = name === SYM_TOPIC ? SYMBOLS.length : TOPICS[name].length;
+  const l = document.createElement('label');
+  l.className = 'choice';
+  l.innerHTML = `<input type="checkbox" checked data-topic="${i}"><span></span><small>${n} שאלות</small>`;
+  l.querySelector('span').textContent = name;
+  $('topics').appendChild(l);
+});
+
+let pool = [], queue = [], total = 0, done = 0, missed = new Set(), current = null, locked = false;
+
+function build(){
+  pool = [];
+  const names = [...Object.keys(TOPICS), SYM_TOPIC];
+  document.querySelectorAll('#topics input').forEach(cb => {
+    if (!cb.checked) return;
+    const name = names[cb.dataset.topic];
+    if (name === SYM_TOPIC) {
+      SYMBOLS.forEach(([t, s]) => pool.push({ q:'איזה רכיב מופיע בסכמה?', svg:s, a:t,
+        wrong: shuffle(SYMBOLS.map(x => x[0]).filter(x => x !== t)).slice(0, 3) }));
+    } else {
+      TOPICS[name].forEach(([q, a, wrong]) => pool.push({ q, a, wrong }));
+    }
+  });
+}
+
+function show(id){ ['start','quiz','end'].forEach(x => $(x).classList.toggle('hidden', x !== id)); }
+
+function start(){
+  build();
+  if (!pool.length) { alert('צריך לבחור לפחות נושא אחד'); return; }
+  queue = shuffle(pool); total = pool.length; done = 0; missed = new Set();
+  show('quiz'); ask();
+}
+
+function ask(){
+  if (!queue.length) return finish();
+  current = queue.shift(); locked = false;
+  $('barFill').style.width = (done / total * 100) + '%';
+  $('countTxt').textContent = `${done} מתוך ${total}`;
+  $('qText').textContent = current.q;
+  $('qSvg').innerHTML = current.svg || '';
+  $('qSvg').classList.toggle('hidden', !current.svg);
+  $('feedback').textContent = ''; $('feedback').className = 'feedback';
+  $('next').classList.add('hidden');
+  $('answers').innerHTML = '';
+  shuffle([current.a, ...current.wrong]).forEach((o, i) => {
+    const b = document.createElement('button');
+    b.className = 'ans'; b.dataset.v = o;
+    b.innerHTML = `<span class="n">${i + 1}</span><span></span>`;
+    b.lastChild.textContent = o;
+    b.onclick = () => pick(b);
+    $('answers').appendChild(b);
+  });
+}
+
+function pick(btn){
+  if (locked) return; locked = true;
+  const right = btn.dataset.v === current.a;
+  [...$('answers').children].forEach(b => { b.disabled = true; if (b.dataset.v === current.a) b.classList.add('ok'); });
+  if (right){
+    btn.classList.add('ok'); done++;
+    $('feedback').textContent = ['נכון!', 'מצוין!', 'בדיוק!', 'יפה מאוד!'][Math.floor(Math.random() * 4)];
+    $('feedback').className = 'feedback ok';
+    setTimeout(ask, 900);
+  } else {
+    btn.classList.add('bad'); missed.add(current);
+    $('feedback').textContent = 'לא נורא, השאלה תחזור שוב בהמשך';
+    $('feedback').className = 'feedback bad';
+    queue.splice(Math.min(queue.length, 3 + Math.floor(Math.random() * 3)), 0, current);
+    $('next').classList.remove('hidden'); $('next').focus();
+  }
+}
+
+function finish(){
+  $('barFill').style.width = '100%';
+  show('end');
+  const list = [...missed];
+  $('endTxt').textContent = list.length
+    ? `עברת על כל ${total} השאלות. כדאי לחזור על אלה:`
+    : `עברת על כל ${total} השאלות בלי טעויות!`;
+  $('review').innerHTML = '';
+  list.forEach(q => {
+    const li = document.createElement('li');
+    li.innerHTML = '<b></b><span></span>';
+    li.firstChild.textContent = q.a;
+    li.lastChild.textContent = q.q;
+    $('review').appendChild(li);
+  });
+}
+
+document.addEventListener('keydown', e => {
+  if ($('quiz').classList.contains('hidden')) return;
+  const n = parseInt(e.key, 10);
+  if (n >= 1 && n <= 4 && !locked) { const b = $('answers').children[n - 1]; if (b) pick(b); }
+  if (e.key === 'Enter' && !$('next').classList.contains('hidden')) ask();
+});
+$('go').onclick = start;
+$('next').onclick = ask;
+$('again').onclick = start;
+$('home').onclick = () => show('start');
+</script>
+</body>
+</html>
