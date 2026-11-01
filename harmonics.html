@@ -286,7 +286,6 @@
       </div>
     </div>
     <div class="spectrum log" id="spectrum"></div>
-    <div class="scale-note" id="scaleNote"></div>
 
     <div class="controls">
       <div class="slider-row">
@@ -322,7 +321,6 @@
         </div>
       </div>
       <div class="spec-grid log" id="specGrid"></div>
-      <div class="scale-note" id="scaleNote2"></div>
     </div>
   </div>
 
@@ -709,23 +707,16 @@
     });
   }
   buildSpecGrid();
-
-  const NOTE_LOG = 'בתצוגה הלוגריתמית מגדילים את ההרמוניות החלשות כדי שנוכל לראות אותן, בערך כמו שהאוזן שלנו שומעת אותן.';
-  const NOTE_LIN = 'בתצוגה הלינארית ההרמוניות החלשות קיימות, רק קטנות מדי כדי לראות.';
   function setScale(mode){
     scaleMode = mode;
     document.querySelectorAll('.scale-btn').forEach(b => b.classList.toggle('active', b.dataset.scale === mode));
     spectrumEl.classList.toggle('log', mode === 'log');
     specGrid.classList.toggle('log', mode === 'log');
-    document.getElementById('scaleNote').textContent = mode === 'log' ? NOTE_LOG : NOTE_LIN;
-    document.getElementById('scaleNote2').textContent = mode === 'log' ? NOTE_LOG : NOTE_LIN;
     buildSpectrum();
     updateSpectrumHighlight();
     buildSpecGrid();
   }
   document.querySelectorAll('.scale-btn').forEach(b => b.addEventListener('click', () => setScale(b.dataset.scale)));
-  document.getElementById('scaleNote').textContent = NOTE_LOG;
-  document.getElementById('scaleNote2').textContent = NOTE_LOG;
 
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
