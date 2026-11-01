@@ -710,8 +710,8 @@
   }
   buildSpecGrid();
 
-  const NOTE_LOG = 'סולם לוגריתמי: כל קו אופקי = ירידה של 20 דציבל (פי 10 באמפליטודה). תחתית העמודה = 60 דציבל מתחת לחזק ביותר.';
-  const NOTE_LIN = 'סולם לינארי: גובה העמודה יחסי ישירות לאמפליטודה. הרמוניות חלשות כמעט לא נראות.';
+  const NOTE_LOG = 'בתצוגה הלוגריתמית מגדילים את ההרמוניות החלשות כדי שנוכל לראות אותן, בערך כמו שהאוזן שלנו שומעת אותן.';
+  const NOTE_LIN = 'בתצוגה הלינארית ההרמוניות החלשות קיימות, רק קטנות מדי כדי לראות.';
   function setScale(mode){
     scaleMode = mode;
     document.querySelectorAll('.scale-btn').forEach(b => b.classList.toggle('active', b.dataset.scale === mode));
