@@ -145,25 +145,34 @@
   .readout .val{ color: var(--text); }
   .readout .row{ display:flex; gap: 6px; align-items:baseline; }
 
-  .spectrum{ direction:ltr; display:flex; gap: 6px; padding: 14px 4px 4px; }
+  .spectrum{ direction:ltr; display:flex; gap: 3px; padding: 14px 4px 6px; overflow-x:auto; }
+  .spectrum .bar-slot{ min-width: 30px; }
   .bar-slot{ flex:1; display:flex; flex-direction:column; align-items:center; gap: 6px; cursor: pointer; background: none; border: none; padding: 0; color: inherit; }
-  .bar-track{ width: 100%; height: 54px; display:flex; align-items:flex-end; justify-content:center; }
+  .bar-track{ width: 100%; height: 96px; display:flex; align-items:flex-end; justify-content:center; }
   .bar{ width: 60%; background: var(--bar-off); border: 1px solid var(--bezel-edge); border-radius: 3px 3px 0 0; transition: height .25s ease, background .2s ease, border-color .2s ease; }
   .bar-slot.included .bar{ background: var(--copper); border-color: var(--copper-bright); }
   .bar-slot.current .bar{ background: var(--trace); border-color: var(--trace); box-shadow: 0 0 10px var(--trace-glow); }
-  .bar-label{ font-family: 'Heebo', sans-serif; font-size: 15px; font-weight: 700; color: var(--text-faint); }
+  .bar-label{ font-family: 'Heebo', sans-serif; font-size: 12px; font-weight: 700; color: var(--text-faint); }
   .bar-slot.included .bar-label{ color: var(--text-dim); }
   .bar-slot.current .bar-label{ color: var(--trace); }
 
-  .po-labels{ display:flex; flex-direction:column; align-items:center; gap: 2px; height: 44px; justify-content:flex-end; }
-  .po-labels .po{ font-family:'Heebo', sans-serif; font-size: 15px; font-weight: 700; line-height:1.25; color: var(--text-faint); }
+  .po-labels{ display:flex; flex-direction:column; align-items:center; gap: 2px; height: 36px; justify-content:flex-end; }
+  .po-labels .po{ font-family:'Heebo', sans-serif; font-size: 12px; font-weight: 700; line-height:1.25; color: var(--text-faint); }
   .po-labels .po.partial{ color: var(--copper-bright); }
   .po-labels .po.overtone{ color: var(--ideal); }
   .bar-slot.current .po-labels .po.partial{ color: var(--trace); }
   .spectrum.hide-partial .po.partial{ display:none; }
   .spectrum.hide-overtone .po.overtone{ display:none; }
 
-  .spectrum-head{ display:flex; justify-content:flex-end; gap: 16px; padding: 0 4px; }
+  .spectrum-head{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap: 10px 16px; padding: 0 4px; }
+  .spectrum-head .toggles{ display:flex; gap:16px; }
+  .scale-row{ display:flex; align-items:center; gap:6px; font-size:13px; color: var(--text-dim); }
+  .scale-btn{ background: var(--surface); border:1px solid var(--bezel-edge); color: var(--text-dim); font-family:'Heebo',sans-serif; font-size:13px; padding:4px 12px; border-radius:999px; cursor:pointer; }
+  .scale-btn:hover{ border-color: var(--copper); color: var(--text); }
+  .scale-btn.active{ background: var(--surface-active); border-color: var(--copper-bright); color: var(--text); font-weight:700; }
+  /* dB grid lines: every 20 dB over a 60 dB range */
+  .log .bar-track, .log .spec-bars{ background-image: linear-gradient(to top, transparent calc(33.333% - 1px), var(--bezel-edge) calc(33.333% - 1px), var(--bezel-edge) 33.333%, transparent 33.333%, transparent calc(66.666% - 1px), var(--bezel-edge) calc(66.666% - 1px), var(--bezel-edge) 66.666%, transparent 66.666%, transparent calc(100% - 1px), var(--bezel-edge) calc(100% - 1px)); }
+  .scale-note{ font-size:12px; color: var(--text-faint); text-align:center; margin-top:4px; min-height:1em; }
   .po-toggle{ display:flex; align-items:center; gap: 6px; font-size: 12px; color: var(--text-faint); cursor:pointer; user-select:none; }
   .po-toggle{ font-size: 14px; font-weight: 700; }
   .po-toggle.po-partial{ color: var(--copper-bright); }
@@ -216,11 +225,11 @@
   .spec-card{ background: var(--surface); border:1px solid var(--bezel-edge); border-radius: 14px; padding: 16px 16px 12px; }
   .spec-card h3{ margin:0 0 4px; font-size:15px; font-weight:700; }
   .spec-card p{ margin:0 0 14px; font-size:12.5px; color: var(--text-dim); line-height:1.6; min-height: 40px; }
-  .spec-bars{ direction:ltr; display:flex; align-items:flex-end; gap:6px; height: 96px; border-bottom:1px solid var(--bezel-edge); }
+  .spec-bars{ direction:ltr; display:flex; align-items:flex-end; gap:3px; height: 96px; border-bottom:1px solid var(--bezel-edge); }
   .spec-bar{ flex:1; background: var(--copper-bright); border-radius:2px 2px 0 0; min-height:2px; }
   .spec-bar.zero{ background: var(--bezel-edge); }
-  .spec-nums{ direction:ltr; display:flex; gap:6px; margin-top:6px; }
-  .spec-nums span{ flex:1; text-align:center; font-family:'Space Mono',monospace; font-size:10.5px; color: var(--text-faint); }
+  .spec-nums{ direction:ltr; display:flex; gap:3px; margin-top:6px; }
+  .spec-nums span{ flex:1; text-align:center; font-family:'Space Mono',monospace; font-size:9px; color: var(--text-faint); }
   @media (max-width: 620px){ .spec-grid{ grid-template-columns: 1fr; } }
 
   @media (max-width: 520px){
@@ -266,10 +275,18 @@
     </div>
 
     <div class="spectrum-head">
-      <label class="po-toggle po-partial"><input type="checkbox" id="partialToggle" checked> Partial</label>
-      <label class="po-toggle po-overtone"><input type="checkbox" id="overtoneToggle" checked> Overtone</label>
+      <div class="toggles">
+        <label class="po-toggle po-partial"><input type="checkbox" id="partialToggle" checked> Partial</label>
+        <label class="po-toggle po-overtone"><input type="checkbox" id="overtoneToggle" checked> Overtone</label>
+      </div>
+      <div class="scale-row">
+        <span>תצוגת עוצמה</span>
+        <button type="button" class="scale-btn" data-scale="lin">לינארית</button>
+        <button type="button" class="scale-btn active" data-scale="log">לוגריתמית</button>
+      </div>
     </div>
-    <div class="spectrum" id="spectrum"></div>
+    <div class="spectrum log" id="spectrum"></div>
+    <div class="scale-note" id="scaleNote"></div>
 
     <div class="controls">
       <div class="slider-row">
@@ -297,7 +314,15 @@
 
   <div class="tab-content" id="tabSpectrum" hidden>
     <div class="panel">
-      <div class="spec-grid" id="specGrid"></div>
+      <div class="spectrum-head" style="justify-content:flex-end;margin-bottom:12px">
+        <div class="scale-row">
+          <span>תצוגת עוצמה</span>
+          <button type="button" class="scale-btn" data-scale="lin">לינארית</button>
+          <button type="button" class="scale-btn active" data-scale="log">לוגריתמית</button>
+        </div>
+      </div>
+      <div class="spec-grid log" id="specGrid"></div>
+      <div class="scale-note" id="scaleNote2"></div>
     </div>
   </div>
 
@@ -327,7 +352,7 @@
   function makeRect(k){
     const D = 1/k, sD = Math.sin(Math.PI*D);
     const ns = [];
-    for (let n=1; ns.length<9; n++) if (n % k !== 0) ns.push(n);
+    for (let n=1; ns.length<16; n++) if (n % k !== 0) ns.push(n);
     const harmonics = ns.map(n => {
       const c = Math.sin(n*Math.PI*D) / (n*sD);
       const shift = n*Math.PI*D;
@@ -345,19 +370,19 @@
   const WAVES = {
     square: {
       label: 'ריבועי', enLabel: 'Square', duty: '50%',
-      harmonics: [1,3,5,7,9,11,13,15].map(n => sineHarm(n, 1/n)),
+      harmonics: Array.from({length:16}, (_,i) => 2*i+1).map(n => sineHarm(n, 1/n)),
       ideal: t => (mod2pi(t) < Math.PI) ? Math.PI/4 : -Math.PI/4, // series sum of 1/n terms converges to PI/4
       icon: sqIcon
     },
     triangle: {
       label: 'משולש', enLabel: 'Triangle', duty: null,
-      harmonics: [1,3,5,7,9,11,13,15].map(n => sineHarm(n, Math.pow(-1,(n-1)/2) / (n*n))),
+      harmonics: Array.from({length:16}, (_,i) => 2*i+1).map(n => sineHarm(n, Math.pow(-1,(n-1)/2) / (n*n))),
       ideal: t => (Math.PI/4) * Math.asin(Math.sin(t)), // peak PI^2/8 for 1/n^2 series
       icon: triIcon
     },
     saw: {
       label: 'שן מסור', enLabel: 'Sawtooth', duty: null,
-      harmonics: [1,2,3,4,5,6,7,8,9].map(n => sineHarm(n, Math.pow(-1,(n+1)) / n)),
+      harmonics: Array.from({length:16}, (_,i) => i+1).map(n => sineHarm(n, Math.pow(-1,(n+1)) / n)),
       ideal: t => wrapPi(t) / 2, // series of (-1)^(n+1)/n sin(n*t) equals t/2
       icon: sawIcon
     },
@@ -377,6 +402,17 @@
   }
 
   function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  // amplitude display scale: 'log' = decibels over a 60 dB range, 'lin' = relative to the largest
+  let scaleMode = 'log';
+  const DB_RANGE = 60;
+  function toDb(mag, maxAbs){ return 20*Math.log10(mag/maxAbs); }
+  function heightFrac(mag, maxAbs){
+    if (!(mag > 0)) return 0;
+    if (scaleMode === 'lin') return mag/maxAbs;
+    return Math.max(0, 1 + toDb(mag, maxAbs)/DB_RANGE);
+  }
+  function dbLabel(db){ return (Math.abs(db) < 0.05 ? '0' : db.toFixed(1)) + ' dB'; }
 
   let currentType = 'square';
   let harmCount = 1;
@@ -427,9 +463,10 @@
       const overtoneLabel = idx === 0 ? 'יסוד' : ('O' + idx);
       const slot = document.createElement('button');
       slot.className = 'bar-slot';
+      slot.title = 'n=' + h.n + ' · ' + fracLabel(mags[idx]) + ' · ' + dbLabel(toDb(mags[idx], maxAbs));
       slot.innerHTML =
         '<div class="po-labels"><div class="po partial">P' + partial + '</div><div class="po overtone">' + overtoneLabel + '</div></div>' +
-        '<div class="bar-track"><div class="bar" style="height:' + Math.max(6, (mags[idx]/maxAbs)*54) + 'px"></div></div>' +
+        '<div class="bar-track"><div class="bar" style="height:' + Math.max(3, heightFrac(mags[idx], maxAbs)*96) + 'px"></div></div>' +
         '<div class="bar-label">n=' + h.n + '</div>';
       slot.addEventListener('click', () => { stopPlaying(); setCount(idx+1); });
       spectrumEl.appendChild(slot);
@@ -606,6 +643,7 @@
       '<div class="row"><span class="dim">Partial</span><span class="val">' + partial + '</span></div>' +
       '<div class="row"><span class="dim">Overtone</span><span class="val">' + overtone + '</span></div>' +
       '<div class="row"><span class="dim">אמפליטודה</span><span class="val">' + fracLabel(mag) + '</span></div>' +
+      '<div class="row"><span class="dim">ביחס ליסוד</span><span class="val" dir="ltr">' + dbLabel(toDb(mag, Math.sqrt(w.harmonics[0].a**2 + w.harmonics[0].b**2))) + '</span></div>' +
       '<div class="row"><span class="dim">מרכיבים בסכום</span><span class="val">' + harmCount + ' / ' + w.harmonics.length + '</span></div>';
   }
 
@@ -634,7 +672,7 @@
       slider.value = harmCount;
       harmCountEl.textContent = harmCount;
       render();
-    }, 750);
+    }, 450);
   }
 
   playBtn.addEventListener('click', togglePlay);
@@ -653,18 +691,41 @@
     }))
   ];
   const specGrid = document.getElementById('specGrid');
-  SPEC.forEach(sp => {
-    let bars = '', nums = '';
-    for (let n=1;n<=9;n++){
-      const a = sp.amp(n);
-      bars += '<div class="spec-bar' + (a===0 ? ' zero' : '') + '" style="height:' + (a===0 ? 2 : Math.max(2, a*96)) + 'px"></div>';
-      nums += '<span>' + n + '</span>';
-    }
-    const card = document.createElement('div');
-    card.className = 'spec-card';
-    card.innerHTML = '<h3>' + sp.label + '</h3><p>' + sp.desc + '</p><div class="spec-bars">' + bars + '</div><div class="spec-nums">' + nums + '</div>';
-    specGrid.appendChild(card);
-  });
+  function buildSpecGrid(){
+    specGrid.innerHTML = '';
+    SPEC.forEach(sp => {
+      let bars = '', nums = '';
+      const maxA = sp.amp(1);
+      for (let n=1;n<=16;n++){
+        const a = sp.amp(n);
+        const t = a===0 ? 'n=' + n + ' · 0' : 'n=' + n + ' · ' + fracLabel(a) + ' · ' + dbLabel(toDb(a, maxA));
+        bars += '<div class="spec-bar' + (a===0 ? ' zero' : '') + '" title="' + t + '" style="height:' + (a===0 ? 2 : Math.max(2, heightFrac(a, maxA)*96)) + 'px"></div>';
+        nums += '<span>' + n + '</span>';
+      }
+      const card = document.createElement('div');
+      card.className = 'spec-card';
+      card.innerHTML = '<h3>' + sp.label + '</h3><p>' + sp.desc + '</p><div class="spec-bars">' + bars + '</div><div class="spec-nums">' + nums + '</div>';
+      specGrid.appendChild(card);
+    });
+  }
+  buildSpecGrid();
+
+  const NOTE_LOG = 'סולם לוגריתמי: כל קו אופקי = ירידה של 20 דציבל (פי 10 באמפליטודה). תחתית העמודה = 60 דציבל מתחת לחזק ביותר.';
+  const NOTE_LIN = 'סולם לינארי: גובה העמודה יחסי ישירות לאמפליטודה. הרמוניות חלשות כמעט לא נראות.';
+  function setScale(mode){
+    scaleMode = mode;
+    document.querySelectorAll('.scale-btn').forEach(b => b.classList.toggle('active', b.dataset.scale === mode));
+    spectrumEl.classList.toggle('log', mode === 'log');
+    specGrid.classList.toggle('log', mode === 'log');
+    document.getElementById('scaleNote').textContent = mode === 'log' ? NOTE_LOG : NOTE_LIN;
+    document.getElementById('scaleNote2').textContent = mode === 'log' ? NOTE_LOG : NOTE_LIN;
+    buildSpectrum();
+    updateSpectrumHighlight();
+    buildSpecGrid();
+  }
+  document.querySelectorAll('.scale-btn').forEach(b => b.addEventListener('click', () => setScale(b.dataset.scale)));
+  document.getElementById('scaleNote').textContent = NOTE_LOG;
+  document.getElementById('scaleNote2').textContent = NOTE_LOG;
 
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
