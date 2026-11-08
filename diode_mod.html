@@ -83,7 +83,7 @@ canvas{width:100%;height:225px;display:block}
 .tick.hit span{color:var(--ink);font-weight:700}
 .ptr{position:absolute;top:50%;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;background:var(--lo);border:3px solid var(--panel);box-shadow:0 1px 4px rgba(0,0,0,.35)}
 .gends{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-top:.2rem}
-.zsay{min-height:2.9em;margin-top:.3rem;font-size:.95rem}
+.zsay{margin-top:.3rem;font-size:.95rem}
 .zsay .st{font-weight:700}
 .capctl .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:.3rem}
 .draghint{font-size:.85rem;color:var(--muted)}
@@ -326,7 +326,25 @@ canvas{width:100%;height:225px;display:block}
   const mY = v => MY + MH * (1 - v);
   ['mU', 'mL'].forEach((id, k) => { const y = mY(k ? L : U); $(id).setAttribute('y1', y); $(id).setAttribute('y2', y); });
   ['m2U', 'm2L'].forEach((id, k) => { const y = mY(k ? L : U); $(id).setAttribute('y1', y); $(id).setAttribute('y2', y); });
-  let lastHigh = st.high, flipAge = 9;
+  let lastHigh = st.high, flipAge = 9, lastSay = '';
+  const WHERE = { flipL: 'נגע ברף התחתון: השער מתהפך.', flipU: 'נגע ברף העליון: השער מתהפך.',
+    below: 'מתחת לרף התחתון.', above: 'מעל הרף העליון.', between: 'בין הרפים: השער לא מתהפך.' };
+  const RES = { off: 'הדיודה מנותקת, אז מתנד הצליל רץ רגיל כל הזמן.',
+    held: 'הדיודה מוליכה וממלאת את הקבל של מתנד הצליל. השער שלו רואה 1, והיציאה שלו תקועה על נמוך, אז אין צליל.',
+    drain: 'הדיודה לא מוליכה. הקבל של מתנד הצליל עוד מתרוקן, ועוד רגע הצליל מתחיל.',
+    run: 'הדיודה לא מוליכה, ומתנד הצליל רץ רגיל.' };
+  function sayText(w, high, r) {
+    return WHERE[w] + ' המתנד האיטי ביציאה: <span class="st" style="color:' + (high ? css('--hi') : css('--lo')) + '">' +
+      (high ? 'גבוה' : 'נמוך') + '</span>. ' + RES[r];
+  }
+  // reserve room for the longest message, so the layout below never jumps
+  function fitSay() {
+    const z = $('zSay'), keep = z.innerHTML; z.style.minHeight = '0px'; let mx = 0;
+    for (const w in WHERE) for (const h of [true, false]) for (const r in RES) { z.innerHTML = sayText(w, h, r); mx = Math.max(mx, z.offsetHeight); }
+    z.innerHTML = keep; z.style.minHeight = mx + 'px';
+  }
+  new ResizeObserver(fitSay).observe($('zSay').parentElement);
+  if (document.fonts) document.fonts.ready.then(fitSay);
 
   $('sRate').addEventListener('input', readSliders);
   $('sPitch').addEventListener('input', readSliders);
@@ -378,14 +396,10 @@ canvas{width:100%;height:225px;display:block}
     $('mFill').setAttribute('y', mY(st.v)); $('mFill').setAttribute('height', Math.max(0, MY + MH - mY(st.v)));
     const flash = flipAge < (st.manual ? 1 : Math.min(0.6, 0.25 / st.rate));
     $('tU').classList.toggle('hit', flash && !st.high); $('tL').classList.toggle('hit', flash && st.high);
-    const outTxt = st.high ? 'גבוה' : 'נמוך';
-    const res = !st.diode ? 'הדיודה מנותקת, אז מתנד הצליל רץ רגיל כל הזמן.'
-      : st.high ? 'הדיודה מוליכה וממלאת את הקבל של מתנד הצליל. השער שלו רואה 1, והיציאה שלו תקועה על נמוך, אז אין צליל.'
-      : st.v2 > U ? 'הדיודה לא מוליכה. הקבל של מתנד הצליל עוד מתרוקן, ועוד רגע הצליל מתחיל.'
-      : 'הדיודה לא מוליכה, ומתנד הצליל רץ רגיל.';
-    const where = flash ? (st.high ? 'נגע ברף התחתון: השער מתהפך.' : 'נגע ברף העליון: השער מתהפך.')
-      : st.v < L ? 'מתחת לרף התחתון.' : st.v > U ? 'מעל הרף העליון.' : 'בין הרפים: השער לא מתהפך.';
-    $('zSay').innerHTML = where + ' המתנד האיטי ביציאה: <span class="st" style="color:' + (st.high ? css('--hi') : css('--lo')) + '">' + outTxt + '</span>. ' + res;
+    const whereK = flash ? (st.high ? 'flipL' : 'flipU') : st.v < L ? 'below' : st.v > U ? 'above' : 'between';
+    const resK = !st.diode ? 'off' : st.high ? 'held' : st.v2 > U ? 'drain' : 'run';
+    const key = whereK + st.high + resK;
+    if (key !== lastSay) { lastSay = key; $('zSay').innerHTML = sayText(whereK, st.high, resK); }
 
     // history for the scope (sample every frame)
     if (dt > 0) hist.push({ t: wall, cap: st.v, lfo: st.high ? 1 : 0, cap2: st.v2, out: st.o2 ? 1 : 0, on: sounding });
