@@ -63,6 +63,22 @@
   .wave-head span b{direction:ltr;display:inline-block;}
   .src-freq-row{margin-top:2px;}
   .src-note{font-size:9px;color:var(--ink-soft);margin-top:1px;}
+
+  .panel-ref{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:5px 8px;flex:0 0 auto;}
+  .panel-ref summary{cursor:pointer;font-family:'Rubik',sans-serif;font-weight:700;font-size:12px;}
+  .panel-ref summary .hint{font-family:'Heebo',sans-serif;font-weight:400;font-size:10px;color:var(--ink-soft);}
+  .panel-body{display:grid;grid-template-columns:minmax(0,340px) 1fr;gap:10px;align-items:center;margin-top:6px;}
+  .panel-body img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff;display:block;}
+  .legend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:11.5px;}
+  .legend li{line-height:1.4;}
+  .legend b{font-family:'Rubik',sans-serif;}
+  .legend .num{display:inline-block;direction:ltr;font-family:'Rubik',sans-serif;font-weight:700;font-size:10px;padding:1px 6px;border-radius:5px;margin-left:6px;border:1.5px solid;}
+  .c-blue{color:var(--blue);border-color:var(--blue);background:var(--blue-soft);}
+  .c-amber{color:var(--amber);border-color:var(--amber);background:var(--amber-soft);}
+  .c-teal{color:var(--teal);border-color:var(--teal);background:var(--teal-soft);}
+  .c-grey{color:var(--ink-soft);border-color:var(--line);background:var(--panel);}
+  .credit{font-size:9px;color:var(--ink-soft);margin-top:4px;}
+  @media (max-width: 720px){ .panel-body{grid-template-columns:1fr;} }
   .final-wave-svg.collapsed{display:none;}
 
   .jack-row{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:6px 8px;display:flex;flex-direction:column;gap:3px;min-width:0;}
@@ -104,6 +120,21 @@
   </header>
 
   <section class="scene">
+
+    <details class="panel-ref" open>
+      <summary>איפה זה על המודול? <span class="hint">(לחיצה מסתירה / מציגה)</span></summary>
+      <div class="panel-body">
+        <img src="img/dpo_timbre_panel.jpg" alt="פאנל המודול עם מספור הכפתורים מתוך המדריך" loading="lazy">
+        <ul class="legend">
+          <li><span class="num c-blue">1D</span><b>ברז ראשי</b> — אינדקס פס האפנון (Mod Bus Index). קובע כמה מהגל הנכנס זורם לכל שלושת החלקים.</li>
+          <li><span class="num c-amber">2A · 2B · 2C</span><b>ברז מקומי</b> — מחליש לכל חלק בנפרד: עיצוב, הטיה, קיפול.</li>
+          <li><span class="num c-teal">3A · 3B · 3C</span><b>כבל חיצוני</b> — שקע הכניסה של כל חלק. חיבור כבל מנתק אותו מפס האפנון.</li>
+          <li><span class="num c-grey">1A · 1B · 1C</span><b>הכפתור הבסיסי</b> של עיצוב, הטיה וקיפול — נקודת ההתחלה שהאפנון מזיז ממנה (בסימולציה הוא קבוע על אפס).</li>
+          <li><span class="num c-grey">3D</span><b>מקור חיצוני</b> — כבל כאן מחליף את הגל הנכנס של המתנד הראשון בפס האפנון.</li>
+        </ul>
+      </div>
+      <div class="credit">התמונה מתוך מדריך המשתמש של Make Noise</div>
+    </details>
 
     <div class="stage">
       <svg viewBox="0 0 320 150" id="mainSvg">
