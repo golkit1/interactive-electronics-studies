@@ -79,6 +79,13 @@
   .src-thumb{width:62px;height:auto;border-radius:6px;border:1px solid var(--line);background:#fff;flex:0 0 auto;}
   .vco-tag{display:inline-block;direction:ltr;font-size:13px;color:var(--amber);border:1.5px solid var(--amber);background:var(--amber-soft);border-radius:5px;padding:0 6px;margin-left:4px;}
   .chain-arrow{text-align:center;color:var(--ink-soft);font-size:14px;line-height:1;margin:-2px 0;flex:0 0 auto;}
+  .zoomable{cursor:zoom-in;transition:transform .15s;}
+  .zoomable:hover{transform:scale(1.04);}
+  .lightbox{position:fixed;inset:0;background:rgba(20,17,14,.82);display:none;align-items:center;justify-content:center;padding:16px;z-index:50;cursor:zoom-out;flex-direction:column;gap:8px;}
+  .lightbox.open{display:flex;}
+  .lightbox img{max-width:min(92vw,900px);max-height:84vh;min-width:min(60vw,320px);width:auto;height:auto;object-fit:contain;border-radius:10px;background:#fff;box-shadow:0 8px 30px rgba(0,0,0,.5);image-rendering:auto;}
+  .lightbox .lb-cap{color:#F3EEE6;font-size:12px;}
+  .lightbox .lb-close{position:absolute;top:12px;left:12px;background:#fff;color:#241F1A;border:none;border-radius:999px;width:32px;height:32px;font-size:18px;cursor:pointer;}
   .src-note{font-size:9px;color:var(--ink-soft);margin-top:1px;}
 
   .panel-ref{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:5px 8px;flex:0 0 auto;}
@@ -273,6 +280,12 @@
 
     </div>
   </section>
+</div>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true">
+  <button class="lb-close" type="button" aria-label="סגירה">✕</button>
+  <img id="lbImg" alt="">
+  <div class="lb-cap">לחיצה בכל מקום או מקש יציאה למזעור</div>
 </div>
 
 <script>
@@ -504,6 +517,24 @@ finalToggleBtn.addEventListener('click', ()=>{
   const hidden = finalWaveSvgWrap.classList.toggle('collapsed');
   finalToggleBtn.textContent = hidden ? 'הצג' : 'הסתר';
 });
+
+/* ---------- Image zoom ---------- */
+(function(){
+  const lb = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lbImg');
+  document.querySelectorAll('.panel-body img, .jack-thumb, .master-thumb, .src-thumb').forEach(img=>{
+    img.classList.add('zoomable');
+    img.title = 'לחיצה להגדלה';
+    img.addEventListener('click', e=>{
+      e.preventDefault(); e.stopPropagation();
+      lbImg.src = img.src; lbImg.alt = img.alt;
+      lb.classList.add('open');
+    });
+  });
+  function close(){ lb.classList.remove('open'); }
+  lb.addEventListener('click', close);
+  document.addEventListener('keydown', e=>{ if(e.key === 'Escape') close(); });
+})();
 </script>
 </body>
 </html>
