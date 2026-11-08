@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>מצאו את הטעות</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Secular+One&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F1F4F9; --surface:#FFFFFF; --ink:#18204A; --muted:#5B6385;
+  --grid:#D6DCEA; --high:#F5B700; --water:#2F6FEB; --low:#AEB5CF;
+  --red:#E0484D; --green:#1F9D62; --bad:#D8333A;
+  --board:#FBFCFE; --hole:#C3CADD; --chip:#232A52; --chiptxt:#DDE2F2;
+  box-sizing:border-box;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#10142B; --surface:#181E3D; --ink:#E8ECFA; --muted:#9AA3C7;
+    --grid:#2A3157; --high:#FFC62A; --water:#5B8CFF; --low:#3A4270;
+    --green:#3CC488; --bad:#FF5A60; --board:#1D2447; --hole:#3A4373; --chip:#0B0F24; --chiptxt:#C9D0EC;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#10142B; --surface:#181E3D; --ink:#E8ECFA; --muted:#9AA3C7;
+  --grid:#2A3157; --high:#FFC62A; --water:#5B8CFF; --low:#3A4270;
+  --green:#3CC488; --bad:#FF5A60; --board:#1D2447; --hole:#3A4373; --chip:#0B0F24; --chiptxt:#C9D0EC;
+}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Assistant","Arial Hebrew",Arial,sans-serif; font-size:16px; line-height:1.6}
+h1,h2{font-family:"Secular One","Assistant",Arial,sans-serif; font-weight:400; line-height:1.15; margin:0}
+h1{font-size:1.6rem}
+h2{font-size:1.15rem; margin-bottom:.3rem}
+p{margin:.3rem 0 .8rem}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--water); outline-offset:3px}
+.wrap{max-width:1000px; margin:0 auto; padding:1.4rem 16px 3rem}
+.lead{color:var(--muted); max-width:46ch}
+
+.top{display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:.8rem}
+.dots{display:flex; gap:.4rem; align-items:center}
+.dots span{width:14px; height:14px; border-radius:50%; border:2px solid var(--low)}
+.dots span.done{background:var(--green); border-color:var(--green)}
+.dots span.now{border-color:var(--ink); border-width:3px}
+.count{color:var(--muted); font-weight:600; margin-inline-start:.4rem}
+
+.boardbox{background:var(--surface); border:1px solid var(--grid); border-radius:16px; padding:.6rem}
+.boardbox{overflow-x:auto}
+#board{width:100%; min-width:540px; height:auto; display:block; direction:ltr; touch-action:manipulation}
+.part{cursor:pointer}
+.part .hit{fill:transparent}
+.part:hover .hit{fill:var(--water); fill-opacity:.10}
+.part:focus{outline:none}
+.part:focus-visible .hit{fill:var(--water); fill-opacity:.18; stroke:var(--water); stroke-width:2}
+.part.ok .hit{fill:var(--green); fill-opacity:.16}
+.part.found .hit{fill:var(--bad); fill-opacity:.18; stroke:var(--bad); stroke-width:2.5}
+.part path.hit{fill:none; stroke:transparent; stroke-width:20; stroke-linecap:round}
+.part:hover path.hit{fill:none; stroke:var(--water); stroke-opacity:.15}
+.part:focus-visible path.hit{fill:none; stroke:var(--water); stroke-opacity:.25; stroke-width:20}
+.part.ok path.hit{fill:none; stroke:var(--green); stroke-opacity:.2}
+.part.found path.hit{fill:none; stroke:var(--bad); stroke-opacity:.25; stroke-width:20}
+.fixing .part{cursor:default}
+
+.panel{display:grid; grid-template-columns:1.25fr 1fr; gap:1rem; margin-top:1rem}
+@media (max-width:760px){.panel{grid-template-columns:1fr}}
+.card{background:var(--surface); border:1px solid var(--grid); border-radius:16px; padding:1rem 1.1rem}
+.sym{font-weight:700; font-size:1.08rem}
+.sym .ledmark{display:inline-block; width:.85em; height:.85em; border-radius:50%; vertical-align:-.08em; margin-inline-end:.35em; border:2px solid var(--ink)}
+.msg{min-height:3.2em; margin:.6rem 0 .2rem}
+.msg.good{color:var(--green); font-weight:700}
+.msg.why{border-inline-start:4px solid var(--bad); padding-inline-start:.7rem}
+.msg.win{border-inline-start:4px solid var(--green); padding-inline-start:.7rem}
+.msg .t{font-weight:700; display:block}
+.hint{color:var(--muted); min-height:1.4em}
+.bar{display:flex; gap:.6rem; flex-wrap:wrap; margin-top:.6rem}
+.btn{border:2px solid var(--ink); background:var(--surface); border-radius:999px; padding:.3rem 1.2rem; font-weight:700}
+.btn.main{background:var(--ink); color:var(--paper)}
+.btn[hidden]{display:none}
+
+.ref svg{width:100%; height:auto; display:block; direction:ltr}
+.ref .cap{color:var(--muted); font-size:.92rem; margin:.2rem 0 .9rem}
+.ref .sep{border-top:1px solid var(--grid); margin:.6rem 0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>מצאו את הטעות</h1>
+      <p class="lead">בכל לוח ניסויים (Breadboard) יש טעות אחת, ולכן המתנד לא עובד. לחצו על הרכיב שמחובר לא נכון.</p>
+    </div>
+    <div class="dots" id="dots" aria-hidden="true"></div>
+  </div>
+
+  <div class="boardbox">
+    <svg id="board" viewBox="0 0 620 382" role="group" aria-label="לוח הניסויים עם המעגל"></svg>
+  </div>
+
+  <div class="panel">
+    <div class="card" aria-live="polite">
+      <div class="sym" id="sym"></div>
+      <div class="msg" id="msg">לחצו על רכיב בלוח כדי לבדוק אותו.</div>
+      <div class="hint" id="hint"></div>
+      <div class="bar">
+        <button class="btn" id="hintBtn">רמז</button>
+        <button class="btn main" id="fixBtn" hidden>תקנו את הטעות</button>
+        <button class="btn main" id="nextBtn" hidden>ללוח הבא</button>
+      </div>
+    </div>
+
+    <div class="card ref">
+      <h2>ככה המעגל צריך להיות</h2>
+      <svg viewBox="40 0 460 250" aria-label="סכמה של המתנד">
+        <path d="M360 140 V45 H300 M230 45 H150 V140" fill="none" stroke="var(--ink)" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M230 45 l6 -12 l12 24 l12 -24 l12 24 l12 -24 l12 24 l4 -12" fill="none" stroke="var(--ink)" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M150 140 H190 M150 140 V186 M150 198 V230 M135 230 H165" fill="none" stroke="var(--ink)" stroke-width="4"/>
+        <path d="M122 186 H178 M122 198 H178" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/>
+        <path d="M190 92 V188 L282 140 Z" fill="var(--surface)" stroke="var(--ink)" stroke-width="4" stroke-linejoin="round"/>
+        <circle cx="291" cy="140" r="9" fill="var(--surface)" stroke="var(--ink)" stroke-width="4"/>
+        <text x="198" y="147" font-size="18" fill="var(--ink)">NOT</text>
+        <path d="M300 140 H430 V160 M430 196 V230 M415 230 H445" fill="none" stroke="var(--ink)" stroke-width="4"/>
+        <circle cx="430" cy="178" r="17" fill="var(--high)" stroke="var(--ink)" stroke-width="3"/>
+        <circle cx="150" cy="140" r="6" fill="var(--ink)"/><circle cx="360" cy="140" r="6" fill="var(--ink)"/>
+        <g font-size="17" fill="var(--muted)" font-family="Assistant,sans-serif">
+          <text x="268" y="22" text-anchor="middle">נגד</text>
+          <text x="114" y="198" text-anchor="end">קבל</text>
+          <text x="454" y="184">נורה</text>
+          <text x="168" y="128" text-anchor="middle">רגל 1</text>
+          <text x="328" y="128" text-anchor="middle">רגל 2</text>
+        </g>
+      </svg>
+      <div class="sep"></div>
+      <h2>רגלי השבב 40106</h2>
+      <svg viewBox="0 0 300 120" aria-label="רגלי השבב כפי שהוא מונח על הלוח">
+        <rect x="30" y="34" width="240" height="52" rx="6" fill="var(--chip)"/>
+        <path d="M30 51 A9 9 0 0 1 30 69 Z" fill="var(--surface)"/>
+        <g id="pinout"></g>
+      </svg>
+      <p class="cap">הגומה בצד שמאל. רגל 14 לפלוס, רגל 7 למינוס. לשער הראשון: כניסה ברגל 1, יציאה ברגל 2.</p>
+      <p class="cap">בנורה, הרגל הארוכה (עם הכיפוף) לצד היציאה, והצד השטוח לצד המינוס.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const NS="http://www.w3.org/2000/svg";
+  const mk=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e};
+
+  /* pinout reference */
+  const po=document.getElementById("pinout");
+  for(let i=0;i<7;i++){
+    const x=50+i*33.3;
+    const top=14-i, bot=i+1;
+    const col=n=>n===14?"var(--red)":n===7?"var(--ink)":n===1?"var(--water)":n===2?"var(--high)":"var(--low)";
+    mk("rect",{x:x-6,y:22,width:12,height:12,rx:2,fill:col(top)},po);
+    mk("rect",{x:x-6,y:86,width:12,height:12,rx:2,fill:col(bot)},po);
+    const t1=mk("text",{x:x,y:16,"text-anchor":"middle","font-size":13,fill:"var(--muted)","font-family":"Assistant"},po); t1.textContent=top;
+    const t2=mk("text",{x:x,y:114,"text-anchor":"middle","font-size":13,fill:"var(--muted)","font-family":"Assistant"},po); t2.textContent=bot;
+  }
+  { const t=mk("text",{x:150,y:66,"text-anchor":"middle","font-size":20,fill:"var(--chiptxt)","font-family":"Secular One"},po); t.textContent="40106"; }
+
+  /* board geometry */
+  const X=c=>110+(c-1)*28;
+  const Y={rp:44,a:84,b:106,c:128,d:150,e:172,f:216,g:238,h:260,i:282,j:304,rn:344};
+  const board=document.getElementById("board");
+
+  const levels=[
+    {bad:"pwr", led:"off", sym:"הנורה לא נדלקת בכלל.",
+     hint:"השבב צריך פלוס. איזו רגל של השבב צריכה להיות מחוברת לפלוס?",
+     why:"החוט האדום נכנס לשורה שליד השבב, ולא לרגל 14. השבב לא מקבל חשמל."},
+    {bad:"cap", led:"on", sym:"הנורה דולקת כל הזמן, ולא מהבהבת.",
+     hint:"בדקו את הקבל. לאן מחוברות שתי הרגליים שלו?",
+     why:"שתי הרגליים של הקבל באותה שורה, אז הן מחוברות אחת לשנייה. הקבל לא מחובר למינוס, והוא לא יכול להתמלא ולהתרוקן."},
+    {bad:"led", led:"off", sym:"הנורה לא נדלקת, למרות שהשבב מקבל חשמל.",
+     hint:"בדקו את הנורה. באיזה צד הרגל הארוכה?",
+     why:"הנורה הפוכה. זרם עובר בנורה רק בכיוון אחד: הרגל הארוכה צריכה להיות בצד של היציאה, והצד השטוח בצד של המינוס."},
+    {bad:"res", led:"on", sym:"הנורה דולקת כל הזמן, ולא מהבהבת.",
+     hint:"עקבו אחרי הנגד. בין אילו רגלים של השבב הוא מחבר?",
+     why:"הנגד מחבר את רגל 2 לרגל 3, במקום לרגל 1. היציאה לא ממלאת את הקבל, המתח בכניסה לא מגיע לרף העליון, והשער לא מתהפך."},
+    {bad:"gnd", led:"off", sym:"הנורה לא נדלקת בכלל.",
+     hint:"השבב צריך פלוס וגם מינוס. בדקו את רגל 7.",
+     why:"החוט של המינוס נכנס לשורה של רגל 6, ולא לרגל 7. בלי מינוס, השבב לא עובד."},
+    {bad:"chip", led:"off", sym:"הנורה לא נדלקת, והשבב מתחמם.",
+     hint:"בדקו את הגומה בשבב. באיזה צד היא צריכה להיות?",
+     why:"השבב הפוך: הגומה בצד ימין. עכשיו הפלוס מגיע לרגל 7 והמינוס לרגל 14. מנתקים מיד את הסוללה, כי שבב הפוך יכול להישרף."}
+  ];
+  const names={bat:["הסוללה","f"],pwr:["החוט האדום","m"],gnd:["החוט של המינוס","m"],chip:["השבב","m"],
+    res:["הנגד","m"],cap:["הקבל","m"],out:["החוט הירוק","m"],led:["הנורה","f"]};
+
+  let lv=0, found=false, fixed=false, done=[], checked=new Set(), ledMode="off", ledEl=null, ledGlow=null;
+
+  function wire(g,x1,y1,x2,y2,color,lift){
+    const d=lift?`M${x1} ${y1} C${x1} ${y1-lift} ${x2} ${y2-lift} ${x2} ${y2}`:`M${x1} ${y1} L${x2} ${y2}`;
+    mk("path",{d,class:"hit"},g);
+    mk("path",{d,fill:"none",stroke:color,"stroke-width":6,"stroke-linecap":"round"},g);
+    mk("path",{d,fill:"none",stroke:"#fff","stroke-opacity":.25,"stroke-width":2,"stroke-linecap":"round"},g);
+    [[x1,y1],[x2,y2]].forEach(([x,y])=>mk("circle",{cx:x,cy:y,r:3.5,fill:"#7A8199"},g));
+  }
+  function part(id){const g=mk("g",{class:"part","data-id":id,tabindex:0,role:"button","aria-label":names[id][0]},board); return g}
+  function addHit(g){const b=g.getBBox(),p=7; const r=mk("rect",{class:"hit",x:b.x-p,y:b.y-p,width:b.width+2*p,height:b.height+2*p,rx:8}); g.insertBefore(r,g.firstChild)}
+
+  function draw(){
+    board.innerHTML="";
+    const L=levels[lv], bad=fixed?null:L.bad;
+    /* board base */
+    mk("rect",{x:92,y:20,width:512,height:346,rx:10,fill:"var(--board)",stroke:"var(--grid)","stroke-width":2},board);
+    mk("rect",{x:96,y:184,width:504,height:20,rx:3,fill:"var(--grid)","fill-opacity":.6},board);
+    mk("line",{x1:104,x2:592,y1:30,y2:30,stroke:"var(--red)","stroke-width":2.5},board);
+    mk("line",{x1:104,x2:592,y1:358,y2:358,stroke:"var(--ink)","stroke-width":2.5},board);
+    const tp=mk("text",{x:598,y:49,"font-size":16,"font-weight":700,fill:"var(--red)","text-anchor":"end"},board); tp.textContent="+";
+    const tn=mk("text",{x:598,y:349,"font-size":16,"font-weight":700,fill:"var(--ink)","text-anchor":"end"},board); tn.textContent="−";
+    for(let c=1;c<=18;c++){
+      for(const r of ["rp","a","b","c","d","e","f","g","h","i","j","rn"])
+        mk("rect",{x:X(c)-3.5,y:Y[r]-3.5,width:7,height:7,rx:1.5,fill:"var(--hole)"},board);
+    }
+
+    /* battery */
+    let g=part("bat");
+    mk("rect",{x:24,y:150,width:46,height:84,rx:6,fill:"#2B3158"},g);
+    mk("rect",{x:24,y:150,width:46,height:24,rx:6,fill:"#E9B949"},g);
+    mk("rect",{x:40,y:142,width:14,height:9,rx:2,fill:"#9AA0B8"},g);
+    const bt=mk("text",{x:47,y:212,"text-anchor":"middle","font-size":17,fill:"#fff","font-family":"Secular One"},g); bt.textContent="9V";
+    mk("path",{d:`M47 142 C47 70 80 44 ${X(1)} 44`,fill:"none",stroke:"var(--red)","stroke-width":6,"stroke-linecap":"round"},g);
+    mk("path",{d:`M47 234 C47 320 80 344 ${X(1)} 344`,fill:"none",stroke:"var(--ink)","stroke-width":6,"stroke-linecap":"round"},g);
+    mk("circle",{cx:X(1),cy:44,r:3.5,fill:"#7A8199"},g); mk("circle",{cx:X(1),cy:344,r:3.5,fill:"#7A8199"},g);
+    addHit(g);
+
+    /* chip */
+    g=part("chip");
+    const rev=bad==="chip";
+    for(let c=7;c<=13;c++){
+      mk("rect",{x:X(c)-4,y:168,width:8,height:14,rx:1.5,fill:"#A9AFC4"},g);
+      mk("rect",{x:X(c)-4,y:206,width:8,height:14,rx:1.5,fill:"#A9AFC4"},g);
+    }
+    mk("rect",{x:X(7)-16,y:179,width:X(13)-X(7)+32,height:30,rx:4,fill:"var(--chip)"},g);
+    const nx=rev?X(13)+16:X(7)-16;
+    mk("path",{d:rev?`M${nx} 186 A8 8 0 0 0 ${nx} 202 Z`:`M${nx} 186 A8 8 0 0 1 ${nx} 202 Z`,fill:"var(--board)"},g);
+    mk("circle",{cx:rev?X(13)+4:X(7)-4,cy:rev?186:202,r:2.6,fill:"var(--chiptxt)"},g);
+    const ct=mk("text",{x:(X(7)+X(13))/2,y:200,"text-anchor":"middle","font-size":15,fill:"var(--chiptxt)","font-family":"Secular One",transform:rev?`rotate(180 ${(X(7)+X(13))/2} 194)`:""},g); ct.textContent="40106";
+    addHit(g);
+
+    /* output wire pin2 column to LED column */
+    g=part("out"); wire(g,X(8),Y.i,X(16),Y.i,"var(--green)",34);
+    /* power wire to pin 14 */
+    g=part("pwr"); const pc=bad==="pwr"?6:7; wire(g,X(pc),Y.rp,X(pc),Y.a,"var(--red)",0);
+    /* ground wire from pin 7 */
+    g=part("gnd"); const gc=bad==="gnd"?12:13; wire(g,X(gc),Y.j,X(gc),Y.rn,"var(--ink)",0);
+
+    /* resistor between pin1 and pin2 columns */
+    g=part("res"); const r1=bad==="res"?8:7, r2=r1+1, ry=Y.h;
+    mk("path",{d:`M${X(r1)} ${ry} V${ry-9} M${X(r2)} ${ry} V${ry-9}`,stroke:"#9AA0B8","stroke-width":2.5,fill:"none"},g);
+    mk("rect",{x:X(r1)-3,y:ry-17,width:X(r2)-X(r1)+6,height:12,rx:5,fill:"#D7B47E"},g);
+    [6,12,18,24].forEach((o,k)=>mk("rect",{x:X(r1)-3+o,y:ry-17,width:3,height:12,fill:["#8B5A2B","#111","#E8A33B","#C9A227"][k]},g));
+    mk("circle",{cx:X(r1),cy:ry,r:3,fill:"#7A8199"},g); mk("circle",{cx:X(r2),cy:ry,r:3,fill:"#7A8199"},g);
+    addHit(g);
+
+    /* capacitor: pin1 column to minus rail */
+    g=part("cap"); const ca=bad==="cap"?Y.i:Y.j, cb=bad==="cap"?Y.j:Y.rn, cm=(ca+cb)/2, cx=X(7)-14;
+    mk("path",{d:`M${X(7)} ${ca} L${cx+3} ${cm-6} M${X(7)} ${cb} L${cx+3} ${cm+6}`,stroke:"#9AA0B8","stroke-width":2.5,fill:"none"},g);
+    mk("ellipse",{cx:cx,cy:cm,rx:9,ry:Math.min(11,(cb-ca)/2-1),fill:"#E8A33B",stroke:"#B87411","stroke-width":1.5},g);
+    mk("circle",{cx:X(7),cy:ca,r:3,fill:"#7A8199"},g); mk("circle",{cx:X(7),cy:cb,r:3,fill:"#7A8199"},g);
+    addHit(g);
+
+
+    /* LED: anode (long, bent leg) in row j, cathode in minus rail */
+    g=part("led"); const flip=bad==="led", lx=X(16), bx=lx+16, by=324;
+    const top=flip?"k":"a";
+    const legA=`M${lx} ${Y.j} L${lx} ${Y.j+5} L${lx+6} ${Y.j+8} L${bx-4} ${by-9}`;
+    const legK=`M${lx} ${Y.rn} L${bx-4} ${by+9}`;
+    const legA2=`M${lx} ${Y.rn} L${lx} ${Y.rn-5} L${lx+6} ${Y.rn-8} L${bx-4} ${by+9}`;
+    const legK2=`M${lx} ${Y.j} L${bx-4} ${by-9}`;
+    mk("path",{d:top==="a"?legA+" "+legK:legA2+" "+legK2,stroke:"#9AA0B8","stroke-width":2.5,fill:"none"},g);
+    ledGlow=mk("circle",{cx:bx,cy:by,r:20,fill:"var(--high)",opacity:0},g);
+    ledEl=mk("circle",{cx:bx,cy:by,r:11,fill:"var(--surface)",stroke:"var(--ink)","stroke-width":2},g);
+    const fy=top==="a"?by+9:by-9;
+    mk("line",{x1:bx-8,x2:bx+8,y1:fy,y2:fy,stroke:"var(--ink)","stroke-width":3},g);
+    mk("circle",{cx:lx,cy:Y.j,r:3,fill:"#7A8199"},g); mk("circle",{cx:lx,cy:Y.rn,r:3,fill:"#7A8199"},g);
+    addHit(g);
+
+    board.querySelectorAll(".part").forEach(p=>{
+      const id=p.dataset.id;
+      if(checked.has(id)) p.classList.add("ok");
+      if(found&&!fixed&&id===L.bad) p.classList.add("found");
+      p.addEventListener("click",()=>pick(id));
+      p.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick(id)}});
+    });
+    board.classList.toggle("fixing",found);
+    ledMode=fixed?"blink":L.led;
+  }
+
+  const $=id=>document.getElementById(id);
+  function ui(){
+    const L=levels[lv];
+    $("dots").innerHTML=levels.map((_,i)=>`<span class="${done.includes(i)?"done":""} ${i===lv?"now":""}"></span>`).join("")+
+      `<span class="count" style="border:0;width:auto;height:auto">לוח ${lv+1} מתוך ${levels.length}</span>`;
+    const mark=fixed?"var(--high)":L.led==="on"?"var(--high)":"transparent";
+    $("sym").innerHTML=`<span class="ledmark" style="background:${mark}"></span>`+(fixed?"הנורה מהבהבת. המתנד עובד!":"מה רואים: "+L.sym);
+    $("hintBtn").hidden=found; $("fixBtn").hidden=!found||fixed; $("nextBtn").hidden=!fixed;
+    $("nextBtn").textContent=lv===levels.length-1?"מתחילים מההתחלה":"ללוח הבא";
+  }
+  function setMsg(html,cls){const m=$("msg"); m.className="msg "+(cls||""); m.innerHTML=html}
+
+  function pick(id){
+    if(found) return;
+    const L=levels[lv];
+    if(id===L.bad){
+      found=true; checked.delete(id);
+      setMsg(`<span class="t">מצאתם! הטעות ב${names[id][0].replace(/^ה/,"")}.</span>${L.why}`,"why");
+      $("hint").textContent="";
+      draw(); ui();
+    } else {
+      checked.add(id);
+      const [n,gnd]=names[id];
+      setMsg(`${n} ${gnd==="f"?"מחוברת":"מחובר"} נכון. נסו רכיב אחר.`,"");
+      board.querySelector(`.part[data-id="${id}"]`).classList.add("ok");
+    }
+  }
+  $("hintBtn").onclick=()=>{$("hint").textContent="רמז: "+levels[lv].hint};
+  $("fixBtn").onclick=()=>{
+    fixed=true; if(!done.includes(lv)) done.push(lv);
+    const last=done.length===levels.length;
+    setMsg(last?`<span class="t">מצאתם את כל ${levels.length} הטעויות.</span>ככה בודקים מעגל שלא עובד: מסתכלים מה הנורה עושה, ובודקים רכיב אחרי רכיב מול הסכמה.`
+               :`<span class="t">תוקן.</span>עכשיו המעגל זהה לסכמה, והנורה מהבהבת.`,last?"win":"good");
+    draw(); ui();
+  };
+  $("nextBtn").onclick=()=>{
+    if(lv===levels.length-1){done=[]; lv=0} else lv++;
+    found=false; fixed=false; checked=new Set(); $("hint").textContent="";
+    setMsg("לחצו על רכיב בלוח כדי לבדוק אותו.","");
+    draw(); ui();
+  };
+
+  /* LED behaviour */
+  const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function frame(t){
+    if(ledEl){
+      const on=ledMode==="on"||(ledMode==="blink"&&(reduce||Math.floor(t/400)%2===0));
+      ledEl.setAttribute("fill",on?"var(--high)":"var(--surface)");
+      ledGlow.setAttribute("opacity",on?.35:0);
+    }
+    requestAnimationFrame(frame);
+  }
+  draw(); ui(); requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
