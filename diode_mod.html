@@ -67,7 +67,10 @@ button[aria-pressed="true"]{background:var(--ink);color:var(--btn-ink)}
 button:focus-visible,input:focus-visible{outline:3px solid var(--dot);outline-offset:2px}
 
 .scope{margin-top:10px}
-canvas{width:100%;height:225px;display:block}
+canvas{width:100%;height:120px;display:block}
+.scope.caps canvas{height:225px}
+.scopebar{display:flex;justify-content:flex-start;margin-bottom:4px}
+.scopebar button{font-size:.9rem;padding:3px 10px}
 
 .capctl{}
 .capctl .vin{font-weight:700}
@@ -202,6 +205,7 @@ canvas{width:100%;height:225px;display:block}
   </div>
 
   <section class="card scope">
+    <div class="scopebar"><button id="bCaps" aria-pressed="false">הצגת המתח על הקבלים</button></div>
     <canvas id="cv" aria-label="גרף: המתח במתנד האיטי וביציאה"></canvas>
   </section>
 
@@ -421,15 +425,24 @@ canvas{width:100%;height:225px;display:block}
     requestAnimationFrame(frame);
   }
 
+  let showCaps = false;
+  $('bCaps').onclick = () => {
+    showCaps = !showCaps;
+    $('bCaps').setAttribute('aria-pressed', showCaps);
+    $('bCaps').textContent = showCaps ? 'הסתרת המתח על הקבלים' : 'הצגת המתח על הקבלים';
+    document.querySelector('.scope').classList.toggle('caps', showCaps);
+  };
   function draw() {
     if (!W) return;
     ctx.clearRect(0, 0, W, H);
     const PL = 8, R = 8, pw = W - PL - R;
-    const band = H / 4, rh = band - 22;
-    const rows = [{ key: 'cap', label: 'המתח על הקבל של המתנד האיטי', color: css('--lo'), top: 18 },
-                  { key: 'lfo', label: 'יציאת המתנד האיטי', color: css('--hi'), top: 18 + band },
-                  { key: 'cap2', label: 'המתח על הקבל של מתנד הצליל (בהילוך איטי)', color: css('--tone'), top: 18 + 2 * band },
-                  { key: 'out', label: 'יציאת מתנד הצליל לרמקול (בהילוך איטי)', color: css('--tone'), top: 18 + 3 * band }];
+    const all = [{ key: 'cap', label: 'המתח על הקבל של המתנד האיטי', color: css('--lo'), top: 0 },
+                  { key: 'lfo', label: 'יציאת המתנד האיטי', color: css('--hi'), top: 0 },
+                  { key: 'cap2', label: 'המתח על הקבל של מתנד הצליל (בהילוך איטי)', color: css('--tone'), top: 0 },
+                  { key: 'out', label: 'יציאת מתנד הצליל לרמקול (בהילוך איטי)', color: css('--tone'), top: 0 }];
+    const rows = all.filter(r => showCaps || (r.key !== 'cap' && r.key !== 'cap2'));
+    const band = H / rows.length, rh = band - 22;
+    rows.forEach((r, i) => { r.top = 18 + i * band; });
     ctx.font = '12px Rubik, sans-serif'; ctx.textBaseline = 'bottom'; ctx.textAlign = 'right';
     for (const r of rows) {
       ctx.fillStyle = css('--muted'); ctx.fillText(r.label, W - R, r.top - 4);
