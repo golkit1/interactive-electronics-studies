@@ -60,6 +60,9 @@
   .wave-toggle-btn{border:1px solid var(--line);background:var(--panel);color:var(--ink-soft);font-family:'Heebo',sans-serif;font-size:9.5px;border-radius:999px;padding:2px 8px;cursor:pointer;flex:0 0 auto;}
   .wave-toggle-btn:hover{color:var(--ink);border-color:var(--ink-soft);}
   .final-wave-svg{overflow:hidden;}
+  .wave-head span b{direction:ltr;display:inline-block;}
+  .src-freq-row{margin-top:2px;}
+  .src-note{font-size:9px;color:var(--ink-soft);margin-top:1px;}
   .final-wave-svg.collapsed{display:none;}
 
   .jack-row{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:6px 8px;display:flex;flex-direction:column;gap:3px;min-width:0;}
@@ -147,8 +150,13 @@
     <div class="grid-wrap">
 
       <div class="wave-box">
-        <div class="wave-head"><b>המקור · VCO A Sine</b><span>±5V</span></div>
-        <svg viewBox="0 0 300 50"><path id="srcWavePath" fill="none" stroke="var(--amber)" stroke-width="2.5"/></svg>
+        <div class="wave-head"><b>הגל הנכנס · VCO A Sine</b><span>±5V · <b id="srcFreqLabel">1.0 Hz</b></span></div>
+        <svg viewBox="0 0 300 50">
+          <line x1="0" y1="25" x2="300" y2="25" stroke="var(--line)" stroke-width="1"/>
+          <path id="srcWavePath" fill="none" stroke="var(--amber)" stroke-width="2.5"/>
+        </svg>
+        <div class="ctrl-row src-freq-row"><span class="clab">תדר</span><input type="range" class="local" id="srcFreq" min="0" max="100" value="53"></div>
+        <div class="src-note">החלון מציג 2 שניות. בפועל המתנד יכול לנוע עד תדרי שמע — כאן הוא מואט כדי שאפשר יהיה לראות.</div>
       </div>
 
       <div class="jack-row">
@@ -300,6 +308,41 @@ const srcWavePath = document.getElementById('srcWavePath');
 const finalWavePath = document.getElementById('finalWavePath');
 let wavePhase = 0;
 
+/* VCO A frequency: log slider 0.1–8 Hz, scope window of 2 s that rolls in real time */
+const srcFreq = document.getElementById('srcFreq');
+const srcFreqLabel = document.getElementById('srcFreqLabel');
+const F_MIN = 0.1, F_MAX = 8, WINDOW_SEC = 2, N_ROLL = 240;
+function getSrcFreq(){ return F_MIN * Math.pow(F_MAX/F_MIN, parseFloat(srcFreq.value)/100); }
+function updateFreqLabel(){
+  const f = getSrcFreq();
+  srcFreqLabel.textContent = (f < 1 ? f.toFixed(2) : f.toFixed(1)) + ' Hz';
+}
+srcFreq.addEventListener('input', updateFreqLabel);
+updateFreqLabel();
+
+let srcPhase = 0, lastT = null;
+const phaseHist = []; /* [time, phase] samples so frequency changes don't redraw the past */
+function phaseAt(t){
+  for(let i=phaseHist.length-1;i>=0;i--){
+    if(phaseHist[i][0] <= t){
+      const [t0,p0,f0] = phaseHist[i];
+      return p0 + 2*Math.PI*f0*(t - t0);
+    }
+  }
+  const [t0,p0,f0] = phaseHist[0];
+  return p0 + 2*Math.PI*f0*(t - t0);
+}
+function buildRollPath(ampPx, tNow){
+  let d = '';
+  for(let i=0;i<N_ROLL;i++){
+    const x = i/(N_ROLL-1)*WW;
+    const t = tNow - (1 - i/(N_ROLL-1))*WINDOW_SEC;
+    const y = WH/2 - Math.sin(phaseAt(t))*ampPx;
+    d += (i===0?'M':'L') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+  }
+  return d;
+}
+
 /* Shape/Angle/Fold math (same as VCO B Timbre section) */
 function sineWave(t){ return Math.sin(t); }
 function spikeWave(t){ const s = Math.sin(t); return Math.sign(s)*Math.pow(Math.abs(s), 0.35); }
@@ -337,9 +380,17 @@ function buildFinalPath(sp, ap, fp, phase){
   return d;
 }
 
-function drawWaves(){
+function drawWaves(now){
   wavePhase += 0.05;
-  srcWavePath.setAttribute('d', buildWavePath(AMP_PX, wavePhase, 'sine'));
+  const tNow = (now || performance.now())/1000;
+  const f = getSrcFreq();
+  if(lastT === null){ phaseHist.push([tNow - WINDOW_SEC - 1, 0, f]); lastT = tNow; }
+  srcPhase = phaseAt(tNow);
+  const lastSeg = phaseHist[phaseHist.length-1];
+  if(lastSeg[2] !== f) phaseHist.push([tNow, srcPhase, f]);
+  while(phaseHist.length > 1 && phaseHist[1][0] < tNow - WINDOW_SEC - 0.5) phaseHist.shift();
+  lastT = tNow;
+  srcWavePath.setAttribute('d', buildRollPath(AMP_PX, tNow));
 
   const reach = {};
   ['S','A','F'].forEach(letter=>{
@@ -362,16 +413,17 @@ function drawWaves(){
     } else {
       const peakV = master*localFrac*5;
       const ampPx = master*localFrac*AMP_PX;
-      wavePath.setAttribute('d', buildWavePath(ampPx, wavePhase, 'sine'));
+      wavePath.setAttribute('d', buildRollPath(ampPx, tNow));
       wavePath.setAttribute('stroke', 'var(--amber)');
       peakEl.textContent = '±' + peakV.toFixed(1) + 'V';
       reach[letter] = { frac: master*localFrac, ext: false };
     }
   });
 
-  const modS = reach.S.ext ? triWaveShape(wavePhase*1.6) : Math.sin(wavePhase);
-  const modA = reach.A.ext ? triWaveShape(wavePhase*1.6) : Math.sin(wavePhase);
-  const modF = reach.F.ext ? triWaveShape(wavePhase*1.6) : Math.sin(wavePhase);
+  const srcNow = Math.sin(srcPhase);
+  const modS = reach.S.ext ? triWaveShape(wavePhase*1.6) : srcNow;
+  const modA = reach.A.ext ? triWaveShape(wavePhase*1.6) : srcNow;
+  const modF = reach.F.ext ? triWaveShape(wavePhase*1.6) : srcNow;
   const sp = clamp(BASE_SHAPE + reach.S.frac*MAXDEPTH_SHAPE*modS, 0, 2);
   const ap = clamp(BASE_ANGLE + reach.A.frac*MAXDEPTH_ANGLE*modA, -0.9, 0.9);
   const fp = clamp(BASE_FOLD + reach.F.frac*MAXDEPTH_FOLD*modF, 0, 1);
@@ -379,7 +431,7 @@ function drawWaves(){
 
   requestAnimationFrame(drawWaves);
 }
-drawWaves();
+requestAnimationFrame(drawWaves);
 
 const finalToggleBtn = document.getElementById('finalToggleBtn');
 const finalWaveSvgWrap = document.getElementById('finalWaveSvgWrap');
