@@ -155,25 +155,9 @@
 
   <header>
     <h1>מעגל ה-Final ב-DPO</h1>
-    <p>ברז ראשי משותף, ברז מקומי לכל חלק, מתח חיצוני, וגל חי — הכל יחד</p>
   </header>
 
   <section class="scene">
-
-    <details class="panel-ref" open>
-      <summary>איפה זה על המודול? <span class="hint">(לחיצה מסתירה / מציגה)</span></summary>
-      <div class="panel-body">
-        <img src="img/dpo_timbre_panel.jpg" alt="פאנל המודול עם מספור הכפתורים מתוך המדריך" loading="lazy">
-        <ul class="legend">
-          <li><span class="num c-blue">1D</span><b>ברז ראשי</b> — אינדקס פס האפנון (Mod Bus Index). קובע כמה מהגל הנכנס זורם לכל שלושת החלקים.</li>
-          <li><span class="num c-amber">2A · 2B · 2C</span><b>ברז מקומי</b> — מחליש לכל חלק בנפרד: עיצוב, הטיה, קיפול.</li>
-          <li><span class="num c-teal">3A · 3B · 3C</span><b>כבל חיצוני</b> — שקע הכניסה של כל חלק. חיבור כבל מנתק אותו מפס האפנון.</li>
-          <li><span class="num c-grey">1A · 1B · 1C</span><b>הכפתור הבסיסי</b> של עיצוב, הטיה וקיפול — נקודת ההתחלה שהאפנון מזיז ממנה (בסימולציה הוא קבוע על אפס).</li>
-          <li><span class="num c-grey">3D</span><b>מקור חיצוני</b> — כבל כאן מחליף את הגל הנכנס של המתנד הראשון בפס האפנון.</li>
-        </ul>
-      </div>
-      <div class="credit">התמונה מתוך מדריך המשתמש של Make Noise</div>
-    </details>
 
     <div class="stage">
       <svg viewBox="0 0 320 150" id="mainSvg">
@@ -541,7 +525,7 @@ finalToggleBtn.addEventListener('click', ()=>{
 (function(){
   const lb = document.getElementById('lightbox');
   const lbImg = document.getElementById('lbImg');
-  document.querySelectorAll('.panel-body img, .jack-thumb, .master-thumb, .src-thumb').forEach(img=>{
+  document.querySelectorAll('.jack-thumb, .master-thumb, .src-thumb').forEach(img=>{
     img.classList.add('zoomable');
     img.title = 'לחיצה להגדלה';
     img.addEventListener('click', e=>{
