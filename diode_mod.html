@@ -62,7 +62,27 @@ button[aria-pressed="true"]{background:var(--ink);color:var(--btn-ink)}
 button:focus-visible,input:focus-visible{outline:3px solid var(--dot);outline-offset:2px}
 
 .scope{margin-top:14px}
-canvas{width:100%;height:200px;display:block}
+canvas{width:100%;height:290px;display:block}
+
+.capctl{margin-top:14px}
+.capctl .vin{font-weight:700}
+.capctl .vin b{display:inline-block;min-width:2.6em;text-align:center;font-size:1.15rem}
+.gauge{margin:1.7rem .4rem .2rem;direction:ltr}
+.track{position:relative;height:16px;border-radius:8px;background:var(--paper);border:1px solid var(--rule);cursor:grab;touch-action:none}
+.track:active{cursor:grabbing}
+.track:focus-visible{outline:3px solid var(--dot);outline-offset:4px}
+.band{position:absolute;top:0;bottom:0;background:var(--grid)}
+.tick{position:absolute;top:-7px;bottom:-7px;width:3px;margin-left:-1.5px;background:var(--ink);border-radius:2px}
+.tick span{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:.8rem;color:var(--muted);direction:rtl}
+.tick.hit{background:var(--dot);box-shadow:0 0 8px var(--dot)}
+.tick.hit span{color:var(--ink);font-weight:700}
+.ptr{position:absolute;top:50%;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;background:var(--lo);border:3px solid var(--panel);box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.gends{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-top:.2rem}
+.zsay{min-height:1.5em;margin-top:.5rem}
+.zsay .st{font-weight:700}
+.capctl .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:.6rem}
+.draghint{font-size:.85rem;color:var(--muted)}
+#meter{cursor:ns-resize;touch-action:none}
 
 </style>
 </head>
@@ -85,7 +105,14 @@ canvas{width:100%;height:200px;display:block}
       <circle cx="157" cy="160" r="5" fill="var(--panel)" stroke="var(--ink)" stroke-width="3"/>
       <path class="w" d="M162 160 H190"/>
       <path class="w" d="M90 160 V203 M72 203 H108 M72 213 H108 M90 213 V262"/>
-      <text class="lbl" x="66" y="212" text-anchor="end">10µF</text>
+      <text class="lbl" x="98" y="240">10µF</text>
+      <g id="meter" aria-hidden="true">
+        <rect x="30" y="176" width="24" height="82" rx="5" fill="var(--panel)" stroke="var(--ink)" stroke-width="2"/>
+        <rect id="mFill" x="32" y="216" width="20" height="40" rx="3" fill="var(--lo)" opacity=".85"/>
+        <line id="mU" x1="24" x2="60" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line id="mL" x1="24" x2="60" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <path d="M58 208 H72" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="2 3"/>
+      </g>
       <text id="lvl" class="ttl" x="190" y="186" text-anchor="middle">+</text>
 
       <!-- diode -->
@@ -140,6 +167,23 @@ canvas{width:100%;height:200px;display:block}
     </div>
   </section>
 
+  <section class="card capctl">
+    <div class="vin">המתח על הקבל של המתנד האיטי: <b id="vNum">0.0</b> וולט</div>
+    <div class="gauge">
+      <div class="track" id="gTrack" tabindex="0" role="slider" aria-label="המתח על הקבל של המתנד האיטי" aria-valuemin="0" aria-valuemax="9" aria-valuenow="0">
+        <div class="band" id="gBand"></div>
+        <div class="tick" id="tL"><span>רף תחתון</span></div><div class="tick" id="tU"><span>רף עליון</span></div>
+        <div class="ptr" id="gPtr"></div>
+      </div>
+      <div class="gends"><span>0</span><span>9</span></div>
+    </div>
+    <div class="zsay" id="zSay"></div>
+    <div class="row">
+      <span class="draghint">גררו את הנקודה, או את המים במד שליד הקבל, כדי למלא ולרוקן את הקבל בעצמכם.</span>
+      <button id="bAuto" aria-pressed="true">הפעלה רציפה</button>
+    </div>
+  </section>
+
   <section class="card scope">
     <canvas id="cv" aria-label="גרף: המתח במתנד האיטי וביציאה"></canvas>
   </section>
@@ -152,7 +196,8 @@ canvas{width:100%;height:200px;display:block}
   const NS = 'http://www.w3.org/2000/svg';
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
-  const st = { rate: 2, pitch: 400, diode: true, phase: 0, high: true, paused: false };
+  const st = { rate: 2, pitch: 400, diode: true, high: true, paused: false, v: 0.38, manual: false };
+  const U = 0.62, L = 0.38, VCC = 9, KA = 2 * Math.log((1 - L) / (1 - U));  // k = KA * rate gives one full cycle per 1/rate seconds
   const rateOf = v => 0.5 * Math.pow(16, v / 100);      // 0.5 .. 8 Hz
   const pitchOf = v => 120 * Math.pow(10, v / 100);     // 120 .. 1200 Hz
 
@@ -168,23 +213,17 @@ canvas{width:100%;height:200px;display:block}
     const t = ac.currentTime + 0.02;
     const tone = ac.createOscillator(); tone.type = 'square'; tone.frequency.value = st.pitch;
     const gate = ac.createGain(); gate.gain.value = 0;
-    const lfo = ac.createOscillator(); lfo.type = 'square'; lfo.frequency.value = st.rate;
-    const lfoScale = ac.createGain(); lfoScale.gain.value = -0.5;    // high -> silent
-    const offset = ac.createConstantSource(); offset.offset.value = st.diode ? 0.5 : 1;
     const master = ac.createGain(); master.gain.value = 0.12;
-    lfo.connect(lfoScale); if (st.diode) lfoScale.connect(gate.gain);
-    offset.connect(gate.gain);
     tone.connect(gate).connect(master).connect(ac.destination);
-    [tone, lfo, offset].forEach(n => n.start(t));
-    nodes = { tone, lfo, lfoScale, offset, gate, master, last: t };
-    st.phase = 0;
+    tone.start(t);
+    nodes = { tone, gate, master, last: t, sounding: null };
   }
   function stopAudio() {
     if (!nodes) return;
     const t = ac.currentTime;
     nodes.master.gain.setTargetAtTime(0, t, 0.01);
     const n = nodes; nodes = null;
-    setTimeout(() => { [n.tone, n.lfo, n.offset].forEach(x => { try { x.stop(); } catch (e) {} }); }, 120);
+    setTimeout(() => { try { n.tone.stop(); } catch (e) {} }, 120);
   }
   function setDiode(on) {
     st.diode = on;
@@ -192,11 +231,6 @@ canvas{width:100%;height:200px;display:block}
     $('bDiode').textContent = on ? 'דיודה מחוברת' : 'דיודה מנותקת';
     ['wireAB', 'diodeBar', 'wireBC'].forEach(id => $(id).classList.toggle('off', !on));
     $('diode').style.stroke = on ? '' : css('--off');
-    if (nodes) {
-      try { nodes.lfoScale.disconnect(); } catch (e) {}
-      if (on) nodes.lfoScale.connect(nodes.gate.gain);
-      nodes.offset.offset.setValueAtTime(on ? 0.5 : 1, ac.currentTime);
-    }
   }
 
   $('bPlay').onclick = () => {
@@ -218,10 +252,39 @@ canvas{width:100%;height:200px;display:block}
   function readSliders() {
     st.rate = rateOf(+$('sRate').value); st.pitch = pitchOf(+$('sPitch').value);
     if (nodes) {
-      nodes.lfo.frequency.setValueAtTime(st.rate, ac.currentTime);
       nodes.tone.frequency.setTargetAtTime(st.pitch, ac.currentTime, 0.01);
     }
   }
+  function setManual(on) {
+    st.manual = on; $('bAuto').setAttribute('aria-pressed', !on);
+    if (on && st.paused) setPaused(false);
+  }
+  function setV(v) {
+    setManual(true); st.v = Math.max(0, Math.min(1, v));
+    if (st.v >= U) st.high = false; else if (st.v <= L) st.high = true;
+  }
+  $('bAuto').onclick = () => setManual(false);
+  function dragOn(el, fn) {
+    el.addEventListener('pointerdown', e => { el.setPointerCapture(e.pointerId); fn(e); e.preventDefault(); });
+    el.addEventListener('pointermove', e => { if (el.hasPointerCapture(e.pointerId)) fn(e); });
+  }
+  const gTrack = $('gTrack');
+  dragOn(gTrack, e => { const r = gTrack.getBoundingClientRect(); setV((e.clientX - r.left) / r.width); });
+  const MY = 178, MH = 78;   // meter inner top and height in svg units
+  dragOn($('meter'), e => {
+    const svg = $('meter').ownerSVGElement, pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    const p = pt.matrixTransform(svg.getScreenCTM().inverse()); setV((MY + MH - p.y) / MH);
+  });
+  gTrack.addEventListener('keydown', e => {
+    const d = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[e.key];
+    if (d) { e.preventDefault(); setV(st.v + d * 0.02); }
+  });
+  $('gBand').style.left = (L * 100) + '%'; $('gBand').style.width = ((U - L) * 100) + '%';
+  $('tL').style.left = (L * 100) + '%'; $('tU').style.left = (U * 100) + '%';
+  const mY = v => MY + MH * (1 - v);
+  ['mU', 'mL'].forEach((id, k) => { const y = mY(k ? L : U); $(id).setAttribute('y1', y); $(id).setAttribute('y2', y); });
+  let lastHigh = st.high, flipAge = 9;
+
   $('sRate').addEventListener('input', readSliders);
   $('sPitch').addEventListener('input', readSliders);
   readSliders();
@@ -240,16 +303,35 @@ canvas{width:100%;height:200px;display:block}
     let dt;
     if (nodes) { const t = ac.currentTime; dt = Math.max(0, t - nodes.last); nodes.last = t; }
     else { dt = Math.min(0.05, (now - lastPerf) / 1000); }
-    if (st.paused) dt = 0;
+    if (st.paused && !st.manual) dt = 0;
     lastPerf = now; wall += dt;
-    st.phase = (st.phase + st.rate * dt) % 1;
-    st.high = st.phase < 0.5;
+    if (!st.manual && dt > 0) {
+      const k = KA * st.rate;
+      if (st.high) { st.v = 1 - (1 - st.v) * Math.exp(-k * dt); if (st.v >= U) st.high = false; }
+      else { st.v = st.v * Math.exp(-k * dt); if (st.v <= L) st.high = true; }
+    }
     const open = st.diode && st.high;
     const sounding = !open;
+    if (nodes && nodes.sounding !== sounding) { nodes.gate.gain.setTargetAtTime(sounding ? 1 : 0, ac.currentTime, 0.003); nodes.sounding = sounding; }
+    if (st.high !== lastHigh) { flipAge = 0; lastHigh = st.high; } else flipAge += Math.max(dt, st.manual ? 1 / 60 : 0);
+
+    // capacitor readouts
+    $('vNum').textContent = (st.v * VCC).toFixed(1);
+    $('gPtr').style.left = (st.v * 100) + '%';
+    gTrack.setAttribute('aria-valuenow', (st.v * VCC).toFixed(1));
+    $('mFill').setAttribute('y', mY(st.v)); $('mFill').setAttribute('height', Math.max(0, MY + MH - mY(st.v)));
+    const flash = flipAge < (st.manual ? 1 : Math.min(0.6, 0.25 / st.rate));
+    $('tU').classList.toggle('hit', flash && !st.high); $('tL').classList.toggle('hit', flash && st.high);
+    const outTxt = st.high ? 'גבוה' : 'נמוך';
+    const res = !st.diode ? 'הדיודה מנותקת, אז מתנד הצליל מנגן כל הזמן.'
+      : st.high ? 'הדיודה פתוחה ומחזיקה את מתנד הצליל, והוא שותק.' : 'הדיודה סגורה, ומתנד הצליל מנגן.';
+    const where = flash ? (st.high ? 'נגע ברף התחתון: השער מתהפך.' : 'נגע ברף העליון: השער מתהפך.')
+      : st.v < L ? 'מתחת לרף התחתון.' : st.v > U ? 'מעל הרף העליון.' : 'בין הרפים: השער לא מתהפך.';
+    $('zSay').innerHTML = where + ' המתנד האיטי ביציאה: <span class="st" style="color:' + (st.high ? css('--hi') : css('--lo')) + '">' + outTxt + '</span>. ' + res;
 
     // history for the scope (sample every frame)
     tonePhase += st.pitch / 40 * dt;   // slowed down so the wave is visible
-    if (dt > 0) hist.push({ t: wall, lfo: st.high ? 1 : 0, out: sounding ? ((tonePhase % 1) < 0.5 ? 1 : 0) : 0, on: sounding });
+    if (dt > 0) hist.push({ t: wall, cap: st.v, lfo: st.high ? 1 : 0, out: sounding ? ((tonePhase % 1) < 0.5 ? 1 : 0) : 0, on: sounding });
     while (hist.length && hist[0].t < wall - WINDOW - 0.5) hist.shift();
 
     // circuit state
@@ -271,21 +353,28 @@ canvas{width:100%;height:200px;display:block}
   function draw() {
     if (!W) return;
     ctx.clearRect(0, 0, W, H);
-    const L = 8, R = 8, pw = W - L - R;
-    const rows = [{ key: 'lfo', label: 'מתנד איטי', color: css('--hi'), top: 26 }, { key: 'out', label: 'יציאה לרמקול', color: css('--tone'), top: 26 + (H - 26) / 2 }];
-    const rh = (H - 26) / 2 - 26;
+    const PL = 8, R = 8, pw = W - PL - R;
+    const band = H / 3, rh = band - 30;
+    const rows = [{ key: 'cap', label: 'המתח על הקבל', color: css('--lo'), top: 24 },
+                  { key: 'lfo', label: 'יציאת המתנד האיטי', color: css('--hi'), top: 24 + band },
+                  { key: 'out', label: 'יציאה לרמקול', color: css('--tone'), top: 24 + 2 * band }];
     ctx.font = '14px Rubik, sans-serif'; ctx.textBaseline = 'bottom'; ctx.textAlign = 'right';
     for (const r of rows) {
       ctx.fillStyle = css('--muted'); ctx.fillText(r.label, W - R, r.top - 4);
       ctx.strokeStyle = css('--rule'); ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(L, r.top + rh); ctx.lineTo(L + pw, r.top + rh); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(PL, r.top + rh); ctx.lineTo(PL + pw, r.top + rh); ctx.stroke();
+      if (r.key === 'cap') {
+        ctx.setLineDash([6, 5]); ctx.strokeStyle = css('--muted');
+        [U, L].forEach(v => { const y = r.top + rh - v * rh; ctx.beginPath(); ctx.moveTo(PL, y); ctx.lineTo(PL + pw, y); ctx.stroke(); });
+        ctx.setLineDash([]);
+      }
       ctx.strokeStyle = r.color; ctx.lineWidth = 2.5; ctx.beginPath();
       let first = true, prevY = null;
       for (const h of hist) {
-        const x = L + pw - (wall - h.t) / WINDOW * pw; if (x < L) continue;
+        const x = PL + pw - (wall - h.t) / WINDOW * pw; if (x < PL) continue;
         const y = r.top + rh - h[r.key] * rh;
         if (first) { ctx.moveTo(x, y); first = false; }
-        else { if (prevY !== y) ctx.lineTo(x, prevY); ctx.lineTo(x, y); }
+        else { if (prevY !== y && r.key !== 'cap') ctx.lineTo(x, prevY); ctx.lineTo(x, y); }
         prevY = y;
       }
       ctx.stroke();
