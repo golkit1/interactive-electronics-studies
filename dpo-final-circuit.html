@@ -74,6 +74,11 @@
   input[type=range].white::-moz-range-track{height:4px;border-radius:999px;background:var(--cream-line);}
   input[type=range].white::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;margin-top:-5.5px;border-radius:50%;background:#fff;border:1.5px solid #6b6359;box-shadow:0 1px 2px rgba(0,0,0,.25);}
   input[type=range].white::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:#fff;border:1.5px solid #6b6359;box-shadow:0 1px 2px rgba(0,0,0,.25);}
+  .src-box{display:flex;gap:10px;align-items:center;flex:0 0 auto;max-width:640px;margin:0 auto;width:100%;}
+  .src-main{flex:1 1 auto;min-width:0;}
+  .src-thumb{width:62px;height:auto;border-radius:6px;border:1px solid var(--line);background:#fff;flex:0 0 auto;}
+  .vco-tag{display:inline-block;direction:ltr;font-size:13px;color:var(--amber);border:1.5px solid var(--amber);background:var(--amber-soft);border-radius:5px;padding:0 6px;margin-left:4px;}
+  .chain-arrow{text-align:center;color:var(--ink-soft);font-size:14px;line-height:1;margin:-2px 0;flex:0 0 auto;}
   .src-note{font-size:9px;color:var(--ink-soft);margin-top:1px;}
 
   .panel-ref{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:5px 8px;flex:0 0 auto;}
@@ -185,6 +190,20 @@
       <div id="srctip">&nbsp;</div>
     </div>
 
+    <div class="wave-box src-box">
+      <img class="src-thumb" src="img/dpo_vcoa.png" alt="המתנד הראשון על הפאנל">
+      <div class="src-main">
+        <div class="wave-head"><b><span class="vco-tag">VCO A</span> הגל הנכנס · סינוס</b><span>±5V · <b id="srcFreqLabel">1.0 Hz</b></span></div>
+        <svg viewBox="0 0 300 50">
+          <line x1="0" y1="25" x2="300" y2="25" stroke="var(--line)" stroke-width="1"/>
+          <path id="srcWavePath" fill="none" stroke="var(--amber)" stroke-width="2.5"/>
+        </svg>
+        <div class="ctrl-row src-freq-row"><span class="clab">תדר</span><input type="range" class="local" id="srcFreq" min="0" max="100" value="53"></div>
+        <div class="src-note">החלון מציג 2 שניות. בפועל המתנד יכול לנוע עד תדרי שמע — כאן הוא מואט כדי שאפשר יהיה לראות.</div>
+      </div>
+    </div>
+    <div class="chain-arrow">↓</div>
+
     <div class="master-row">
       <img class="master-thumb" src="img/dpo_modbus.png" alt="פקדי פס האפנון על הפאנל">
       <div class="master-main">
@@ -195,15 +214,6 @@
 
     <div class="grid-wrap">
 
-      <div class="wave-box">
-        <div class="wave-head"><b>הגל הנכנס · VCO A Sine</b><span>±5V · <b id="srcFreqLabel">1.0 Hz</b></span></div>
-        <svg viewBox="0 0 300 50">
-          <line x1="0" y1="25" x2="300" y2="25" stroke="var(--line)" stroke-width="1"/>
-          <path id="srcWavePath" fill="none" stroke="var(--amber)" stroke-width="2.5"/>
-        </svg>
-        <div class="ctrl-row src-freq-row"><span class="clab">תדר</span><input type="range" class="local" id="srcFreq" min="0" max="100" value="53"></div>
-        <div class="src-note">החלון מציג 2 שניות. בפועל המתנד יכול לנוע עד תדרי שמע — כאן הוא מואט כדי שאפשר יהיה לראות.</div>
-      </div>
 
       <div class="jack-row">
         <img class="jack-thumb" src="img/dpo_shape.png" alt="הפקדים של עיצוב על הפאנל">
