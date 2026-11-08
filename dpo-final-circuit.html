@@ -87,6 +87,20 @@
   .lightbox img{max-width:min(92vw,900px);max-height:84vh;min-width:min(60vw,320px);width:auto;height:auto;object-fit:contain;border-radius:10px;background:#fff;box-shadow:0 8px 30px rgba(0,0,0,.5);image-rendering:auto;}
   .lightbox .lb-cap{color:#F3EEE6;font-size:12px;}
   .lightbox .lb-close{position:absolute;top:12px;left:12px;background:#fff;color:#241F1A;border:none;border-radius:999px;width:32px;height:32px;font-size:18px;cursor:pointer;}
+  /* module-like layout: Shape / Angle on top, Mod Bus (left) + Fold (right) below, as on the panel */
+  .grid-wrap{display:flex !important;flex-direction:column;gap:6px;}
+  .module-face{direction:ltr;display:grid;grid-template-columns:1fr 1fr;grid-template-areas:"shape shape" "angle angle" "mod fold";gap:6px;padding:6px;border-radius:12px;background:linear-gradient(160deg,#e9e9e7,#cfcfcc);border:1px solid #b9b9b5;max-width:720px;width:100%;margin:0 auto;}
+  .module-face > *{direction:rtl;}
+  .area-shape{grid-area:shape;} .area-angle{grid-area:angle;} .area-mod{grid-area:mod;background:#1f1d1b !important;border-color:#000 !important;color:#F3EEE6;} .area-fold{grid-area:fold;}
+  .area-mod .readout{color:#B4A99B;}
+  .master-lab{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;}
+  .master-lab b{font-family:'Rubik',sans-serif;color:#7FA0DE;}
+  .master-lab span{direction:ltr;color:#B4A99B;}
+  .area-mod input[type=range]{accent-color:#4A74C9;}
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .module-face{background:linear-gradient(160deg,#3a3835,#2a2826);border-color:#4a4743;} }
+  :root[data-theme="dark"] .module-face{background:linear-gradient(160deg,#3a3835,#2a2826);border-color:#4a4743;}
+  @media (max-width: 560px){ .module-face{grid-template-columns:1fr;grid-template-areas:"shape" "angle" "mod" "fold";} }
+  .flat-wave{height:40px;}
   .src-note{font-size:9px;color:var(--ink-soft);margin-top:1px;}
 
   .panel-ref{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:5px 8px;flex:0 0 auto;}
@@ -212,18 +226,9 @@
     </div>
     <div class="chain-arrow">↓</div>
 
-    <div class="master-row">
-      <img class="master-thumb" src="img/dpo_modbus.png" alt="פקדי פס האפנון על הפאנל">
-      <div class="master-main">
-      <div class="lab"><b>ברז ראשי (משותף)</b><span>Mod Bus Index · <b id="masterPct">70%</b></span></div>
-      <input type="range" id="masterKnob" min="0" max="100" value="70">
-      </div>
-    </div>
-
     <div class="grid-wrap">
-
-
-      <div class="jack-row">
+    <div class="module-face">
+      <div class="jack-row area-shape">
         <img class="jack-thumb" src="img/dpo_shape.png" alt="הפקדים של עיצוב על הפאנל">
         <div class="jack-main">
         <div class="jack-row-head">
@@ -236,11 +241,11 @@
         <div class="ctrl-row"><span class="clab">ברז מקומי</span><input type="range" class="local white" id="localS" min="0" max="100" value="60"></div>
         <div class="bar-track"><div class="bar-fill" id="barS"></div></div>
         <div class="readout" id="readS"></div>
-        <div class="out-wave-wrap"><div class="wave-cap"><span>מגיע בפועל</span><b id="peakS">±0.0V</b></div><svg viewBox="0 0 300 50"><path id="waveS" fill="none" stroke="var(--amber)" stroke-width="2.5"/></svg></div>
+        <div class="out-wave-wrap"><div class="wave-cap"><span>מגיע בפועל</span><b id="peakS">±0.0V</b></div><svg viewBox="0 0 300 50" preserveAspectRatio="none" class="flat-wave"><path id="waveS" fill="none" stroke="var(--amber)" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg></div>
         </div>
       </div>
 
-      <div class="jack-row">
+      <div class="jack-row area-angle">
         <img class="jack-thumb" src="img/dpo_angle.png" alt="הפקדים של הטיה על הפאנל">
         <div class="jack-main">
         <div class="jack-row-head">
@@ -253,11 +258,21 @@
         <div class="ctrl-row"><span class="clab">ברז מקומי</span><input type="range" class="local white" id="localA" min="0" max="100" value="45"></div>
         <div class="bar-track"><div class="bar-fill" id="barA"></div></div>
         <div class="readout" id="readA"></div>
-        <div class="out-wave-wrap"><div class="wave-cap"><span>מגיע בפועל</span><b id="peakA">±0.0V</b></div><svg viewBox="0 0 300 50"><path id="waveA" fill="none" stroke="var(--amber)" stroke-width="2.5"/></svg></div>
+        <div class="out-wave-wrap"><div class="wave-cap"><span>מגיע בפועל</span><b id="peakA">±0.0V</b></div><svg viewBox="0 0 300 50" preserveAspectRatio="none" class="flat-wave"><path id="waveA" fill="none" stroke="var(--amber)" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg></div>
         </div>
       </div>
 
-      <div class="jack-row">
+      <div class="jack-row area-mod">
+        <img class="jack-thumb" src="img/dpo_modbus.png" alt="פקדי פס האפנון על הפאנל">
+        <div class="jack-main">
+          <div class="jack-row-head"><span class="jack-name">פס האפנון · Mod Bus</span></div>
+          <div class="master-lab"><b>ברז ראשי (משותף)</b><span>Index · <b id="masterPct">70%</b></span></div>
+          <input type="range" id="masterKnob" min="0" max="100" value="70">
+          <div class="readout">קובע כמה מהגל הנכנס זורם לכל שלושת החלקים</div>
+        </div>
+      </div>
+
+      <div class="jack-row area-fold">
         <img class="jack-thumb" src="img/dpo_fold.png" alt="הפקדים של קיפול על הפאנל">
         <div class="jack-main">
         <div class="jack-row-head">
@@ -274,6 +289,9 @@
         </div>
       </div>
 
+    </div>
+
+      <div class="chain-arrow">↓</div>
       <div class="wave-box">
         <div class="wave-head"><b>הפלט הסופי · VCO B Final</b><span>Shape → Angle → Fold</span><button class="wave-toggle-btn" id="finalToggleBtn" type="button">הסתר</button></div>
         <div class="final-wave-svg" id="finalWaveSvgWrap"><svg viewBox="0 0 300 50"><path id="finalWavePath" fill="none" stroke="var(--teal)" stroke-width="3"/></svg></div>
