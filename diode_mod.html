@@ -27,19 +27,23 @@
 }
 *,*::before,*::after{box-sizing:border-box}
 body{
-  margin:0; color:var(--ink); font-family:"Rubik",system-ui,Arial,sans-serif; font-size:18px; line-height:1.5;
+  margin:0; color:var(--ink); font-family:"Rubik",system-ui,Arial,sans-serif; font-size:16px; line-height:1.45;
   background-color:var(--paper);
   background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
   background-size:28px 28px;
 }
-.wrap{max-width:980px;margin:0 auto;padding:28px 16px 56px}
-h1{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:900;font-size:clamp(2rem,6vw,3rem);line-height:1.05;margin:0 0 6px}
-.lead{margin:0 0 18px;color:var(--muted)}
-.card{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px}
+.wrap{max-width:1240px;margin:0 auto;padding:14px 16px 24px}
+h1{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:900;font-size:clamp(1.5rem,3.4vw,2.1rem);line-height:1.05;margin:0 0 2px}
+.lead{margin:0 0 10px;color:var(--muted)}
+.top{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:10px;align-items:start}
+.side{display:grid;gap:10px}
+.side .card{margin-top:0}
+@media (max-width:900px){.top{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:10px 12px}
 
 svg{width:100%;height:auto;display:block;direction:ltr}
 .schem{overflow-x:auto}
-@media (max-width:600px){.schem svg{min-width:560px}}
+@media (max-width:600px){.schem svg{min-width:520px}}
 .w{fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 .w.off{stroke:var(--off)}
 .lbl{fill:var(--muted);font:500 15px "Rubik",sans-serif}
@@ -51,23 +55,24 @@ svg{width:100%;height:auto;display:block;direction:ltr}
 .waves path{fill:none;stroke:var(--tone);stroke-width:3;stroke-linecap:round}
 
 
-.controls{margin-top:14px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px;align-items:end}
-@media (max-width:700px){.controls{grid-template-columns:1fr}}
+.controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 18px;align-items:end}
+.controls .buttons{grid-column:1/-1}
+@media (max-width:420px){.controls{grid-template-columns:1fr}}
 .slider b{font-weight:500;display:block}
 .slider input{width:100%;accent-color:var(--ink);margin:4px 0 0}
 .ends{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted)}
 .buttons{display:flex;gap:10px;flex-wrap:wrap}
-button{font:inherit;font-weight:500;border:2px solid var(--ink);background:transparent;color:var(--ink);border-radius:8px;padding:10px 16px;cursor:pointer}
+button{font:inherit;font-weight:500;border:2px solid var(--ink);background:transparent;color:var(--ink);border-radius:8px;padding:5px 12px;cursor:pointer}
 button[aria-pressed="true"]{background:var(--ink);color:var(--btn-ink)}
 button:focus-visible,input:focus-visible{outline:3px solid var(--dot);outline-offset:2px}
 
-.scope{margin-top:14px}
-canvas{width:100%;height:380px;display:block}
+.scope{margin-top:10px}
+canvas{width:100%;height:225px;display:block}
 
-.capctl{margin-top:14px}
+.capctl{}
 .capctl .vin{font-weight:700}
 .capctl .vin b{display:inline-block;min-width:2.6em;text-align:center;font-size:1.15rem}
-.gauge{margin:1.7rem .4rem .2rem;direction:ltr}
+.gauge{margin:1.5rem .4rem .1rem;direction:ltr}
 .track{position:relative;height:16px;border-radius:8px;background:var(--paper);border:1px solid var(--rule);cursor:grab;touch-action:none}
 .track:active{cursor:grabbing}
 .track:focus-visible{outline:3px solid var(--dot);outline-offset:4px}
@@ -78,9 +83,9 @@ canvas{width:100%;height:380px;display:block}
 .tick.hit span{color:var(--ink);font-weight:700}
 .ptr{position:absolute;top:50%;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;background:var(--lo);border:3px solid var(--panel);box-shadow:0 1px 4px rgba(0,0,0,.35)}
 .gends{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-top:.2rem}
-.zsay{min-height:1.5em;margin-top:.5rem}
+.zsay{min-height:2.9em;margin-top:.3rem;font-size:.95rem}
 .zsay .st{font-weight:700}
-.capctl .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:.6rem}
+.capctl .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:.3rem}
 .draghint{font-size:.85rem;color:var(--muted)}
 #meter{cursor:ns-resize;touch-action:none}
 
@@ -91,8 +96,9 @@ canvas{width:100%;height:380px;display:block}
   <h1>אפנון בדיודה (Diode Modulation)</h1>
   <p class="lead">מתנד איטי מדליק ומכבה מתנד של צליל. התוצאה: ביפ־ביפ קצבי.</p>
 
+  <div class="top">
   <section class="card">
-    <div class="schem"><svg viewBox="0 0 660 300" role="img" aria-label="מעגל: מתנד איטי, דיודה, מתנד צליל ורמקול">
+    <div class="schem"><svg viewBox="16 14 630 280" role="img" aria-label="מעגל: מתנד איטי, דיודה, מתנד צליל ורמקול">
       <!-- slow oscillator -->
       <text class="ttl" x="140" y="34" text-anchor="middle" direction="rtl" style="unicode-bidi:embed">מתנד איטי</text>
       <path class="w" d="M90 160 V90 H115"/>
@@ -161,11 +167,12 @@ canvas{width:100%;height:380px;display:block}
     </svg></div>
   </section>
 
+  <div class="side">
   <section class="card controls">
-    <label class="slider"><b>קצב (פוטנציומטר של המתנד האיטי)</b>
+    <label class="slider"><b>קצב המתנד האיטי</b>
       <input id="sRate" type="range" min="0" max="100" value="35">
       <span class="ends"><span>איטי</span><span>מהיר</span></span></label>
-    <label class="slider"><b>גובה הצליל (פוטנציומטר של מתנד הצליל)</b>
+    <label class="slider"><b>גובה הצליל</b>
       <input id="sPitch" type="range" min="0" max="100" value="45">
       <span class="ends"><span>נמוך</span><span>גבוה</span></span></label>
     <div class="buttons">
@@ -187,10 +194,12 @@ canvas{width:100%;height:380px;display:block}
     </div>
     <div class="zsay" id="zSay"></div>
     <div class="row">
-      <span class="draghint">גררו את הנקודה, או את המים במד שליד הקבל, כדי למלא ולרוקן את הקבל בעצמכם.</span>
+      <span class="draghint">גררו את הנקודה, או את המים במד הכחול.</span>
       <button id="bAuto" aria-pressed="true">הפעלה רציפה</button>
     </div>
   </section>
+  </div>
+  </div>
 
   <section class="card scope">
     <canvas id="cv" aria-label="גרף: המתח במתנד האיטי וביציאה"></canvas>
@@ -374,12 +383,12 @@ canvas{width:100%;height:380px;display:block}
     if (!W) return;
     ctx.clearRect(0, 0, W, H);
     const PL = 8, R = 8, pw = W - PL - R;
-    const band = H / 4, rh = band - 30;
-    const rows = [{ key: 'cap', label: 'המתח על הקבל של המתנד האיטי', color: css('--lo'), top: 24 },
-                  { key: 'lfo', label: 'יציאת המתנד האיטי', color: css('--hi'), top: 24 + band },
-                  { key: 'cap2', label: 'המתח על הקבל של מתנד הצליל (בהילוך איטי)', color: css('--tone'), top: 24 + 2 * band },
-                  { key: 'out', label: 'יציאת מתנד הצליל לרמקול (בהילוך איטי)', color: css('--tone'), top: 24 + 3 * band }];
-    ctx.font = '14px Rubik, sans-serif'; ctx.textBaseline = 'bottom'; ctx.textAlign = 'right';
+    const band = H / 4, rh = band - 22;
+    const rows = [{ key: 'cap', label: 'המתח על הקבל של המתנד האיטי', color: css('--lo'), top: 18 },
+                  { key: 'lfo', label: 'יציאת המתנד האיטי', color: css('--hi'), top: 18 + band },
+                  { key: 'cap2', label: 'המתח על הקבל של מתנד הצליל (בהילוך איטי)', color: css('--tone'), top: 18 + 2 * band },
+                  { key: 'out', label: 'יציאת מתנד הצליל לרמקול (בהילוך איטי)', color: css('--tone'), top: 18 + 3 * band }];
+    ctx.font = '12px Rubik, sans-serif'; ctx.textBaseline = 'bottom'; ctx.textAlign = 'right';
     for (const r of rows) {
       ctx.fillStyle = css('--muted'); ctx.fillText(r.label, W - R, r.top - 4);
       ctx.strokeStyle = css('--rule'); ctx.lineWidth = 1;
