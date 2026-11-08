@@ -128,6 +128,7 @@ canvas{width:100%;height:225px;display:block}
       <path id="wireBC" class="w" d="M262 160 H330"/>
       <text class="ttl" x="249" y="132" text-anchor="middle" direction="rtl" style="unicode-bidi:embed">דיודה</text>
       <g id="dots"></g>
+      <g id="flow2"></g>
 
       <!-- tone oscillator -->
       <text class="ttl" x="380" y="34" text-anchor="middle" direction="rtl" style="unicode-bidi:embed">מתנד צליל</text>
@@ -222,6 +223,31 @@ canvas{width:100%;height:225px;display:block}
   const N = 6, dots = [];
   for (let k = 0; k < N; k++) { const c = document.createElementNS(NS, 'circle'); c.setAttribute('r', 4); c.setAttribute('class', 'dot'); c.setAttribute('cy', 160); $('dots').appendChild(c); dots.push(c); }
   let dotOff = 0;
+
+  // current arrows in the tone oscillator: output -> potentiometer -> capacitor, and back
+  const flow2 = (() => {
+    const g = $('flow2'), pth = document.createElementNS(NS, 'path');
+    pth.setAttribute('d', 'M404 160 H430 V90 H330 V196'); pth.setAttribute('fill', 'none'); pth.setAttribute('stroke', 'none');
+    g.appendChild(pth);
+    const len = pth.getTotalLength(), n = Math.floor(len / 34), arr = [];
+    for (let i = 0; i < n; i++) {
+      const a = document.createElementNS(NS, 'polygon');
+      a.setAttribute('points', '-7,-6 7,0 -7,6'); a.setAttribute('fill', 'var(--tone)');
+      g.appendChild(a); arr.push(a);
+    }
+    return { pth, len, sp: len / n, arr, off: 0 };
+  })();
+  function drawFlow2(dir, show) {
+    const f = flow2;
+    f.arr.forEach((a, i) => {
+      if (!show) { a.style.display = 'none'; return; }
+      a.style.display = '';
+      const d = ((i * f.sp + f.off) % f.len + f.len) % f.len;
+      const p1 = f.pth.getPointAtLength(d), p2 = f.pth.getPointAtLength(Math.min(f.len, d + 1)), p0 = f.pth.getPointAtLength(Math.max(0, d - 1));
+      let ang = Math.atan2(p2.y - p0.y, p2.x - p0.x) * 180 / Math.PI; if (dir < 0) ang += 180;
+      a.setAttribute('transform', 'translate(' + p1.x + ' ' + p1.y + ') rotate(' + ang + ')');
+    });
+  }
 
   // audio
   let ac = null, nodes = null;
@@ -338,6 +364,11 @@ canvas{width:100%;height:225px;display:block}
       if (st.v2 >= U) st.o2 = false; else if (st.v2 <= L) st.o2 = true;
     }
     $('m2Fill').setAttribute('y', mY(st.v2)); $('m2Fill').setAttribute('height', Math.max(0, MY + MH - mY(st.v2)));
+    {
+      const dir = st.o2 ? 1 : -1, cur = st.o2 ? (1 - st.v2) : st.v2;
+      flow2.off += dt * 110 * cur * dir;
+      drawFlow2(dir, !open);
+    }
     $('lvl2').textContent = st.o2 ? 'גבוה' : 'נמוך';
     $('lvl2').style.fill = st.o2 ? css('--hi') : css('--lo');
     if (nodes && nodes.sounding !== sounding) { nodes.gate.gain.setTargetAtTime(sounding ? 1 : 0, ac.currentTime, 0.003); nodes.sounding = sounding; }
