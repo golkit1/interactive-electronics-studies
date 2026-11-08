@@ -62,6 +62,18 @@
   .final-wave-svg{overflow:hidden;}
   .wave-head span b{direction:ltr;display:inline-block;}
   .src-freq-row{margin-top:2px;}
+
+  .jack-row{flex-direction:row !important;align-items:flex-start;gap:8px !important;}
+  .jack-main{display:flex;flex-direction:column;gap:3px;flex:1 1 auto;min-width:0;}
+  .jack-thumb{width:68px;max-height:118px;object-fit:contain;border-radius:6px;border:1px solid var(--line);background:#fff;flex:0 0 auto;}
+  .master-row{display:flex;align-items:center;gap:10px;}
+  .master-main{flex:1 1 auto;min-width:0;}
+  .master-thumb{width:52px;height:auto;border-radius:6px;border:1px solid var(--line);background:#fff;flex:0 0 auto;}
+  input[type=range].white{-webkit-appearance:none;appearance:none;background:transparent;}
+  input[type=range].white::-webkit-slider-runnable-track{height:4px;border-radius:999px;background:var(--cream-line);}
+  input[type=range].white::-moz-range-track{height:4px;border-radius:999px;background:var(--cream-line);}
+  input[type=range].white::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;margin-top:-5.5px;border-radius:50%;background:#fff;border:1.5px solid #6b6359;box-shadow:0 1px 2px rgba(0,0,0,.25);}
+  input[type=range].white::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:#fff;border:1.5px solid #6b6359;box-shadow:0 1px 2px rgba(0,0,0,.25);}
   .src-note{font-size:9px;color:var(--ink-soft);margin-top:1px;}
 
   .panel-ref{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:5px 8px;flex:0 0 auto;}
@@ -174,8 +186,11 @@
     </div>
 
     <div class="master-row">
+      <img class="master-thumb" src="img/dpo_modbus.png" alt="פקדי פס האפנון על הפאנל">
+      <div class="master-main">
       <div class="lab"><b>ברז ראשי (משותף)</b><span>Mod Bus Index · <b id="masterPct">70%</b></span></div>
       <input type="range" id="masterKnob" min="0" max="100" value="70">
+      </div>
     </div>
 
     <div class="grid-wrap">
@@ -191,6 +206,8 @@
       </div>
 
       <div class="jack-row">
+        <img class="jack-thumb" src="img/dpo_shape.png" alt="הפקדים של עיצוב על הפאנל">
+        <div class="jack-main">
         <div class="jack-row-head">
           <span class="jack-name">עיצוב · Shape</span>
           <div class="toggle-row"><span class="toggle-label">כבל חיצוני</span>
@@ -198,13 +215,16 @@
           </div>
         </div>
         <div class="ctrl-row" id="voltRowS"><span class="clab">מתח (0–5V)</span><input type="range" class="ext" id="voltS" min="0" max="5" step="0.1" value="2.5" disabled></div>
-        <div class="ctrl-row"><span class="clab">ברז מקומי</span><input type="range" class="local" id="localS" min="0" max="100" value="60"></div>
+        <div class="ctrl-row"><span class="clab">ברז מקומי</span><input type="range" class="local white" id="localS" min="0" max="100" value="60"></div>
         <div class="bar-track"><div class="bar-fill" id="barS"></div></div>
         <div class="readout" id="readS"></div>
         <div class="out-wave-wrap"><div class="wave-cap"><span>מגיע בפועל</span><b id="peakS">±0.0V</b></div><svg viewBox="0 0 300 50"><path id="waveS" fill="none" stroke="var(--amber)" stroke-width="2.5"/></svg></div>
+        </div>
       </div>
 
       <div class="jack-row">
+        <img class="jack-thumb" src="img/dpo_angle.png" alt="הפקדים של הטיה על הפאנל">
+        <div class="jack-main">
         <div class="jack-row-head">
           <span class="jack-name">הטיה · Angle</span>
           <div class="toggle-row"><span class="toggle-label">כבל חיצוני</span>
@@ -212,13 +232,16 @@
           </div>
         </div>
         <div class="ctrl-row" id="voltRowA"><span class="clab">מתח (-4–4V)</span><input type="range" class="ext" id="voltA" min="-4" max="4" step="0.1" value="0" disabled></div>
-        <div class="ctrl-row"><span class="clab">ברז מקומי</span><input type="range" class="local" id="localA" min="0" max="100" value="45"></div>
+        <div class="ctrl-row"><span class="clab">ברז מקומי</span><input type="range" class="local white" id="localA" min="0" max="100" value="45"></div>
         <div class="bar-track"><div class="bar-fill" id="barA"></div></div>
         <div class="readout" id="readA"></div>
         <div class="out-wave-wrap"><div class="wave-cap"><span>מגיע בפועל</span><b id="peakA">±0.0V</b></div><svg viewBox="0 0 300 50"><path id="waveA" fill="none" stroke="var(--amber)" stroke-width="2.5"/></svg></div>
+        </div>
       </div>
 
       <div class="jack-row">
+        <img class="jack-thumb" src="img/dpo_fold.png" alt="הפקדים של קיפול על הפאנל">
+        <div class="jack-main">
         <div class="jack-row-head">
           <span class="jack-name">קיפול · Fold</span>
           <div class="toggle-row"><span class="toggle-label">כבל חיצוני</span>
@@ -226,10 +249,11 @@
           </div>
         </div>
         <div class="ctrl-row" id="voltRowF"><span class="clab">מתח (0–8V)</span><input type="range" class="ext" id="voltF" min="0" max="8" step="0.1" value="4" disabled></div>
-        <div class="ctrl-row"><span class="clab">ברז מקומי</span><input type="range" class="local" id="localF" min="0" max="100" value="55"></div>
+        <div class="ctrl-row"><span class="clab">ברז מקומי</span><input type="range" class="local white" id="localF" min="0" max="100" value="55"></div>
         <div class="bar-track"><div class="bar-fill" id="barF"></div></div>
         <div class="readout" id="readF"></div>
         <div class="out-wave-wrap"><div class="wave-cap"><span>מגיע בפועל</span><b id="peakF">±0.0V</b></div><svg viewBox="0 0 300 50"><path id="waveF" fill="none" stroke="var(--amber)" stroke-width="2.5"/></svg></div>
+        </div>
       </div>
 
       <div class="wave-box">
