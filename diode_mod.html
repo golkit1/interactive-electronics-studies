@@ -150,7 +150,6 @@ canvas{width:100%;height:225px;display:block}
         <line id="m2L" x1="264" x2="300" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="4 3"/>
         <path d="M298 208 H312" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="2 3"/>
       </g>
-      <text id="lvl2" class="ttl" x="430" y="186" text-anchor="middle">+</text>
 
       <!-- output -->
       <path class="w" d="M430 160 H462"/>
@@ -369,8 +368,6 @@ canvas{width:100%;height:225px;display:block}
       flow2.off += dt * 110 * cur * dir;
       drawFlow2(dir, !open);
     }
-    $('lvl2').textContent = st.o2 ? 'גבוה' : 'נמוך';
-    $('lvl2').style.fill = st.o2 ? css('--hi') : css('--lo');
     if (nodes && nodes.sounding !== sounding) { nodes.gate.gain.setTargetAtTime(sounding ? 1 : 0, ac.currentTime, 0.003); nodes.sounding = sounding; }
     if (st.high !== lastHigh) { flipAge = 0; lastHigh = st.high; } else flipAge += Math.max(dt, st.manual ? 1 / 60 : 0);
 
