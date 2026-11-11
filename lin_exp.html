@@ -167,6 +167,13 @@
   .explain .quote{font-size:12px;color:var(--ink-soft, #7A7066);border-left:3px solid currentColor;padding:2px 10px;margin-top:6px;text-align:left;}
   .sens-hint{font-size:12px;margin-top:4px;color:var(--ink-soft, #7A7066);}
   .sens-hint b{color:inherit;font-weight:700;}
+  .iv-table-wrap{overflow-x:auto;margin-top:14px;}
+  .iv-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .iv-table th,.iv-table td{padding:5px 8px;border-bottom:1px solid var(--line, #E6DECF);text-align:right;white-space:nowrap;}
+  .iv-table th{font-weight:700;font-size:12px;color:var(--ink-soft, #7A7066);}
+  .iv-table td.ltr{direction:ltr;text-align:right;font-variant-numeric:tabular-nums;}
+  .iv-table tr.oct td{font-weight:700;}
+  .iv-table tr.hl td{background:rgba(217,138,61,.12);}
 </style>
 </head>
 <body>
@@ -182,7 +189,7 @@
 
   <section class="explain">
     <p><strong style="color:var(--linear)">ליניארי</strong> — כל שינוי קבוע במתח (נגיד, כל 1V) מוסיף או מחסיר אותה כמות הרץ. לדוגמה, אם 1V = 100Hz: מ-400Hz, שינוי של ‎+1V לוקח ל-500Hz, ושינוי של ‎-1V לוקח ל-300Hz — תמיד בדיוק 100Hz, לא משנה תדר הבסיס. לכן <b>המרווח המוזיקלי משתנה</b>: מ-100Hz ל-200Hz זו אוקטבה שלמה, ומ-1000Hz ל-1100Hz זה פחות מטון שלם.</p>
-    <p><strong style="color:var(--expo)">אקספוננציאלי (1V/oct)</strong> — כל שינוי קבוע במתח (‎1V) מכפיל או מחלק את התדר באותו יחס — תמיד פי 2 לכל 1V. מ-400Hz: ‎+1V לוקח ל-800Hz (הכפלה), ‎-1V לוקח ל-200Hz (חלוקה). כלומר, כל שינוי קבוע במתח מזיז את הצליל ב<b>אותו מרווח מוזיקלי</b>, מכל נקודת התחלה: ‎1V הוא תמיד אוקטבה, ו-1/12V הוא תמיד חצי טון.</p>
+    <p><strong style="color:var(--expo)">אקספוננציאלי (1V/oct)</strong> — כל שינוי קבוע במתח (‎1V) מכפיל או מחלק את התדר באותו יחס — תמיד פי 2 לכל 1V. מ-400Hz: ‎+1V לוקח ל-800Hz (הכפלה), ‎-1V לוקח ל-200Hz (חלוקה). כלומר, כל שינוי קבוע במתח מזיז את הצליל ב<b>אותו מרווח מוזיקלי</b>, מכל נקודת התחלה: בכניסת ‎1V/oct, ‎1V הוא תמיד אוקטבה, ו-1/12V הוא תמיד חצי טון (טבלה מלאה בלשונית "מרווחים ב-1V/oct").</p>
     <p class="quote" dir="ltr">“Exponential response means equal musical interval changes per applied control value, and linear response means equal Hertz change per applied control value.” — Allen Strange, <i>Electronic Music: Systems, Techniques, and Controls</i>, p. 35</p>
   </section>
 
@@ -271,6 +278,13 @@
         <div class="readouts">
           <div class="item"><b id="ivVolt">7/12 V ≈ 0.583 V</b><span>מתח נדרש</span></div>
           <div class="item expo"><b id="ivExp">599 Hz</b><span id="ivExpSub">Exponential — מרווח: קווינטה (7 חצאי טון)</span></div>
+        </div>
+
+        <div class="iv-table-wrap">
+          <table class="iv-table">
+            <thead><tr><th>מרווח</th><th>חצאי טון</th><th>מתח</th><th>יחס תדרים</th><th>מ-<span id="ivTblBase">400</span>Hz</th></tr></thead>
+            <tbody id="ivTbl"></tbody>
+          </table>
         </div>
 
       </div>
@@ -643,6 +657,23 @@
   }
   [lin, exp, linN, expN].forEach(el => el && ['input','change'].forEach(ev => el.addEventListener(ev, () => setTimeout(upd))));
   upd();
+})();
+</script>
+<script>
+/* interval table for 1V/oct */
+(function(){
+  const names = ['אוניסון','חצי-טון','טון שלם','טרצה קטנה','טרצה גדולה','קווארטה','טריטון','קווינטה','סקסטה קטנה','סקסטה גדולה','ספטימה קטנה','ספטימה גדולה','אוקטבה'];
+  const tb = document.getElementById('ivTbl'), base = document.getElementById('ivFc'), baseN = document.getElementById('ivFcNum');
+  function frac(n){ if(n===0) return '0 V'; if(n===12) return '1 V'; const g=(a,b)=>b?g(b,a%b):a, d=g(n,12); return (n/d)+'/'+(12/d)+' V'; }
+  function build(){
+    const f = parseFloat(base.value) || 400;
+    document.getElementById('ivTblBase').textContent = Math.round(f);
+    const chosen = (document.getElementById('ivExpSub').textContent.match(/\((\d+)/)||[])[1];
+    tb.innerHTML = names.map((nm,n)=>'<tr class="'+(n===12?'oct ':'')+(String(n)===chosen?'hl':'')+'"><td>'+nm+'</td><td class="ltr">'+n+'</td><td class="ltr">'+frac(n)+' ≈ '+(n/12).toFixed(3)+'</td><td class="ltr">×'+Math.pow(2,n/12).toFixed(3)+'</td><td class="ltr">'+(f*Math.pow(2,n/12)).toFixed(0)+' Hz</td></tr>').join('');
+  }
+  [base, baseN].forEach(el => el && ['input','change'].forEach(ev => el.addEventListener(ev, () => setTimeout(build))));
+  document.getElementById('ivChips').addEventListener('click', () => setTimeout(build));
+  build();
 })();
 </script>
 </body>
