@@ -129,6 +129,24 @@
     .bus{flex-direction:row;flex-wrap:wrap;justify-content:center;text-align:right;}
     .bus .bus-main{flex:1 1 180px;}
   }
+
+  /* readability pass: larger, darker secondary text */
+  body{font-size:15px;}
+  :root{--ink-soft:#655C52;}
+  .readout{font-size:12.5px;line-height:1.45;}
+  .ctrl-row .clab{width:84px;font-size:12px;}
+  .ctrl-row .clab .heb{font-size:11px;}
+  .ctrl-row .val{width:52px;font-size:12px;}
+  .toggle-label{font-size:12px;}
+  .dest-name{font-size:14px;}
+  .head-line .sub{font-size:12px;}
+  .out-cap{font-size:12px;}
+  .mod-key{font-size:11px;}
+  .bus-title{font-size:14px;}
+  .vco-tag{font-size:14px;}
+
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){--ink-soft:#C2B8AA;} }
+  :root[data-theme="dark"]{--ink-soft:#C2B8AA;}
 </style>
 </head>
 <body>
