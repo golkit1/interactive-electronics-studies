@@ -165,6 +165,8 @@
   footer{ padding:26px 0 10px; border-top:1px solid var(--line); margin-top:26px; }
   footer p{ font-size:13px; color:var(--ink-soft); margin:0; }
   .explain .quote{font-size:12px;color:var(--ink-soft, #7A7066);border-left:3px solid currentColor;padding:2px 10px;margin-top:6px;text-align:left;}
+  .sens-hint{font-size:12px;margin-top:4px;color:var(--ink-soft, #7A7066);}
+  .sens-hint b{color:inherit;font-weight:700;}
 </style>
 </head>
 <body>
@@ -225,12 +227,14 @@
           <div class="control">
             <div class="control-head"><span class="name" style="color:var(--linear);">עומק אפנון Linear</span><span class="val-wrap"><input type="number" class="val-input" id="sensLinNum" min="0" max="300" step="1" value="100"><span class="unit">Hz/V</span></span></div>
             <input type="range" id="sensLin" min="0" max="300" step="1" value="100">
-            <div class="ticks"><span>0</span><span>300 Hz/V</span></div>
+            <div class="ticks"><span>0</span><span>300</span></div>
+            <div class="sens-hint" id="sensLinHint"></div>
           </div>
           <div class="control">
             <div class="control-head"><span class="name" style="color:var(--expo);">עומק אפנון Exponential</span><span class="val-wrap"><input type="number" class="val-input" id="sensExpNum" min="0.25" max="2" step="0.05" value="1"><span class="unit">oct/V</span></span></div>
             <input type="range" id="sensExp" min="0.25" max="2" step="0.05" value="1">
-            <div class="ticks"><span>0.25</span><span>2 oct/V</span></div>
+            <div class="ticks"><span>0.25</span><span>2</span></div>
+            <div class="sens-hint" id="sensExpHint"></div>
           </div>
         </div>
 
@@ -618,6 +622,27 @@
   });
   updateIntervals();
 
+})();
+</script>
+<script>
+/* plain-language reading of the two depth controls */
+(function(){
+  const lin = document.getElementById('sensLin'), exp = document.getElementById('sensExp');
+  const linN = document.getElementById('sensLinNum'), expN = document.getElementById('sensExpNum');
+  const hL = document.getElementById('sensLinHint'), hE = document.getElementById('sensExpHint');
+  function oct(o){
+    if(Math.abs(o-1) < .001) return 'אוקטבה אחת (פי 2)';
+    if(Math.abs(o-2) < .001) return 'שתי אוקטבות (פי 4)';
+    const semis = Math.round(o*12);
+    return semis + ' חצאי טון (פי ' + Math.pow(2,o).toFixed(2) + ')';
+  }
+  function upd(){
+    const l = parseFloat(lin.value), e = parseFloat(exp.value);
+    hL.innerHTML = 'כל ‎1V מזיז את התדר ב-<b>' + Math.round(l) + 'Hz</b> — אותה כמות הרץ מכל תדר בסיס.';
+    hE.innerHTML = 'כל ‎1V מזיז את התדר ב<b>' + oct(e) + '</b> — אותו מרווח מכל תדר בסיס.';
+  }
+  [lin, exp, linN, expN].forEach(el => el && ['input','change'].forEach(ev => el.addEventListener(ev, () => setTimeout(upd))));
+  upd();
 })();
 </script>
 </body>
