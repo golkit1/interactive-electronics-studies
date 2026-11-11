@@ -213,13 +213,13 @@
           <img class="thumb" src="img/dpo_fm_vcoa.jpg" alt="המתנד הראשון על הפאנל">
           <div class="grow">
             <div class="head-line"><span class="vco-tag tag-a">VCO A</span><span class="sub">מקבל את הסינוס של VCO B</span></div>
-            <div class="ctrl-row"><span class="clab">תדר <span class="num">4A</span></span><input type="range" class="freq" id="fA" min="0" max="100" value="23"><span class="val" id="fAv"></span></div>
+            <div class="ctrl-row"><span class="clab">תדר</span><input type="range" class="freq" id="fA" min="0" max="100" value="23"><span class="val" id="fAv"></span></div>
           </div>
         </div>
 
         <div class="dest" id="dAE">
           <div class="dest-head">
-            <span class="dest-name">אקספוננציאלי<span class="num">7A</span><span class="num">9A</span> <span class="od" id="odAE">עומס יתר</span></span>
+            <span class="dest-name">אקספוננציאלי</span>
             <div class="toggle-row"><span class="toggle-label">כבל חיצוני</span><label class="switch"><input type="checkbox" id="tAE"><span class="sw-track"></span></label></div>
           </div>
           <div class="ctrl-row"><span class="clab">מתח חיצוני</span><input type="range" class="ext" id="vAE" min="0" max="5" step="0.1" value="2.5" disabled><span class="val" id="vAEv"></span></div>
@@ -230,7 +230,7 @@
 
         <div class="dest" id="dAL">
           <div class="dest-head">
-            <span class="dest-name">ליניארי<span class="num">8A</span><span class="num">11A</span> <span class="od" id="odAL">עומס יתר</span></span>
+            <span class="dest-name">ליניארי</span>
             <div class="toggle-row"><span class="toggle-label">כבל חיצוני</span><label class="switch"><input type="checkbox" id="tAL"><span class="sw-track"></span></label></div>
           </div>
           <div class="ctrl-row"><span class="clab">מתח חיצוני</span><input type="range" class="ext" id="vAL" min="0" max="5" step="0.1" value="2.5" disabled><span class="val" id="vALv"></span></div>
@@ -254,7 +254,6 @@
           <div class="pct" id="idxV">60%</div>
           <input type="range" id="idx" min="0" max="100" value="60">
           <div class="bus-led" id="busLed" title="נורית האינדקס"></div>
-          <span class="od" id="odBus">עומס יתר</span>
           <div class="readout">ברז אחד ששולט <b>בשני הכיוונים</b> בבת אחת: כמה מהסינוס של כל מתנד נשלח אל המתנד השני.</div>
         </div>
       </div>
@@ -265,13 +264,13 @@
           <img class="thumb" src="img/dpo_fm_vcob.jpg" alt="המתנד השני על הפאנל">
           <div class="grow">
             <div class="head-line"><span class="vco-tag tag-b">VCO B</span><span class="sub">מקבל את הסינוס של VCO A</span></div>
-            <div class="ctrl-row"><span class="clab">תדר <span class="num">4B</span></span><input type="range" class="freq" id="fB" min="0" max="100" value="72"><span class="val" id="fBv"></span></div>
+            <div class="ctrl-row"><span class="clab">תדר</span><input type="range" class="freq" id="fB" min="0" max="100" value="72"><span class="val" id="fBv"></span></div>
           </div>
         </div>
 
         <div class="dest" id="dBE">
           <div class="dest-head">
-            <span class="dest-name">אקספוננציאלי<span class="num">7B</span><span class="num">11B</span> <span class="od" id="odBE">עומס יתר</span></span>
+            <span class="dest-name">אקספוננציאלי</span>
             <div class="toggle-row"><span class="toggle-label">כבל חיצוני</span><label class="switch"><input type="checkbox" id="tBE"><span class="sw-track"></span></label></div>
           </div>
           <div class="ctrl-row"><span class="clab">מתח חיצוני</span><input type="range" class="ext" id="vBE" min="0" max="5" step="0.1" value="2.5" disabled><span class="val" id="vBEv"></span></div>
@@ -282,7 +281,7 @@
 
         <div class="dest" id="dBL">
           <div class="dest-head">
-            <span class="dest-name">ליניארי<span class="num">8B</span><span class="num">9B</span> <span class="od" id="odBL">עומס יתר</span></span>
+            <span class="dest-name">ליניארי</span>
             <div class="toggle-row"><span class="toggle-label">כבל חיצוני</span><label class="switch"><input type="checkbox" id="tBL"><span class="sw-track"></span></label></div>
           </div>
           <div class="ctrl-row"><span class="clab">מתח חיצוני</span><input type="range" class="ext" id="vBL" min="0" max="5" step="0.1" value="2.5" disabled><span class="val" id="vBLv"></span></div>
@@ -391,7 +390,6 @@ function refreshUI(){
     setFill($('a'+k));
     const od = !d.ext && overdrive(P.idx, d.att) > .05;
     anyOD = anyOD || od;
-    $('od'+k).classList.toggle('on', od);
     $('r'+k).innerHTML = d.ext
       ? 'מקור: <b>כבל חיצוני</b> — הנרמול מנותק, הברז הראשי לא משפיע. מגיע: <b>' + Math.round(d.att*d.volt/5*100) + '%</b>'
       : 'מקור: <b>' + src + '</b> דרך הפס — ' + Math.round(P.idx*100) + '% × ' + Math.round(d.att*100) + '% = <b>' + Math.round(P.idx*d.att*100) + '%</b>';
@@ -407,12 +405,10 @@ function refreshUI(){
     });
     $('cab'+k).setAttribute('opacity', d.ext ? 1 : 0);
     $('w'+k).setAttribute('stroke', d.ext ? 'var(--teal)' : (lane==='A' ? 'var(--rose)' : 'var(--amber)'));
-    $('k'+k).setAttribute('fill', od ? 'var(--red)' : '#fff');
   });
   $('lnA').style.opacity = (0.25 + 0.75*P.idx).toFixed(2);
   $('lnB').style.opacity = (0.25 + 0.75*P.idx).toFixed(2);
   $('dIdx').setAttribute('r', (7 + 6*P.idx).toFixed(1));
-  $('odBus').classList.toggle('on', anyOD);
   const led = $('busLed');
   led.style.background = 'rgba(127,160,222,' + (0.15 + 0.85*P.idx).toFixed(2) + ')';
   led.style.boxShadow = '0 0 ' + (2 + 10*P.idx).toFixed(0) + 'px rgba(127,160,222,' + (0.9*P.idx).toFixed(2) + ')';
