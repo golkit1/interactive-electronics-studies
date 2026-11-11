@@ -253,7 +253,7 @@
 
       <!-- ===== FM BUS ===== -->
       <div class="card bus">
-        <img class="thumb" src="img/dpo_fm_bus.jpg" alt="ברז פס אפנון התדר על הפאנל">
+        <img class="thumb" src="img/dpo_fm_bus.jpg" alt="ברז אפיק אפנון התדר על הפאנל">
         <div class="bus-main" style="display:flex;flex-direction:column;gap:5px;align-items:stretch;">
           <div class="bus-title">ברז ראשי · FM Bus Index</div>
           <div class="pct" id="idxV">60%</div>
@@ -412,7 +412,7 @@ function refreshUI(){
     anyOD = anyOD || od;
     $('r'+k).innerHTML = d.ext
       ? 'מקור: <b>כבל חיצוני</b> (גל משולש) — הנרמול מנותק, הברז הראשי לא משפיע. מגיע: <b>' + Math.round(d.att*d.volt/5*100) + '%</b>'
-      : 'מקור: <b>' + src + '</b> דרך הפס — ' + Math.round(P.idx*100) + '% × ' + Math.round(d.att*100) + '% = <b>' + Math.round(P.idx*d.att*100) + '%</b>';
+      : 'מקור: <b>' + src + '</b> דרך האפיק — ' + Math.round(P.idx*100) + '% × ' + Math.round(d.att*100) + '% = <b>' + Math.round(P.idx*d.att*100) + '%</b>';
     // diagram
     const lvl = d.ext ? 0 : P.idx*d.att;
     const lane = k[0]==='A' ? 'A' : 'B';
