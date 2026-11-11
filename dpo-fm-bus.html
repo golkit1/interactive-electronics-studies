@@ -242,7 +242,6 @@
         <div class="out-box">
           <div class="out-cap"><span>יציאת הסינוס של VCO A</span><span>ממוצע <b id="avgA"></b></span></div>
           <svg class="out-svg" viewBox="0 0 300 54" preserveAspectRatio="none"><line x1="0" y1="27" x2="300" y2="27" stroke="var(--line)"/><path id="oA" fill="none" stroke="var(--amber)" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg>
-          <div class="verdict" id="verA"></div>
         </div>
       </div>
 
@@ -293,7 +292,6 @@
         <div class="out-box">
           <div class="out-cap"><span>יציאת הסינוס של VCO B</span><span>ממוצע <b id="avgB"></b></span></div>
           <svg class="out-svg" viewBox="0 0 300 54" preserveAspectRatio="none"><line x1="0" y1="27" x2="300" y2="27" stroke="var(--line)"/><path id="oB" fill="none" stroke="var(--rose)" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg>
-          <div class="verdict" id="verB"></div>
         </div>
       </div>
 
@@ -415,14 +413,6 @@ function refreshUI(){
   sendAudioParams();
 }
 
-function verdict(base, avg, lin, expo){
-  if(lin < .01 && expo < .01) return 'אין אפנון — המתנד מנגן בתדר הבסיס.';
-  if(expo >= .01){
-    const up = Math.max(0, Math.round((avg/base - 1)*100));
-    return 'הגובה הממוצע <b>עלה ב־' + up + '%</b> — אפנון אקספוננציאלי מושך את הצליל כלפי מעלה, כי העלייה בתדר גדולה מהירידה.';
-  }
-  return 'הגובה הממוצע <b>נשאר במקום</b> — באפנון ליניארי התדר עולה ויורד באותה מידה סביב הבסיס.';
-}
 
 function frame(now){
   if(lastNow === null) lastNow = now;
@@ -433,9 +423,7 @@ function frame(now){
   DESTS.forEach(k => $('w'+k).setAttribute('d', pathOf(buf[k], 26, 11)));
   const aA = mean(buf.fA), aB = mean(buf.fB);
   $('avgA').textContent = fmtHz(aA); $('avgB').textContent = fmtHz(aB);
-  const amt = k => { const d = P.d[k]; return d.ext ? d.att*d.volt/5 : P.idx*d.att; };
-  $('verA').innerHTML = verdict(P.fA, aA, amt('AL'), amt('AE'));
-  $('verB').innerHTML = verdict(P.fB, aB, amt('BL'), amt('BE'));
+
   requestAnimationFrame(frame);
 }
 
