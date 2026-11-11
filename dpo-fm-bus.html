@@ -392,6 +392,8 @@ function refreshUI(){
   DESTS.forEach(k => {
     const d = P.d[k], src = k[0]==='A' ? 'VCO B' : 'VCO A';
     $('v'+k).disabled = !d.ext; $('x'+k).disabled = !d.ext;
+    $('v'+k).closest('.ctrl-row').style.display = d.ext ? '' : 'none';
+    $('x'+k).closest('.ctrl-row').style.display = d.ext ? '' : 'none';
     $('x'+k+'v').textContent = d.ext ? fmtHz(d.rate) : '—';
     $('s'+k).classList.toggle('on', d.ext);
     $('v'+k+'v').textContent = d.ext ? '±' + d.volt.toFixed(1) + 'V' : '—';
