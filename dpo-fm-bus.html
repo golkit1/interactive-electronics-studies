@@ -12,7 +12,7 @@
     --bg:#FAF7F1; --panel:#FFFFFF; --ink:#241F1A; --ink-soft:#7A7066; --line:#E6DECF;
     --blue:#2E4C7E; --blue-soft:#C7D3E8; --cream-line:#C9BFA8;
     --amber:#D98A3D; --amber-soft:#F3DDB8; --rose:#B4506A; --rose-soft:#F1D3DB;
-    --teal:#2F8F82; --teal-soft:#C4E6E0; --red:#C0392B;
+    --teal:#2F8F82; --teal-soft:#C4E6E0; --red:#C0392B; --lin:#2F6F6B; --exp:#C15A4E;
     --radius:12px; --shadow: 0 1px 2px rgba(36,31,26,0.06), 0 4px 12px rgba(36,31,26,0.05);
   }
   @media (prefers-color-scheme: dark){
@@ -20,7 +20,7 @@
       --bg:#1B1815; --panel:#242019; --ink:#F3EEE6; --ink-soft:#B4A99B; --line:#3A342B;
       --blue:#7FA0DE; --blue-soft:#31446B; --cream-line:#5C5340;
       --amber:#E8A55F; --amber-soft:#4A3620; --rose:#E08AA0; --rose-soft:#4A2630;
-      --teal:#5CC2B2; --teal-soft:#1F3E39; --red:#E5675A;
+      --teal:#5CC2B2; --teal-soft:#1F3E39; --red:#E5675A; --lin:#6FC7C1; --exp:#E28579;
       --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.35);
     }
   }
@@ -28,7 +28,7 @@
     --bg:#1B1815; --panel:#242019; --ink:#F3EEE6; --ink-soft:#B4A99B; --line:#3A342B;
     --blue:#7FA0DE; --blue-soft:#31446B; --cream-line:#5C5340;
     --amber:#E8A55F; --amber-soft:#4A3620; --rose:#E08AA0; --rose-soft:#4A2630;
-    --teal:#5CC2B2; --teal-soft:#1F3E39; --red:#E5675A;
+    --teal:#5CC2B2; --teal-soft:#1F3E39; --red:#E5675A; --lin:#6FC7C1; --exp:#E28579;
     --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.35);
   }
   *{box-sizing:border-box;}
@@ -113,7 +113,6 @@
   .out-cap b{color:var(--ink);font-weight:600;direction:ltr;display:inline-block;}
   .out-svg{height:54px;}
   .mod-key{font-size:9px;margin-inline-start:6px;opacity:.75;}
-  .mk-a{color:var(--amber);} .mk-b{color:var(--rose);}
   .verdict{font-size:10px;min-height:14px;color:var(--ink-soft);}
   .verdict b{color:var(--ink);}
 
@@ -224,7 +223,7 @@
 
         <div class="dest" id="dAE">
           <div class="dest-head">
-            <span class="dest-name">אקספוננציאלי</span>
+            <span class="dest-name" style="color:var(--exp)">אקספוננציאלי</span>
             <span class="shape-tag" id="sAE">∧ גל משולש</span><div class="toggle-row"><span class="toggle-label">כבל חיצוני</span><label class="switch"><input type="checkbox" id="tAE"><span class="sw-track"></span></label></div>
           </div>
           <div class="ctrl-row"><span class="clab">מתח חיצוני</span><input type="range" class="ext" id="vAE" min="0" max="5" step="0.1" value="2.5" disabled><span class="val" id="vAEv"></span></div>
@@ -236,7 +235,7 @@
 
         <div class="dest" id="dAL">
           <div class="dest-head">
-            <span class="dest-name">ליניארי</span>
+            <span class="dest-name" style="color:var(--lin)">ליניארי</span>
             <span class="shape-tag" id="sAL">∧ גל משולש</span><div class="toggle-row"><span class="toggle-label">כבל חיצוני</span><label class="switch"><input type="checkbox" id="tAL"><span class="sw-track"></span></label></div>
           </div>
           <div class="ctrl-row"><span class="clab">מתח חיצוני</span><input type="range" class="ext" id="vAL" min="0" max="5" step="0.1" value="2.5" disabled><span class="val" id="vALv"></span></div>
@@ -247,8 +246,8 @@
         </div>
 
         <div class="out-box">
-          <div class="out-cap"><span>יציאת הסינוס של VCO A <span class="mod-key mk-b">- - המאפנן</span></span><span>ממוצע <b id="avgA"></b></span></div>
-          <svg class="out-svg" viewBox="0 0 300 54" preserveAspectRatio="none"><line x1="0" y1="27" x2="300" y2="27" stroke="var(--line)"/><path id="mA" fill="none" stroke="var(--rose)" stroke-width="1.8" opacity=".5" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/><path id="oA" fill="none" stroke="var(--amber)" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg>
+          <div class="out-cap"><span>יציאת הסינוס של VCO A <span class="mod-key" style="color:var(--lin)">- - ליניארי</span><span class="mod-key" style="color:var(--exp)">- - אקספוננציאלי</span></span><span>ממוצע <b id="avgA"></b></span></div>
+          <svg class="out-svg" viewBox="0 0 300 54" preserveAspectRatio="none"><line x1="0" y1="27" x2="300" y2="27" stroke="var(--line)"/><path id="mAL" fill="none" stroke="var(--lin)" stroke-width="1.8" opacity=".6" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/><path id="mAE" fill="none" stroke="var(--exp)" stroke-width="1.8" opacity=".6" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/><path id="oA" fill="none" stroke="var(--amber)" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg>
         </div>
       </div>
 
@@ -276,7 +275,7 @@
 
         <div class="dest" id="dBE">
           <div class="dest-head">
-            <span class="dest-name">אקספוננציאלי</span>
+            <span class="dest-name" style="color:var(--exp)">אקספוננציאלי</span>
             <span class="shape-tag" id="sBE">∧ גל משולש</span><div class="toggle-row"><span class="toggle-label">כבל חיצוני</span><label class="switch"><input type="checkbox" id="tBE"><span class="sw-track"></span></label></div>
           </div>
           <div class="ctrl-row"><span class="clab">מתח חיצוני</span><input type="range" class="ext" id="vBE" min="0" max="5" step="0.1" value="2.5" disabled><span class="val" id="vBEv"></span></div>
@@ -288,7 +287,7 @@
 
         <div class="dest" id="dBL">
           <div class="dest-head">
-            <span class="dest-name">ליניארי</span>
+            <span class="dest-name" style="color:var(--lin)">ליניארי</span>
             <span class="shape-tag" id="sBL">∧ גל משולש</span><div class="toggle-row"><span class="toggle-label">כבל חיצוני</span><label class="switch"><input type="checkbox" id="tBL"><span class="sw-track"></span></label></div>
           </div>
           <div class="ctrl-row"><span class="clab">מתח חיצוני</span><input type="range" class="ext" id="vBL" min="0" max="5" step="0.1" value="2.5" disabled><span class="val" id="vBLv"></span></div>
@@ -299,8 +298,8 @@
         </div>
 
         <div class="out-box">
-          <div class="out-cap"><span>יציאת הסינוס של VCO B <span class="mod-key mk-a">- - המאפנן</span></span><span>ממוצע <b id="avgB"></b></span></div>
-          <svg class="out-svg" viewBox="0 0 300 54" preserveAspectRatio="none"><line x1="0" y1="27" x2="300" y2="27" stroke="var(--line)"/><path id="mB" fill="none" stroke="var(--amber)" stroke-width="1.8" opacity=".5" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/><path id="oB" fill="none" stroke="var(--rose)" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg>
+          <div class="out-cap"><span>יציאת הסינוס של VCO B <span class="mod-key" style="color:var(--lin)">- - ליניארי</span><span class="mod-key" style="color:var(--exp)">- - אקספוננציאלי</span></span><span>ממוצע <b id="avgB"></b></span></div>
+          <svg class="out-svg" viewBox="0 0 300 54" preserveAspectRatio="none"><line x1="0" y1="27" x2="300" y2="27" stroke="var(--line)"/><path id="mBL" fill="none" stroke="var(--lin)" stroke-width="1.8" opacity=".6" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/><path id="mBE" fill="none" stroke="var(--exp)" stroke-width="1.8" opacity=".6" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/><path id="oB" fill="none" stroke="var(--rose)" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg>
         </div>
       </div>
 
@@ -425,7 +424,7 @@ function refreshUI(){
       if(id.startsWith('out')) el.setAttribute('stroke', d.ext ? 'var(--teal)' : (lane==='A' ? 'var(--rose)' : 'var(--amber)'));
     });
     $('cab'+k).setAttribute('opacity', d.ext ? 1 : 0);
-    $('w'+k).setAttribute('stroke', d.ext ? 'var(--teal)' : (lane==='A' ? 'var(--rose)' : 'var(--amber)'));
+    $('w'+k).setAttribute('stroke', d.ext ? 'var(--teal)' : (k[1]==='L' ? 'var(--lin)' : 'var(--exp)'));
   });
   $('lnA').style.opacity = (0.25 + 0.75*P.idx).toFixed(2);
   $('lnB').style.opacity = (0.25 + 0.75*P.idx).toFixed(2);
@@ -443,14 +442,12 @@ function frame(now){
   while(acc >= 1/SR){ stepSample(); acc -= 1/SR; }
   $('oA').setAttribute('d', pathOf(buf.oA, 54, 22));
   $('oB').setAttribute('d', pathOf(buf.oB, 54, 22));
-  ['A','B'].forEach(X => {
-    const L = P.d[X+'L'], E = P.d[X+'E'];
-    const act = [L, E].filter(d => d.att > .005 && (d.ext || P.idx > .005));
-    const m = $('m'+X);
-    m.style.display = act.length ? '' : 'none';
-    m.setAttribute('stroke', act.length && act.every(d => d.ext) ? 'var(--teal)' : (X==='A' ? 'var(--rose)' : 'var(--amber)'));
-    if(act.length) m.setAttribute('d', pathSum(buf[X+'L'], buf[X+'E'], 54, 22));
-  });
+  ['A','B'].forEach(X => ['L','E'].forEach(T => {
+    const d = P.d[X+T], m = $('m'+X+T);
+    const on = d.att > .005 && (d.ext || P.idx > .005);
+    m.style.display = on ? '' : 'none';
+    if(on) m.setAttribute('d', pathOf(buf[X+T], 54, 22));
+  }));
   DESTS.forEach(k => $('w'+k).setAttribute('d', pathOf(buf[k], 26, 11)));
   const aA = mean(buf.fA), aB = mean(buf.fB);
   $('avgA').textContent = fmtHz(aA); $('avgB').textContent = fmtHz(aB);
