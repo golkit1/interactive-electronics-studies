@@ -164,6 +164,7 @@
 
   footer{ padding:26px 0 10px; border-top:1px solid var(--line); margin-top:26px; }
   footer p{ font-size:13px; color:var(--ink-soft); margin:0; }
+  .explain .quote{font-size:12px;color:var(--ink-soft, #7A7066);border-left:3px solid currentColor;padding:2px 10px;margin-top:6px;text-align:left;}
 </style>
 </head>
 <body>
@@ -178,8 +179,9 @@
 <div class="wrap">
 
   <section class="explain">
-    <p><strong style="color:var(--linear)">ליניארי</strong> — כל שינוי קבוע במתח (נגיד, כל 1V) מוסיף או מחסיר אותה כמות הרץ. לדוגמה, אם 1V = 100Hz: מ-400Hz, שינוי של ‎+1V לוקח ל-500Hz, ושינוי של ‎-1V לוקח ל-300Hz — תמיד בדיוק 100Hz, לא משנה תדר הבסיס.</p>
-    <p><strong style="color:var(--expo)">אקספוננציאלי (1V/oct)</strong> — כל שינוי קבוע במתח (‎1V) מכפיל או מחלק את התדר באותו יחס — תמיד פי 2 לכל 1V. מ-400Hz: ‎+1V לוקח ל-800Hz (הכפלה), ‎-1V לוקח ל-200Hz (חלוקה).</p>
+    <p><strong style="color:var(--linear)">ליניארי</strong> — כל שינוי קבוע במתח (נגיד, כל 1V) מוסיף או מחסיר אותה כמות הרץ. לדוגמה, אם 1V = 100Hz: מ-400Hz, שינוי של ‎+1V לוקח ל-500Hz, ושינוי של ‎-1V לוקח ל-300Hz — תמיד בדיוק 100Hz, לא משנה תדר הבסיס. לכן <b>המרווח המוזיקלי משתנה</b>: מ-100Hz ל-200Hz זו אוקטבה שלמה, ומ-1000Hz ל-1100Hz זה פחות מטון שלם.</p>
+    <p><strong style="color:var(--expo)">אקספוננציאלי (1V/oct)</strong> — כל שינוי קבוע במתח (‎1V) מכפיל או מחלק את התדר באותו יחס — תמיד פי 2 לכל 1V. מ-400Hz: ‎+1V לוקח ל-800Hz (הכפלה), ‎-1V לוקח ל-200Hz (חלוקה). כלומר, כל שינוי קבוע במתח מזיז את הצליל ב<b>אותו מרווח מוזיקלי</b>, מכל נקודת התחלה: ‎1V הוא תמיד אוקטבה, ו-1/12V הוא תמיד חצי טון.</p>
+    <p class="quote" dir="ltr">“Exponential response means equal musical interval changes per applied control value, and linear response means equal Hertz change per applied control value.” — Allen Strange, <i>Electronic Music: Systems, Techniques, and Controls</i>, p. 35</p>
   </section>
 
   <div class="view-tabs">
