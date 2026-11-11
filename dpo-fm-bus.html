@@ -112,6 +112,8 @@
   .out-cap{display:flex;justify-content:space-between;font-size:9.5px;color:var(--ink-soft);}
   .out-cap b{color:var(--ink);font-weight:600;direction:ltr;display:inline-block;}
   .out-svg{height:54px;}
+  .mod-key{font-size:9px;margin-inline-start:6px;opacity:.75;}
+  .mk-a{color:var(--amber);} .mk-b{color:var(--rose);}
   .verdict{font-size:10px;min-height:14px;color:var(--ink-soft);}
   .verdict b{color:var(--ink);}
 
@@ -245,8 +247,8 @@
         </div>
 
         <div class="out-box">
-          <div class="out-cap"><span>יציאת הסינוס של VCO A</span><span>ממוצע <b id="avgA"></b></span></div>
-          <svg class="out-svg" viewBox="0 0 300 54" preserveAspectRatio="none"><line x1="0" y1="27" x2="300" y2="27" stroke="var(--line)"/><path id="oA" fill="none" stroke="var(--amber)" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg>
+          <div class="out-cap"><span>יציאת הסינוס של VCO A <span class="mod-key mk-b">- - המאפנן</span></span><span>ממוצע <b id="avgA"></b></span></div>
+          <svg class="out-svg" viewBox="0 0 300 54" preserveAspectRatio="none"><line x1="0" y1="27" x2="300" y2="27" stroke="var(--line)"/><path id="mA" fill="none" stroke="var(--rose)" stroke-width="1.8" opacity=".5" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/><path id="oA" fill="none" stroke="var(--amber)" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg>
         </div>
       </div>
 
@@ -297,8 +299,8 @@
         </div>
 
         <div class="out-box">
-          <div class="out-cap"><span>יציאת הסינוס של VCO B</span><span>ממוצע <b id="avgB"></b></span></div>
-          <svg class="out-svg" viewBox="0 0 300 54" preserveAspectRatio="none"><line x1="0" y1="27" x2="300" y2="27" stroke="var(--line)"/><path id="oB" fill="none" stroke="var(--rose)" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg>
+          <div class="out-cap"><span>יציאת הסינוס של VCO B <span class="mod-key mk-a">- - המאפנן</span></span><span>ממוצע <b id="avgB"></b></span></div>
+          <svg class="out-svg" viewBox="0 0 300 54" preserveAspectRatio="none"><line x1="0" y1="27" x2="300" y2="27" stroke="var(--line)"/><path id="mB" fill="none" stroke="var(--amber)" stroke-width="1.8" opacity=".5" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/><path id="oB" fill="none" stroke="var(--rose)" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg>
         </div>
       </div>
 
@@ -379,6 +381,14 @@ function pathOf(arr, h, amp){
   }
   return d;
 }
+function pathSum(a1, a2, h, amp){
+  let d = '';
+  for(let i=0;i<N;i++){
+    const j = (head+i) % N, v = Math.max(-1.2, Math.min(1.2, a1[j] + a2[j]));
+    d += (i?'L':'M') + (i/(N-1)*300).toFixed(1) + ',' + (h/2 - v*amp).toFixed(1) + ' ';
+  }
+  return d;
+}
 function mean(arr){ let s=0; for(let i=0;i<N;i++) s+=arr[i]; return s/N; }
 
 /* ================= UI ================= */
@@ -433,6 +443,14 @@ function frame(now){
   while(acc >= 1/SR){ stepSample(); acc -= 1/SR; }
   $('oA').setAttribute('d', pathOf(buf.oA, 54, 22));
   $('oB').setAttribute('d', pathOf(buf.oB, 54, 22));
+  ['A','B'].forEach(X => {
+    const L = P.d[X+'L'], E = P.d[X+'E'];
+    const act = [L, E].filter(d => d.att > .005 && (d.ext || P.idx > .005));
+    const m = $('m'+X);
+    m.style.display = act.length ? '' : 'none';
+    m.setAttribute('stroke', act.length && act.every(d => d.ext) ? 'var(--teal)' : (X==='A' ? 'var(--rose)' : 'var(--amber)'));
+    if(act.length) m.setAttribute('d', pathSum(buf[X+'L'], buf[X+'E'], 54, 22));
+  });
   DESTS.forEach(k => $('w'+k).setAttribute('d', pathOf(buf[k], 26, 11)));
   const aA = mean(buf.fA), aB = mean(buf.fB);
   $('avgA').textContent = fmtHz(aA); $('avgB').textContent = fmtHz(aB);
