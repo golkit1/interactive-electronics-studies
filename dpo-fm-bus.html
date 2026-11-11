@@ -75,7 +75,8 @@
   .num{direction:ltr;display:inline-block;font-family:'Rubik',sans-serif;font-size:9px;color:var(--ink-soft);border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-right:3px;background:var(--panel);}
 
   .ctrl-row{display:flex;align-items:center;gap:6px;}
-  .ctrl-row .clab{width:62px;flex:0 0 auto;font-size:9.5px;color:var(--ink-soft);}
+  .ctrl-row .clab .heb{display:block;font-size:8.5px;}
+  .ctrl-row .clab{width:66px;flex:0 0 auto;font-size:9.5px;color:var(--ink-soft);}
   .ctrl-row .val{width:44px;flex:0 0 auto;font-size:9.5px;direction:ltr;text-align:left;color:var(--ink);}
   input[type=range]{width:100%;direction:ltr;accent-color:var(--blue);height:14px;margin:0;}
   input[type=range].ext{accent-color:var(--teal);}
@@ -100,6 +101,8 @@
   .switch input:checked + .sw-track{background:var(--teal);}
   .switch input:checked + .sw-track:before{transform:translateX(13px);}
   .toggle-row{display:flex;align-items:center;gap:5px;}
+  .shape-tag{display:none;font-size:9.5px;font-weight:600;color:var(--teal);background:var(--teal-soft);border:1px solid var(--teal);border-radius:999px;padding:0 7px;margin-inline-start:auto;margin-inline-end:4px;}
+  .shape-tag.on{display:inline-block;}
   .toggle-label{font-size:9.5px;color:var(--ink-soft);}
   .readout{font-size:9.5px;color:var(--ink-soft);}
   .readout b{color:var(--ink);font-weight:600;}
@@ -220,10 +223,11 @@
         <div class="dest" id="dAE">
           <div class="dest-head">
             <span class="dest-name">אקספוננציאלי</span>
-            <div class="toggle-row"><span class="toggle-label">כבל חיצוני</span><label class="switch"><input type="checkbox" id="tAE"><span class="sw-track"></span></label></div>
+            <span class="shape-tag" id="sAE">∧ גל משולש</span><div class="toggle-row"><span class="toggle-label">כבל חיצוני</span><label class="switch"><input type="checkbox" id="tAE"><span class="sw-track"></span></label></div>
           </div>
           <div class="ctrl-row"><span class="clab">מתח חיצוני</span><input type="range" class="ext" id="vAE" min="0" max="5" step="0.1" value="2.5" disabled><span class="val" id="vAEv"></span></div>
-          <div class="ctrl-row"><span class="clab">מחליש</span><input type="range" class="white" id="aAE" min="0" max="100" value="0"><span class="val" id="aAEv"></span></div>
+          <div class="ctrl-row"><span class="clab">תדר המאפנן</span><input type="range" class="ext" id="xAE" min="0" max="100" value="37" disabled><span class="val" id="xAEv"></span></div>
+          <div class="ctrl-row"><span class="clab">Attenuator <span class="heb">(ווסת)</span></span><input type="range" class="white" id="aAE" min="0" max="100" value="0"><span class="val" id="aAEv"></span></div>
           <div class="readout" id="rAE"></div>
           <svg class="mini" viewBox="0 0 300 26" preserveAspectRatio="none"><line x1="0" y1="13" x2="300" y2="13" stroke="var(--line)"/><path id="wAE" fill="none" stroke="var(--rose)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
         </div>
@@ -231,10 +235,11 @@
         <div class="dest" id="dAL">
           <div class="dest-head">
             <span class="dest-name">ליניארי</span>
-            <div class="toggle-row"><span class="toggle-label">כבל חיצוני</span><label class="switch"><input type="checkbox" id="tAL"><span class="sw-track"></span></label></div>
+            <span class="shape-tag" id="sAL">∧ גל משולש</span><div class="toggle-row"><span class="toggle-label">כבל חיצוני</span><label class="switch"><input type="checkbox" id="tAL"><span class="sw-track"></span></label></div>
           </div>
           <div class="ctrl-row"><span class="clab">מתח חיצוני</span><input type="range" class="ext" id="vAL" min="0" max="5" step="0.1" value="2.5" disabled><span class="val" id="vALv"></span></div>
-          <div class="ctrl-row"><span class="clab">מחליש</span><input type="range" class="white" id="aAL" min="0" max="100" value="0"><span class="val" id="aALv"></span></div>
+          <div class="ctrl-row"><span class="clab">תדר המאפנן</span><input type="range" class="ext" id="xAL" min="0" max="100" value="37" disabled><span class="val" id="xALv"></span></div>
+          <div class="ctrl-row"><span class="clab">Attenuator <span class="heb">(ווסת)</span></span><input type="range" class="white" id="aAL" min="0" max="100" value="0"><span class="val" id="aALv"></span></div>
           <div class="readout" id="rAL"></div>
           <svg class="mini" viewBox="0 0 300 26" preserveAspectRatio="none"><line x1="0" y1="13" x2="300" y2="13" stroke="var(--line)"/><path id="wAL" fill="none" stroke="var(--rose)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
         </div>
@@ -270,10 +275,11 @@
         <div class="dest" id="dBE">
           <div class="dest-head">
             <span class="dest-name">אקספוננציאלי</span>
-            <div class="toggle-row"><span class="toggle-label">כבל חיצוני</span><label class="switch"><input type="checkbox" id="tBE"><span class="sw-track"></span></label></div>
+            <span class="shape-tag" id="sBE">∧ גל משולש</span><div class="toggle-row"><span class="toggle-label">כבל חיצוני</span><label class="switch"><input type="checkbox" id="tBE"><span class="sw-track"></span></label></div>
           </div>
           <div class="ctrl-row"><span class="clab">מתח חיצוני</span><input type="range" class="ext" id="vBE" min="0" max="5" step="0.1" value="2.5" disabled><span class="val" id="vBEv"></span></div>
-          <div class="ctrl-row"><span class="clab">מחליש</span><input type="range" class="white" id="aBE" min="0" max="100" value="0"><span class="val" id="aBEv"></span></div>
+          <div class="ctrl-row"><span class="clab">תדר המאפנן</span><input type="range" class="ext" id="xBE" min="0" max="100" value="37" disabled><span class="val" id="xBEv"></span></div>
+          <div class="ctrl-row"><span class="clab">Attenuator <span class="heb">(ווסת)</span></span><input type="range" class="white" id="aBE" min="0" max="100" value="0"><span class="val" id="aBEv"></span></div>
           <div class="readout" id="rBE"></div>
           <svg class="mini" viewBox="0 0 300 26" preserveAspectRatio="none"><line x1="0" y1="13" x2="300" y2="13" stroke="var(--line)"/><path id="wBE" fill="none" stroke="var(--amber)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
         </div>
@@ -281,10 +287,11 @@
         <div class="dest" id="dBL">
           <div class="dest-head">
             <span class="dest-name">ליניארי</span>
-            <div class="toggle-row"><span class="toggle-label">כבל חיצוני</span><label class="switch"><input type="checkbox" id="tBL"><span class="sw-track"></span></label></div>
+            <span class="shape-tag" id="sBL">∧ גל משולש</span><div class="toggle-row"><span class="toggle-label">כבל חיצוני</span><label class="switch"><input type="checkbox" id="tBL"><span class="sw-track"></span></label></div>
           </div>
           <div class="ctrl-row"><span class="clab">מתח חיצוני</span><input type="range" class="ext" id="vBL" min="0" max="5" step="0.1" value="2.5" disabled><span class="val" id="vBLv"></span></div>
-          <div class="ctrl-row"><span class="clab">מחליש</span><input type="range" class="white" id="aBL" min="0" max="100" value="70"><span class="val" id="aBLv"></span></div>
+          <div class="ctrl-row"><span class="clab">תדר המאפנן</span><input type="range" class="ext" id="xBL" min="0" max="100" value="37" disabled><span class="val" id="xBLv"></span></div>
+          <div class="ctrl-row"><span class="clab">Attenuator <span class="heb">(ווסת)</span></span><input type="range" class="white" id="aBL" min="0" max="100" value="70"><span class="val" id="aBLv"></span></div>
           <div class="readout" id="rBL"></div>
           <svg class="mini" viewBox="0 0 300 26" preserveAspectRatio="none"><line x1="0" y1="13" x2="300" y2="13" stroke="var(--line)"/><path id="wBL" fill="none" stroke="var(--amber)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
         </div>
@@ -315,7 +322,7 @@ const $ = id => document.getElementById(id);
 const F_MIN = 0.25, F_MAX = 8;            // on-screen "slow motion" Hz
 const AUDIO_MULT = 55;                    // sound: 1 Hz on screen → 55 Hz
 const EXPO_OCT = 2;                       // full expo depth = ±2 octaves
-const EXT_RATE = 0.5;                     // external cable = slow triangle LFO
+const XF_MIN = 0.1, XF_MAX = 8;            // external cable = triangle LFO, adjustable rate
 const DESTS = ['AE','AL','BE','BL'];
 let ctx = null, node = null, playing = false;
 
@@ -325,7 +332,7 @@ function tri(x){ const p = x - Math.floor(x); return p < .5 ? 4*p - 1 : 3 - 4*p;
 
 function params(){
   const p = { idx: $('idx').value/100, fA: freqOf($('fA')), fB: freqOf($('fB')), d:{} };
-  DESTS.forEach(k => p.d[k] = { att: $('a'+k).value/100, ext: $('t'+k).checked, volt: parseFloat($('v'+k).value) });
+  DESTS.forEach(k => p.d[k] = { att: $('a'+k).value/100, ext: $('t'+k).checked, volt: parseFloat($('v'+k).value), rate: XF_MIN*Math.pow(XF_MAX/XF_MIN, $('x'+k).value/100) });
   return p;
 }
 function overdrive(idx, att){
@@ -333,8 +340,8 @@ function overdrive(idx, att){
   return a*b;
 }
 /* signal arriving at one destination, normalised: ±1 = ±5V */
-function destSignal(d, idx, srcSine, t){
-  if(d.ext) return d.att * (d.volt/5) * tri(t*EXT_RATE);
+function destSignal(d, idx, srcSine, ph){
+  if(d.ext) return d.att * (d.volt/5) * tri(ph);
   const x = idx * d.att * srcSine, w = overdrive(idx, d.att);
   return (1-w)*x + w*Math.tanh(3*x)*1.15;
 }
@@ -342,6 +349,7 @@ function destSignal(d, idx, srcSine, t){
 /* ================= Scope simulation ================= */
 const SR = 120, WIN = 2, N = SR*WIN, SUB = 10;
 const buf = { oA:new Float32Array(N), oB:new Float32Array(N), AE:new Float32Array(N), AL:new Float32Array(N), BE:new Float32Array(N), BL:new Float32Array(N), fA:new Float32Array(N), fB:new Float32Array(N) };
+const xph = {AE:0, AL:0, BE:0, BL:0};
 let head = 0, phA = 0, phB = 0, tSim = 0, acc = 0, lastNow = null, P = params();
 
 function stepSample(){
@@ -349,8 +357,9 @@ function stepSample(){
   let m;
   for(let s=0;s<SUB;s++){
     const sA = Math.sin(phA), sB = Math.sin(phB);
-    m = { AE: destSignal(P.d.AE, P.idx, sB, tSim), AL: destSignal(P.d.AL, P.idx, sB, tSim),
-          BE: destSignal(P.d.BE, P.idx, sA, tSim), BL: destSignal(P.d.BL, P.idx, sA, tSim) };
+    m = { AE: destSignal(P.d.AE, P.idx, sB, xph.AE), AL: destSignal(P.d.AL, P.idx, sB, xph.AL),
+          BE: destSignal(P.d.BE, P.idx, sA, xph.BE), BL: destSignal(P.d.BL, P.idx, sA, xph.BL) };
+    DESTS.forEach(k => { xph[k] = (xph[k] + P.d[k].rate*dt) % 1000; });
     m.fA = Math.max(0, P.fA * Math.pow(2, m.AE*EXPO_OCT) * (1 + m.AL));
     m.fB = Math.max(0, P.fB * Math.pow(2, m.BE*EXPO_OCT) * (1 + m.BL));
     phA += 2*Math.PI*m.fA*dt; phB += 2*Math.PI*m.fB*dt; tSim += dt;
@@ -382,14 +391,16 @@ function refreshUI(){
   let anyOD = false;
   DESTS.forEach(k => {
     const d = P.d[k], src = k[0]==='A' ? 'VCO B' : 'VCO A';
-    $('v'+k).disabled = !d.ext;
+    $('v'+k).disabled = !d.ext; $('x'+k).disabled = !d.ext;
+    $('x'+k+'v').textContent = d.ext ? fmtHz(d.rate) : '—';
+    $('s'+k).classList.toggle('on', d.ext);
     $('v'+k+'v').textContent = d.ext ? '±' + d.volt.toFixed(1) + 'V' : '—';
     $('a'+k+'v').textContent = Math.round(d.att*100) + '%';
     setFill($('a'+k));
     const od = !d.ext && overdrive(P.idx, d.att) > .05;
     anyOD = anyOD || od;
     $('r'+k).innerHTML = d.ext
-      ? 'מקור: <b>כבל חיצוני</b> — הנרמול מנותק, הברז הראשי לא משפיע. מגיע: <b>' + Math.round(d.att*d.volt/5*100) + '%</b>'
+      ? 'מקור: <b>כבל חיצוני</b> (גל משולש) — הנרמול מנותק, הברז הראשי לא משפיע. מגיע: <b>' + Math.round(d.att*d.volt/5*100) + '%</b>'
       : 'מקור: <b>' + src + '</b> דרך הפס — ' + Math.round(P.idx*100) + '% × ' + Math.round(d.att*100) + '% = <b>' + Math.round(P.idx*d.att*100) + '%</b>';
     // diagram
     const lvl = d.ext ? 0 : P.idx*d.att;
@@ -433,17 +444,18 @@ requestAnimationFrame(frame);
 
 /* ================= Sound (same model at audio rate) ================= */
 const workletSrc = `
-const EXPO_OCT=${EXPO_OCT}, EXT_RATE=${EXT_RATE}, MULT=${AUDIO_MULT};
+const EXPO_OCT=${EXPO_OCT}, MULT=${AUDIO_MULT};
 function tri(x){const p=x-Math.floor(x);return p<.5?4*p-1:3-4*p;}
 function od(i,a){const x=Math.min(1,Math.max(0,(i-.85)/.15)),y=Math.min(1,Math.max(0,(a-.8)/.2));return x*y;}
-function sig(d,i,s,t){if(d.ext)return d.att*(d.volt/5)*tri(t*EXT_RATE);const x=i*d.att*s,w=od(i,d.att);return (1-w)*x+w*Math.tanh(3*x)*1.15;}
+function sig(d,i,s,ph){if(d.ext)return d.att*(d.volt/5)*tri(ph);const x=i*d.att*s,w=od(i,d.att);return (1-w)*x+w*Math.tanh(3*x)*1.15;}
 class FM extends AudioWorkletProcessor{
-  constructor(){super();this.p=null;this.a=0;this.b=0;this.t=0;this.g=0;this.mon='AB';this.on=false;
+  constructor(){super();this.p=null;this.a=0;this.b=0;this.t=0;this.g=0;this.x={AE:0,AL:0,BE:0,BL:0};this.mon='AB';this.on=false;
     this.port.onmessage=e=>{if(e.data.p)this.p=e.data.p;if(e.data.mon)this.mon=e.data.mon;if('on' in e.data)this.on=e.data.on;};}
   process(_,outs){const L=outs[0][0],R=outs[0][1]||outs[0][0];if(!this.p)return true;const P=this.p,dt=1/sampleRate,TAU=2*Math.PI;
     for(let n=0;n<L.length;n++){const sA=Math.sin(this.a),sB=Math.sin(this.b);
-      const fA=Math.max(0,P.fA*MULT*Math.pow(2,sig(P.d.AE,P.idx,sB,this.t)*EXPO_OCT)*(1+sig(P.d.AL,P.idx,sB,this.t)));
-      const fB=Math.max(0,P.fB*MULT*Math.pow(2,sig(P.d.BE,P.idx,sA,this.t)*EXPO_OCT)*(1+sig(P.d.BL,P.idx,sA,this.t)));
+      const X=this.x;const fA=Math.max(0,P.fA*MULT*Math.pow(2,sig(P.d.AE,P.idx,sB,X.AE)*EXPO_OCT)*(1+sig(P.d.AL,P.idx,sB,X.AL)));
+      const fB=Math.max(0,P.fB*MULT*Math.pow(2,sig(P.d.BE,P.idx,sA,X.BE)*EXPO_OCT)*(1+sig(P.d.BL,P.idx,sA,X.BL)));
+      for(const k in X){X[k]=(X[k]+P.d[k].rate*MULT*dt)%1000;}
       this.a=(this.a+TAU*fA*dt)%TAU;this.b=(this.b+TAU*fB*dt)%TAU;this.t+=dt;
       this.g+=((this.on?0.18:0)-this.g)*0.0015;
       const g=this.g;
