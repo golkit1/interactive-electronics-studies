@@ -202,7 +202,7 @@ footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px 
 </section>
 
 <section class="wrap pane" id="tabC" hidden>
-  <p>אותו קבל, תדרים שונים.</p>
+  <p>אותו קבל, תדרים שונים. התדרים הם הרמוניות של גל מרובע ב־50 הרץ.</p>
   <div class="panel">
     <div class="ctl" style="margin:0">
       <span class="lbl" id="capLblC">קבל (ננופרד)</span>
@@ -383,7 +383,7 @@ footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px 
     requestAnimationFrame(frame);
   }
   /* ---------- part C: same filter, different frequencies ---------- */
-  const FS=[50,150,400,1000,3000];
+  const FS=[50,150,450,950,2950];
   let CC=1e-8, tC=0, oscC=null, gC=null, filtC=null, partOn=-1;
   const partsEl=document.getElementById("parts"), capBtnsC=document.getElementById("capBtnsC");
   capsA.forEach(c=>{const b=document.createElement("button"); b.textContent=c.t; b.setAttribute("aria-pressed",c.v===CC);
@@ -391,7 +391,7 @@ footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px 
     capBtnsC.appendChild(b)});
   const parts=FS.map((f0,i)=>{
     const b=document.createElement("button"); b.className="part"; b.setAttribute("aria-pressed","false");
-    b.innerHTML='<div class="nm"><span>'+(f0>=1000?(f0/1000)+" אלף":f0)+' הרץ</span><small class="pct"></small></div><canvas></canvas>';
+    b.innerHTML='<div class="nm"><span>'+f0+' הרץ</span><small>הרמוניה '+(f0/50)+'</small><small class="pct"></small></div><canvas></canvas>';
     partsEl.appendChild(b);
     const cv=b.querySelector("canvas"), c=cv.getContext("2d");
     new ResizeObserver(()=>fit(cv,c)).observe(cv);
