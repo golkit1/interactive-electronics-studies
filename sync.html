@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>סנכרון אוסילטורים – Sync</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e1014; --panel:#171a21; --panel2:#1e222b; --line:#2b303b;
+  --txt:#e8eaf0; --dim:#9aa1b1;
+  --o1:#f4a261; --o2:#4cc9f0; --pulse:#ef476f; --ok:#06d6a0;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:'Heebo',sans-serif;line-height:1.65}
+.wrap{max-width:1040px;margin:0 auto;padding:28px 18px 80px}
+h1{font-size:2.1rem;font-weight:800;margin:0 0 4px}
+h2{font-size:1.35rem;margin:42px 0 10px;font-weight:800}
+h3{margin:0 0 6px;font-size:1.08rem}
+.sub{color:var(--dim);margin:0 0 18px}
+p{margin:8px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0}
+.o1{color:var(--o1);font-weight:600}.o2{color:var(--o2);font-weight:600}.pl{color:var(--pulse);font-weight:600}
+.modes{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.modes button,.btn{font-family:inherit;font-size:1rem;background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:8px 16px;cursor:pointer;transition:.15s}
+.modes button:hover,.btn:hover{border-color:#4a5263}
+.modes button.on{background:#2a3b52;border-color:var(--o2);color:#fff}
+.btn.on:not(.play){background:#2a3b52;border-color:var(--o2)}
+.btn.play{background:var(--ok);color:#06231b;border-color:var(--ok);font-weight:700}
+.btn.play.on{background:var(--pulse);border-color:var(--pulse);color:#fff}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.ctl label{display:flex;justify-content:space-between;font-size:.95rem;color:var(--dim)}
+.ctl input[type=range]{width:100%;accent-color:var(--o2)}
+.ctl.c1 input[type=range]{accent-color:var(--o1)}
+input[type=number]{width:84px;font-family:inherit;font-size:.95rem;font-weight:600;background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:2px 6px;direction:ltr;text-align:center}
+.val{font-variant-numeric:tabular-nums;color:var(--txt);font-weight:600}
+canvas{width:100%;display:block;background:#0a0c10;border-radius:10px;border:1px solid var(--line)}
+.readout{display:flex;gap:18px;flex-wrap:wrap;font-size:.95rem;margin-top:10px}
+.readout div{background:var(--panel2);padding:6px 12px;border-radius:8px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+select{font-family:inherit;background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:.95rem}
+.explain{border-right:4px solid var(--o2);background:var(--panel2);padding:12px 16px;border-radius:8px;margin-top:12px}
+.presets{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.preset{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;text-align:right;color:var(--txt);font-family:inherit;font-size:.95rem}
+.preset:hover{border-color:var(--o2)}
+.preset b{display:block;font-size:1.02rem;margin-bottom:4px}
+.legend{display:flex;gap:16px;font-size:.88rem;color:var(--dim);margin:6px 0 8px;flex-wrap:wrap}
+.legend span::before{content:'';display:inline-block;width:12px;height:3px;margin-left:6px;vertical-align:middle;background:currentColor}
+.q{margin:14px 0}
+.q .opts{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.q button{text-align:right;font-family:inherit;font-size:.97rem;background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}
+.q button.right{border-color:var(--ok);background:#0f3a30}
+.q button.wrong{border-color:var(--pulse);background:#3d1622}
+.q .fb{font-size:.92rem;color:var(--dim);margin-top:6px;min-height:1.2em}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+td,th{border-bottom:1px solid var(--line);padding:8px;text-align:right;vertical-align:top}
+th{color:var(--dim);font-weight:600}
+.note{font-size:.88rem;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>סנכרון אוסילטורים – Sync</h1>
+<p class="sub">לפי "מוזיקה אלקטרונית" של אלן סטריינג'</p>
+
+<div class="card">
+  <div class="modes" id="modes">
+    <button data-m="none" class="on">No Sync</button>
+    <button data-m="soft">Soft Sync</button>
+    <button data-m="hard">Hard Sync</button>
+  </div>
+  <div class="grid">
+    <div class="ctl c1">
+      <label><span class="o1">אוסילטור 1 – Master</span><span class="val"><input type="number" id="f1v" min="40" max="2000" step="0.1"> הרץ</span></label>
+      <input type="range" id="f1" min="0" max="1000" step="1">
+    </div>
+    <div class="ctl">
+      <label><span class="o2">אוסילטור 2 – Slave</span><span class="val"><input type="number" id="f2v" min="40" max="2000" step="0.1"> הרץ</span></label>
+      <input type="range" id="f2" min="0" max="1000" step="1">
+    </div>
+  </div>
+  <canvas id="scope" height="300"></canvas>
+  <div class="readout">
+    <div>אוסילטור 1 בפועל: <span class="val o1" id="m1">–</span></div>
+    <div>אוסילטור 2 בפועל: <span class="val o2" id="m2">–</span></div>
+  </div>
+  <div class="row">
+    <button class="btn play" id="play">▶ השמעה</button>
+    <button class="btn" id="freeze">⏸ עצירת הגלים</button>
+    <button class="btn" id="reset">חזרה לדוגמה מהספר</button>
+  </div>
+  <div class="explain" id="explain"></div>
+</div>
+
+</div>
+<script>
+// ---------- Parameters ----------
+const P = { f1: 440, f2: 432.6, mode: 'none', th: 0.94 };
+const FMIN = 40, FMAX = 2000;
+const toSlider = f => Math.round(1000 * Math.log(f / FMIN) / Math.log(FMAX / FMIN));
+const fromSlider = v => FMIN * Math.pow(FMAX / FMIN, v / 1000);
+const fmt = f => (f < 100 ? f.toFixed(2) : f.toFixed(1)) + ' הרץ';
+
+// ---------- Engine (shared by audio, scope, measurement) ----------
+class Engine {
+  constructor() { this.p1 = 0; this.p2 = 0.37; }
+  clone() { const e = new Engine(); e.p1 = this.p1; e.p2 = this.p2; return e; }
+  // advance by dt seconds; returns event flags
+  step(dt) {
+    const f1 = P.f1, f2 = P.f2;
+    let p1 = this.p1 + f1 * dt, p2 = this.p2 + f2 * dt;
+    let w1 = false, w2 = false, r1 = false, r2 = false;
+    if (p1 >= 1) { p1 -= Math.floor(p1); w1 = true; }
+    if (p2 >= 1) { p2 -= Math.floor(p2); w2 = true; }
+    if (P.mode === 'hard') {
+      if (w1) { if (!w2 || p2 > 0.02) r2 = true; p2 = (p1 / f1) * f2; p2 -= Math.floor(p2); }
+    } else if (P.mode === 'soft') {
+      if (w1 && !w2 && p2 > P.th) { p2 = (p1 / f1) * f2; r2 = true; }
+      else if (w2 && !w1 && p1 > P.th) { p1 = (p2 / f2) * f1; r1 = true; }
+    }
+    this.p1 = p1; this.p2 = p2;
+    this.w1 = w1 || r1; this.w2 = w2 || r2; this.r1 = r1; this.r2 = r2;
+  }
+}
+
+// ---------- Audio ----------
+let ac = null, node = null, gain = null, playing = false;
+const audioEng = new Engine();
+function startAudio() {
+  if (!ac) {
+    ac = new (window.AudioContext || window.webkitAudioContext)();
+    gain = ac.createGain(); gain.gain.value = 0; gain.connect(ac.destination);
+    node = ac.createScriptProcessor(2048, 0, 1);
+    const OS = 4;
+    let lp = 0;
+    node.onaudioprocess = e => {
+      const out = e.outputBuffer.getChannelData(0);
+      const dt = 1 / ac.sampleRate / OS;
+      const L = 'both';
+      const a1 = L === 'o2' ? 0 : 1, a2 = L === 'o1' ? 0 : 1;
+      const norm = (a1 + a2) || 1;
+      for (let i = 0; i < out.length; i++) {
+        let s = 0;
+        for (let k = 0; k < OS; k++) {
+          audioEng.step(dt);
+          s += a1 * (2 * audioEng.p1 - 1) + a2 * (2 * audioEng.p2 - 1);
+        }
+        s = s / OS / norm;
+        lp += 0.6 * (s - lp);
+        out[i] = lp * 0.35;
+      }
+    };
+    node.connect(gain);
+  }
+  ac.resume();
+  gain.gain.setTargetAtTime(1, ac.currentTime, 0.03);
+}
+function stopAudio() { if (gain) gain.gain.setTargetAtTime(0, ac.currentTime, 0.03); }
+document.getElementById('play').onclick = function () {
+  try {
+    playing = !playing;
+    if (playing) { startAudio(); this.textContent = '■ עצירה'; this.classList.add('on'); }
+    else { stopAudio(); this.textContent = '▶ השמעה'; this.classList.remove('on'); }
+  } catch (err) { this.textContent = 'השמעה לא זמינה בדפדפן הזה'; }
+};
+
+// ---------- Measurement ----------
+function measure() {
+  const e = new Engine(); const sr = 48000, dt = 1 / sr;
+  for (let i = 0; i < sr * 0.3; i++) e.step(dt);
+  let t1 = [], t2 = [];
+  for (let i = 0; i < sr * 0.6; i++) { e.step(dt); if (e.w1) t1.push(i); if (e.w2) t2.push(i); }
+  const fr = t => t.length > 1 ? (t.length - 1) / ((t[t.length - 1] - t[0]) / sr) : 0;
+  const m1 = fr(t1), m2 = P.mode === 'hard' ? m1 : fr(t2);
+  document.getElementById('m1').textContent = fmt(m1);
+  document.getElementById('m2').textContent = fmt(m2);
+}
+
+// ---------- Scope ----------
+const scope = document.getElementById('scope');
+const visEng = new Engine();
+let lastT = performance.now(), frozen = false;
+document.getElementById('freeze').onclick = function () {
+  frozen = !frozen;
+  this.textContent = frozen ? '▶ המשך תנועה' : '⏸ עצירת הגלים';
+  this.classList.toggle('on', frozen);
+};
+function drawScope(now) {
+  const speed = frozen ? 0 : 0.05;
+  const dtReal = Math.min(0.05, (now - lastT) / 1000); lastT = now;
+  // advance the visual engine in small steps
+  const adv = dtReal * speed, steps = Math.ceil(adv * Math.max(P.f1, P.f2) * 40) + 1;
+  for (let i = 0; i < steps; i++) visEng.step(adv / steps);
+
+  const dpr = devicePixelRatio, W = scope.width = scope.clientWidth * dpr, H = scope.height = 300 * dpr;
+  const ctx = scope.getContext('2d'); ctx.clearRect(0, 0, W, H);
+  // trigger on osc 1 fall
+  const e = visEng.clone();
+  const fine = 1 / (Math.max(P.f1, P.f2) * 200);
+  for (let i = 0; i < 400 && !e.w1; i++) e.step(fine * 2);
+  const win = 3 / P.f1, N = Math.floor(W / dpr * 2), dt = win / N;
+  const lane = H / 2, amp = lane * 0.36;
+  const y1 = [], y2 = [], pulses = [], resets = [];
+  for (let i = 0; i < N; i++) {
+    const sub = 8; let rr = false, ww = false;
+    for (let k = 0; k < sub; k++) { e.step(dt / sub); if (e.w1) ww = true; if (e.r2 || e.r1) rr = true; }
+    y1.push(2 * e.p1 - 1); y2.push(2 * e.p2 - 1);
+    if (ww) pulses.push(i); if (rr) resets.push(i);
+  }
+  const X = i => (i / N) * W;
+  // lanes
+  ctx.fillStyle = '#9aa1b1'; ctx.font = (12 * dpr) + 'px Heebo'; ctx.textAlign = 'right';
+  ctx.fillText('אוסילטור 1', W - 8 * dpr, 16 * dpr); ctx.fillText('אוסילטור 2', W - 8 * dpr, lane + 16 * dpr);
+  ctx.strokeStyle = '#2b303b'; ctx.beginPath(); ctx.moveTo(0, lane); ctx.lineTo(W, lane); ctx.stroke();
+  // pulses
+  ctx.strokeStyle = 'rgba(239,71,111,.45)'; ctx.setLineDash([4 * dpr, 4 * dpr]);
+  pulses.forEach(i => { ctx.beginPath(); ctx.moveTo(X(i), 0); ctx.lineTo(X(i), H); ctx.stroke(); });
+  ctx.setLineDash([]);
+  const plot = (arr, off, col) => {
+    ctx.strokeStyle = col; ctx.lineWidth = 2.2 * dpr; ctx.beginPath();
+    arr.forEach((v, i) => { const xx = X(i), yy = off - v * amp; i ? ctx.lineTo(xx, yy) : ctx.moveTo(xx, yy); });
+    ctx.stroke();
+  };
+  plot(y1, lane / 2, '#f4a261'); plot(y2, lane + lane / 2, '#4cc9f0');
+  // reset dots
+  ctx.fillStyle = '#ef476f';
+  resets.forEach(i => { ctx.beginPath(); ctx.arc(X(i), lane + lane / 2 - y2[Math.max(0, i - 1)] * amp, 4.5 * dpr, 0, 7); ctx.fill(); });
+  ctx.fillStyle = '#9aa1b1'; ctx.textAlign = 'left';
+  ctx.textAlign = 'right'; ctx.fillText('זמן →', W - 8 * dpr, H - 8 * dpr);
+  requestAnimationFrame(drawScope);
+}
+
+// ---------- UI ----------
+const EXPLAIN = {
+  none: '',
+  soft: 'כאשר אוסילטור 1 מסיים מחזור, הוא מאפשר לאוסילטור 2 להתאפס גם כן, בתנאי שאוסילטור 2 כבר קרוב לסיום המחזור שלו. כך אוסילטור 2 נמשך לתדר של אוסילטור 1.',
+  hard: 'אוסילטור 2 מתאפס בכל פעם שאוסילטור 1 משלים מחזור ומתחיל מחזור חדש (בנקודה האדומה).<br>הזיזו את התדר של אוסילטור 2 כלפי מעלה, מעבר לתדר של אוסילטור 1, והקשיבו כיצד צורת הגל משתנה ובהתאם גם גוון הצליל.'
+};
+function setMode(m) {
+  P.mode = m;
+  document.querySelectorAll('#modes button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+  document.getElementById('explain').innerHTML = EXPLAIN[m];
+  document.getElementById('explain').style.display = EXPLAIN[m] ? '' : 'none';
+  refresh();
+}
+document.querySelectorAll('#modes button').forEach(b => b.onclick = () => { if (b.dataset.m === 'hard') setFreqs(110, P.f2); setMode(b.dataset.m); });
+const s1 = document.getElementById('f1'), s2 = document.getElementById('f2');
+function setFreqs(f1, f2, fromUI) {
+  P.f1 = f1; P.f2 = f2;
+  if (!fromUI) { s1.value = toSlider(f1); s2.value = toSlider(f2); }
+  const n1 = document.getElementById('f1v'), n2 = document.getElementById('f2v');
+  if (document.activeElement !== n1) n1.value = +f1.toFixed(1);
+  if (document.activeElement !== n2) n2.value = +f2.toFixed(1);
+  refresh();
+}
+s1.oninput = () => setFreqs(fromSlider(+s1.value), P.f2, true);
+s2.oninput = () => setFreqs(P.f1, fromSlider(+s2.value), true);
+const clampF = v => Math.min(FMAX, Math.max(FMIN, v));
+document.getElementById('f1v').addEventListener('input', e => { const v = parseFloat(e.target.value); if (v >= FMIN && v <= FMAX) { P.f1 = v; s1.value = toSlider(v); refresh(); } });
+document.getElementById('f2v').addEventListener('input', e => { const v = parseFloat(e.target.value); if (v >= FMIN && v <= FMAX) { P.f2 = v; s2.value = toSlider(v); refresh(); } });
+['f1v','f2v'].forEach(id => document.getElementById(id).addEventListener('change', e => { const v = clampF(parseFloat(e.target.value) || 440); e.target.value = v; id === 'f1v' ? setFreqs(v, P.f2) : setFreqs(P.f1, v); }));
+let refreshT = null;
+function refresh() { clearTimeout(refreshT); refreshT = setTimeout(() => { measure(); }, 60); }
+
+// ---------- Init ----------
+setFreqs(P.f1, P.f2); setMode('none');
+document.getElementById('reset').onclick = () => { setFreqs(440, 432.6); setMode('none'); };
+requestAnimationFrame(drawScope);
+</script>
+</body>
+</html>
