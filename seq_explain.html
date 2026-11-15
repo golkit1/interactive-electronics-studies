@@ -1355,7 +1355,8 @@ function drawTiming(c,s,names){
     c.strokeStyle=col;c.lineWidth=2.2;stepLine(c,L,w,600,t=>f(p0+span*t),v=>v?yt:yb);});
   const yN=top+4*rh+22;c.fillStyle=css('--muted');c.textAlign='left';c.fillText(names[4],4,yN);
   c.textAlign='center';c.fillStyle=css('--ink');c.font='500 14px Rubik, Arial';
-  for(let k=Math.floor(p0-DUTY)-1;k<=pEnd;k++){const a=Math.max(p0,k+DUTY),b=Math.min(pEnd,k+1+DUTY);if(b-a<0.35)continue;
+  for(let k=Math.floor(p0-DUTY)-1;k<=pEnd;k++){const a=Math.max(p0,k+DUTY),b=Math.min(pEnd,k+1+DUTY);if(b-a<0.15)continue;
+    c.font=(b-a<0.35?'500 11px':'500 14px')+' Rubik, Arial';
     c.fillText(mod8(countAt(k+DUTY+0.01)),L+((a+b)/2-p0)/span*w,yN);}
   playhead(c,L,w,p0,span,s.phase,top,top+rh*4+34);
 }
@@ -1406,7 +1407,8 @@ function drawTimingE(c,s){
     c.strokeStyle=col;c.lineWidth=2.2;stepLine(c,L,w,800,t=>f(p0+span*t),v=>v?yt:yb);});
   const yN=top+6*rh+22;c.fillStyle=css('--muted');c.textAlign='left';c.fillText('ערוץ',4,yN);
   c.textAlign='center';c.fillStyle=css('--ink');c.font='500 13px Rubik, Arial';
-  for(let k=Math.floor(p0-DUTY)-1;k<=pEnd;k++){const a=Math.max(p0,k+DUTY),b=Math.min(pEnd,k+1+DUTY);if(b-a<0.35)continue;
+  for(let k=Math.floor(p0-DUTY)-1;k<=pEnd;k++){const a=Math.max(p0,k+DUTY),b=Math.min(pEnd,k+1+DUTY);if(b-a<0.15)continue;
+    c.font=(b-a<0.35?'500 10px':'500 13px')+' Rubik, Arial';
     c.fillText(chOf(countAt(k+DUTY+0.01)),L+((a+b)/2-p0)/span*w,yN);}
   playhead(c,L,w,p0,span,s.phase,top,top+rh*6+34);
 }
