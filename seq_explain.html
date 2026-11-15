@@ -161,6 +161,7 @@ dd{margin:2px 0 0}
     <section class="module">
       <h2>דיאגרמת תזמון <span class="en">(Timing diagram)</span></h2>
       <p class="hint">המונה מתקדם בכל פעם שהשעון עובר ממתח גבוה לנמוך. כל יציאה במונה משתנה במחצית הקצב של היציאה שלפניה.</p>
+      <div class="btns" style="margin-bottom:6px"><button class="bits-toggle" aria-pressed="false">הצגת 0 ו־1</button></div>
       <div class="cvs"><canvas id="a-timing" height="250"></canvas></div>
     </section>
 
@@ -238,6 +239,7 @@ dd{margin:2px 0 0}
     <section class="module">
       <h2>דיאגרמת תזמון <span class="en">(Timing diagram)</span></h2>
       <p class="hint">המונה מתקדם בכל פעם שהשעון עובר ממתח גבוה לנמוך. כל יציאה במונה משתנה במחצית הקצב של היציאה שלפניה.</p>
+      <div class="btns" style="margin-bottom:6px"><button class="bits-toggle" aria-pressed="false">הצגת 0 ו־1</button></div>
       <div class="cvs"><canvas id="b-timing" height="250"></canvas></div>
     </section>
 
@@ -1343,6 +1345,9 @@ function stepLine(c,x0,w,n,fn,yOf,tMax=1){let prev=null;c.beginPath();
   for(let i=0;i<=iMax;i++){const x=x0+w*i/n,v=fn(i/n);
     if(prev===null)c.moveTo(x,yOf(v));else if(v!==prev){c.lineTo(x,yOf(prev));c.lineTo(x,yOf(v));}else c.lineTo(x,yOf(v));prev=v;}
   c.stroke();}
+let showBits=false;
+document.querySelectorAll('.bits-toggle').forEach(b=>b.addEventListener('click',()=>{showBits=!showBits;
+  document.querySelectorAll('.bits-toggle').forEach(x=>{x.setAttribute('aria-pressed',showBits);x.textContent=showBits?'הסתרת 0 ו־1':'הצגת 0 ו־1';});}));
 function drawTiming(c,s,names){
   const W=c._w,H=c._h,L=86,R=12,w=W-L-R,span=12,p0=Math.max(0,s.phase-span),pEnd=p0+span,rh=44,top=10;
   c.clearRect(0,0,W,H);
@@ -1358,6 +1363,10 @@ function drawTiming(c,s,names){
   for(let k=Math.floor(p0-DUTY)-1;k<=pEnd;k++){const a=Math.max(p0,k+DUTY),b=Math.min(pEnd,k+1+DUTY);if(b-a<0.15)continue;
     c.font=(b-a<0.35?'500 11px':'500 14px')+' Rubik, Arial';
     c.fillText(mod8(countAt(k+DUTY+0.01)),L+((a+b)/2-p0)/span*w,yN);}
+  if(showBits){c.font='600 13px Rubik, Arial';c.fillStyle=css('--ink');
+    for(let k=Math.floor(p0-DUTY)-1;k<=pEnd;k++){const a=Math.max(p0,k+DUTY),b=Math.min(pEnd,k+1+DUTY);if(b-a<0.15)continue;
+      const n=countAt(k+DUTY+0.01),x=L+((a+b)/2-p0)/span*w;
+      [1,2,3].forEach(r=>c.fillText((n>>(r-1))&1,x,top+r*rh+21));}}
   playhead(c,L,w,p0,span,s.phase,top,top+rh*4+34);
 }
 function playhead(c,L,w,p0,span,ph,y0,y1){if(ph>=p0+span-0.02)return;const x=L+(ph-p0)/span*w;
