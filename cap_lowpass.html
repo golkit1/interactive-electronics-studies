@@ -102,6 +102,9 @@ canvas{width:100%; height:170px; display:block; background:var(--surface); borde
 .part .pct{color:var(--water)}
 .part canvas{height:70px; margin:0; border:none; background:transparent}
 .sumc{height:150px}
+.key{font-weight:700; font-size:1.1rem; background:var(--surface); border-inline-start:5px solid var(--water); border-radius:10px; padding:.6rem .9rem}
+ul.ideas{padding-inline-start:1.2rem; margin:.4rem 0 0}
+ul.ideas li{margin-bottom:.3rem}
 footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px solid var(--grid)}
 </style>
 </head>
@@ -118,7 +121,12 @@ footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px 
 
 <section class="wrap">
   <h2>הרעיון</h2>
-  <p>הקבל (Capacitor) הוא דלי, הנגד (Resistor) הוא צינור. לרמקול מגיע <b>גובה המים בדלי</b>.</p>
+  <p class="key">הקבל מגיב אחרת לשינויים איטיים ולשינויים מהירים במתח.</p>
+  <ul class="ideas">
+    <li><b>הקבל (Capacitor)</b> הוא דלי שאוגר מים. הוא יכול להתמלא ולהתרוקן.</li>
+    <li><b>הנגד (Resistor)</b> הוא צינור שמגביל את קצב זרימת המים.</li>
+    <li><b>הרמקול</b> מקבל את השינויים בגובה המים בדלי, ומתרגם אותם לתנועה של הממברנה ולצליל.</li>
+  </ul>
 </section>
 
 <nav class="wrap tabs" role="tablist">
