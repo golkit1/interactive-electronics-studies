@@ -100,7 +100,7 @@ canvas{width:100%; height:170px; display:block; background:var(--surface); borde
 .part .nm{font-weight:700; line-height:1.3}
 .part .nm small{display:block; color:var(--muted); font-weight:600}
 .part .pct{color:var(--water)}
-.part canvas{height:56px; margin:0; border:none; background:transparent}
+.part canvas{height:70px; margin:0; border:none; background:transparent}
 .sumc{height:150px}
 footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px solid var(--grid)}
 </style>
@@ -123,7 +123,7 @@ footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px 
 
 <nav class="wrap tabs" role="tablist">
   <button role="tab" aria-selected="true" data-t="tabA">מתנד אחד</button>
-  <button role="tab" aria-selected="false" data-t="tabC">מה יש בתוך הגל</button>
+  <button role="tab" aria-selected="false" data-t="tabC">תדרים שונים</button>
 </nav>
 
 <section class="wrap wide pane" id="tabA">
@@ -202,26 +202,19 @@ footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px 
 </section>
 
 <section class="wrap pane" id="tabC" hidden>
-  <p>גל ריבועי = הרבה גלי סינוס ביחד. הקבל מחליש יותר את הגבוהים.</p>
+  <p>אותו קבל, תדרים שונים.</p>
   <div class="panel">
-    <div class="ctl">
-      <label for="fC">גובה הצליל: <output id="fCOut"></output></label>
-      <input type="range" id="fC" min="0" max="100" value="45">
-    </div>
-    <div class="ctl">
+    <div class="ctl" style="margin:0">
       <span class="lbl" id="capLblC">קבל (ננופרד)</span>
       <div class="caps ltr" role="group" aria-labelledby="capLblC" id="capBtnsC"></div>
       <div class="hint" id="cHintC"></div>
     </div>
-    <button class="sound" id="soundC" aria-pressed="false">השמיעו הכול</button>
   </div>
   <div class="parts" id="parts"></div>
-  <p class="hint" style="color:var(--muted);font-size:.9rem;margin:.3rem 0 0">לחצו על שורה כדי לשמוע רק אותה.</p>
-  <h2 style="margin-top:1.2rem;font-size:1.2rem">ביחד</h2>
-  <canvas id="sumC" class="sumc"></canvas>
   <div class="legend">
-    <span><span class="dot" style="background:var(--high)"></span>בלי קבל</span>
-    <span><span class="dot" style="background:var(--water)"></span>עם קבל</span>
+    <span><span class="dot" style="background:var(--high)"></span>המתנד</span>
+    <span><span class="dot" style="background:var(--water)"></span>אחרי הקבל</span>
+    <span>לחצו על שורה כדי לשמוע</span>
   </div>
 </section>
 
@@ -389,74 +382,57 @@ footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px 
 
     requestAnimationFrame(frame);
   }
-  /* ---------- part C: harmonics ---------- */
-  const NS=[1,3,5,7,9];
-  let CC=1e-8, fCv=220, tC=0, oscC=null, gC=null, filtC=null, partOn=-1;
-  const fCs=document.getElementById("fC"), partsEl=document.getElementById("parts"), sC=document.getElementById("soundC");
-  const capBtnsC=document.getElementById("capBtnsC");
+  /* ---------- part C: same filter, different frequencies ---------- */
+  const FS=[50,150,400,1000,3000];
+  let CC=1e-8, tC=0, oscC=null, gC=null, filtC=null, partOn=-1;
+  const partsEl=document.getElementById("parts"), capBtnsC=document.getElementById("capBtnsC");
   capsA.forEach(c=>{const b=document.createElement("button"); b.textContent=c.t; b.setAttribute("aria-pressed",c.v===CC);
     b.onclick=()=>{CC=c.v;[...capBtnsC.children].forEach(x=>x.setAttribute("aria-pressed",x===b)); updateC()};
     capBtnsC.appendChild(b)});
-  const parts=NS.map((n,i)=>{
+  const parts=FS.map((f0,i)=>{
     const b=document.createElement("button"); b.className="part"; b.setAttribute("aria-pressed","false");
-    b.innerHTML='<div class="nm"><span class="fq"></span><small class="pct"></small></div><canvas></canvas>';
+    b.innerHTML='<div class="nm"><span>'+(f0>=1000?(f0/1000)+" אלף":f0)+' הרץ</span><small class="pct"></small></div><canvas></canvas>';
     partsEl.appendChild(b);
     const cv=b.querySelector("canvas"), c=cv.getContext("2d");
     new ResizeObserver(()=>fit(cv,c)).observe(cv);
-    b.onclick=()=>playPart(i);
-    return {n,b,cv,c,fq:b.querySelector(".fq"),pct:b.querySelector(".pct")};});
-  const cvS=document.getElementById("sumC"), cS=cvS.getContext("2d");
-  new ResizeObserver(()=>fit(cvS,cS)).observe(cvS);
-  const fcC=()=>CC?1/(2*Math.PI*R*CC):Infinity;
-  const gn=n=>{const x=n*fCv/fcC(); return {g:1/Math.sqrt(1+x*x), ph:Math.atan(x)}};
+    b.onclick=()=>{ if(oscC&&partOn===i) stopC(); else startC(i); };
+    return {f0,b,cv,c,pct:b.querySelector(".pct")};});
+  function steady(f0){ /* time constant in cycles, and min/max of the output */
+    const t=R*CC*f0; if(!t) return {t:0,lo:0,hi:1};
+    const a=Math.exp(-0.5/t); return {t:t,lo:a/(1+a),hi:1/(1+a)}; }
   function updateC(){
-    fCv=Math.round(50*Math.pow(40,fCs.value/100));
-    document.getElementById("fCOut").textContent=fCv+" הרץ";
-    const fc=fcC();
+    const fc=CC?1/(2*Math.PI*R*CC):0;
     document.getElementById("cHintC").textContent=CC?"מעמעם מעל "+(fc>=1000?(fc/1000).toFixed(1)+" אלף":Math.round(fc))+" הרץ":"";
-    parts.forEach(p=>{const h=p.n*fCv; p.fq.textContent=(h>=1000?(h/1000).toFixed(1)+" אלף":h)+" הרץ";
-      p.pct.textContent="נשאר "+Math.round(gn(p.n).g*100)+"%";});
-    if(oscC){oscC.frequency.setTargetAtTime(partOn<0?fCv:NS[partOn]*fCv,ac.currentTime,0.02);
-      if(partOn<0) wireC(); else gC.gain.setTargetAtTime(0.25*gn(NS[partOn]).g/NS[partOn],ac.currentTime,0.02);}
+    parts.forEach(p=>{const q=steady(p.f0); p.pct.textContent="נשאר "+Math.round((q.hi-q.lo)*100)+"%";});
+    if(oscC) wireC();
   }
-  fCs.addEventListener("input",updateC);
   function wireC(){ oscC.disconnect(); if(filtC) filtC.disconnect(); filtC=rcFilter(ac,R*CC);
     if(filtC){oscC.connect(filtC); filtC.connect(gC);} else oscC.connect(gC); }
   function stopC(){ if(!oscC) return; gC.gain.setTargetAtTime(0,ac.currentTime,0.02); const o=oscC; setTimeout(()=>o.stop(),120);
-    oscC=null; partOn=-1; sC.setAttribute("aria-pressed","false"); sC.textContent="השמיעו הכול";
-    parts.forEach(p=>p.b.setAttribute("aria-pressed","false")); }
+    oscC=null; partOn=-1; parts.forEach(p=>p.b.setAttribute("aria-pressed","false")); }
   function startC(i){
     stopA(); stopC(); const a=ctx(); partOn=i;
-    oscC=a.createOscillator(); gC=a.createGain(); gC.gain.value=0; gC.connect(a.destination);
-    if(i<0){oscC.type="square"; oscC.frequency.value=fCv; wireC(); gC.gain.setTargetAtTime(0.12,a.currentTime,0.02);
-      sC.setAttribute("aria-pressed","true"); sC.textContent="עצרו את הצליל";}
-    else {const n=NS[i]; oscC.type="sine"; oscC.frequency.value=n*fCv; oscC.connect(gC);
-      gC.gain.setTargetAtTime(0.25*gn(n).g/n,a.currentTime,0.02); parts[i].b.setAttribute("aria-pressed","true");}
-    oscC.start();
+    oscC=a.createOscillator(); oscC.type="square"; oscC.frequency.value=FS[i];
+    gC=a.createGain(); gC.gain.value=0; gC.connect(a.destination);
+    wireC(); oscC.start(); gC.gain.setTargetAtTime(0.12,a.currentTime,0.02);
+    parts[i].b.setAttribute("aria-pressed","true");
   }
-  sC.onclick=()=>{ if(oscC&&partOn<0) stopC(); else startC(-1); };
-  function playPart(i){ if(oscC&&partOn===i) stopC(); else startC(i); }
-
   function drawC(){
-    const hi=css("--high"), wa=css("--water"), grid=css("--grid"), cyc=2;
+    const hi=css("--high"), wa=css("--water"), grid=css("--grid"), cyc=4;
     parts.forEach(p=>{
-      const W=p.cv.clientWidth, H=p.cv.clientHeight, c=p.c, mid=H/2, A=H*0.44/p.n, {g,ph}=gn(p.n);
+      const W=p.cv.clientWidth, H=p.cv.clientHeight, c=p.c, top=6, bot=H-6, cy=v=>bot-(bot-top)*v, q=steady(p.f0);
+      const w=ph=>{ph-=Math.floor(ph); if(!q.t) return ph<0.5?1:0;
+        return ph<0.5?1-(1-q.lo)*Math.exp(-ph/q.t):q.hi*Math.exp(-(ph-0.5)/q.t);};
       c.clearRect(0,0,W,H);
-      c.strokeStyle=grid; c.lineWidth=1; c.beginPath(); c.moveTo(0,mid); c.lineTo(W,mid); c.stroke();
-      const line=(amp,sh,col,lw)=>{c.strokeStyle=col; c.lineWidth=lw; c.beginPath();
-        for(let x=0;x<=W;x+=1){const t=tC+cyc*x/W, y=mid-amp*Math.sin(2*Math.PI*p.n*t-sh); x?c.lineTo(x,y):c.moveTo(x,y)} c.stroke();};
-      c.globalAlpha=.7; line(A,0,hi,1.5); c.globalAlpha=1; line(A*g,ph,wa,3);
+      c.strokeStyle=grid; c.lineWidth=1; c.setLineDash([5,4]);
+      [0,1].forEach(v=>{c.beginPath();c.moveTo(0,cy(v));c.lineTo(W,cy(v));c.stroke()}); c.setLineDash([]);
+      c.strokeStyle=hi; c.lineWidth=1.5; c.globalAlpha=.8; c.beginPath();
+      for(let x=0;x<=W;x++){const ph=tC+cyc*x/W, y=cy((ph-Math.floor(ph))<0.5?1:0); x?c.lineTo(x,y):c.moveTo(x,y)} c.stroke();
+      c.globalAlpha=1; c.strokeStyle=wa; c.lineWidth=3; c.beginPath();
+      for(let x=0;x<=W;x++){const y=cy(w(tC+cyc*x/W)); x?c.lineTo(x,y):c.moveTo(x,y)} c.stroke();
     });
-    const W=cvS.clientWidth, H=cvS.clientHeight, mid=H/2, A=H*0.36;
-    cS.clearRect(0,0,W,H);
-    cS.strokeStyle=hi; cS.lineWidth=2; cS.globalAlpha=.8; cS.beginPath();
-    for(let x=0;x<=W;x++){const t=tC+cyc*x/W, y=mid-A*((t-Math.floor(t))<0.5?1:-1); x?cS.lineTo(x,y):cS.moveTo(x,y)} cS.stroke();
-    cS.globalAlpha=1; cS.strokeStyle=wa; cS.lineWidth=3.5; cS.beginPath();
-    const hs=[]; for(let n=1;n<=99;n+=2) hs.push([n,gn(n)]);
-    for(let x=0;x<=W;x+=2){const t=tC+cyc*x/W; let v=0;
-      for(const [n,q] of hs) v+=q.g/n*Math.sin(2*Math.PI*n*t-q.ph);
-      const y=mid-A*v*4/Math.PI; x?cS.lineTo(x,y):cS.moveTo(x,y)} cS.stroke();
   }
+
   let lastC=performance.now();
   function frameC(now){const dt=Math.min(0.1,(now-lastC)/1000); lastC=now;
     if(!document.getElementById("tabC").hidden){tC+=dt*0.12; drawC();}
