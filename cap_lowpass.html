@@ -266,11 +266,11 @@ footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px 
     tau=R*C;
     const cc=capsA.find(c=>c.v===C);
     let hint="";
-    if(C){const fc=1/(2*Math.PI*tau); hint="מעמעם מעל "+(fc>=1000?(fc/1000).toFixed(1)+" אלף":Math.round(fc))+" הרץ";}
+    if(C){const fc=1/(2*Math.PI*tau); hint="נקודת חיתוך: "+(fc>=1000?(fc/1000).toFixed(1)+" אלף":Math.round(fc))+" הרץ";}
     document.getElementById("cHint").textContent=hint;
     tc=tau*f; /* time constant measured in cycles */
     if(tc){const a=Math.exp(-0.5/tc); vmax=1/(1+a); vmin=a/(1+a);} else {vmax=1; vmin=0;}
-    const r=vmax-vmin;
+    const r=passRMS(vmin,vmax,tc);
     document.getElementById("meter").style.width=(r*100).toFixed(1)+"%";
     document.getElementById("say").textContent=!C?"חד. הכול עובר.":r>0.9?"כמעט הכול עובר.":r>0.4?"רך יותר.":"עמום ושקט.";
     document.getElementById("capG").style.opacity=C?1:.15;
@@ -397,13 +397,17 @@ footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px 
     new ResizeObserver(()=>fit(cv,c)).observe(cv);
     b.onclick=()=>{ if(oscC&&partOn===i) stopC(); else startC(i); };
     return {f0,b,cv,c,pct:b.querySelector(".pct")};});
+  function passRMS(lo,hi,t){ /* AC loudness of the output vs the square wave */
+    if(!t) return 1; let m=0,q=0; const N=400, v=[];
+    for(let i=0;i<N;i++){const ph=i/N; v.push(ph<0.5?1-(1-lo)*Math.exp(-ph/t):hi*Math.exp(-(ph-0.5)/t));}
+    v.forEach(x=>m+=x); m/=N; v.forEach(x=>q+=(x-m)*(x-m)); return Math.sqrt(q/N)/0.5; }
   function steady(f0){ /* time constant in cycles, and min/max of the output */
     const t=R*CC*f0; if(!t) return {t:0,lo:0,hi:1};
     const a=Math.exp(-0.5/t); return {t:t,lo:a/(1+a),hi:1/(1+a)}; }
   function updateC(){
     const fc=CC?1/(2*Math.PI*R*CC):0;
-    document.getElementById("cHintC").textContent=CC?"מעמעם מעל "+(fc>=1000?(fc/1000).toFixed(1)+" אלף":Math.round(fc))+" הרץ":"";
-    parts.forEach(p=>{const q=steady(p.f0); p.pct.textContent="נשאר "+Math.round((q.hi-q.lo)*100)+"%";});
+    document.getElementById("cHintC").textContent=CC?"נקודת חיתוך: "+(fc>=1000?(fc/1000).toFixed(1)+" אלף":Math.round(fc))+" הרץ":"";
+    parts.forEach(p=>{const q=steady(p.f0); p.pct.textContent="נשאר "+Math.round(passRMS(q.lo,q.hi,q.t)*100)+"%";});
     if(oscC) wireC();
   }
   function wireC(){ oscC.disconnect(); if(filtC) filtC.disconnect(); filtC=rcFilter(ac,R*CC);
