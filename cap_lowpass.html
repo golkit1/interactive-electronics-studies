@@ -93,7 +93,7 @@ canvas{width:100%; height:170px; display:block; background:var(--surface); borde
 .tabs button[aria-selected="true"]{border-color:var(--ink); background:var(--ink); color:var(--paper)}
 .pane{border-top:none; padding-top:1.2rem}
 .parts{display:grid; gap:.5rem; margin-top:1rem}
-.part{all:unset; box-sizing:border-box; cursor:pointer; display:grid; grid-template-columns:8.5rem 1fr; align-items:center; gap:.8rem;
+.part{all:unset; box-sizing:border-box; display:grid; grid-template-columns:8.5rem 1fr; align-items:center; gap:.8rem;
   background:var(--surface); border:2px solid var(--grid); border-radius:14px; padding:.3rem .7rem}
 .part:focus-visible{outline:3px solid var(--water); outline-offset:2px}
 .part[aria-pressed="true"]{border-color:var(--high)}
@@ -172,7 +172,7 @@ footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px 
           <div class="lbl" style="font-weight:700">כמה צליל עובר</div>
           <div class="meter"><div id="meter"></div></div>
           <div class="say" id="say"></div>
-          <button class="sound" id="soundA" aria-pressed="false">השמיעו</button>
+          <button class="sound" id="soundA" aria-pressed="false" hidden>השמיעו</button>
         </div>
       </div>
     </div>
@@ -240,7 +240,6 @@ footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px 
   <div class="legend">
     <span><span class="dot" style="background:var(--high)"></span>המתנד</span>
     <span><span class="dot" style="background:var(--water)"></span>אחרי הקבל</span>
-    <span>לחצו על שורה כדי לשמוע</span>
   </div>
 </section>
 
@@ -416,12 +415,11 @@ footer{padding:2rem 0 3rem; color:var(--muted); font-size:.9rem; border-top:1px 
     b.onclick=()=>{CC=c.v;[...capBtnsC.children].forEach(x=>x.setAttribute("aria-pressed",x===b)); updateC()};
     capBtnsC.appendChild(b)});
   const parts=FS.map((f0,i)=>{
-    const b=document.createElement("button"); b.className="part"; b.setAttribute("aria-pressed","false");
+    const b=document.createElement("div"); b.className="part";
     b.innerHTML='<div class="nm"><span>'+f0+' הרץ</span><small>הרמוניה '+(f0/50)+'</small><small class="pct"></small></div><canvas></canvas>';
     partsEl.appendChild(b);
     const cv=b.querySelector("canvas"), c=cv.getContext("2d");
     new ResizeObserver(()=>fit(cv,c)).observe(cv);
-    b.onclick=()=>{ if(oscC&&partOn===i) stopC(); else startC(i); };
     return {f0,b,cv,c,pct:b.querySelector(".pct")};});
   function passRMS(lo,hi,t){ /* AC loudness of the output vs the square wave */
     if(!t) return 1; let m=0,q=0; const N=400, v=[];
