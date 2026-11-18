@@ -71,7 +71,7 @@
   </div>
 
   <div class="card">
-    <svg viewBox="0 0 960 420" id="sch">
+    <svg viewBox="0 0 1195 425" id="sch">
       <defs>
         <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="var(--navy)"/></marker>
       </defs>
@@ -89,17 +89,36 @@
         <text x="600" y="242" text-anchor="middle" style="font-size:34px">⚡</text>
       </g>
 
-      <!-- output scope -->
-      <rect x="650" y="150" width="290" height="160" rx="12" fill="#1C2B3A"/>
-      <line x1="662" y1="170" x2="928" y2="170" stroke="#425065" stroke-dasharray="4 5"/>
-      <line x1="662" y1="230" x2="928" y2="230" stroke="#425065" stroke-dasharray="4 5"/>
-      <line x1="662" y1="290" x2="928" y2="290" stroke="#425065" stroke-dasharray="4 5"/>
-      <text x="935" y="174" text-anchor="end" style="font-size:11px;fill:#8A97A8">9V</text>
-      <text x="935" y="234" text-anchor="end" style="font-size:11px;fill:#8A97A8">4.5V</text>
-      <text x="935" y="294" text-anchor="end" style="font-size:11px;fill:#8A97A8">0V</text>
+      <!-- before-cap probe + scope -->
+      <path d="M720 230 V262" stroke="var(--navy-soft)" stroke-width="2" stroke-dasharray="4 4"/>
+      <circle cx="720" cy="230" r="5" fill="var(--navy-soft)"/>
+      <rect x="630" y="290" width="200" height="120" rx="12" fill="#1C2B3A"/>
+      <line x1="642" y1="310.0" x2="790" y2="310.0" stroke="#425065" stroke-dasharray="4 5"/>
+      <text x="824" y="314.0" text-anchor="end" style="font-size:11px;fill:#8A97A8">9V</text>
+      <line x1="642" y1="350.0" x2="790" y2="350.0" stroke="#425065" stroke-dasharray="4 5"/>
+      <text x="824" y="354.0" text-anchor="end" style="font-size:11px;fill:#8A97A8">4.5V</text>
+      <line x1="642" y1="390.0" x2="790" y2="390.0" stroke="#425065" stroke-dasharray="4 5"/>
+      <text x="824" y="394.0" text-anchor="end" style="font-size:11px;fill:#8A97A8">0V</text>
       <path id="outTrace" fill="none" stroke="#7CE0C3" stroke-width="3" stroke-linejoin="round"/>
       <path id="outBad" fill="none" stroke="#FF6B5B" stroke-width="3" stroke-linejoin="round"/>
-      <text x="795" y="140" text-anchor="middle" class="lbl">יציאה (Output)</text>
+      <text x="730.0" y="280" text-anchor="middle" class="lbl">לפני הקבל</text>
+      <!-- capacitor -->
+      <path id="capIn" d="M650 230 H858" fill="none" stroke="var(--navy)" stroke-width="6" stroke-linecap="round"/>
+      <line x1="860" y1="205" x2="860" y2="255" stroke="var(--navy)" stroke-width="6"/>
+      <line x1="876" y1="205" x2="876" y2="255" stroke="var(--navy)" stroke-width="6"/>
+      <path d="M878 230 H940" fill="none" stroke="#7CE0C3" stroke-width="6" stroke-linecap="round" id="capOut"/>
+      <text x="868" y="190" text-anchor="middle" class="lbl">קבל</text>
+      <text x="868" y="272" text-anchor="middle" class="sub">(Capacitor) 100nF</text>
+      <rect x="940" y="150" width="240" height="160" rx="12" fill="#1C2B3A"/>
+      <line x1="952" y1="170.0" x2="1140" y2="170.0" stroke="#425065" stroke-dasharray="4 5"/>
+      <text x="1174" y="174.0" text-anchor="end" style="font-size:11px;fill:#8A97A8">+4.5V</text>
+      <line x1="952" y1="230.0" x2="1140" y2="230.0" stroke="#425065" stroke-dasharray="4 5"/>
+      <text x="1174" y="234.0" text-anchor="end" style="font-size:11px;fill:#8A97A8">0V</text>
+      <line x1="952" y1="290.0" x2="1140" y2="290.0" stroke="#425065" stroke-dasharray="4 5"/>
+      <text x="1174" y="294.0" text-anchor="end" style="font-size:11px;fill:#8A97A8">−4.5V</text>
+      <path id="capTrace" fill="none" stroke="#7CE0C3" stroke-width="3" stroke-linejoin="round"/>
+      <path id="capBad" fill="none" stroke="#FF6B5B" stroke-width="3" stroke-linejoin="round"/>
+      <text x="1060.0" y="140" text-anchor="middle" class="lbl">אחרי הקבל = יציאה</text>
     </svg>
     <div class="status s-ok" id="status"></div>
   </div>
@@ -116,6 +135,10 @@
     <div class="info">
       <h3>🔇 עוצמה באפס</h3>
       <p>בלי נגדים, עוצמה באפס מחברת את נקודת הערבוב לאדמה — וכולם שותקים. הנגד שומר על השאר.</p>
+    </div>
+    <div class="info">
+      <h3>🔵 הקבל (Capacitor)</h3>
+      <p>מעביר רק את השינויים. לפני הקבל הגל "יושב" בין 0 ל־9 וולט. אחרי הקבל הוא נע סביב 0 — וזה מה שנכנס למגבר.</p>
     </div>
   </div>
 </div>
@@ -175,7 +198,18 @@ for(let i=0;i<2;i++){
 $('sch').appendChild($('chan0'));$('sch').appendChild($('chan1'));$('sch').appendChild($('busDot'));
 $('bus').setAttribute('d','M600 140 V320 M600 230 H650');
 
-const outHist=[]; const N=160;
+const outHist=[], capHist=[]; const N=160;
+const HPA=0.997; let hp=0, prevBus=4.5;
+function drawScope(H,ig,ib,x0,w,yBottom,h,vmin,vmax){
+  let dg='',db='';
+  H.forEach((p,k)=>{
+    const px=x0+k*(w/(N-1)), py=yBottom-(Math.max(vmin-1.5,Math.min(vmax+1.5,p.v))-vmin)/(vmax-vmin)*h;
+    const cont=k&&H[k-1].bad===p.bad;
+    const seg=(cont?'L':'M')+px.toFixed(1)+' '+py.toFixed(1);
+    if(p.bad)db+=seg; else dg+=seg;
+  });
+  $(ig).setAttribute('d',dg);$(ib).setAttribute('d',db);
+}
 let heat=[0,0]; let lastBad=-9, lastG=-9;
 
 function setMode(w){withR=w;
@@ -238,15 +272,12 @@ function frame(now){
   $('busDot').setAttribute('fill',vcol(bad&&!mute?4.5:bus));
   $('zap').setAttribute('opacity',(bad&&!mute)?(Math.random()>.3?1:.4):0);
 
+  hp = HPA*(hp + bus - prevBus); prevBus = bus;
   outHist.push({v:bus,bad}); if(outHist.length>N)outHist.shift();
-  let dg='',db='';
-  outHist.forEach((p,k)=>{
-    const px=662+k*(266/(N-1)), py=290-p.v/9*120;
-    const seg=(k&&outHist[k-1].bad===p.bad)?'L':'M';
-    if(p.bad){db+=(seg==='L'?'L':'M')+px.toFixed(1)+' '+py.toFixed(1);}
-    else{dg+=(seg==='L'?'L':'M')+px.toFixed(1)+' '+py.toFixed(1);}
-  });
-  $('outTrace').setAttribute('d',dg);$('outBad').setAttribute('d',db);
+  capHist.push({v:hp,bad}); if(capHist.length>N)capHist.shift();
+  drawScope(outHist,'outTrace','outBad',642,148,390,80,0,9);
+  drawScope(capHist,'capTrace','capBad',952,188,290,120,-4.5,4.5);
+  $('capIn').setAttribute('stroke',vcol(bad&&!mute?4.5:bus));
 
   if(bad)lastBad=t;
   if(gshort)lastG=t;
