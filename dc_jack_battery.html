@@ -49,7 +49,7 @@
   @keyframes flow{to{stroke-dashoffset:-22;}}
 
   .clickable{cursor:pointer;}
-  #plug,#lever,#leaf{transition:transform .5s cubic-bezier(.5,1.6,.5,1);}
+  #plug,#lever,#leaf,#leaf2{transition:transform .5s cubic-bezier(.5,1.6,.5,1);}
 
   .status{margin:16px auto 0;max-width:760px;border-radius:16px;padding:14px 18px;font-size:1.08rem;line-height:1.6;font-weight:500;text-align:center;transition:background .25s,color .25s;}
   .status b{font-weight:800;}
@@ -120,6 +120,7 @@
       <g id="leaf" style="transform-origin:338px 312px">
         <line x1="338" y1="312" x2="308" y2="291" stroke="#E9C46A" stroke-width="6" stroke-linecap="round"/>
       </g>
+      <circle id="pad" cx="306" cy="292" r="6" fill="var(--green)"/>
       <text x="270" y="166" text-anchor="middle" class="sub" fill="#fff" style="fill:#fff">מחבר מתח</text>
       <text x="270" y="182" text-anchor="middle" class="sub" style="fill:#AEB6C2">(DC Jack)</text>
 
@@ -128,6 +129,20 @@
       <circle cx="330" cy="355" r="12" fill="var(--navy)"/><text x="330" y="360" text-anchor="middle" class="pin">2</text>
       <circle cx="355" cy="312" r="12" fill="var(--gold-deep)"/><text x="355" y="317" text-anchor="middle" class="pin">3</text>
 
+
+      <!-- ===== zoom callout: pin2 / pin3 contact ===== -->
+      <line x1="195" y1="372" x2="300" y2="296" stroke="var(--navy-soft)" stroke-width="1.5" stroke-dasharray="4 4"/>
+      <rect x="15" y="318" width="182" height="132" rx="14" fill="#fff" stroke="var(--navy-soft)" stroke-width="2" stroke-dasharray="6 5"/>
+      <text x="106" y="340" text-anchor="middle" class="sub" style="font-weight:800">🔍 מקרוב: פין 2 ופין 3</text>
+      <line x1="38" y1="402" x2="118" y2="402" stroke="var(--navy)" stroke-width="10" stroke-linecap="round"/>
+      <circle cx="38" cy="402" r="12" fill="var(--navy)"/><text x="38" y="407" text-anchor="middle" class="pin">2</text>
+      <g id="leaf2" style="transform-origin:180px 384px">
+        <line x1="180" y1="384" x2="118" y2="396" stroke="#E9C46A" stroke-width="9" stroke-linecap="round"/>
+      </g>
+      <circle cx="180" cy="384" r="12" fill="var(--gold-deep)"/><text x="180" y="389" text-anchor="middle" class="pin">3</text>
+      <circle id="touchDot" cx="118" cy="398" r="8" fill="var(--green)"/>
+      <text id="zoomTxt" x="106" y="438" text-anchor="middle" class="sub" style="font-weight:800"></text>
+
       <!-- ===== plug (adapter) ===== -->
       <g id="plug" class="clickable">
         <path id="w_cable" class="w" d="M-90 240 H170" style="stroke-width:9"/>
@@ -135,8 +150,8 @@
         <rect x="140" y="204" width="82" height="72" rx="6" fill="#B7BDC6"/>
         <rect x="160" y="230" width="62" height="20" rx="4" fill="#2C3440"/>
       </g>
-      <text x="95" y="195" text-anchor="middle" class="lbl">ספק כוח</text>
-      <text x="95" y="300" text-anchor="middle" class="sub">(Adapter) 9V</text>
+      <text x="95" y="194" text-anchor="middle" class="lbl">ספק כוח</text>
+      <text x="95" y="212" text-anchor="middle" class="sub">(Adapter) 9V</text>
 
       <!-- ===== battery ===== -->
       <g>
@@ -206,6 +221,12 @@
     $('plug').style.transform = plugged ? 'translateX(78px)' : 'translateX(0)';
     // leaf opens when plug is in
     $('leaf').style.transform = plugged ? 'rotate(-42deg)' : 'rotate(0deg)';
+    $('leaf2').style.transform = plugged ? 'rotate(28deg)' : 'rotate(0deg)';
+    $('touchDot').setAttribute('fill', plugged ? 'transparent' : 'var(--green)');
+    $('pad').setAttribute('fill', plugged ? 'var(--red)' : 'var(--green)');
+    const zt=$('zoomTxt');
+    zt.textContent = plugged ? 'התקע דחף — מנותקים ✖' : 'נוגעים — המינוס מחובר ✔';
+    zt.style.fill = plugged ? 'var(--red)' : 'var(--green)';
     // switch lever
     $('lever').style.transform = swOn ? 'rotate(0deg)' : 'rotate(62deg)';
 
