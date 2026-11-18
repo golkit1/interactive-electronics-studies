@@ -61,16 +61,17 @@
     <div class="toggle">
       <button id="bSq" class="sel">מרובע</button>
       <button id="bSin">סינוס</button>
+      <button id="bSeq">סיקוונסר (CV)</button>
     </div>
-    <label class="slide">גובה הגל (DC) <input type="range" dir="ltr" id="off" min="0" max="6" step="0.1" value="4.5"><span class="v" id="offV">4.5V</span></label>
+    <label class="slide" id="offWrap">גובה הגל (DC) <input type="range" dir="ltr" id="off" min="0" max="6" step="0.1" value="4.5"><span class="v" id="offV">4.5V</span></label>
     <button class="pause" id="bPause">⏸ עצירה</button>
   </div>
 
   <div class="card">
-    <svg viewBox="0 0 1000 420">
+    <svg viewBox="0 0 1000 445">
       <!-- source -->
       <rect x="30" y="80" width="170" height="110" rx="14" fill="#fff" stroke="var(--navy)" stroke-width="3"/>
-      <text x="115" y="68" text-anchor="middle" class="lbl">מתנד (Oscillator)</text>
+      <text id="srcLbl" x="115" y="68" text-anchor="middle" class="lbl">מתנד (Oscillator)</text>
       <rect x="44" y="94" width="142" height="82" rx="8" fill="#1C2B3A"/>
       <path id="srcMini" fill="none" stroke="#F4A261" stroke-width="2.5" stroke-linejoin="round"/>
 
@@ -86,21 +87,40 @@
       <path d="M460 135 H640" stroke="var(--navy)" stroke-width="6" fill="none" stroke-linecap="round"/>
 
       <!-- probes -->
-      <path d="M300 135 V255" stroke="var(--navy-soft)" stroke-width="2" stroke-dasharray="4 4"/>
+      <path d="M300 135 V272" stroke="var(--navy-soft)" stroke-width="2" stroke-dasharray="4 4"/>
       <circle cx="300" cy="135" r="6" fill="var(--navy-soft)"/>
-      <path d="M560 135 V255" stroke="var(--navy-soft)" stroke-width="2" stroke-dasharray="4 4"/>
+      <path d="M560 135 V272" stroke="var(--navy-soft)" stroke-width="2" stroke-dasharray="4 4"/>
       <circle cx="560" cy="135" r="6" fill="var(--navy-soft)"/>
 
+      <g id="spk">
       <!-- speaker -->
-      <line x1="760" y1="40" x2="760" y2="230" stroke="#C9CED6" stroke-width="2" stroke-dasharray="5 5"/>
+      <line x1="760" y1="50" x2="760" y2="206" stroke="#C9CED6" stroke-width="2" stroke-dasharray="5 5"/>
       <g id="cone">
         <polygon points="800,112 800,158 760,205 760,65" fill="#E3E6EA" stroke="var(--navy)" stroke-width="3" stroke-linejoin="round"/>
         <ellipse cx="770" cy="135" rx="8" ry="16" fill="var(--navy-soft)"/>
       </g>
-      <rect x="800" y="108" width="40" height="54" rx="6" fill="var(--navy)"/>
-      <path d="M640 135 H700 V100 H820 V108" stroke="var(--navy)" stroke-width="4" fill="none"/>
+      <rect x="845" y="108" width="40" height="54" rx="6" fill="var(--navy)"/>
+      <path d="M640 135 H700 V95 H865 V108" stroke="var(--navy)" stroke-width="4" fill="none"/>
       <text x="800" y="40" text-anchor="middle" class="lbl">רמקול (Speaker)</text>
-      <text id="spkTxt" x="800" y="240" text-anchor="middle" class="sub" style="font-weight:800"></text>
+      <!-- movement meter -->
+      <rect x="670" y="214" width="180" height="14" rx="7" fill="#EEF0F3"/>
+      <rect id="mBand" y="214" height="14" rx="7" fill="#7CE0C3" opacity=".55"/>
+      <line x1="760" y1="206" x2="760" y2="236" stroke="var(--navy)" stroke-width="3"/>
+      <circle id="mDot" cy="221" r="7" fill="var(--navy)"/>
+      <text x="760" y="248" text-anchor="middle" class="sub">מרכז</text>
+      <text id="spkTxt" x="760" y="264" text-anchor="middle" class="sub" style="font-weight:800"></text>
+      </g>
+      <g id="vco" style="display:none">
+        <path d="M640 135 H690" stroke="var(--navy)" stroke-width="6" fill="none"/>
+        <rect x="690" y="60" width="180" height="150" rx="14" fill="#fff" stroke="var(--navy)" stroke-width="3"/>
+        <text x="780" y="48" text-anchor="middle" class="lbl">מתנד נשלט (VCO)</text>
+        <rect x="712" y="80" width="34" height="110" rx="6" fill="#EEF0F3"/>
+        <rect id="vBar" x="712" width="34" rx="6" fill="#7CE0C3"/>
+        <text x="729" y="204" text-anchor="middle" class="sub">מתח</text>
+        <text id="vNote" x="810" y="140" text-anchor="middle" style="font-size:40px">♪</text>
+        <text id="vVal" x="810" y="175" text-anchor="middle" class="lbl"></text>
+        <text id="vTxt" x="780" y="240" text-anchor="middle" class="sub" style="font-weight:800"></text>
+      </g>
 
       <!-- scopes -->
       <g id="scopes"></g>
@@ -118,7 +138,7 @@ const A=3, F=0.9, HPA=0.995, N=220;
 
 // build scopes
 function makeScope(x,title){
-  const g=$('scopes'), y=275, w=410, h=130;
+  const g=$('scopes'), y=300, w=410, h=130;
   el('rect',{x,y,width:w,height:h,rx:12,fill:'#1C2B3A'},g);
   const ys=v=>y+h/2 - v/9*(h/2-12);
   [[9,'+9V'],[0,'0V'],[-9,'−9V']].forEach(([v,l])=>{
@@ -128,16 +148,25 @@ function makeScope(x,title){
   const dc=el('line',{x1:x+12,x2:x+w-44,stroke:'#E9C46A','stroke-width':2,'stroke-dasharray':'8 6'},g);
   const dcT=el('text',{x:x+18,style:'font-size:12px;font-weight:800;fill:#E9C46A'},g); dcT.textContent='DC';
   const tr=el('path',{fill:'none',stroke:'#7CE0C3','stroke-width':3,'stroke-linejoin':'round'},g);
-  el('text',{x:x+w/2,y:y-10,'text-anchor':'middle',class:'lbl'},g).textContent=title;
-  return {x,w,ys,dc,dcT,tr,hist:[]};
+  const tt=el('text',{x:x+w/2,y:y-10,'text-anchor':'middle',class:'lbl'},g); tt.textContent=title;
+  return {x,w,ys,dc,dcT,tr,hist:[],title:tt};
 }
 const sIn=makeScope(60,'לפני'), sOut=makeScope(530,'אחרי = מה שמגיע לרמקול');
 
 // controls
 function setAC(v){if(v&&!ac&&prevIn!==null)hp=prevIn;ac=v;$('bAC').classList.toggle('sel',v);$('bDC').classList.toggle('sel',!v);}
 $('bAC').onclick=()=>setAC(true); $('bDC').onclick=()=>setAC(false);
-function setSine(v){sine=v;$('bSin').classList.toggle('sel',v);$('bSq').classList.toggle('sel',!v);}
-$('bSin').onclick=()=>setSine(true); $('bSq').onclick=()=>setSine(false);
+let mode='sq';
+function setMode(m){mode=m;sine=(m==='sin');
+  [['bSq','sq'],['bSin','sin'],['bSeq','seq']].forEach(([id,k])=>$(id).classList.toggle('sel',m===k));
+  const seq=m==='seq';
+  $('spk').style.display=seq?'none':''; $('vco').style.display=seq?'':'none';
+  $('offWrap').style.opacity=seq?.35:1; $('off').disabled=seq;
+  $('srcLbl').textContent=seq?'סיקוונסר (Sequencer)':'מתנד (Oscillator)';
+  sOut.title.textContent=seq?'אחרי = מה שמגיע למתנד הנשלט':'אחרי = מה שמגיע לרמקול';
+}
+$('bSq').onclick=()=>setMode('sq'); $('bSin').onclick=()=>setMode('sin'); $('bSeq').onclick=()=>setMode('seq');
+const SEQ=[1,6,3,8,2,7,4,5], STEP=0.6;
 $('off').oninput=e=>{off=+e.target.value;$('offV').textContent=off.toFixed(1)+'V';};
 $('bPause').onclick=()=>{paused=!paused;$('bPause').classList.toggle('on',paused);$('bPause').textContent=paused?'▶ המשך':'⏸ עצירה';};
 
@@ -157,7 +186,7 @@ function frame(now){
   const dt=Math.min(.1,(now-last)/1000); last=now;
   if(!paused){
     simT+=dt;
-    const vin=off+A*wave(simT);
+    const vin= mode==='seq' ? SEQ[Math.floor(simT/STEP)%SEQ.length] : off+A*wave(simT);
     if(prevIn===null){prevIn=vin;hp=vin-off;}
     hp=HPA*(hp+vin-prevIn); prevIn=vin;
     const vout=ac?hp:vin;
@@ -168,12 +197,27 @@ function frame(now){
     let d=''; srcHist.forEach((x,k)=>{d+=(k?'L':'M')+(48+k*(134/89)).toFixed(1)+' '+(170-Math.max(-1,Math.min(10,x))/9*70).toFixed(1);});
     $('srcMini').setAttribute('d',d);
 
-    $('cone').setAttribute('transform',`translate(${(-vout*4).toFixed(1)} 0)`);
+    $('cone').setAttribute('transform',`translate(${(-vout*6).toFixed(1)} 0)`);
+    const rec=sOut.hist.slice(-80), mn=Math.min(...rec), mx=Math.max(...rec);
+    const bx=v=>760-Math.max(-12,Math.min(12,v))*7;
+    $('mBand').setAttribute('x',bx(mx)); $('mBand').setAttribute('width',Math.max(4,bx(mn)-bx(mx)));
+    $('mBand').setAttribute('fill',(!ac&&off>0.3)?'#E57368':'#7CE0C3');
+    $('mDot').setAttribute('cx',bx(vout));
     $('cap').style.display=ac?'':'none'; $('straight').style.display=ac?'none':'';
     $('elLbl').textContent=ac?'קבל':'חוט ישר';
 
     const avgOut=Math.abs(mean(sOut.hist));
     const st=$('status'), sp=$('spkTxt');
+    if(mode==='seq'){
+      const h=Math.max(0,Math.min(9,vout))/9*110;
+      $('vBar').setAttribute('y',190-h); $('vBar').setAttribute('height',h);
+      $('vVal').textContent=vout.toFixed(1)+'V';
+      $('vNote').setAttribute('y',150-Math.max(-2,Math.min(9,vout))*7);
+      const vt=$('vTxt');
+      if(ac){st.className='status s-bad';st.textContent='הקבל מוחק את המתח הקבוע — המדרגות "נוזלות" לאפס';vt.textContent='הצלילים לא נכונים ✖';vt.style.fill='var(--red)';$('vBar').setAttribute('fill','#E57368');}
+      else{st.className='status s-ok';st.textContent='חיבור ישיר — כל מדרגה נשמרת';vt.textContent='הצלילים נכונים ✔';vt.style.fill='var(--green)';$('vBar').setAttribute('fill','#7CE0C3');}
+      requestAnimationFrame(frame);return;
+    }
     if(!ac && off>0.3){st.className='status s-bad';st.textContent='גם ה־DC מגיע לרמקול — הוא נדחף הצידה כל הזמן';sp.textContent='תקוע בצד ✖';sp.style.fill='var(--red)';}
     else if(ac && avgOut>0.6){st.className='status s-ok';st.textContent='הקבל מתאים את עצמו… הגל חוזר למרכז';sp.textContent='חוזר למרכז…';sp.style.fill='var(--gold-deep)';}
     else{st.className='status s-ok';st.textContent='רק התנודות (AC) עוברות — הרמקול זז סביב המרכז';sp.textContent='זז סביב המרכז ✔';sp.style.fill='var(--green)';}
