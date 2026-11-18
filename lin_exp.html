@@ -240,9 +240,9 @@
             <div class="ticks"><span>55</span><span>880 Hz</span></div>
           </div>
           <div class="control">
-            <div class="control-head"><span class="name">תדר (fm)</span><span class="val-wrap"><input type="number" class="val-input" id="fmNum" min="0.2" max="8" step="0.1" value="2"><span class="unit">Hz</span></span></div>
-            <input type="range" id="fm" min="0.2" max="8" step="0.1" value="2">
-            <div class="ticks"><span>0.2</span><span>8 Hz</span></div>
+            <div class="control-head"><span class="name">תדר (fm)</span><span class="val-wrap"><input type="number" class="val-input" id="fmNum" min="0.2" max="500" step="0.1" value="2"><span class="unit">Hz</span></span></div>
+            <input type="range" id="fm" min="0" max="1000" step="1" value="294">
+            <div class="ticks"><span>0.2</span><span>500 Hz</span></div>
           </div>
           <div class="control">
             <div class="control-head"><span class="name" style="color:var(--linear);">עומק אפנון Linear</span><span class="val-wrap"><input type="number" class="val-input" id="sensLinNum" min="0" max="300" step="1" value="100"><span class="unit">Hz/V</span></span></div>
@@ -326,10 +326,16 @@
     playBtn: document.getElementById('playBtn'),
   };
 
+  // modulator frequency slider is logarithmic (0.2–500 Hz)
+  var FM_LO = 0.2, FM_HI = 500, fmExact = 2;
+  function fmFromPos(pos){ return FM_LO*Math.pow(FM_HI/FM_LO, pos/1000); }
+  function fmToPos(f){ return 1000*Math.log(f/FM_LO)/Math.log(FM_HI/FM_LO); }
+  function fmRound(f){ return f < 10 ? Math.round(f*10)/10 : Math.round(f); }
+
   function state(){
     return {
       fc: parseFloat(els.fc.value),
-      fm: parseFloat(els.fm.value),
+      fm: fmExact !== null ? fmExact : fmFromPos(parseFloat(els.fm.value)),
       sensLin: parseFloat(els.sensLin.value),   // Hz/V
       sensExp: parseFloat(els.sensExp.value)    // oct/V
     };
@@ -373,26 +379,33 @@
 
   var pairs = [
     { range: els.fc,      num: els.fcNum,      min:55,   max:880, step:1    },
-    { range: els.fm,      num: els.fmNum,      min:0.2,  max:8,   step:0.1  },
+    { range: els.fm,      num: els.fmNum,      min:FM_LO, max:FM_HI, step:0.1, log:true },
     { range: els.sensLin, num: els.sensLinNum, min:0,    max:300, step:1    },
     { range: els.sensExp, num: els.sensExpNum, min:0.25, max:2,   step:0.05 }
   ];
   function redrawIfPaused(){ if(paused) drawGraph(pausedAt); }
   pairs.forEach(function(p){
     p.range.addEventListener('input', function(){
-      p.num.value = p.range.value;
+      if(p.log){ fmExact = null; p.num.value = fmRound(fmFromPos(parseFloat(p.range.value))); }
+      else p.num.value = p.range.value;
       updateReadouts();
       redrawIfPaused();
     });
     p.num.addEventListener('input', function(){
       var v = parseFloat(p.num.value);
-      if(!isNaN(v)){ p.range.value = Math.min(p.max, Math.max(p.min, v)); updateReadouts(); redrawIfPaused(); }
+      if(!isNaN(v)){
+        v = Math.min(p.max, Math.max(p.min, v));
+        if(p.log){ fmExact = v; p.range.value = fmToPos(v); } else p.range.value = v;
+        updateReadouts(); redrawIfPaused();
+      }
     });
     p.num.addEventListener('change', function(){
       var v = parseFloat(p.num.value);
-      if(isNaN(v)) v = parseFloat(p.range.value);
+      if(isNaN(v)) v = p.log ? state().fm : parseFloat(p.range.value);
       v = Math.min(p.max, Math.max(p.min, v));
-      p.num.value = v; p.range.value = v; updateReadouts();
+      p.num.value = v;
+      if(p.log){ fmExact = v; p.range.value = fmToPos(v); } else p.range.value = v;
+      updateReadouts();
       redrawIfPaused();
     });
   });
@@ -424,9 +437,8 @@
     var w = graph.width, h = graph.height;
     gctx.clearRect(0,0,w,h);
 
-    var win = Math.max(2/s.fm, 0.3);
-    win = Math.min(win, 6);
-    var t0 = (now-startTs)/1000;
+    var win = Math.min(2/s.fm, 6);
+    var t0 = s.fm > 10 ? 0 : (now-startTs)/1000;  // fast modulator: static view of two cycles
     var N = 500;
 
     var dfLin = s.sensLin;
@@ -538,17 +550,17 @@
 
   // ---------- audio ----------
   var audioCtx = null, osc = null, gainNode = null, playing = false, engine = 'linear';
+  var modOsc = null, gLin = null, gExp = null;
   var rafId = null;
 
-  function engineFreq(t){
-    var s = state();
-    return engine==='linear' ? linearFreq(s,t) : expFreq(s,t);
-  }
-
+  // modulator oscillator → linear path (Hz into frequency) or exponential path (cents into detune)
   function audioLoop(){
     if(!playing || !osc) return;
-    var t = audioCtx.currentTime - audioStartTs;
-    osc.frequency.setTargetAtTime(engineFreq(t), audioCtx.currentTime, 0.01);
+    var s = state(), now = audioCtx.currentTime, tc = 0.015;
+    osc.frequency.setTargetAtTime(s.fc, now, tc);
+    modOsc.frequency.setTargetAtTime(s.fm, now, tc);
+    gLin.gain.setTargetAtTime(engine==='linear' ? s.sensLin : 0, now, tc);
+    gExp.gain.setTargetAtTime(engine==='expo' ? s.sensExp*1200 : 0, now, tc);
     rafId = requestAnimationFrame(audioLoop);
   }
   var audioStartTs = 0;
@@ -565,7 +577,14 @@
     gainNode.gain.value = 0.18;
     osc.connect(gainNode);
     gainNode.connect(audioCtx.destination);
-    osc.start();
+    modOsc = audioCtx.createOscillator();
+    modOsc.type = 'sine';
+    modOsc.frequency.value = s.fm;
+    gLin = audioCtx.createGain(); gLin.gain.value = 0;
+    gExp = audioCtx.createGain(); gExp.gain.value = 0;
+    modOsc.connect(gLin); gLin.connect(osc.frequency);
+    modOsc.connect(gExp); gExp.connect(osc.detune);
+    osc.start(); modOsc.start();
     audioStartTs = audioCtx.currentTime;
     playing = true;
     els.playBtn.textContent = '■ עצור';
@@ -574,6 +593,8 @@
   function stopAudio(){
     if(rafId) cancelAnimationFrame(rafId);
     if(osc){ try{osc.stop();}catch(e){} osc.disconnect(); }
+    if(modOsc){ try{modOsc.stop();}catch(e){} modOsc.disconnect(); }
+    modOsc = gLin = gExp = null;
     if(gainNode) gainNode.disconnect();
     if(audioCtx) audioCtx.close();
     osc = gainNode = audioCtx = null;
