@@ -63,6 +63,8 @@
   .tag-b{color:var(--rose);border-color:var(--rose);background:var(--rose-soft);}
   .head-line{display:flex;align-items:center;justify-content:space-between;gap:6px;}
   .head-line .sub{font-size:10px;color:var(--ink-soft);}
+  .src-note + .dest{border-top:none;}
+  .src-note{font-size:10.5px;font-weight:700;color:var(--ink-soft);border-top:1px dashed var(--line);padding-top:4px;margin-bottom:-2px;}
   .num{direction:ltr;display:inline-block;font-family:'Rubik',sans-serif;font-size:9px;color:var(--ink-soft);border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-right:3px;background:var(--panel);}
 
   .ctrl-row{display:flex;align-items:center;gap:6px;}
@@ -140,6 +142,7 @@
   .toggle-label{font-size:12px;}
   .dest-name{font-size:14px;}
   .head-line .sub{font-size:12px;}
+  .src-note{font-size:12.5px;}
   .out-cap{font-size:12px;}
   .mod-key{font-size:11px;}
   .bus-title{font-size:14px;}
@@ -217,11 +220,12 @@
         <div class="card-top">
           <img class="thumb" src="img/dpo_fm_vcoa.jpg" alt="המתנד הראשון על הפאנל">
           <div class="grow">
-            <div class="head-line"><span class="vco-tag tag-a">VCO A</span><span class="sub">מקבל את הסינוס של VCO B</span></div>
+            <div class="head-line"><span class="vco-tag tag-a">VCO A</span></div>
             <div class="ctrl-row"><span class="clab">תדר</span><input type="range" class="freq" id="fA" min="0" max="100" value="23"><span class="val" id="fAv"></span></div>
           </div>
         </div>
 
+        <div class="src-note">מקבל את הסינוס של VCO B</div>
         <div class="dest" id="dAE">
           <div class="dest-head">
             <span class="dest-name" style="color:var(--exp)">אקספוננציאלי</span>
@@ -269,11 +273,12 @@
         <div class="card-top">
           <img class="thumb" src="img/dpo_fm_vcob.jpg" alt="המתנד השני על הפאנל">
           <div class="grow">
-            <div class="head-line"><span class="vco-tag tag-b">VCO B</span><span class="sub">מקבל את הסינוס של VCO A</span></div>
+            <div class="head-line"><span class="vco-tag tag-b">VCO B</span></div>
             <div class="ctrl-row"><span class="clab">תדר</span><input type="range" class="freq" id="fB" min="0" max="100" value="72"><span class="val" id="fBv"></span></div>
           </div>
         </div>
 
+        <div class="src-note">מקבל את הסינוס של VCO A</div>
         <div class="dest" id="dBE">
           <div class="dest-head">
             <span class="dest-name" style="color:var(--exp)">אקספוננציאלי</span>
