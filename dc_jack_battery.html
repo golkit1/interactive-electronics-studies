@@ -142,7 +142,6 @@
       <text x="702" y="28" class="lbl">VCC</text>
       <text x="702" y="46" class="sub">אל המעגל</text>
     </svg>
-    <div class="status s-off" id="status"></div>
   </div>
 
   <details class="card fold">
@@ -336,17 +335,6 @@
     bs.textContent = plugged ? 'מנותקת ✖' : 'מחוברת ✔';
     bs.style.fill = plugged ? 'var(--red)' : 'var(--green)';
 
-    const st=$('status');
-    st.className='status s-'+src;
-    if(src==='off'){
-      st.innerHTML = plugged
-        ? 'הספק מחובר, אבל <b>המתג כבוי</b> — הדרך לנורה חסומה. הנורה כבויה.'
-        : 'אין ספק, הסוללה מחוברת — אבל <b>המתג כבוי</b>. הנורה כבויה.';
-    } else if(src==='adapter'){
-      st.innerHTML = 'החשמל מגיע <b>מספק הכוח</b> 🟠 דרך פין 1. הלשונית בפין 3 נדחפה — <b>הסוללה מנותקת</b> ולא מתבזבזת.';
-    } else {
-      st.innerHTML = 'אין ספק, אז <b>הסוללה מזינה</b> 🔵. הזרם יוצא מהפלוס, עובר במתג ובמעגל, וחוזר דרך האדמה → פין 2 → לשונית → פין 3 → מינוס של הסוללה.';
-    }
 
     $('btnPlug').classList.toggle('on',plugged);
     $('btnPlugTxt').textContent = plugged ? 'נתקו ספק כוח' : 'חברו ספק כוח';
