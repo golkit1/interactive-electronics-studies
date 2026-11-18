@@ -52,6 +52,13 @@
   .info p{margin:0;color:var(--navy-soft);font-size:.98rem;}
   .flow{fill:none;stroke:#E63946;stroke-width:4;stroke-dasharray:8 10;stroke-linecap:round;stroke-linejoin:round;animation:fl .45s linear infinite;}
   @keyframes fl{to{stroke-dashoffset:-18;}}
+  .fold{margin-top:16px;padding:0;}
+  .fold summary{cursor:pointer;font-weight:800;font-size:1.05rem;padding:14px 18px;list-style:none;display:flex;align-items:center;gap:10px;}
+  .fold summary::-webkit-details-marker{display:none;}
+  .fold summary::before{content:'◀';font-size:.8rem;color:var(--teal);transition:transform .2s;}
+  .fold[open] summary::before{transform:rotate(-90deg);}
+  .fold svg{padding:0 14px 10px;}
+  .flow.calm{stroke:var(--green);stroke-width:2.5;animation-duration:1.4s;}
 </style>
 </head>
 <body>
@@ -122,6 +129,35 @@
     </svg>
     <div class="status s-ok" id="status"></div>
   </div>
+
+  <details class="card fold">
+    <summary>מה קורה בתוך השבב?</summary>
+    <svg viewBox="0 0 700 280" id="inside">
+      <rect x="30" y="30" width="180" height="230" rx="16" fill="#fff" stroke="var(--navy)" stroke-width="3"/>
+      <text x="120" y="20" text-anchor="middle" class="lbl">מתנד 1</text>
+      <text x="110" y="62" text-anchor="middle" class="lbl" style="fill:var(--red)">+9V</text>
+      <path d="M110 68 V90" stroke="var(--red)" stroke-width="4"/>
+      <circle cx="110" cy="90" r="6" fill="var(--red)"/>
+      <circle cx="110" cy="210" r="6" fill="var(--navy)"/>
+      <path d="M110 210 V232 M96 232 H124 M101 239 H119 M106 246 H114" stroke="var(--navy)" stroke-width="3"/>
+      <rect x="490" y="30" width="180" height="230" rx="16" fill="#fff" stroke="var(--navy)" stroke-width="3"/>
+      <text x="580" y="20" text-anchor="middle" class="lbl">מתנד 2</text>
+      <text x="590" y="62" text-anchor="middle" class="lbl" style="fill:var(--red)">+9V</text>
+      <path d="M590 68 V90" stroke="var(--red)" stroke-width="4"/>
+      <circle cx="590" cy="90" r="6" fill="var(--red)"/>
+      <circle cx="590" cy="210" r="6" fill="var(--navy)"/>
+      <path d="M590 210 V232 M576 232 H604 M581 239 H599 M586 246 H594" stroke="var(--navy)" stroke-width="3"/>
+      <path id="inWire" d="M190 150 H510" fill="none" stroke="var(--navy)" stroke-width="5"/>
+      <g id="inRes"><rect x="310" y="136" width="80" height="28" rx="4" fill="#fff" stroke="var(--navy)" stroke-width="3"/>
+        <text x="350" y="125" text-anchor="middle" class="lbl">נגד</text></g>
+      <path id="lev0" stroke="var(--navy)" stroke-width="6" stroke-linecap="round"/>
+      <path id="lev1" stroke="var(--navy)" stroke-width="6" stroke-linecap="round"/>
+      <circle cx="190" cy="150" r="7" fill="var(--navy)"/><circle cx="510" cy="150" r="7" fill="var(--navy)"/>
+      <path id="inFlow" class="flow"/>
+      <text id="inZap" x="350" y="200" text-anchor="middle" style="font-size:34px"></text>
+    </svg>
+    <div class="status" id="inTxt" style="margin:0 auto 16px;width:calc(100% - 28px)"></div>
+  </details>
 
   <div class="cards">
     <div class="info">
@@ -278,6 +314,20 @@ function frame(now){
   }
   else if(t-lastBad<1.5){st.className='status s-bad';st.textContent='⚡ קצר! אחד בפלוס, השני באדמה — הם נאבקים';}
   else{st.className='status s-bad';st.textContent='בלי נגדים — חכו להתנגשות…';}
+
+  // inside the chip
+  const cx=[110,590], pv=[190,510];
+  [0,1].forEach(i=>$('lev'+i).setAttribute('d',`M${pv[i]} 150 L${cx[i]} ${v[i]?90:210}`));
+  $('inRes').style.display=withR?'':'none';
+  const opp=v[0]!==v[1], hi=v[0]?0:1, lo=1-hi;
+  const fl=$('inFlow');
+  fl.setAttribute('d', opp ? `M${cx[hi]} 70 V90 L${pv[hi]} 150 H${pv[lo]} L${cx[lo]} 210 V230` : '');
+  fl.classList.toggle('calm',withR);
+  $('inZap').textContent = (opp&&!withR)?'⚡':'';
+  const it=$('inTxt');
+  if(!opp){it.className='status s-mute';it.textContent='שניהם באותו צד — אין זרם';}
+  else if(withR){it.className='status s-ok';it.textContent='הנגד עוצר — זרם קטן ובטוח';}
+  else{it.className='status s-bad';it.textContent='פלוס מחובר למינוס = קצר!';}
 
   requestAnimationFrame(frame);
 }
