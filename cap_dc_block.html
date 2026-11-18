@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>קבל כחוסם DC — חיבור DC וחיבור AC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1C2B3A; --navy-soft:#425065;
+    --teal:#2A9D8F; --teal-light:#E8F8F5;
+    --gold:#E9C46A; --gold-deep:#B4842E;
+    --red:#C0392B; --red-light:#FBEAE8;
+    --green:#27AE60; --green-light:#EAF7EF;
+    --bg:#F6F7F9; --card:#FFFFFF;
+    --shadow:0 1px 2px rgba(28,43,58,.04),0 8px 24px rgba(28,43,58,.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--navy);font-family:'Heebo',Arial,sans-serif;padding:28px 16px 60px;min-height:100vh;}
+  .wrap{max-width:1000px;margin:0 auto;}
+  header{text-align:center;margin-bottom:18px;}
+  .eyebrow{display:inline-block;font-size:.8rem;font-weight:700;color:var(--teal);background:var(--teal-light);padding:5px 14px;border-radius:100px;margin-bottom:12px;}
+  h1{font-size:clamp(1.6rem,4vw,2.3rem);font-weight:800;margin:0;line-height:1.25;}
+
+  .controls{display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;margin:18px 0;}
+  .toggle{display:flex;background:#fff;border-radius:100px;box-shadow:var(--shadow);padding:5px;gap:4px;}
+  .toggle button{border:none;cursor:pointer;font-family:inherit;font-weight:800;font-size:1rem;padding:10px 18px;border-radius:100px;background:transparent;color:var(--navy-soft);transition:background .2s,color .2s;}
+  .toggle button.sel{background:var(--navy);color:#fff;}
+  .toggle button.sel.dc{background:var(--red);}
+  .toggle button.sel.ac{background:var(--green);}
+  .slide{display:flex;align-items:center;gap:10px;background:#fff;border-radius:100px;box-shadow:var(--shadow);padding:8px 18px;font-weight:700;}
+  .slide input{width:130px;accent-color:var(--gold-deep);}
+  .slide .v{min-width:44px;text-align:center;color:var(--gold-deep);font-weight:800;}
+  .pause{border:none;cursor:pointer;font-family:inherit;font-weight:800;font-size:1rem;padding:10px 20px;border-radius:100px;background:#fff;color:var(--navy);box-shadow:var(--shadow);}
+  .pause.on{background:var(--gold);}
+
+  .card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:14px;}
+  svg{width:100%;height:auto;display:block;direction:ltr;}
+  svg text{font-family:'Heebo',Arial,sans-serif;}
+  .lbl{font-size:15px;font-weight:800;fill:var(--navy);}
+  .sub{font-size:12.5px;font-weight:500;fill:var(--navy-soft);}
+  .status{margin:12px auto 0;max-width:700px;border-radius:16px;padding:12px 18px;font-size:1.1rem;font-weight:700;text-align:center;}
+  .s-ok{background:var(--green-light);color:#1E7A45;}
+  .s-bad{background:var(--red-light);color:var(--red);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">מעבדה אנלוגית · קבלים</span>
+    <h1>קבל (Capacitor) כחוסם DC</h1>
+  </header>
+
+  <div class="controls">
+    <div class="toggle">
+      <button id="bDC" class="dc">חיבור ישיר (DC Coupling)</button>
+      <button id="bAC" class="ac sel">דרך קבל (AC Coupling)</button>
+    </div>
+    <div class="toggle">
+      <button id="bSq" class="sel">מרובע</button>
+      <button id="bSin">סינוס</button>
+    </div>
+    <label class="slide">גובה הגל (DC) <input type="range" dir="ltr" id="off" min="0" max="6" step="0.1" value="4.5"><span class="v" id="offV">4.5V</span></label>
+    <button class="pause" id="bPause">⏸ עצירה</button>
+  </div>
+
+  <div class="card">
+    <svg viewBox="0 0 1000 420">
+      <!-- source -->
+      <rect x="30" y="80" width="170" height="110" rx="14" fill="#fff" stroke="var(--navy)" stroke-width="3"/>
+      <text x="115" y="68" text-anchor="middle" class="lbl">מתנד (Oscillator)</text>
+      <rect x="44" y="94" width="142" height="82" rx="8" fill="#1C2B3A"/>
+      <path id="srcMini" fill="none" stroke="#F4A261" stroke-width="2.5" stroke-linejoin="round"/>
+
+      <!-- wires -->
+      <path d="M200 135 H380" stroke="var(--navy)" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path id="straight" d="M380 135 H460" stroke="var(--navy)" stroke-width="6" fill="none"/>
+      <g id="cap">
+        <line x1="412" y1="105" x2="412" y2="165" stroke="var(--navy)" stroke-width="7"/>
+        <line x1="428" y1="105" x2="428" y2="165" stroke="var(--navy)" stroke-width="7"/>
+        <path d="M380 135 H410 M430 135 H460" stroke="var(--navy)" stroke-width="6" fill="none"/>
+      </g>
+      <text id="elLbl" x="420" y="88" text-anchor="middle" class="lbl">קבל</text>
+      <path d="M460 135 H640" stroke="var(--navy)" stroke-width="6" fill="none" stroke-linecap="round"/>
+
+      <!-- probes -->
+      <path d="M300 135 V255" stroke="var(--navy-soft)" stroke-width="2" stroke-dasharray="4 4"/>
+      <circle cx="300" cy="135" r="6" fill="var(--navy-soft)"/>
+      <path d="M560 135 V255" stroke="var(--navy-soft)" stroke-width="2" stroke-dasharray="4 4"/>
+      <circle cx="560" cy="135" r="6" fill="var(--navy-soft)"/>
+
+      <!-- speaker -->
+      <line x1="760" y1="40" x2="760" y2="230" stroke="#C9CED6" stroke-width="2" stroke-dasharray="5 5"/>
+      <g id="cone">
+        <polygon points="800,112 800,158 760,205 760,65" fill="#E3E6EA" stroke="var(--navy)" stroke-width="3" stroke-linejoin="round"/>
+        <ellipse cx="770" cy="135" rx="8" ry="16" fill="var(--navy-soft)"/>
+      </g>
+      <rect x="800" y="108" width="40" height="54" rx="6" fill="var(--navy)"/>
+      <path d="M640 135 H700 V100 H820 V108" stroke="var(--navy)" stroke-width="4" fill="none"/>
+      <text x="800" y="40" text-anchor="middle" class="lbl">רמקול (Speaker)</text>
+      <text id="spkTxt" x="800" y="240" text-anchor="middle" class="sub" style="font-weight:800"></text>
+
+      <!-- scopes -->
+      <g id="scopes"></g>
+    </svg>
+    <div class="status" id="status"></div>
+  </div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg', $=id=>document.getElementById(id);
+function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p&&p.appendChild(e);return e;}
+
+let ac=true, sine=false, off=4.5, paused=false;
+const A=3, F=0.9, HPA=0.995, N=220;
+
+// build scopes
+function makeScope(x,title){
+  const g=$('scopes'), y=275, w=410, h=130;
+  el('rect',{x,y,width:w,height:h,rx:12,fill:'#1C2B3A'},g);
+  const ys=v=>y+h/2 - v/9*(h/2-12);
+  [[9,'+9V'],[0,'0V'],[-9,'−9V']].forEach(([v,l])=>{
+    el('line',{x1:x+12,y1:ys(v),x2:x+w-44,y2:ys(v),stroke:v===0?'#6B7A8C':'#425065','stroke-dasharray':v===0?'':'4 5'},g);
+    el('text',{x:x+w-6,y:ys(v)+4,'text-anchor':'end',style:'font-size:11px;fill:#8A97A8'},g).textContent=l;
+  });
+  const dc=el('line',{x1:x+12,x2:x+w-44,stroke:'#E9C46A','stroke-width':2,'stroke-dasharray':'8 6'},g);
+  const dcT=el('text',{x:x+18,style:'font-size:12px;font-weight:800;fill:#E9C46A'},g); dcT.textContent='DC';
+  const tr=el('path',{fill:'none',stroke:'#7CE0C3','stroke-width':3,'stroke-linejoin':'round'},g);
+  el('text',{x:x+w/2,y:y-10,'text-anchor':'middle',class:'lbl'},g).textContent=title;
+  return {x,w,ys,dc,dcT,tr,hist:[]};
+}
+const sIn=makeScope(60,'לפני'), sOut=makeScope(530,'אחרי = מה שמגיע לרמקול');
+
+// controls
+function setAC(v){if(v&&!ac&&prevIn!==null)hp=prevIn;ac=v;$('bAC').classList.toggle('sel',v);$('bDC').classList.toggle('sel',!v);}
+$('bAC').onclick=()=>setAC(true); $('bDC').onclick=()=>setAC(false);
+function setSine(v){sine=v;$('bSin').classList.toggle('sel',v);$('bSq').classList.toggle('sel',!v);}
+$('bSin').onclick=()=>setSine(true); $('bSq').onclick=()=>setSine(false);
+$('off').oninput=e=>{off=+e.target.value;$('offV').textContent=off.toFixed(1)+'V';};
+$('bPause').onclick=()=>{paused=!paused;$('bPause').classList.toggle('on',paused);$('bPause').textContent=paused?'▶ המשך':'⏸ עצירה';};
+
+let simT=0,last=performance.now(),hp=0,prevIn=null;
+const srcHist=[];
+function wave(t){const ph=(t*F)%1; return sine?Math.sin(ph*2*Math.PI):(ph<.5?1:-1);}
+
+function drawTrace(S,v,avg){
+  S.hist.push(v); if(S.hist.length>N)S.hist.shift();
+  let d=''; S.hist.forEach((x,k)=>{d+=(k?'L':'M')+(S.x+12+k*((S.w-56)/(N-1))).toFixed(1)+' '+S.ys(Math.max(-10,Math.min(10,x))).toFixed(1);});
+  S.tr.setAttribute('d',d);
+  const yy=S.ys(avg); S.dc.setAttribute('y1',yy);S.dc.setAttribute('y2',yy);S.dcT.setAttribute('y',yy-6);
+}
+const mean=a=>a.reduce((s,x)=>s+x,0)/a.length;
+
+function frame(now){
+  const dt=Math.min(.1,(now-last)/1000); last=now;
+  if(!paused){
+    simT+=dt;
+    const vin=off+A*wave(simT);
+    if(prevIn===null){prevIn=vin;hp=vin-off;}
+    hp=HPA*(hp+vin-prevIn); prevIn=vin;
+    const vout=ac?hp:vin;
+    drawTrace(sIn,vin,mean(sIn.hist.concat([vin])));
+    drawTrace(sOut,vout,mean(sOut.hist.concat([vout])));
+
+    srcHist.push(vin); if(srcHist.length>90)srcHist.shift();
+    let d=''; srcHist.forEach((x,k)=>{d+=(k?'L':'M')+(48+k*(134/89)).toFixed(1)+' '+(170-Math.max(-1,Math.min(10,x))/9*70).toFixed(1);});
+    $('srcMini').setAttribute('d',d);
+
+    $('cone').setAttribute('transform',`translate(${(-vout*4).toFixed(1)} 0)`);
+    $('cap').style.display=ac?'':'none'; $('straight').style.display=ac?'none':'';
+    $('elLbl').textContent=ac?'קבל':'חוט ישר';
+
+    const avgOut=Math.abs(mean(sOut.hist));
+    const st=$('status'), sp=$('spkTxt');
+    if(!ac && off>0.3){st.className='status s-bad';st.textContent='גם ה־DC מגיע לרמקול — הוא נדחף הצידה כל הזמן';sp.textContent='תקוע בצד ✖';sp.style.fill='var(--red)';}
+    else if(ac && avgOut>0.6){st.className='status s-ok';st.textContent='הקבל מתאים את עצמו… הגל חוזר למרכז';sp.textContent='חוזר למרכז…';sp.style.fill='var(--gold-deep)';}
+    else{st.className='status s-ok';st.textContent='רק התנודות (AC) עוברות — הרמקול זז סביב המרכז';sp.textContent='זז סביב המרכז ✔';sp.style.fill='var(--green)';}
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
