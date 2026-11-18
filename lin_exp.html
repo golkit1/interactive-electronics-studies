@@ -251,9 +251,9 @@
             <div class="sens-hint" id="sensLinHint"></div>
           </div>
           <div class="control">
-            <div class="control-head"><span class="name" style="color:var(--expo);">עומק אפנון Exponential</span><span class="val-wrap"><input type="number" class="val-input" id="sensExpNum" min="0.25" max="2" step="0.05" value="1"><span class="unit">oct/V</span></span></div>
-            <input type="range" id="sensExp" min="0.25" max="2" step="0.05" value="1">
-            <div class="ticks"><span>0.25</span><span>2</span></div>
+            <div class="control-head"><span class="name" style="color:var(--expo);">עומק אפנון Exponential</span><span class="val-wrap"><input type="number" class="val-input" id="sensExpNum" min="0" max="2" step="0.05" value="1"><span class="unit">oct/V</span></span></div>
+            <input type="range" id="sensExp" min="0" max="2" step="0.05" value="1">
+            <div class="ticks"><span>0</span><span>2</span></div>
             <div class="sens-hint" id="sensExpHint"></div>
           </div>
         </div>
@@ -381,7 +381,7 @@
     { range: els.fc,      num: els.fcNum,      min:55,   max:880, step:1    },
     { range: els.fm,      num: els.fmNum,      min:FM_LO, max:FM_HI, step:0.1, log:true },
     { range: els.sensLin, num: els.sensLinNum, min:0,    max:300, step:1    },
-    { range: els.sensExp, num: els.sensExpNum, min:0.25, max:2,   step:0.05 }
+    { range: els.sensExp, num: els.sensExpNum, min:0, max:2,   step:0.05 }
   ];
   function redrawIfPaused(){ if(paused) drawGraph(pausedAt); }
   pairs.forEach(function(p){
@@ -712,7 +712,7 @@
   function upd(){
     const l = parseFloat(lin.value), e = parseFloat(exp.value);
     hL.innerHTML = 'כל ‎1V מזיז את התדר ב-<b>' + Math.round(l) + 'Hz</b> — אותה כמות הרץ מכל תדר בסיס.';
-    hE.innerHTML = 'כל ‎1V מזיז את התדר ב<b>' + oct(e) + '</b> — אותו מרווח מכל תדר בסיס.';
+    hE.innerHTML = e < 0.001 ? 'עומק 0 — אין אפנון.' : 'כל ‎1V מזיז את התדר ב<b>' + oct(e) + '</b> — אותו מרווח מכל תדר בסיס.';
   }
   [lin, exp, linN, expN].forEach(el => el && ['input','change'].forEach(ev => el.addEventListener(ev, () => setTimeout(upd))));
   upd();
