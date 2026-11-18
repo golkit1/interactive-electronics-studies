@@ -62,6 +62,7 @@
       <button id="bSq" class="sel">מרובע</button>
       <button id="bSin">סינוס</button>
       <button id="bSeq">סיקוונסר (CV)</button>
+      <button id="bConst">מתח קבוע (DC)</button>
     </div>
     <label class="slide" id="offWrap">גובה הגל (DC) <input type="range" dir="ltr" id="off" min="0" max="6" step="0.1" value="4.5"><span class="v" id="offV">4.5V</span></label>
     <button class="pause" id="bPause">⏸ עצירה</button>
@@ -165,14 +166,14 @@ function setAC(v){if(v&&!ac&&prevIn!==null)hp=prevIn;ac=v;$('bAC').classList.tog
 $('bAC').onclick=()=>setAC(true); $('bDC').onclick=()=>setAC(false);
 let mode='sq';
 function setMode(m){mode=m;sine=(m==='sin');
-  [['bSq','sq'],['bSin','sin'],['bSeq','seq']].forEach(([id,k])=>$(id).classList.toggle('sel',m===k));
+  [['bSq','sq'],['bSin','sin'],['bSeq','seq'],['bConst','dc']].forEach(([id,k])=>$(id).classList.toggle('sel',m===k));
   const seq=m==='seq';
   $('spk').style.display=seq?'none':''; $('vco').style.display=seq?'':'none';
   $('offWrap').style.opacity=seq?.35:1; $('off').disabled=seq;
-  $('srcLbl').textContent=seq?'סיקוונסר (Sequencer)':'מתנד (Oscillator)';
+  $('srcLbl').textContent=seq?'סיקוונסר (Sequencer)':(m==='dc'?'מתח קבוע (DC)':'מתנד (Oscillator)');
   sOut.title.textContent=seq?'אחרי = מה שמגיע למתנד הנשלט':'אחרי = מה שמגיע לרמקול';
 }
-$('bSq').onclick=()=>setMode('sq'); $('bSin').onclick=()=>setMode('sin'); $('bSeq').onclick=()=>setMode('seq');
+$('bSq').onclick=()=>setMode('sq'); $('bSin').onclick=()=>setMode('sin'); $('bSeq').onclick=()=>setMode('seq'); $('bConst').onclick=()=>setMode('dc');
 const SEQ=[1,6,3,8,2,7,4,5], STEP=0.6;
 $('off').oninput=e=>{off=+e.target.value;$('offV').textContent=off.toFixed(1)+'V';};
 $('bPause').onclick=()=>{paused=!paused;$('bPause').classList.toggle('on',paused);$('bPause').textContent=paused?'▶ המשך':'⏸ עצירה';};
@@ -185,7 +186,7 @@ function drawTrace(S,v,avg){
   S.hist.push(v); if(S.hist.length>N)S.hist.shift();
   let d=''; S.hist.forEach((x,k)=>{d+=(k?'L':'M')+(S.x+12+k*((S.w-56)/(N-1))).toFixed(1)+' '+S.ys(Math.max(-10,Math.min(10,x))).toFixed(1);});
   S.tr.setAttribute('d',d);
-  const yy=S.ys(avg); S.dc.setAttribute('y1',yy);S.dc.setAttribute('y2',yy);S.dcT.setAttribute('y',yy-6);
+  const yy=S.ys(avg); S.dc.setAttribute('y1',yy);S.dc.setAttribute('y2',yy);S.dcT.setAttribute('y',yy-6); S.dcT.textContent='DC = '+(Math.abs(avg)<0.05?0:avg).toFixed(1)+'V';
 }
 const mean=a=>a.reduce((s,x)=>s+x,0)/a.length;
 
@@ -193,9 +194,9 @@ function frame(now){
   const dt=Math.min(.1,(now-last)/1000); last=now;
   if(!paused){
     simT+=dt;
-    const vin= mode==='seq' ? SEQ[Math.floor(simT/STEP)%SEQ.length] : off+A*wave(simT);
+    const vin= mode==='seq' ? SEQ[Math.floor(simT/STEP)%SEQ.length] : mode==='dc' ? off : off+A*wave(simT);
     if(prevIn===null){prevIn=vin;hp=vin-off;}
-    const a = mode==='seq' ? Math.exp(-dt/0.12) : HPA;
+    const a = mode==='seq' ? Math.exp(-dt/0.12) : mode==='dc' ? Math.exp(-dt/0.35) : HPA;
     hp=a*(hp+vin-prevIn); prevIn=vin;
     const vout=ac?hp:vin;
     drawTrace(sIn,vin,mean(sIn.hist.concat([vin])));
@@ -230,7 +231,11 @@ function frame(now){
       else{st.className='status s-ok';st.textContent='חיבור ישיר — כל מדרגה נשמרת';vt.textContent='הצלילים נכונים ✔';vt.style.fill='var(--green)';$('vBar').setAttribute('fill','#7CE0C3');}
       requestAnimationFrame(frame);return;
     }
-    if(!ac && off>0.3){st.className='status s-bad';st.textContent='גם ה־DC מגיע לרמקול — הוא נדחף קדימה כל הזמן';sp.textContent='תקוע קדימה ✖';sp.style.fill='var(--red)';}
+    if(mode==='dc'){
+      if(ac){st.className='status s-ok';st.textContent='מתח קבוע לא עובר בכלל — ביציאה 0V. כמו בכניסה של כרטיס קול';sp.textContent='במרכז, לא זז ✔';sp.style.fill='var(--green)';}
+      else{st.className='status s-bad';st.textContent='מתח קבוע עובר כמו שהוא — הרמקול נדחף קדימה ונתקע';sp.textContent='תקוע קדימה ✖';sp.style.fill='var(--red)';}
+    }
+    else if(!ac && off>0.3){st.className='status s-bad';st.textContent='גם ה־DC מגיע לרמקול — הוא נדחף קדימה כל הזמן';sp.textContent='תקוע קדימה ✖';sp.style.fill='var(--red)';}
     else if(ac && avgOut>0.6){st.className='status s-ok';st.textContent='הקבל מתאים את עצמו… הגל חוזר למרכז';sp.textContent='חוזר למרכז…';sp.style.fill='var(--gold-deep)';}
     else{st.className='status s-ok';st.textContent='רק התנודות (AC) עוברות — הרמקול זז סביב המרכז';sp.textContent='זז סביב המרכז ✔';sp.style.fill='var(--green)';}
   }
