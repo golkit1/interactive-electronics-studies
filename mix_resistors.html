@@ -78,11 +78,11 @@
       <g id="chan0"></g>
       <g id="chan1"></g>
 
-      <text x="460" y="225" text-anchor="middle" class="sub" id="resLbl">נגד (Resistor)</text>
+      <text x="520" y="225" text-anchor="middle" class="sub" id="resLbl">נגד (Resistor)</text>
       <!-- mix bus -->
       <path id="bus" d="M600 140 V320 M600 230 H650" fill="none" stroke="var(--navy)" stroke-width="6" stroke-linecap="round"/>
       <circle cx="600" cy="230" r="8" fill="var(--navy)" id="busDot"/>
-      <text x="600" y="128" text-anchor="middle" class="lbl">נקודת ערבוב</text>
+      <text x="600" y="100" text-anchor="middle" class="lbl">נקודת ערבוב</text>
       <text x="600" y="345" text-anchor="middle" class="sub">(Mix)</text>
       <g id="zap" opacity="0">
         <circle cx="600" cy="230" r="30" fill="var(--red)" opacity=".18"/>
@@ -155,13 +155,17 @@ for(let i=0;i<2;i++){
   c.wip=el('path',{fill:'none','stroke-width':5,'stroke-linecap':'round','marker-end':''},g);
   c.arrow=el('path',{fill:'var(--navy)'},g);
   // wire wiper -> resistor
-  c.w2=el('path',{d:`M345 ${y+30} H420`,fill:'none','stroke-width':6,'stroke-linecap':'round'},g);
+  c.w2=el('path',{d:`M345 ${y+30} H480`,fill:'none','stroke-width':6,'stroke-linecap':'round'},g);
   // resistor or straight
   c.res=el('g',{},g);
-  el('rect',{x:420,y:y+18,width:80,height:24,rx:4,fill:'#fff',stroke:'var(--navy)','stroke-width':3},c.res);
-  el('text',{x:460,y:y+8,'text-anchor':'middle',class:'lbl'},c.res).textContent='100K';
-  c.wire=el('path',{d:`M420 ${y+30} H500`,fill:'none','stroke-width':6,'stroke-linecap':'round'},g);
-  c.w3=el('path',{d:`M500 ${y+30} H600`,fill:'none','stroke-width':6,'stroke-linecap':'round'},g);
+  el('rect',{x:480,y:y+18,width:80,height:24,rx:4,fill:'#fff',stroke:'var(--navy)','stroke-width':3},c.res);
+  el('text',{x:520,y:y+8,'text-anchor':'middle',class:'lbl'},c.res).textContent='100K';
+  c.wire=el('path',{d:`M480 ${y+30} H560`,fill:'none','stroke-width':6,'stroke-linecap':'round'},g);
+  c.w3=el('path',{d:`M560 ${y+30} H600`,fill:'none','stroke-width':6,'stroke-linecap':'round'},g);
+  el('text',{x:420,y:y-50,'text-anchor':'middle',class:'sub',style:'font-weight:700'},g).textContent='אחרי הפוטנציומטר';
+  el('rect',{x:370,y:y-42,width:100,height:56,rx:8,fill:'#1C2B3A'},g);
+  c.mini2=el('path',{fill:'none',stroke:'#F4A261','stroke-width':2.5,'stroke-linejoin':'round'},g);
+  c.hist2=[];
   c.flowA=el('path',{class:'flow'},g);
   c.flowB=el('path',{class:'flow'},g);
   c.gz=el('text',{x:322,y:y+92,style:'font-size:22px'},g);
@@ -206,6 +210,9 @@ function frame(now){
     c.hist.push(v[i]); if(c.hist.length>90)c.hist.shift();
     let d=''; c.hist.forEach((x,k)=>{const px=48+k*(124/89), py=y+26-x/9*52; d+=(k?'L':'M')+px.toFixed(1)+' '+py.toFixed(1);});
     c.mini.setAttribute('d',d);
+    c.hist2.push(w[i]); if(c.hist2.length>90)c.hist2.shift();
+    let d2=''; c.hist2.forEach((x,k)=>{const px=374+k*(92/89), py=y+8-x/9*44; d2+=(k?'L':'M')+px.toFixed(1)+' '+py.toFixed(1);});
+    c.mini2.setAttribute('d',d2);
     c.w1.setAttribute('stroke',vcol(v[i]));
     const yw=y+56-vol[i]*52;
     c.wip.setAttribute('d',`M345 ${yw} V${y+30} M345 ${yw} H318`);
