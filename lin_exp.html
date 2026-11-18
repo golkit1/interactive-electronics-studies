@@ -188,8 +188,18 @@
 <div class="wrap">
 
   <section class="explain">
-    <p><strong style="color:var(--linear)">ליניארי</strong> — כל שינוי קבוע במתח (נגיד, כל 1V) מוסיף או מחסיר אותה כמות הרץ. לדוגמה, אם 1V = 100Hz: מ-400Hz, שינוי של ‎+1V לוקח ל-500Hz, ושינוי של ‎-1V לוקח ל-300Hz — תמיד בדיוק 100Hz, לא משנה תדר הבסיס. לכן <b>המרווח המוזיקלי משתנה</b>: מ-100Hz ל-200Hz זו אוקטבה שלמה, ומ-1000Hz ל-1100Hz זה פחות מטון שלם.</p>
-    <p><strong style="color:var(--expo)">אקספוננציאלי (1V/oct)</strong> — כל שינוי קבוע במתח (‎1V) מכפיל או מחלק את התדר באותו יחס — תמיד פי 2 לכל 1V. מ-400Hz: ‎+1V לוקח ל-800Hz (הכפלה), ‎-1V לוקח ל-200Hz (חלוקה). כלומר, כל שינוי קבוע במתח מזיז את הצליל ב<b>אותו מרווח מוזיקלי</b>, מכל נקודת התחלה: בכניסת ‎1V/oct, ‎1V הוא תמיד אוקטבה, ו-1/12V הוא תמיד חצי טון (טבלה מלאה בלשונית "מרווחים ב-1V/oct").</p>
+    <p style="margin-bottom:.3em"><strong style="color:var(--linear)">ליניארי (Linear)</strong> — כל שינוי קבוע במתח (למשל, כל 1V) מוסיף או מחסיר אותה כמות של הרצים, ללא קשר לתדר הבסיס.<br>לדוגמה, אם 1V מייצג שינוי של 100Hz:</p>
+    <ul style="margin:0 0 .3em; padding-inline-start:1.4em; color:var(--ink-soft);">
+      <li>מ-400Hz, עלייה של 1V תביא ל-500Hz.</li>
+      <li>ירידה של 1V תביא ל-300Hz.</li>
+    </ul>
+    <p style="margin-bottom:1.4em">כלומר, השינוי בתדר הוא תמיד 100Hz.</p>
+    <p style="margin-bottom:.3em"><strong style="color:var(--expo)">אקספוננציאלי (Exponential, 1V/oct)</strong> — כל שינוי של 1V מכפיל או מחלק את התדר פי 2.<br>לדוגמה, מתדר בסיס של 400Hz:</p>
+    <ul style="margin:0 0 .3em; padding-inline-start:1.4em; color:var(--ink-soft);">
+      <li>עלייה של 1V תביא ל-800Hz.</li>
+      <li>ירידה של 1V תביא ל-200Hz.</li>
+    </ul>
+    <p>כלומר, אותו שינוי במתח יוצר תמיד אותו מרווח מוזיקלי (אוקטבה), ללא קשר לתדר הבסיס.</p>
     <p class="quote" dir="ltr">“Exponential response means equal musical interval changes per applied control value, and linear response means equal Hertz change per applied control value.” — Allen Strange, <i>Electronic Music: Systems, Techniques, and Controls</i>, p. 35</p>
   </section>
 
@@ -212,12 +222,15 @@
         <div class="legend">
           <span><span class="swatch linear"></span>Linear</span>
           <span><span class="swatch expo"></span>Exponential</span>
+          <span>קו מקווקו: תדר ממוצע</span>
         </div>
 
         <div class="readouts">
           <div class="item linear"><b id="linRangeVal">220–420 Hz</b><span>טווח Linear</span></div>
           <div class="item expo"><b id="expRangeVal">156–311 Hz</b><span>טווח Exponential</span></div>
           <div class="item"><b id="octVal">±1.0</b><span>סטייה</span></div>
+          <div class="item linear"><b id="linAvgVal"></b><span>תדר ממוצע Linear</span></div>
+          <div class="item expo"><b id="expAvgVal"></b><span>תדר ממוצע Exponential</span></div>
         </div>
 
         <div class="controls">
@@ -326,6 +339,9 @@
   function linearFreq(s, t){ return s.fc + s.sensLin*Math.sin(2*Math.PI*s.fm*t); }
   function expFreq(s, t){ return s.fc * Math.pow(2, s.sensExp*Math.sin(2*Math.PI*s.fm*t)); }
 
+  // average of 2^(a·sin) over a cycle = I0(a·ln2)
+  function besselI0(x){ var sum=1, term=1; for(var k=1;k<30;k++){ term *= (x/2)*(x/2)/(k*k); sum += term; } return sum; }
+
   function intervalName(n){
     var names = {1:'חצי-טון',2:'טון שלם',3:'טרצה קטנה',4:'טרצה גדולה',5:'קווארטה',6:'טריטון',
                  7:'קווינטה',8:'סקסטה קטנה',9:'סקסטה גדולה',10:'ספטימה קטנה',11:'ספטימה גדולה',12:'אוקטבה'};
@@ -349,6 +365,10 @@
     var semi = isWhole ? Math.round(semiRaw) : Math.round(semiRaw*10)/10;
     var nm = isWhole ? intervalName(semi) : '';
     document.getElementById('octVal').innerHTML = ltr('±'+oct.toFixed(2))+' אוקטבות = '+ltr(semi)+' חצאי טון'+(nm ? ' — '+nm : '');
+    var expAvg = s.fc*besselI0(oct*Math.LN2);
+    var shift = 12*Math.log(expAvg/s.fc)/Math.LN2;
+    document.getElementById('linAvgVal').innerHTML = ltr(Math.round(s.fc)+' Hz')+' <span>(סטייה: '+ltr('0')+' חצאי טון)</span>';
+    document.getElementById('expAvgVal').innerHTML = ltr(Math.round(expAvg)+' Hz')+' <span>(סטייה: '+ltr('+'+shift.toFixed(1))+' חצאי טון)</span>';
   }
 
   var pairs = [
@@ -442,6 +462,24 @@
     }
     plot(linearFreq, cssVar('--linear'));
     plot(expFreq, cssVar('--expo'));
+
+    // average-frequency lines
+    var expAvgF = s.fc*besselI0(oct*Math.LN2);
+    gctx.setLineDash([10,7]);
+    gctx.lineWidth = 2;
+    gctx.strokeStyle = cssVar('--linear');
+    gctx.beginPath(); gctx.moveTo(0, yPix(s.fc)); gctx.lineTo(w, yPix(s.fc)); gctx.stroke();
+    gctx.strokeStyle = cssVar('--expo');
+    gctx.beginPath(); gctx.moveTo(0, yPix(expAvgF)); gctx.lineTo(w, yPix(expAvgF)); gctx.stroke();
+    gctx.setLineDash([]);
+    var avgFont = Math.max(15, h*0.035);
+    gctx.font = 'bold '+avgFont+'px Heebo, sans-serif';
+    gctx.textAlign = 'left';
+    gctx.direction = 'ltr';
+    gctx.fillStyle = cssVar('--expo');
+    gctx.fillText(Math.round(expAvgF), 10, yPix(expAvgF)-7);
+    gctx.fillStyle = cssVar('--linear');
+    gctx.fillText(Math.round(s.fc), 10, yPix(s.fc)+avgFont+5);
 
     // y-axis labels (denser grid)
     var dpr = window.devicePixelRatio||1;
