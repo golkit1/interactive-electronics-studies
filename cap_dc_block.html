@@ -61,7 +61,6 @@
     <div class="toggle">
       <button id="bSq" class="sel">מרובע</button>
       <button id="bSin">סינוס</button>
-      <button id="bSeq">סיקוונסר (CV)</button>
       <button id="bConst">מתח קבוע (DC)</button>
     </div>
     <label class="slide" id="offWrap">גובה הגל (DC) <input type="range" dir="ltr" id="off" min="0" max="6" step="0.1" value="4.5"><span class="v" id="offV">4.5V</span></label>
@@ -118,17 +117,6 @@
       <text x="760" y="280" text-anchor="middle" class="sub">מרכז</text>
       <text id="spkTxt" x="760" y="298" text-anchor="middle" class="sub" style="font-weight:800"></text>
       </g>
-      <g id="vco" style="display:none">
-        <path d="M640 135 H690" stroke="var(--navy)" stroke-width="6" fill="none"/>
-        <rect x="690" y="60" width="180" height="150" rx="14" fill="#fff" stroke="var(--navy)" stroke-width="3"/>
-        <text x="780" y="48" text-anchor="middle" class="lbl">מתנד נשלט (VCO)</text>
-        <rect x="712" y="80" width="34" height="110" rx="6" fill="#EEF0F3"/>
-        <rect id="vBar" x="712" width="34" rx="6" fill="#7CE0C3"/>
-        <text x="729" y="204" text-anchor="middle" class="sub">מתח</text>
-        <text id="vNote" x="810" y="140" text-anchor="middle" style="font-size:40px">♪</text>
-        <text id="vVal" x="810" y="175" text-anchor="middle" class="lbl"></text>
-        <text id="vTxt" x="780" y="240" text-anchor="middle" class="sub" style="font-weight:800"></text>
-      </g>
 
       <!-- scopes -->
       <g id="scopes"></g>
@@ -166,15 +154,11 @@ function setAC(v){if(v&&!ac&&prevIn!==null)hp=prevIn;ac=v;$('bAC').classList.tog
 $('bAC').onclick=()=>setAC(true); $('bDC').onclick=()=>setAC(false);
 let mode='sq';
 function setMode(m){mode=m;sine=(m==='sin');
-  [['bSq','sq'],['bSin','sin'],['bSeq','seq'],['bConst','dc']].forEach(([id,k])=>$(id).classList.toggle('sel',m===k));
-  const seq=m==='seq';
-  $('spk').style.display=seq?'none':''; $('vco').style.display=seq?'':'none';
-  $('offWrap').style.opacity=seq?.35:1; $('off').disabled=seq;
-  $('srcLbl').textContent=seq?'סיקוונסר (Sequencer)':(m==='dc'?'מתח קבוע (DC)':'מתנד (Oscillator)');
-  sOut.title.textContent=seq?'אחרי = מה שמגיע למתנד הנשלט':'אחרי = מה שמגיע לרמקול';
+  [['bSq','sq'],['bSin','sin'],['bConst','dc']].forEach(([id,k])=>$(id).classList.toggle('sel',m===k));
+  $('srcLbl').textContent=m==='dc'?'מתח קבוע (DC)':'מתנד (Oscillator)';
 }
-$('bSq').onclick=()=>setMode('sq'); $('bSin').onclick=()=>setMode('sin'); $('bSeq').onclick=()=>setMode('seq'); $('bConst').onclick=()=>setMode('dc');
-const SEQ=[1,6,3,8,2,7,4,5], STEP=0.6;
+$('bSq').onclick=()=>setMode('sq'); $('bSin').onclick=()=>setMode('sin'); $('bConst').onclick=()=>setMode('dc');
+
 $('off').oninput=e=>{off=+e.target.value;$('offV').textContent=off.toFixed(1)+'V';};
 $('bPause').onclick=()=>{paused=!paused;$('bPause').classList.toggle('on',paused);$('bPause').textContent=paused?'▶ המשך':'⏸ עצירה';};
 
@@ -194,9 +178,9 @@ function frame(now){
   const dt=Math.min(.1,(now-last)/1000); last=now;
   if(!paused){
     simT+=dt;
-    const vin= mode==='seq' ? SEQ[Math.floor(simT/STEP)%SEQ.length] : mode==='dc' ? off : off+A*wave(simT);
+    const vin= mode==='dc' ? off : off+A*wave(simT);
     if(prevIn===null){prevIn=vin;hp=vin-off;}
-    const a = mode==='seq' ? Math.exp(-dt/0.12) : mode==='dc' ? Math.exp(-dt/0.35) : HPA;
+    const a = mode==='dc' ? Math.exp(-dt/0.35) : HPA;
     hp=a*(hp+vin-prevIn); prevIn=vin;
     const vout=ac?hp:vin;
     drawTrace(sIn,vin,mean(sIn.hist.concat([vin])));
@@ -221,16 +205,6 @@ function frame(now){
 
     const avgOut=Math.abs(mean(sOut.hist));
     const st=$('status'), sp=$('spkTxt');
-    if(mode==='seq'){
-      const h=Math.max(0,Math.min(9,vout))/9*110;
-      $('vBar').setAttribute('y',190-h); $('vBar').setAttribute('height',h);
-      $('vVal').textContent=vout.toFixed(1)+'V';
-      $('vNote').setAttribute('y',150-Math.max(-2,Math.min(9,vout))*7);
-      const vt=$('vTxt');
-      if(ac){st.className='status s-bad';st.textContent='במעבר בין מדרגות: השינוי במתח עובר דרך הקבל ויוצר קפיצה ביציאה. כל עוד המתח בכניסה נשאר קבוע, המתח ביציאה דועך בחזרה לאפס.';vt.textContent='הצלילים לא נכונים ✖';vt.style.fill='var(--red)';$('vBar').setAttribute('fill','#E57368');}
-      else{st.className='status s-ok';st.textContent='חיבור ישיר — כל מדרגה נשמרת';vt.textContent='הצלילים נכונים ✔';vt.style.fill='var(--green)';$('vBar').setAttribute('fill','#7CE0C3');}
-      requestAnimationFrame(frame);return;
-    }
     if(mode==='dc'){
       if(ac){st.className='status s-ok';st.textContent='מתח קבוע לא עובר בכלל — ביציאה 0V. כמו בכניסה של כרטיס קול';sp.textContent='במרכז, לא זז ✔';sp.style.fill='var(--green)';}
       else{st.className='status s-bad';st.textContent='מתח קבוע עובר כמו שהוא — הרמקול נדחף קדימה ונתקע';sp.textContent='תקוע קדימה ✖';sp.style.fill='var(--red)';}
