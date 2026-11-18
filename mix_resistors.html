@@ -50,6 +50,8 @@
   .info{background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:16px 18px;line-height:1.6;}
   .info h3{margin:0 0 6px;font-size:1.08rem;font-weight:800;}
   .info p{margin:0;color:var(--navy-soft);font-size:.98rem;}
+  .flow{fill:none;stroke:#E63946;stroke-width:4;stroke-dasharray:8 10;stroke-linecap:round;stroke-linejoin:round;animation:fl .45s linear infinite;}
+  @keyframes fl{to{stroke-dashoffset:-18;}}
 </style>
 </head>
 <body>
@@ -160,14 +162,17 @@ for(let i=0;i<2;i++){
   el('text',{x:460,y:y+8,'text-anchor':'middle',class:'lbl'},c.res).textContent='100K';
   c.wire=el('path',{d:`M420 ${y+30} H500`,fill:'none','stroke-width':6,'stroke-linecap':'round'},g);
   c.w3=el('path',{d:`M500 ${y+30} H600`,fill:'none','stroke-width':6,'stroke-linecap':'round'},g);
+  c.flowA=el('path',{class:'flow'},g);
+  c.flowB=el('path',{class:'flow'},g);
+  c.gz=el('text',{x:322,y:y+92,style:'font-size:22px'},g);
   c.hist=[];
   ch.push(c);
 }
-// bus vertical range uses y+30 of each
+$('sch').appendChild($('chan0'));$('sch').appendChild($('chan1'));$('sch').appendChild($('busDot'));
 $('bus').setAttribute('d','M600 140 V320 M600 230 H650');
 
 const outHist=[]; const N=160;
-let heat=[0,0]; let lastBad=-9;
+let heat=[0,0]; let lastBad=-9, lastG=-9;
 
 function setMode(w){withR=w;
   $('bWith').classList.toggle('sel',w);$('bWithout').classList.toggle('sel',!w);}
@@ -180,13 +185,20 @@ function frame(now){
   const t=(now-t0)/1000;
   const v=[0,1].map(i=>((t/periods[i])%1)<0.5?9:0);
   const w=v.map((x,i)=>x*vol[i]);
-  let bus, bad=false, mute=false;
+  let bus, bad=false, mute=false, gshort=false;
+  const src=[false,false], sinkG=[false,false], sinkO=[false,false];
   if(withR){
     bus=(w[0]+w[1])/2;
   } else {
-    if(vol[0]<0.03||vol[1]<0.03){bus=0;mute=true;}
-    else if(Math.abs(w[0]-w[1])>0.5){bad=true;bus=4.5+(Math.random()-.5)*3.5;}
-    else bus=w[0];
+    const muted=[0,1].filter(i=>vol[i]<0.03), act=[0,1].filter(i=>vol[i]>=0.03);
+    if(muted.length){
+      bus=0; mute=true;
+      act.forEach(i=>{ if(v[i]>0){ src[i]=true; gshort=true; } });
+      if(gshort){ bad=true; muted.forEach(j=>sinkG[j]=true); }
+    } else if(Math.abs(w[0]-w[1])>0.5){
+      bad=true; bus=4.5+(Math.random()-.5)*3.5;
+      const hi=w[0]>w[1]?0:1; src[hi]=true; sinkO[1-hi]=true;
+    } else bus=w[0];
   }
 
   for(let i=0;i<2;i++){
@@ -199,21 +211,25 @@ function frame(now){
     c.wip.setAttribute('d',`M345 ${yw} V${y+30} M345 ${yw} H318`);
     c.wip.setAttribute('stroke',vcol(w[i]));
     c.arrow.setAttribute('d',`M312 ${yw} l10 -6 v12 z`);
+    c.flowA.setAttribute('d', src[i] ? `M190 ${y} H300 V${yw} H345 V${y+30} H600 V230` : '');
+    c.flowB.setAttribute('d', sinkG[i] ? `M600 230 V${y+30} H345 V${yw} H300 V${y+80}`
+                         : sinkO[i] ? `M600 230 V${y+30} H345 V${yw} H300 V${y} H190` : '');
+    c.gz.textContent = sinkG[i] ? '⚡' : '';
     c.w2.setAttribute('stroke',vcol(w[i]));
     c.res.style.display=withR?'':'none';
     c.wire.style.display=withR?'none':'';
     c.wire.setAttribute('stroke',vcol(bad?4.5:bus));
-    c.w3.setAttribute('stroke',bad?'var(--red)':vcol(withR?bus:bus));
-    heat[i]=Math.max(0,Math.min(1,heat[i]+(bad?0.02:-0.004)));
+    c.w3.setAttribute('stroke',vcol(bad&&!mute?4.5:bus));
+    heat[i]=Math.max(0,Math.min(1,heat[i]+((src[i]||sinkO[i])?0.02:-0.004)));
     const hr=Math.round(255), hg=Math.round(255-heat[i]*130), hb=Math.round(255-heat[i]*150);
     c.box.setAttribute('fill',`rgb(${hr},${hg},${hb})`);
     c.heat.textContent=heat[i]>0.15?'🔥 השבב מתחמם!':'';
     c.heat.style.fill='var(--red)';
   }
   $('resLbl').style.display=withR?'':'none';
-  $('bus').setAttribute('stroke',bad?'var(--red)':vcol(bus));
-  $('busDot').setAttribute('fill',bad?'var(--red)':vcol(bus));
-  $('zap').setAttribute('opacity',bad?(Math.random()>.3?1:.4):0);
+  $('bus').setAttribute('stroke',vcol(bad&&!mute?4.5:bus));
+  $('busDot').setAttribute('fill',vcol(bad&&!mute?4.5:bus));
+  $('zap').setAttribute('opacity',(bad&&!mute)?(Math.random()>.3?1:.4):0);
 
   outHist.push({v:bus,bad}); if(outHist.length>N)outHist.shift();
   let dg='',db='';
@@ -226,9 +242,14 @@ function frame(now){
   $('outTrace').setAttribute('d',dg);$('outBad').setAttribute('d',db);
 
   if(bad)lastBad=t;
+  if(gshort)lastG=t;
   const st=$('status');
   if(withR){st.className='status s-ok';st.textContent='✔ שני המתנדים נשמעים — היציאה היא ממוצע שלהם';}
-  else if(mute){st.className='status s-mute';st.textContent='🔇 עוצמה אחת באפס — היא מחברת את הכול לאדמה. כולם שותקים!';}
+  else if(mute){
+    const a=[0,1].find(i=>vol[i]>=0.03);
+    if(a!==undefined && t-lastG<1.5){st.className='status s-bad';st.textContent='⚡ מתנד '+(a+1)+' מחובר ישר לאדמה — הזרם נשפך לאדמה במקום ליציאה!';}
+    else{st.className='status s-mute';st.textContent='🔇 עוצמה באפס מחברת את נקודת הערבוב לאדמה — היציאה שותקת';}
+  }
   else if(t-lastBad<1.5){st.className='status s-bad';st.textContent='⚡ קצר! אחד בפלוס, השני באדמה — הם נאבקים';}
   else{st.className='status s-bad';st.textContent='בלי נגדים — חכו להתנגשות…';}
 
