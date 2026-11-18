@@ -82,10 +82,8 @@
       <!-- ===== ground symbols ===== -->
       <g stroke="var(--navy)" stroke-width="3" stroke-linecap="round">
         <line x1="285" y1="390" x2="325" y2="390"/><line x1="293" y1="398" x2="317" y2="398"/><line x1="300" y1="406" x2="310" y2="406"/>
-        <line x1="680" y1="390" x2="720" y2="390"/><line x1="688" y1="398" x2="712" y2="398"/><line x1="695" y1="406" x2="705" y2="406"/>
       </g>
       <text x="305" y="430" text-anchor="middle" class="sub">אדמה (GND)</text>
-      <text x="700" y="430" text-anchor="middle" class="sub">אדמה (GND)</text>
 
       <!-- ===== wires ===== -->
       <!-- pin1 -> node (adapter only) -->
@@ -96,11 +94,13 @@
       <path class="w" id="w_sw" d="M460 170 V95 H530"/>
       <!-- switch -> lamp -> ground -->
       <path class="w" id="w_vcc" d="M590 62 H700 V170"/>
-      <path class="w" id="w_lamp" d="M700 230 V388"/>
+      <path class="w" id="w_lamp" d="M700 230 V375 H305"/>
       <!-- unused throw -->
       <path class="w" d="M590 128 H620" style="stroke-dasharray:0"/>
       <!-- ground -> pin2 (return) -->
-      <path class="w" id="w_p2" d="M305 388 V340 V286"/>
+      <path class="w" id="w_p2" d="M305 375 V286"/>
+      <line x1="305" y1="375" x2="305" y2="390" stroke="var(--navy)" stroke-width="3"/>
+      <circle cx="305" cy="375" r="7" fill="var(--navy)"/>
       <!-- pin3 -> battery - -->
       <path class="w bat" id="w_bminus" d="M340 312 H460 V268"/>
 
@@ -115,6 +115,8 @@
       <rect x="206" y="282" width="100" height="8" rx="3" fill="#C9CED6"/>
       <line x1="305" y1="198" x2="305" y2="282" stroke="#C9CED6" stroke-width="5"/>
       <line x1="305" y1="286" x2="305" y2="340" stroke="#C9CED6" stroke-width="6"/>
+      <path class="w" id="w_in1" d="M305 340 V312"/>
+      <path class="w" id="w_in2" d="M305 312 V290" style="stroke:transparent"/>
       <!-- center pin -->
       <rect x="222" y="234" width="72" height="12" rx="6" fill="#E9C46A"/>
       <!-- switch leaf (pin3) -->
@@ -242,6 +244,10 @@
     set('w_vcc',   src!=='off', src==='battery');
     set('w_lamp',  src!=='off', src==='battery');
     set('w_p2',    src!=='off', src==='battery');
+    set('w_in1',   src!=='off', src==='battery');
+    set('w_in2',   src==='adapter');
+    $('w_in1').style.stroke = src==='off' ? 'transparent' : '';
+    $('w_in2').style.stroke = src==='adapter' ? '' : 'transparent';
     // keep base classes for battery wires
     $('w_bplus').classList.add('bat'); $('w_bminus').classList.add('bat');
 
