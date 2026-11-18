@@ -78,12 +78,15 @@
   </div>
 
   <div class="card">
-    <svg viewBox="0 0 820 460" id="sch">
+    <svg viewBox="0 0 820 485" id="sch">
       <!-- ===== ground symbols ===== -->
       <g stroke="var(--navy)" stroke-width="3" stroke-linecap="round">
         <line x1="285" y1="390" x2="325" y2="390"/><line x1="293" y1="398" x2="317" y2="398"/><line x1="300" y1="406" x2="310" y2="406"/>
+        <line x1="680" y1="390" x2="720" y2="390"/><line x1="688" y1="398" x2="712" y2="398"/><line x1="695" y1="406" x2="705" y2="406"/>
       </g>
-      <text x="305" y="430" text-anchor="middle" class="sub">אדמה (GND)</text>
+      <text x="333" y="400" class="sub">אדמה (GND)</text>
+      <text x="735" y="400" class="sub">אדמה (GND)</text>
+      <text x="502" y="470" text-anchor="middle" class="sub" style="font-weight:800">כל האדמות מחוברות יחד</text>
 
       <!-- ===== wires ===== -->
       <!-- pin1 -> node (adapter only) -->
@@ -94,13 +97,12 @@
       <path class="w" id="w_sw" d="M460 170 V95 H530"/>
       <!-- switch -> lamp -> ground -->
       <path class="w" id="w_vcc" d="M590 62 H700 V170"/>
-      <path class="w" id="w_lamp" d="M700 230 V375 H305"/>
+      <path class="w" id="w_lamp" d="M700 230 V388"/>
+      <path class="w" id="w_bus" d="M700 406 V445 H305 V406"/>
       <!-- unused throw -->
       <path class="w" d="M590 128 H620" style="stroke-dasharray:0"/>
       <!-- ground -> pin2 (return) -->
-      <path class="w" id="w_p2" d="M305 375 V286"/>
-      <line x1="305" y1="375" x2="305" y2="390" stroke="var(--navy)" stroke-width="3"/>
-      <circle cx="305" cy="375" r="7" fill="var(--navy)"/>
+      <path class="w" id="w_p2" d="M305 388 V286"/>
       <!-- pin3 -> battery - -->
       <path class="w bat" id="w_bminus" d="M340 312 H460 V268"/>
 
@@ -244,6 +246,7 @@
     set('w_vcc',   src!=='off', src==='battery');
     set('w_lamp',  src!=='off', src==='battery');
     set('w_p2',    src!=='off', src==='battery');
+    set('w_bus',   src!=='off', src==='battery');
     set('w_in1',   src!=='off', src==='battery');
     set('w_in2',   src==='adapter');
     $('w_in1').style.stroke = src==='off' ? 'transparent' : '';
