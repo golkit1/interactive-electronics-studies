@@ -195,7 +195,8 @@ function frame(now){
     simT+=dt;
     const vin= mode==='seq' ? SEQ[Math.floor(simT/STEP)%SEQ.length] : off+A*wave(simT);
     if(prevIn===null){prevIn=vin;hp=vin-off;}
-    hp=HPA*(hp+vin-prevIn); prevIn=vin;
+    const a = mode==='seq' ? Math.exp(-dt/0.12) : HPA;
+    hp=a*(hp+vin-prevIn); prevIn=vin;
     const vout=ac?hp:vin;
     drawTrace(sIn,vin,mean(sIn.hist.concat([vin])));
     drawTrace(sOut,vout,mean(sOut.hist.concat([vout])));
@@ -225,7 +226,7 @@ function frame(now){
       $('vVal').textContent=vout.toFixed(1)+'V';
       $('vNote').setAttribute('y',150-Math.max(-2,Math.min(9,vout))*7);
       const vt=$('vTxt');
-      if(ac){st.className='status s-bad';st.textContent='הקבל מוחק את המתח הקבוע — המדרגות "נוזלות" לאפס';vt.textContent='הצלילים לא נכונים ✖';vt.style.fill='var(--red)';$('vBar').setAttribute('fill','#E57368');}
+      if(ac){st.className='status s-bad';st.textContent='במעבר בין מדרגות: השינוי במתח עובר דרך הקבל ויוצר קפיצה ביציאה. כל עוד המתח בכניסה נשאר קבוע, המתח ביציאה דועך בחזרה לאפס.';vt.textContent='הצלילים לא נכונים ✖';vt.style.fill='var(--red)';$('vBar').setAttribute('fill','#E57368');}
       else{st.className='status s-ok';st.textContent='חיבור ישיר — כל מדרגה נשמרת';vt.textContent='הצלילים נכונים ✔';vt.style.fill='var(--green)';$('vBar').setAttribute('fill','#7CE0C3');}
       requestAnimationFrame(frame);return;
     }
