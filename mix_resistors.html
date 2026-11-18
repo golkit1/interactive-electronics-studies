@@ -59,6 +59,9 @@
   .fold[open] summary::before{transform:rotate(-90deg);}
   .fold svg{padding:0 14px 10px;}
   .flow.calm{stroke:var(--green);stroke-width:2.5;animation-duration:1.4s;}
+  .pause{border:none;cursor:pointer;font-family:inherit;font-weight:800;font-size:1.02rem;padding:10px 20px;border-radius:100px;background:#fff;color:var(--navy);box-shadow:var(--shadow);}
+  .pause.on{background:var(--gold);}
+  body.paused .flow{animation-play-state:paused;}
 </style>
 </head>
 <body>
@@ -73,6 +76,7 @@
       <button id="bWith" class="with sel">עם נגדים</button>
       <button id="bWithout" class="without">בלי נגדים</button>
     </div>
+    <button class="pause" id="bPause">⏸ עצירה</button>
     <label class="vol">עוצמה 1 <input type="range" dir="ltr" id="vol0" min="0" max="100" value="100"><span class="v" id="vv0">100%</span></label>
     <label class="vol">עוצמה 2 <input type="range" dir="ltr" id="vol1" min="0" max="100" value="100"><span class="v" id="vv1">100%</span></label>
   </div>
@@ -242,9 +246,14 @@ $('bWith').onclick=()=>setMode(true);
 $('bWithout').onclick=()=>setMode(false);
 for(let i=0;i<2;i++){$('vol'+i).oninput=e=>{vol[i]=e.target.value/100;$('vv'+i).textContent=e.target.value+'%';};}
 
-const t0=performance.now();
+let paused=false, simT=0, lastNow=performance.now();
+$('bPause').onclick=()=>{paused=!paused;document.body.classList.toggle('paused',paused);
+  $('bPause').classList.toggle('on',paused);$('bPause').textContent=paused?'▶ המשך':'⏸ עצירה';};
 function frame(now){
-  const t=(now-t0)/1000;
+  const dt=(now-lastNow)/1000; lastNow=now;
+  if(paused){requestAnimationFrame(frame);return;}
+  simT+=Math.min(dt,0.1);
+  const t=simT;
   const v=[0,1].map(i=>((t/periods[i])%1)<0.5?9:0);
   const w=v.map((x,i)=>x*vol[i]);
   let bus, bad=false, mute=false, gshort=false;
